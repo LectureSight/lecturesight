@@ -7,7 +7,7 @@ import org.osgi.service.component.ComponentContext;
  *
  * @scr.component name="lecturesight.main.commands" immediate="true"
  * @scr.service interface="cv.lecturesight.main.TestCommands"
- * @scr.property name="osgi.command.scope" value="ot"
+ * @scr.property name="osgi.command.scope" value="ls"
  * @scr.property name="osgi.command.function" cardinality="2" values0="test" values1="sayhello"
  */
 public class TestCommands {
