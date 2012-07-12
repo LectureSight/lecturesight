@@ -1,0 +1,163 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>cv.lecturesight</groupId>
+  <artifactId>base</artifactId>
+  <version>0.3-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>LectureSight</name>
+
+  <prerequisites>
+    <maven>2.0.6</maven>
+  </prerequisites>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <modules>
+    <module>modules/lecturesight-utils</module>
+    <module>modules/lecturesight-opencl-api</module>
+    <module>modules/lecturesight-opencl-impl</module>
+    <module>modules/lecturesight-ui-api</module>
+    <module>modules/lecturesight-ui-impl</module>
+    <module>modules/lecturesight-framesource-api</module>
+    <module>modules/lecturesight-framesource-impl</module>
+    <module>modules/lecturesight-framesource-v4l</module>
+    <module>modules/lecturesight-framesource-videofile</module>
+    <module>modules/lecturesight-connectedcomponent-api</module>
+    <module>modules/lecturesight-connectedcomponent-impl</module>
+    <module>modules/lecturesight-videoanalysis-api</module>
+    <module>modules/lecturesight-videoanalysis-impl</module>
+    <module>modules/lecturesight-object-api</module>
+    <module>modules/lecturesight-object-impl</module>
+    <!-- module>modules/lecturesight-cameraoperator-api</module>
+    <module>modules/lecturesight-cameraoperator-impl</module -->
+    <module>modules/lecturesight-heartbeat</module>
+
+  </modules>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <!-- Require Java 6 or higher for building -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <!-- Deploy OSGi bundles to a container -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>copy-to-felix</id>
+            <phase>install</phase>
+            <configuration>
+              <target if="deployTo">
+                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="${deployTo}" failonerror="false" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencyManagement>
+    <dependencies>
+
+    <!-- OSGi -->
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.core</artifactId>
+        <version>4.2.0</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.compendium</artifactId>
+        <version>4.2.0</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.fileinstall</artifactId>
+        <version>3.1.4</version>
+      </dependency>
+
+      <!-- testing -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.5</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.nativelibs4java</groupId>
+        <artifactId>javacl</artifactId>
+        <version>1.0-beta-6</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>nativelibs4java-repo</id>
+      <url>http://nativelibs4java.sourceforge.net/maven</url>
+    </repository>
+    <repository>
+      <id>sonatype</id>
+      <name>Sonatype OSS Snapshots Repository</name>
+      <url>http://oss.sonatype.org/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>maven2-repository.dev.java.net</id>
+      <name>Java.net Repository for Maven</name>
+      <url>http://download.java.net/maven/2/</url>
+      <layout>default</layout>
+    </repository>
+  </repositories>
+
+  <developers>
+    <developer>
+      <id>bwulff</id>
+      <name>Benjamin Wulff</name>
+      <email>bwulff@uos.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uos.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>wsmirnow</id>
+      <name>Waldemar Smirnow</name>
+      <email>wsmirnow@uos.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uos.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+  <dependencies></dependencies>
+</project>
