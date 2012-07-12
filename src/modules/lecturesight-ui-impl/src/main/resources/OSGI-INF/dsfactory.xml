@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="opentrack.display" immediate="true" activate="activate">
+  <implementation class="cv.opentrack.ui.impl.DisplayServiceFactory" />
+  <property name="service.description" value="Display Service" />
+  <service>
+    <provide interface="cv.opentrack.ui.DisplayService" />
+  </service>
+  <reference cardinality="1..1" interface="cv.opentrack.opencl.OpenCLService"
+    name="OpenCL" policy="static" bind="setOpenCL"/>
+  <reference cardinality="1..1" interface="cv.opentrack.util.conf.Configuration"
+    name="Configuration" policy="static" bind="setConfiguration"/>
+</scr:component>
