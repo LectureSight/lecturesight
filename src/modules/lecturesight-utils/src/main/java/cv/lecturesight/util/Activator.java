@@ -20,9 +20,9 @@ import org.osgi.service.log.LogService;
 
 public final class Activator implements BundleActivator {
 
-  final static String LOGLISTENER_ACTIVE_PROPERTY = "cv.opentrack.util.log.console.enabled";
-  final static String CONFIG_NAME = "opentrack.properties";
-  final static String CONFIG_PATH_PROPERTY = "cv.opentrack.config.path";
+  final static String LOGLISTENER_ACTIVE_PROPERTY = "cv.lecturesight.util.log.console.enabled";
+  final static String CONFIG_NAME = "lecturesight.properties";
+  final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
   private ServiceRegistration consoleLogRegistration = null;
   private ServiceRegistration confFactoryReg;
   private Log log = new Log("Activator");
@@ -34,7 +34,7 @@ public final class Activator implements BundleActivator {
   public void start(BundleContext context) throws Exception {
 
     // TODO: wrap those two into a service tracker!!
-    // set LogService for OpenTrack Log
+    // set LogService for lecturesight Log
     ServiceReference logRef = context.getServiceReference(LogService.class.getName());
     if (logRef != null) {
       Log.setLogService((LogService) context.getService(logRef));
