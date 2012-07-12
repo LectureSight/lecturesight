@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-heartbeat</artifactId>
-  <name>lecturesight Heart Beat</name>
+  <name>LectureSight Heart Beat</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   

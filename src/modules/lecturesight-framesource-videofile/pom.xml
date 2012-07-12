@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-framesource-videofile</artifactId>
-  <name>lecturesight Video File FrameSource</name>
+  <name>LectureSight Video File FrameSource</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
 

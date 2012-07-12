@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-connectedcomponent-impl</artifactId>
-  <name>lecturesight Connected Components Service</name>
+  <name>LectureSight Connected Components Service</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   

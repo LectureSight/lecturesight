@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-ui-impl</artifactId>
-  <name>lecturesight GUI Service</name>
+  <name>LectureSight UI Service</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   

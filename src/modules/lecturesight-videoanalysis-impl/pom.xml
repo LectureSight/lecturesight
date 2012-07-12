@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-videoanalysis-impl</artifactId>
-  <name>lecturesight Video Analysis Services</name>
+  <name>LectureSight Video Analysis Services</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
 
