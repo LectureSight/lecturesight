@@ -63,6 +63,7 @@ public class HeartBeat {
 
     log.info("Activated. Starting system.");
 
+    Thread.sleep(3000);
     nextFrame();    // start system by getting first frame
   }
 
