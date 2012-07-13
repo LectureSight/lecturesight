@@ -14,6 +14,9 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -22,9 +25,9 @@ import org.osgi.service.event.EventHandler;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.framesource.manager" immediate="true"
- * @scr.service
  */
+@Component(name="lecturesight.framesource.manager",immediate=true)
+@Service
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
@@ -33,11 +36,11 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
-  /** @scr.reference */
+  @Reference
   private Configuration config;
-  /** @scr.reference */
+  @Reference
   private OpenCLService ocl;
-  /** @scr.reference */
+  @Reference
   private DisplayService dsps;
   Log log = new Log("FrameSourceManager");
   private ComponentContext componentContext;

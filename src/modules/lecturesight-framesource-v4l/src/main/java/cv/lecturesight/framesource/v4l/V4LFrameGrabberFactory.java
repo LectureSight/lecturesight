@@ -10,16 +10,22 @@ import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.framesource.v4l" immediate="true"
- * @scr.service
- * @scr.property name="cv.lecturesight.framesource.name" value="Video4Linux"
- * @scr.property name="cv.lecturesight.framesource.type" value="v4l"
- *
  */
+@Component(name="lecturesight.framesource.v4l", immediate=true)
+@Service()
+@Properties({
+@Property(name="cv.lecturesight.framesource.name", value="Video4Linux"),
+@Property(name="cv.lecturesight.framesource.type", value="v4l")  
+})
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
   private final static String PROPKEY_FRAME_WIDTH = "resolution.width";
@@ -28,7 +34,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
   private final static String PROPKEY_CHANNEL = "channel";
   private final static String PROPKEY_QUALITY = "quality";
   private Log log = new Log("Video4Linux FrameSource");
-  /** @scr.reference */
+  @Reference
   private Configuration config;
 
   protected void activate(ComponentContext cc) {

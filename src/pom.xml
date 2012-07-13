@@ -99,6 +99,18 @@
         <artifactId>org.apache.felix.fileinstall</artifactId>
         <version>3.1.4</version>
       </dependency>
+      
+      <!-- SCR Annotations -->
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr</artifactId>
+        <version>1.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>org.apache.felix.scr.annotations</artifactId>
+        <version>1.6.0</version>
+      </dependency>
 
       <!-- testing -->
       <dependency>
@@ -108,6 +120,7 @@
         <scope>test</scope>
       </dependency>
 
+       <!-- OpenCL -->
       <dependency>
         <groupId>com.nativelibs4java</groupId>
         <artifactId>javacl</artifactId>

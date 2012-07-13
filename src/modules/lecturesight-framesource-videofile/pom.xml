@@ -50,6 +50,14 @@
       <artifactId>xpcom</artifactId>
       <version>1.8.0.90</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

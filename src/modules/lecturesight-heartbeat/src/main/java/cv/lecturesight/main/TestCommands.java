@@ -1,16 +1,23 @@
 package cv.lecturesight.main;
 
+import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.Log;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.main.commands" immediate="true"
- * @scr.service interface="cv.lecturesight.main.TestCommands"
- * @scr.property name="osgi.command.scope" value="ls"
- * @scr.property name="osgi.command.function" cardinality="2" values0="test" values1="sayhello"
  */
-public class TestCommands {
+@Component(name="lecturesight.main.commands", immediate=true)
+@Service()
+@Properties({
+@Property(name="osgi.command.scope", value="ls"),
+@Property(name="osgi.command.function", value={"test","sayhello"})  
+})
+public class TestCommands implements DummyInterface {
 
   Log log = new Log("Console Commands");
 

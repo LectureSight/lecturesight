@@ -8,21 +8,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.framesource.videofile" immediate="true"
- * @scr.service
- * @scr.property name="cv.lecturesight.framesource.name" value="Video File"
- * @scr.property name="cv.lecturesight.framesource.type" value="file"
- *
  */
+@Component(name="lecturesight.framesource.videofile",immediate=true)
+@Service
+@Properties({
+@Property(name="cv.lecturesight.framesource.name",value="Video File"),
+@Property(name="cv.lecturesight.framesource.type",value="file")
+})
 public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
 
-  /** @scr.reference */
+  @Reference
   private LogService log;
 
   private List<VideoFilePipeline> children = new LinkedList<VideoFilePipeline>();

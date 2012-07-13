@@ -15,23 +15,26 @@ import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.changedetector" immediate="true"
- * @scr.service
  */
+@Component(name="lecturesight.changedetector",immediate=true)
+@Service
 public class ChangeDetectorImpl implements ChangeDetector {
 
   Log log = new Log("Change Detector Service");
-  /** @scr.reference */
+  @Reference
   private Configuration config;
-  /** @scr.reference */
+  @Reference
   private OpenCLService ocl;
-  /** @scr.reference */
+  @Reference
   private DisplayService dsps;
-  /** @scr.reference */
+  @Reference
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
   CLImage2D input, last;

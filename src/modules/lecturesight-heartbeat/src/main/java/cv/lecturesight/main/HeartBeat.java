@@ -7,24 +7,28 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
+import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.main" immediate="true" 
- * @scr.service interface="cv.lecturesight.main.HeartBeat"
  */
-public class HeartBeat {
+@Component(name="lecturesight.main",immediate=true)
+@Service
+public class HeartBeat implements DummyInterface {
 
   static final String PROPKEY_LISTENTO = "heartbeat.listens.to";
   private Log log = new Log("Heartbeat");
-  /** @scr.reference */
+  @Reference
   private Configuration config;
-  /** @scr.reference */
+  @Reference
   private OpenCLService ocl;
-  /** @scr.reference */
+  @Reference
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
   private OCLSignalBarrier barrier;

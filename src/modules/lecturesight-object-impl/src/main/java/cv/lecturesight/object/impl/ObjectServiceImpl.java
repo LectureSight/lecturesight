@@ -30,13 +30,16 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
- * @scr.component name="lecturesight.objects" immediate="true"
- * @scr.service
  */
+@Component(name="lecturesight.objects",immediate=true)
+@Service
 public class ObjectServiceImpl implements ObjectService, CustomRenderer {
 
   // collection of this services signals
@@ -45,17 +48,17 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
   
   private Log log = new Log("Object Service");
 
-  /** @scr.reference */
+  @Reference
   private Configuration config;
-  /** @scr.reference */
+  @Reference
   private OpenCLService ocl;
-  /** @scr.reference */
+  @Reference
   private DisplayService dsps;
-  /** @scr.reference */
+  @Reference
   private ConnectedComponentService ccs;
-  /** @scr.reference */
+  @Reference
   private FrameSourceProvider fsp;
-  /** @scr.reference */
+  @Reference
   private ForegroundService fgs;
   
   int[] workDim;

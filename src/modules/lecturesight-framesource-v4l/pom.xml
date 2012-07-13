@@ -40,6 +40,14 @@
       <artifactId>v4l4j</artifactId>
       <version>0.8.7</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

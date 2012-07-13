@@ -21,6 +21,11 @@ import org.osgi.service.component.ComponentContext;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 
 /** Foreground Service Implementation
  * 
@@ -33,11 +38,13 @@ import java.util.EnumMap;
  * this number is below a threshold the blob is 'aged'. This way inactive blobs
  * disappear after a certain period of time.
  *
- * @scr.service
- * @scr.component name="lecturesight.foreground" immediate="true"
- * @scr.property name="osgi.command.scope" value="fg"
- * @scr.property name="osgi.command.function" cardinality="1" values0="reset"
  */
+@Component(name="lecturesight.foreground", immediate=true)
+@Service()
+@Properties({
+@Property(name="osgi.command.scope", value="fg"),
+@Property(name="osgi.command.function", value={"reset"})  
+})
 public class ForegroundServiceImpl implements ForegroundService {
 
   // collection of this services signals
@@ -46,22 +53,22 @@ public class ForegroundServiceImpl implements ForegroundService {
   
   private Log log = new Log("Foreground Service");
   
-  /** @scr.reference */
+  @Reference
   private Configuration config;             // this services configuration
   
-  /** @scr.reference */
+  @Reference
   private OpenCLService ocl;                // OpenCL service
   
-  /** @scr.reference */
+  @Reference
   private DisplayService dsps;              // display service
   
-  /** @scr.reference */
+  @Reference
   private BackgroundModel bgmodel;          // background model service
   
-  /** @scr.reference */
+  @Reference
   private ChangeDetector changedetect;      // change detection service
   
-  /** @scr.reference */
+  @Reference
   private ConnectedComponentService ccs;    // connected component analysis service
   
   private CLImage2D change;                 // output of change detection
