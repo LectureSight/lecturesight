@@ -11,4 +11,9 @@ public interface ObjectService {
     DONE_VISUAL
   }
   
+  boolean isTracked(TrackerObject obj);
+  TrackerObject getObject(int id);
+  TrackerObject[] getAllObjects();
+  TrackerObject[] getAllTrackedObjects();
+  
 }
