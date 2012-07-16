@@ -1,5 +1,6 @@
 package cv.lecturesight.object.impl;
 
+import cv.lecturesight.object.TrackerObject;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
@@ -179,6 +180,25 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
     g.setColor(Color.yellow);
     g.drawString("   t: " + fs.getFrameNumber(), 2, 26);
     g.drawString("objs: " + num, 2, 36);
+  }
+  
+  @Override
+  public TrackerObject getObject(int id) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+  @Override
+  public boolean isTracked(TrackerObject obj) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public TrackerObject[] getAllObjects() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public TrackerObject[] getAllTrackedObjects() {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
   
   private class OverlapImageRun implements ComputationRun {
