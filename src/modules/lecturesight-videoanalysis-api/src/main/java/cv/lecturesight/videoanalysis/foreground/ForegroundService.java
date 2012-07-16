@@ -39,7 +39,7 @@ public interface ForegroundService {
   
   /** Returns the foreground map working buffer.
    * 
-   * 
+   * @return foreground map working buffer
    */
   CLImageDoubleBuffer getForegroundWorkingBuffer();
   

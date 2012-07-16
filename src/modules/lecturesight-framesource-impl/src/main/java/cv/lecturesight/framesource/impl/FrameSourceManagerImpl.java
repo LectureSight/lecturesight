@@ -155,7 +155,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
         activateProvider(config.get(PROPKEY_MRL));
       }
     } catch (Exception e) {
-      log.warn("Unable to check if new installed FrameGrabberFactory fits FrameSourceProvider configuration");
+      log.warn("Unable to check if newly installed FrameGrabberFactory fits FrameSourceProvider configuration");
     }
   }
 
