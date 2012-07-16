@@ -24,7 +24,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-blobfinder-api</artifactId>
+      <artifactId>lecturesight-connectedcomponent-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
