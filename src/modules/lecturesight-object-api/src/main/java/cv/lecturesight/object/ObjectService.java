@@ -1,5 +1,7 @@
 package cv.lecturesight.object;
 
+import cv.lecturesight.opencl.api.OCLSignal;
+
 /** Service API
  * 
  */
@@ -11,6 +13,7 @@ public interface ObjectService {
     DONE_VISUAL
   }
   
+  OCLSignal getSignal(Signal signal);
   boolean isTracked(TrackerObject obj);
   TrackerObject getObject(int id);
   TrackerObject[] getAllObjects();

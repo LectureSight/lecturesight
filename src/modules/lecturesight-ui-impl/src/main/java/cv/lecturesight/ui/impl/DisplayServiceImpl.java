@@ -16,7 +16,6 @@ public class DisplayServiceImpl implements DisplayService {
 
   private OpenCLService ocl;
   private Set<DisplayRegistration> myRegs = new HashSet<DisplayRegistration>();
-  private String[] autoShowWindows;
 
   public DisplayServiceImpl(OpenCLService ocl) {
     this.ocl = ocl;

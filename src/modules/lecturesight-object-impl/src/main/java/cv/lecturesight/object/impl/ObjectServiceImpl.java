@@ -20,15 +20,9 @@ import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
-import cv.lecturesight.ui.CustomRenderer;
 import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import cv.lecturesight.util.geometry.BoundingBox;
-import cv.lecturesight.util.geometry.Position;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import org.apache.felix.scr.annotations.Component;
@@ -41,7 +35,7 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(name="lecturesight.objects",immediate=true)
 @Service
-public class ObjectServiceImpl implements ObjectService, CustomRenderer {
+public class ObjectServiceImpl implements ObjectService {
 
   // collection of this services signals
   private EnumMap<ObjectService.Signal, OCLSignal> signals =
@@ -71,14 +65,13 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
   CLIntBuffer labels_current, labels_last;
   CLIntBuffer label_pairs;
   int[] pairs = new int[Constants.pairsBufferLength];
-  CLImage2D overlap, visual;
+  CLImage2D overlap;
   CLImageDoubleBuffer fgBuffer;
   int max_objects;
   TrackerObject[] objects;
 
   protected void activate(ComponentContext cc) throws Exception {
     signals.put(Signal.DONE_COMPUTE_OVERLAP, ocl.getSignal(Constants.SIGNAME_DONE_COMPUTE_OVERLAP));
-    signals.put(Signal.DONE_VISUAL, ocl.getSignal(Constants.SIGNAME_DONE_VISUAL));
     signals.put(Signal.DONE_CORRELATION, ocl.getSignal(Constants.SIGNAME_DONE_CORRELATION));
     
     fs = fsp.getFrameSource();
@@ -119,15 +112,6 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
     // init correlation run
     ocl.registerLaunch(overlapLabeler.getSignal(ConnectedComponentLabeler.Signal.DONE), new CorrelationRun());
     
-    // set up terminator-like view if configured
-    if (config.getBoolean(Constants.PROPKEY_DISPLAY_OVERLAP)) {
-      visual = ocl.context().createImage2D(Usage.InputOutput, 
-              Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-      ocl.registerLaunch(analysisBarrier.getSignal(), new VisualizationRun());
-      dsps.registerDispaly(Constants.WINDOWNAME_VISUAL, "visual", visual, 
-              this, signals.get(Signal.DONE_VISUAL));
-    }
-    
     registerDisplays();
     
     log.info("Object Service activated.");
@@ -147,45 +131,16 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
   //</editor-fold>
   
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
-  //</editor-fold>
-  
   @Override
-  public void render(Graphics g) {
-    Font font = new Font("Monospaced", Font.PLAIN, 10);
-    g.setFont(font);
-    int minWidth = config.getInt(Constants.PROPKEY_WIDTH_MIN);
-    int minHeight = config.getInt(Constants.PROPKEY_HEIGHT_MIN);
-    int maxWidth = config.getInt(Constants.PROPKEY_WIDTH_MAX);
-    int maxHeight = config.getInt(Constants.PROPKEY_HEIGHT_MAX);
-    int num = foregroundLabeler.getNumBlobs();
-    for (int i=0; i < num; i++) {
-      BoundingBox box = boxFinder.getBox(i);
-      Position pos = centroidFinder.getControid(i);
-      int width = box.getWidth();
-      int height = box.getHeight();
-      if (width >= minWidth && 
-          width <= maxWidth && 
-          height >= minHeight && 
-          height <= maxHeight) {
-        g.setColor(Color.white);
-        g.drawOval(pos.getX(), pos.getY(), 2, 2);
-        String info = Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
-        g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
-        g.setColor(Color.yellow);
-      } else {
-        g.setColor(Color.gray);
-      }
-      g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
-    }
-    g.setColor(Color.yellow);
-    g.drawString("   t: " + fs.getFrameNumber(), 2, 26);
-    g.drawString("objs: " + num, 2, 36);
+  public OCLSignal getSignal(Signal signal) {
+    return signals.get(signal);
   }
-  
+    
   @Override
   public TrackerObject getObject(int id) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
+  
   @Override
   public boolean isTracked(TrackerObject obj) {
     throw new UnsupportedOperationException("Not supported yet.");
@@ -200,7 +155,8 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
   public TrackerObject[] getAllTrackedObjects() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
-  
+  //</editor-fold>
+
   private class OverlapImageRun implements ComputationRun {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_COMPUTE_OVERLAP);
@@ -256,24 +212,6 @@ public class ObjectServiceImpl implements ObjectService, CustomRenderer {
 //        }
 //      }
 //      System.out.println("\n-------------------------------------------------------");
-      ocl.castSignal(SIG_done);
-    }
-  }
-  
-  private class VisualizationRun implements ComputationRun {
-    
-    OCLSignal SIG_done = signals.get(Signal.DONE_VISUAL);
-    CLKernel copyRedTintK = ocl.programs().getKernel("objects", "copy_red_tint");
-    CLImage2D input = fsp.getFrameSource().getImage();
-
-    @Override
-    public void launch(CLQueue queue) {
-      copyRedTintK.setArgs(input, fgs.getForegroundMap(), labels_current, visual, workDim[0]);
-      copyRedTintK.enqueueNDRange(queue, workDim);
-    }
-
-    @Override
-    public void land() {
       ocl.castSignal(SIG_done);
     }
   }
