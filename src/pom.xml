@@ -34,9 +34,10 @@
     <module>modules/lecturesight-videoanalysis-impl</module>
     <module>modules/lecturesight-object-api</module>
     <module>modules/lecturesight-object-impl</module>
-    <!-- module>modules/lecturesight-cameraoperator-api</module>
-    <module>modules/lecturesight-cameraoperator-impl</module -->
+    <module>modules/lecturesight-cameraoperator-api</module>
+    <!-- module>modules/lecturesight-cameraoperator-impl</module -->
     <module>modules/lecturesight-heartbeat</module>
+    <module>modules/lecturesight-visualization</module>
 
   </modules>
 
