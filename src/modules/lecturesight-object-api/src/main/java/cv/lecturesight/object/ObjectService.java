@@ -18,5 +18,6 @@ public interface ObjectService {
   TrackerObject getObject(int id);
   TrackerObject[] getAllObjects();
   TrackerObject[] getAllTrackedObjects();
+  void discardObject(TrackerObject obj);
   
 }

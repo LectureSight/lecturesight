@@ -27,7 +27,7 @@ import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -47,7 +47,7 @@ public class ObjectServiceImpl implements ObjectService {
   private EnumMap<ObjectService.Signal, OCLSignal> signals =
           new EnumMap<ObjectService.Signal, OCLSignal>(ObjectService.Signal.class);
   
-  private Log log = new Log("Object Tracker Service");
+  private Log log = new Log("Object Service");
 
   @Reference
   private Configuration config;
@@ -75,8 +75,8 @@ public class ObjectServiceImpl implements ObjectService {
   CLImage2D overlap;
   CLImageDoubleBuffer fgBuffer;
   int max_objects;
-  Map<Integer, TrackerObject> objects = new TreeMap<Integer,TrackerObject>();           // contains every obejct ever created TODO: this must be cleaned!!!
-  Map<Integer, TrackerObject> trackedObjects = new TreeMap<Integer,TrackerObject>();
+  Map<Integer, TrackerObjectImpl> objects = new TreeMap<Integer,TrackerObjectImpl>();           // contains every obejct ever created, TODO: this must be cleaned!!!
+  Map<Integer, TrackerObjectImpl> trackedObjects = new TreeMap<Integer,TrackerObjectImpl>();
 
   protected void activate(ComponentContext cc) throws Exception {
     signals.put(Signal.DONE_COMPUTE_OVERLAP, ocl.getSignal(Constants.SIGNAME_DONE_COMPUTE_OVERLAP));
@@ -122,7 +122,7 @@ public class ObjectServiceImpl implements ObjectService {
     
     registerDisplays();
     
-    log.info("Object Service activated.");
+    log.info("Activated");
   }
   
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
@@ -167,34 +167,86 @@ public class ObjectServiceImpl implements ObjectService {
   public TrackerObject[] getAllTrackedObjects() {
     return (TrackerObject[])trackedObjects.values().toArray();
   }
+  
+  @Override
+  public void discardObject(TrackerObject obj) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
   //</editor-fold>
 
   private void updateTracking() {
     long currentTime = System.currentTimeMillis();
-    Map<Integer,TrackerObject> newTrackedObjects = new TreeMap<Integer,TrackerObject>();
-    int numObjs = fgs.getLabeler().getNumBlobs();
-    for (int i = 0; i < numObjs; i++) {
-      BoundingBox box = boxFinder.getBox(i);
-      Position pos = centroidFinder.getControid(i);
-      List<Integer> corrs = findCorrelations(i);
-      
-    }    
-  }
-  
-  private List<Integer> findCorrelations(int id) {
-    List<Integer> corrs = new LinkedList<Integer>();
+    Map<Integer,TrackerObjectImpl> newTrackedObjects = new TreeMap<Integer,TrackerObjectImpl>();
+    List<Integer> regions = makeRegionList();
+    Map<Integer, List<Integer>> mergers = findMergers(regions);
+    Map<Integer, List<Integer>> splitters = findSplitters(regions);
+   
+    // care about mergers
+    for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
+      int currentId = it.next();
+      Position centroid = centroidFinder.getControid(currentId);
+      BoundingBox bbox = boxFinder.getBox(currentId);
+      TrackerObjectImpl newGroup = createTrackerObject(centroid, bbox, currentTime);
+      for (Iterator<Integer> git = mergers.get(currentId).iterator(); it.hasNext();) {
+        int mergerId = git.next();
+        TrackerObjectImpl merger = trackedObjects.get(mergerId);
+        if (merger.isGroup()) {
+          newGroup.members.addAll(merger.members);
+          objects.remove(merger.getId());
+        } else {
+          newGroup.members.add(merger);
+        }
+      }
+      objects.put(newGroup.getId(), newGroup);
+      newTrackedObjects.put(currentId, newGroup);
+      // TODO call decorators for case: MERGE
+    }
     
-    return corrs;
+    // care about splitters
+    for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
+      int lastId = it.next();
+      // did a former object split into several?
+      // did a group split up into objects
+      // did a group member separate from group
+      //   ---> call identity decorator
+    }
+    
+    // care about remaining
+    for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
+      int currentId = it.next();
+      int lastId = findCorrelation(currentId);
+      if (lastId == 0) {
+        // create new TrackerObject
+      } else if (lastId > 0) {
+        // update TrackerObject
+      }
+    }
+  }  
+  
+  private List<Integer> makeRegionList() {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  private int findCorrelation(int currentId) {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  private Map<Integer, List<Integer>> findMergers(List<Integer> regions) {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  private Map<Integer, List<Integer>> findSplitters(List<Integer> regions) {
+    throw new UnsupportedOperationException("Not yet implemented");
   }
   
-  private TrackerObject createTrackerObject() {
+  private TrackerObjectImpl createTrackerObject(Position centroid, BoundingBox bbox, long timestamp) {
     return null;
   }
   
-  private TrackerObject updateTrackerObject(TrackerObject obj, Position centroid, BoundingBox box) {
-    return null;
+  private void updateTrackerObject(TrackerObject obj, Position centroid, BoundingBox box) {
+
   }
-  
+
   private class OverlapImageRun implements ComputationRun {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_COMPUTE_OVERLAP);
