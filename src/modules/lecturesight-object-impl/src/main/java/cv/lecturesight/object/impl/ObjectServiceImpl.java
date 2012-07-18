@@ -176,10 +176,9 @@ public class ObjectServiceImpl implements ObjectService {
     for (int i = 0; i < numObjs; i++) {
       BoundingBox box = boxFinder.getBox(i);
       Position pos = centroidFinder.getControid(i);
-      
       List<Integer> corrs = findCorrelations(i);
       
-    }
+    }    
   }
   
   private List<Integer> findCorrelations(int id) {
