@@ -19,6 +19,7 @@ public interface ConnectedComponentLabeler {
   int getNumBlobs();
   int[] getLabels();
   int[] getSizes();
+  int getSize(int id);
   int getMaxBlobs();
   void dispose();
   void setInput(CLImage2D image);  

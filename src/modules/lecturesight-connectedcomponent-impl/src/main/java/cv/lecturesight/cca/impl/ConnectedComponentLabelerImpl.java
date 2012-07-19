@@ -113,6 +113,10 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     return sizes_out;         // TODO make thread-safe
   }
   
+  public int getSize(int id) {
+    return sizes_out[id];
+  }
+  
   @Override
   public int getMaxBlobs() {
     return maxBlobs;

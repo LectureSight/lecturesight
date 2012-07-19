@@ -23,11 +23,10 @@ import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import cv.lecturesight.util.geometry.BoundingBox;
-import cv.lecturesight.util.geometry.Position;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,16 +38,14 @@ import org.osgi.service.component.ComponentContext;
 /** Implementation of Service API
  *
  */
-@Component(name="lecturesight.objects",immediate=true)
+@Component(name = "lecturesight.objects", immediate = true)
 @Service
 public class ObjectServiceImpl implements ObjectService {
 
   // collection of this services signals
   private EnumMap<ObjectService.Signal, OCLSignal> signals =
           new EnumMap<ObjectService.Signal, OCLSignal>(ObjectService.Signal.class);
-  
   private Log log = new Log("Object Service");
-
   @Reference
   private Configuration config;
   @Reference
@@ -61,10 +58,9 @@ public class ObjectServiceImpl implements ObjectService {
   private FrameSourceProvider fsp;
   @Reference
   private ForegroundService fgs;
-  
   int[] workDim;
   FrameSource fsrc;
-  ConnectedComponentLabeler foregroundLabeler, overlapLabeler;
+  ConnectedComponentLabeler fgLabeler, overlapLabeler;
   BoundingBoxFinder boxFinder;
   CentroidFinder centroidFinder;
   OCLSignalBarrier analysisBarrier;
@@ -75,56 +71,56 @@ public class ObjectServiceImpl implements ObjectService {
   CLImage2D overlap;
   CLImageDoubleBuffer fgBuffer;
   int max_objects;
-  Map<Integer, TrackerObjectImpl> objects = new TreeMap<Integer,TrackerObjectImpl>();           // contains every obejct ever created, TODO: this must be cleaned!!!
-  Map<Integer, TrackerObjectImpl> trackedObjects = new TreeMap<Integer,TrackerObjectImpl>();
+  Map<Integer, TrackerObjectImpl> objects = new TreeMap<Integer, TrackerObjectImpl>();           // contains every obejct ever created, TODO: this must be cleaned!!!
+  Map<Integer, TrackerObjectImpl> trackedObjects = new TreeMap<Integer, TrackerObjectImpl>();
 
   protected void activate(ComponentContext cc) throws Exception {
     signals.put(Signal.DONE_COMPUTE_OVERLAP, ocl.getSignal(Constants.SIGNAME_DONE_COMPUTE_OVERLAP));
     signals.put(Signal.DONE_CORRELATION, ocl.getSignal(Constants.SIGNAME_DONE_CORRELATION));
-    
+
     fsrc = fsp.getFrameSource();
-    
+
     // get global working range
-    workDim = new int[] { (int)fgs.getForegroundMap().getWidth(), 
-                          (int)fgs.getForegroundMap().getHeight() };
+    workDim = new int[]{(int) fgs.getForegroundMap().getWidth(),
+      (int) fgs.getForegroundMap().getHeight()};
     max_objects = config.getInt(Constants.PROPKEY_OBJECTS_MAX);
 
-    foregroundLabeler = fgs.getLabeler();
-    boxFinder = ccs.createBoundingBoxFinder(foregroundLabeler);
-    centroidFinder = ccs.createCentroidFinder(foregroundLabeler);
-    analysisBarrier = ocl.createSignalBarrier(new OCLSignal[] {
-      fgs.getSignal(ForegroundService.Signal.DONE_CLEANING), 
-      boxFinder.getSignal(BoundingBoxFinder.Signal.DONE),
-      centroidFinder.getSignal(CentroidFinder.Signal.DONE)
-    });
-    
+    fgLabeler = fgs.getLabeler();
+    boxFinder = ccs.createBoundingBoxFinder(fgLabeler);
+    centroidFinder = ccs.createCentroidFinder(fgLabeler);
+    analysisBarrier = ocl.createSignalBarrier(new OCLSignal[]{
+              fgs.getSignal(ForegroundService.Signal.DONE_CLEANING),
+              boxFinder.getSignal(BoundingBoxFinder.Signal.DONE),
+              centroidFinder.getSignal(CentroidFinder.Signal.DONE)
+            });
+
     // init label buffer copy 
-    labels_current = foregroundLabeler.getLabelBuffer();
+    labels_current = fgLabeler.getLabelBuffer();
     labels_last = ocl.context().createIntBuffer(Usage.InputOutput, labels_current.getElementCount());
     ocl.utils().setValues(0, (int) labels_last.getElementCount() - 1, labels_last, 0);
 
     // init overlap image
     fgBuffer = fgs.getForegroundWorkingBuffer();
-    overlap = ocl.context().createImage2D(Usage.InputOutput, 
+    overlap = ocl.context().createImage2D(Usage.InputOutput,
             Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    
+
     // init buffer for label pairs
     label_pairs = ocl.context().createIntBuffer(Usage.InputOutput, Constants.pairsBufferLength);
-    
+
     // init overlap computation run
     ocl.registerLaunch(fgs.getSignal(ForegroundService.Signal.DONE_CLEANING), new OverlapImageRun());
-    
+
     // init CC-Labeler on overlap image
     overlapLabeler = ccs.createLabeler(overlap, fgs.getLabeler().getMaxBlobs(), 1, Integer.MAX_VALUE);
-    
+
     // init correlation run
     ocl.registerLaunch(overlapLabeler.getSignal(ConnectedComponentLabeler.Signal.DONE), new CorrelationRun());
-    
+
     registerDisplays();
-    
+
     log.info("Activated");
   }
-  
+
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
   /** Register displays if configured 
    * 
@@ -137,13 +133,13 @@ public class ObjectServiceImpl implements ObjectService {
     }
   }
   //</editor-fold>
-  
+
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   @Override
   public OCLSignal getSignal(Signal signal) {
     return signals.get(signal);
   }
-    
+
   @Override
   public TrackerObject getObject(int id) {
     if (objects.containsKey(id)) {
@@ -152,7 +148,7 @@ public class ObjectServiceImpl implements ObjectService {
       return null;
     }
   }
-  
+
   @Override
   public boolean isTracked(TrackerObject obj) {
     return trackedObjects.containsValue(obj);
@@ -160,14 +156,14 @@ public class ObjectServiceImpl implements ObjectService {
 
   @Override
   public TrackerObject[] getAllObjects() {
-    return (TrackerObject[])objects.values().toArray();
+    return (TrackerObject[]) objects.values().toArray();
   }
 
   @Override
   public TrackerObject[] getAllTrackedObjects() {
-    return (TrackerObject[])trackedObjects.values().toArray();
+    return (TrackerObject[]) trackedObjects.values().toArray();
   }
-  
+
   @Override
   public void discardObject(TrackerObject obj) {
     throw new UnsupportedOperationException("Not supported yet.");
@@ -176,82 +172,142 @@ public class ObjectServiceImpl implements ObjectService {
 
   private void updateTracking() {
     long currentTime = System.currentTimeMillis();
-    Map<Integer,TrackerObjectImpl> newTrackedObjects = new TreeMap<Integer,TrackerObjectImpl>();
+    Map<Integer, TrackerObjectImpl> newTrackedObjects = new TreeMap<Integer, TrackerObjectImpl>();
     List<Integer> regions = makeRegionList();
     Map<Integer, List<Integer>> mergers = findMergers(regions);
     Map<Integer, List<Integer>> splitters = findSplitters(regions);
-   
+
     // care about mergers
-    for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
-      int currentId = it.next();
-      Position centroid = centroidFinder.getControid(currentId);
-      BoundingBox bbox = boxFinder.getBox(currentId);
-      TrackerObjectImpl newGroup = createTrackerObject(centroid, bbox, currentTime);
-      for (Iterator<Integer> git = mergers.get(currentId).iterator(); it.hasNext();) {
-        int mergerId = git.next();
-        TrackerObjectImpl merger = trackedObjects.get(mergerId);
-        if (merger.isGroup()) {
-          newGroup.members.addAll(merger.members);
-          objects.remove(merger.getId());
-        } else {
-          newGroup.members.add(merger);
+    if (mergers.size() > 0) {
+      for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
+        int currentId = it.next();
+        TrackerObjectImpl newGroup = createTrackerObject(currentId, currentTime);
+        for (Iterator<Integer> git = mergers.get(currentId).iterator(); it.hasNext();) {
+          int mergerId = git.next();
+          TrackerObjectImpl merger = trackedObjects.get(mergerId);
+          if (merger.isGroup()) {
+            newGroup.members.addAll(merger.members);
+            merger.members.clear();
+            merger.group = newGroup;
+            objects.remove(merger.getId());
+          } else {
+            newGroup.members.add(merger);
+          }
+        }
+        objects.put(newGroup.getId(), newGroup);
+        newTrackedObjects.put(currentId, newGroup);
+        // TODO call decorators for case: MERGE
+      }
+    }
+
+    // care about splitters
+    if (splitters.size() > 0) {
+      for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
+        int lastId = it.next();
+        TrackerObject oldObj = trackedObjects.get(lastId);
+        List<Integer> splitterCurrentIds = splitters.get(lastId);
+        if (oldObj.isGroup()) {
+          
+        } else {                  // object that split was recognized as a single object before
+          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
+          
+          }
         }
       }
-      objects.put(newGroup.getId(), newGroup);
-      newTrackedObjects.put(currentId, newGroup);
-      // TODO call decorators for case: MERGE
     }
-    
-    // care about splitters
-    for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
-      int lastId = it.next();
-      // did a former object split into several?
-      // did a group split up into objects
-      // did a group member separate from group
-      //   ---> call identity decorator
-    }
-    
+
     // care about remaining
     for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
       int currentId = it.next();
       int lastId = findCorrelation(currentId);
+      TrackerObjectImpl obj = null;
       if (lastId == 0) {
-        // create new TrackerObject
+        obj = createTrackerObject(currentId, currentTime);
+        objects.put(obj.getId(), obj);
       } else if (lastId > 0) {
-        // update TrackerObject
+        obj = trackedObjects.get(lastId);
+        updateTrackerObject(currentId, obj, currentTime);
       }
+      newTrackedObjects.put(currentId, obj);
     }
-  }  
-  
+
+    trackedObjects = newTrackedObjects;
+  }
+
   private List<Integer> makeRegionList() {
-    throw new UnsupportedOperationException("Not yet implemented");
+    List<Integer> out = new LinkedList<Integer>();
+    for (int i = 0; i < fgLabeler.getNumBlobs(); i++) {
+      out.add(i);
+    }
+    return out;
   }
 
   private int findCorrelation(int currentId) {
-    throw new UnsupportedOperationException("Not yet implemented");
+    for (int i = 0; i < num_corrs; i++) {
+      int idx = 2 * i;
+      if (pairs[i] == currentId) {
+        return pairs[++i];
+      }
+    }
+    return 0;
   }
 
   private Map<Integer, List<Integer>> findMergers(List<Integer> regions) {
-    throw new UnsupportedOperationException("Not yet implemented");
+    Map<Integer, List<Integer>> out = new TreeMap<Integer, List<Integer>>();
+    for (int i = 0; i < num_corrs; i++) {
+      int idx = 2 * i;
+      int current = pairs[idx];
+      int last = pairs[++idx];
+      if (!out.containsKey(current)) {
+        out.put(current, new LinkedList<Integer>());
+      }
+      out.get(current).add(last);
+    }
+    for (Iterator<Integer> it = out.keySet().iterator(); it.hasNext();) {
+      int id = it.next();
+      if (out.get(id).size() > 1) {
+        regions.remove(id);
+      } else {
+        out.remove(id);
+      }
+    }
+    return out;
   }
 
   private Map<Integer, List<Integer>> findSplitters(List<Integer> regions) {
-    throw new UnsupportedOperationException("Not yet implemented");
+    Map<Integer, List<Integer>> out = new TreeMap<Integer, List<Integer>>();
+    for (int i = 0; i < num_corrs; i++) {
+      int idx = 2 * i;
+      int current = pairs[idx];
+      int last = pairs[++idx];
+      if (!out.containsKey(last)) {
+        out.put(last, new LinkedList<Integer>());
+      }
+      out.get(last).add(current);
+    }
+    for (Iterator<Integer> it = out.keySet().iterator(); it.hasNext();) {
+      int id = it.next();
+      if (out.get(id).size() > 1) {
+        regions.removeAll(out.get(id));
+      } else {
+        out.remove(id);
+      }
+    }
+    return out;
   }
-  
-  private TrackerObjectImpl createTrackerObject(Position centroid, BoundingBox bbox, long timestamp) {
+
+  private TrackerObjectImpl createTrackerObject(int regionId, long timestamp) {
     return null;
   }
-  
-  private void updateTrackerObject(TrackerObject obj, Position centroid, BoundingBox box) {
 
+  private void updateTrackerObject(int regionId, TrackerObject obj, long timestamp) {
   }
 
   private class OverlapImageRun implements ComputationRun {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_COMPUTE_OVERLAP);
     CLKernel imageAndK = ocl.programs().getKernel("objects", "image_and");
-    
+
     @Override
     public void launch(CLQueue queue) {
       imageAndK.setArgs(fgBuffer.current(), fgBuffer.last(), overlap);
@@ -264,9 +320,9 @@ public class ObjectServiceImpl implements ObjectService {
       ocl.castSignal(SIG_done);
     }
   }
-  
+
   private class CorrelationRun implements ComputationRun {
-    
+
     OCLSignal SIG_done = signals.get(Signal.DONE_CORRELATION);
     CLKernel gatherLabelPairsK = ocl.programs().getKernel("objects", "gather_label_pairs");
     CLIntBuffer addresses = overlapLabeler.getIdBuffer();
@@ -275,7 +331,7 @@ public class ObjectServiceImpl implements ObjectService {
 
     @Override
     public void launch(CLQueue queue) {
-      ocl.utils().setValues(0, (int)label_pairs.getElementCount(), label_pairs, 0);
+      ocl.utils().setValues(0, (int) label_pairs.getElementCount(), label_pairs, 0);
       // gather pairs
       if (overlapLabeler.getNumBlobs() > 0) {
         gatherLabelPairsK.setArgs(addresses, labels_current, labels_last, label_pairs, overlapLabeler.getNumBlobs(), Constants.pairsBufferLength);    // TODO length / 2 !!
@@ -283,7 +339,7 @@ public class ObjectServiceImpl implements ObjectService {
         gatherLabelPairsK.enqueueNDRange(queue, pairsWorkDim);
         pairsH = label_pairs.read(queue);
       }
-      
+
       // copy label buffer
       labels_current.copyTo(queue, 0, labels_current.getElementCount(), labels_last, 0);
     }
@@ -292,7 +348,7 @@ public class ObjectServiceImpl implements ObjectService {
     public void land() {
       num_corrs = overlapLabeler.getNumBlobs();
       if (num_corrs > 0) {
-        pairsH.get(pairs);          
+        pairsH.get(pairs);
       }
       updateTracking();
       ocl.castSignal(SIG_done);
