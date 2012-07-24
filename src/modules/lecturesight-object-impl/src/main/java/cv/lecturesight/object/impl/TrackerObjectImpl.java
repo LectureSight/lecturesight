@@ -16,6 +16,7 @@ public class TrackerObjectImpl implements TrackerObject {
   private int id;
   BoundingBox bbox = null;
   Position centroid = null;
+  int weight = 0;
   long lastSeen = 0L;
   HashMap<String, Object> props = new HashMap<String, Object>();
   TrackerObject group = null;
@@ -38,6 +39,11 @@ public class TrackerObjectImpl implements TrackerObject {
   @Override
   public Position getCentroid() {
     return centroid;
+  }
+  
+  @Override
+  public int getWeight() {
+    return weight;
   }
   
   @Override
@@ -74,15 +80,4 @@ public class TrackerObjectImpl implements TrackerObject {
   public TrackerObject getGroup() {
     return group;
   }
-
-  @Override
-  public BufferedImage getVisual() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public CLImage2D getVisualCL() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-  
 }

@@ -1,5 +1,7 @@
 package cv.lecturesight.decorator.head;
 
+import cv.lecturesight.framesource.FrameSource;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.object.ObjectDecorator;
 import cv.lecturesight.object.TrackerObject;
 import cv.lecturesight.util.Log;
@@ -36,6 +38,9 @@ public class HeadDecorator implements ObjectDecorator {
   private Log log = new Log("Head Finder");
   @Reference
   Configuration config;
+  @Reference
+  FrameSourceProvider fsp;
+  FrameSource fsource;
   private int PARAM_K = 7;
   private int MAX_ITER = 100;
 
@@ -54,6 +59,8 @@ public class HeadDecorator implements ObjectDecorator {
 
     // Try to read the image
     try {
+      fsource = fsp.getFrameSource();
+      
       BufferedImage image = obj.getVisual();
       WritableRaster r = image.getRaster();
 

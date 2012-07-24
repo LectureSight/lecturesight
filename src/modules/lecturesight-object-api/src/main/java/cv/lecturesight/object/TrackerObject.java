@@ -1,9 +1,7 @@
 package cv.lecturesight.object;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
-import java.awt.image.BufferedImage;
 
 public interface TrackerObject {
 
@@ -14,6 +12,8 @@ public interface TrackerObject {
   BoundingBox getBoundingBox();
 
   Position getCentroid();
+  
+  int getWeight();
   
   boolean hasProperty(String key);
   
@@ -26,9 +26,5 @@ public interface TrackerObject {
   boolean isGroupMember();
   
   TrackerObject getGroup();
-  
-  BufferedImage getVisual();
-  
-  CLImage2D getVisualCL();
         
 }

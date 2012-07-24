@@ -13,6 +13,7 @@ import cv.lecturesight.cca.ConnectedComponentService;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
+import cv.lecturesight.object.ObjectIdentityService;
 import cv.lecturesight.object.ObjectService;
 import cv.lecturesight.opencl.CLImageDoubleBuffer;
 import cv.lecturesight.opencl.OpenCLService;
@@ -58,6 +59,8 @@ public class ObjectServiceImpl implements ObjectService {
   private FrameSourceProvider fsp;
   @Reference
   private ForegroundService fgs;
+//  @Reference 
+//  private ObjectIdentityService identity;
   int[] workDim;
   FrameSource fsrc;
   ConnectedComponentLabeler fgLabeler, overlapLabeler;
@@ -194,7 +197,6 @@ public class ObjectServiceImpl implements ObjectService {
             newGroup.members.add(merger);
           }
         }
-        objects.put(newGroup.getId(), newGroup);
         newTrackedObjects.put(currentId, newGroup);
         // TODO call decorators for case: MERGE
       }
@@ -204,15 +206,20 @@ public class ObjectServiceImpl implements ObjectService {
     if (splitters.size() > 0) {
       for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
         int lastId = it.next();
-        TrackerObject oldObj = trackedObjects.get(lastId);
+        TrackerObjectImpl oldObj = trackedObjects.get(lastId);
         List<Integer> splitterCurrentIds = splitters.get(lastId);
-        if (oldObj.isGroup()) {
-          
-        } else {                  // object that split was recognized as a single object before
-          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
-          
+        int heaviestId = findHeaviestRegion(splitterCurrentIds);    // find biggest region
+        splitterCurrentIds.remove(heaviestId);    
+//        if (oldObj.isGroup()) {
+//          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
+//            // TODO use IdentityServiec here!
+//          }
+//        } else {                  // object that split was recognized as a single object before                  
+          updateTrackerObject(heaviestId, oldObj, currentTime);       // update old object with biggest region data
+          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {     // create new objects for all others
+            createTrackerObject(sit.next(), currentTime);
           }
-        }
+//        }
       }
     }
 
@@ -220,15 +227,12 @@ public class ObjectServiceImpl implements ObjectService {
     for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
       int currentId = it.next();
       int lastId = findCorrelation(currentId);
-      TrackerObjectImpl obj = null;
       if (lastId == 0) {
-        obj = createTrackerObject(currentId, currentTime);
-        objects.put(obj.getId(), obj);
+        createTrackerObject(currentId, currentTime);
       } else if (lastId > 0) {
-        obj = trackedObjects.get(lastId);
+        TrackerObjectImpl obj = trackedObjects.get(lastId);
         updateTrackerObject(currentId, obj, currentTime);
       }
-      newTrackedObjects.put(currentId, obj);
     }
 
     trackedObjects = newTrackedObjects;
@@ -241,12 +245,25 @@ public class ObjectServiceImpl implements ObjectService {
     }
     return out;
   }
+  
+  private Integer findHeaviestRegion(List<Integer> ids) {
+    int winner = -1, maxWeight = -1;
+    for (Iterator<Integer> it = ids.iterator(); it.hasNext();) {
+      int id = it.next();
+      int weight = fgLabeler.getSize(id);
+      if (weight > maxWeight) {
+        winner = id;
+        maxWeight = weight;
+      }
+    }
+    return winner;
+  }
 
   private int findCorrelation(int currentId) {
     for (int i = 0; i < num_corrs; i++) {
       int idx = 2 * i;
-      if (pairs[i] == currentId) {
-        return pairs[++i];
+      if (pairs[idx] == currentId) {
+        return pairs[++idx];
       }
     }
     return 0;
@@ -297,10 +314,20 @@ public class ObjectServiceImpl implements ObjectService {
   }
 
   private TrackerObjectImpl createTrackerObject(int regionId, long timestamp) {
-    return null;
+    TrackerObjectImpl obj = new TrackerObjectImpl();
+    obj.bbox = boxFinder.getBox(regionId);
+    obj.centroid = centroidFinder.getControid(regionId);
+    obj.weight = fgLabeler.getSize(regionId);
+    obj.lastSeen = timestamp;
+    return obj;
   }
 
-  private void updateTrackerObject(int regionId, TrackerObject obj, long timestamp) {
+  private TrackerObjectImpl updateTrackerObject(int regionId, TrackerObjectImpl obj, long timestamp) {
+    obj.bbox = boxFinder.getBox(regionId);
+    obj.centroid = centroidFinder.getControid(regionId);
+    obj.weight = fgLabeler.getSize(regionId);
+    obj.lastSeen = timestamp;
+    return obj;
   }
 
   private class OverlapImageRun implements ComputationRun {
