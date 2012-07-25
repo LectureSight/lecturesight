@@ -375,6 +375,11 @@ public class ObjectServiceImpl implements ObjectService {
       num_corrs = overlapLabeler.getNumBlobs();
       if (num_corrs > 0) {
         pairsH.get(pairs);
+        for (int i=0; i < num_corrs; i++) {
+          int idx = 2 * num_corrs;
+          System.out.print(pairs[idx] + ":" + pairs[idx++] + " ");
+        }
+        System.out.println("-------------------------------------------------");
       }
       updateTracking();
       ocl.castSignal(SIG_done);
