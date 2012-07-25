@@ -1,7 +1,7 @@
 package cv.lecturesight.videoanalysis.foreground.impl;
 
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -77,7 +77,7 @@ public class ForegroundServiceImpl implements ForegroundService {
   private CLImage2D updateMap;              // working buffer indicating pixels to add/remove
   private CLImage2D fgUpdated;              // foreground map output buffer
   private CLImageDoubleBuffer fgBuffer;     // foreground map working buffer
-  private CLIntBuffer activity;             // buffer for activity count of blobs
+  private CLBuffer<Integer> activity;             // buffer for activity count of blobs
   private BufferedImage fgMapHost;
 
   private int[] workDim;                    // dimensions of buffers

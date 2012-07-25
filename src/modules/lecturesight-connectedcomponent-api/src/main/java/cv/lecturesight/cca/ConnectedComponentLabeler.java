@@ -1,7 +1,7 @@
 package cv.lecturesight.cca;
 
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
 
 public interface ConnectedComponentLabeler {
@@ -12,8 +12,8 @@ public interface ConnectedComponentLabeler {
 
   OCLSignal getSignal(Signal signal);
   void doLabels();
-  CLIntBuffer getLabelBuffer();
-  CLIntBuffer getIdBuffer();
+  CLBuffer<Integer> getLabelBuffer();
+  CLBuffer<Integer> getIdBuffer();
   void setMinBlobSize(int numPixels);
   void setMaxBlobSize(int numPixels);
   int getNumBlobs();

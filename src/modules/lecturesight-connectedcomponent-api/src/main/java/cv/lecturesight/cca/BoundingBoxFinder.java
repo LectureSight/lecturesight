@@ -1,6 +1,6 @@
 package cv.lecturesight.cca;
 
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.BoundingBox;
 
@@ -11,7 +11,7 @@ public interface BoundingBoxFinder {
   }
 
   OCLSignal getSignal(Signal signal);
-  CLIntBuffer getBoxBuffer();
+  CLBuffer<Integer> getBoxBuffer();
   BoundingBox getBox(int id);
   BoundingBox[] getAllBoxes();
   

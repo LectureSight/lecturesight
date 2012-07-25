@@ -2,7 +2,7 @@ package cv.lecturesight.object.impl;
 
 import cv.lecturesight.object.TrackerObject;
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -23,7 +23,6 @@ import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,6 +32,7 @@ import java.util.TreeMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.bridj.Pointer;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
@@ -66,8 +66,8 @@ public class ObjectServiceImpl implements ObjectService {
   BoundingBoxFinder boxFinder;
   CentroidFinder centroidFinder;
   OCLSignalBarrier analysisBarrier;
-  CLIntBuffer labels_current, labels_last;
-  CLIntBuffer label_pairs;
+  CLBuffer<Integer> labels_current, labels_last;
+  CLBuffer<Integer> label_pairs;
   int num_corrs;
   int[] pairs = new int[Constants.pairsBufferLength];
   CLImage2D overlap;
@@ -351,8 +351,8 @@ public class ObjectServiceImpl implements ObjectService {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_CORRELATION);
     CLKernel gatherLabelPairsK = ocl.programs().getKernel("objects", "gather_label_pairs");
-    CLIntBuffer addresses = overlapLabeler.getIdBuffer();
-    IntBuffer pairsH;
+    CLBuffer<Integer> addresses = overlapLabeler.getIdBuffer();
+    Pointer<Integer> pairsH;
     int[] pairsWorkDim = new int[1];
 
     @Override
@@ -374,7 +374,8 @@ public class ObjectServiceImpl implements ObjectService {
     public void land() {
       num_corrs = overlapLabeler.getNumBlobs();
       if (num_corrs > 0) {
-        pairsH.get(pairs);
+        //pairsH.get(pairs);
+        pairs = pairsH.getInts();
         System.out.print(num_corrs + " > ");
         for (int i=0; i < 20; i++) {
           int idx = 2 * num_corrs;
