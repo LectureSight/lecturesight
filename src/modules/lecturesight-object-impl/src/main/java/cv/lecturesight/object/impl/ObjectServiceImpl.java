@@ -279,15 +279,15 @@ public class ObjectServiceImpl implements ObjectService {
       }
       out.get(current).add(last);
     }
+    Map<Integer, List<Integer>> result = new TreeMap<Integer, List<Integer>>();
     for (Iterator<Integer> it = out.keySet().iterator(); it.hasNext();) {
       int id = it.next();
       if (out.get(id).size() > 1) {
-        regions.remove(id);
-      } else {
-        out.remove(id);
+        result.put(id, out.get(id));
+        regions.removeAll(out.get(id));
       }
     }
-    return out;
+    return result;
   }
 
   private Map<Integer, List<Integer>> findSplitters(List<Integer> regions) {
@@ -301,15 +301,15 @@ public class ObjectServiceImpl implements ObjectService {
       }
       out.get(last).add(current);
     }
+    Map<Integer, List<Integer>> result = new TreeMap<Integer, List<Integer>>();
     for (Iterator<Integer> it = out.keySet().iterator(); it.hasNext();) {
       int id = it.next();
       if (out.get(id).size() > 1) {
+        result.put(id, out.get(id));
         regions.removeAll(out.get(id));
-      } else {
-        out.remove(id);
       }
     }
-    return out;
+    return result;
   }
 
   private TrackerObjectImpl createTrackerObject(int regionId, long timestamp) {

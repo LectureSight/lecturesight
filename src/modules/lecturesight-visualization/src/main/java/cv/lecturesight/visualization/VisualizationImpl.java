@@ -88,6 +88,10 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
       
       String info = Integer.toString(obj.getId()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
       g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
+      
+//      for (Iterator<String> it = obj.getProperties().keySet(); it.hasNext();) {
+//        
+//      }
     }
     g.drawString("   t: " + fsource.getFrameNumber(), 2, 26);
     g.drawString("objs: " + objects.length, 2, 36);

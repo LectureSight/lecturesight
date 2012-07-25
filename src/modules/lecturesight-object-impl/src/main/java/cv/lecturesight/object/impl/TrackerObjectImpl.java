@@ -5,6 +5,7 @@ import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class TrackerObjectImpl implements TrackerObject {
@@ -77,5 +78,10 @@ public class TrackerObjectImpl implements TrackerObject {
   @Override
   public TrackerObject getGroup() {
     return group;
+  }
+
+  @Override
+  public Map<String, Object> getProperties() {
+    return props;
   }
 }

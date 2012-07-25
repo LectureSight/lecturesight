@@ -114,7 +114,7 @@ public class OCLExecutor extends Thread {
         if (msg != null) {
           warn += ": " + msg;
         }
-        log.warn(warn);
+        log.error(warn, e);
       }
     }
   }
