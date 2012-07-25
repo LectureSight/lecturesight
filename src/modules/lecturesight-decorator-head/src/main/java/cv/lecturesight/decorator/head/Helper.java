@@ -1,10 +1,12 @@
 package cv.lecturesight.decorator.head;
 
+import cv.lecturesight.util.geometry.Position;
+
 public class Helper {
 
-  public static double euclidean_distance(Point x, Point y) {
-    double diff1 = x.getPoint_x() - y.getPoint_x();
-    double diff2 = x.getPoint_y() - y.getPoint_y();
+  public static double euclidean_distance(Position x, Position y) {
+    float diff1 = x.getX() - y.getX();
+    float diff2 = x.getY() - y.getY();
     return Math.sqrt(diff1 * diff1 + diff2 * diff2);
   }
 }

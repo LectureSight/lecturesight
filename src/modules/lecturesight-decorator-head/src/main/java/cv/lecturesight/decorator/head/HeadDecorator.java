@@ -25,7 +25,8 @@ import org.osgi.service.component.ComponentContext;
 @Properties({
   @Property(name = "lecturesight.decorator.name", value = "Head Finder"),
   @Property(name = "lecturesight.decorator.callon", value = "EACHFRAME"),
-  @Property(name = "lecturesight.decorator.produces", value = {"head.center", "head.boundingbox"})
+  @Property(name = "lecturesight.decorator.produces", value = {"head.center", 
+    "head.boundingbox", "head.radius"})
 })
 public class HeadDecorator implements ObjectDecorator {
 
@@ -33,6 +34,7 @@ public class HeadDecorator implements ObjectDecorator {
   final static String PROPKEY_BBOX = "head.boundingbox";
   final static String PROPKEY_K = "k";
   final static String PROPKEY_MAXITER = "iterations.max";
+  final static String PROPKEY_RADIUS = "head.radius";
   
   private Log log = new Log("Head Finder");
   @Reference
@@ -73,12 +75,12 @@ public class HeadDecorator implements ObjectDecorator {
         for (int j = 0; j < height; j++) {
 //          if (r.getSample(i, j, 0) > 0 && r.getSample(i, j, 1) > 0 && r.getSample(i, j, 2) > 0) {
           if (r.getSample(min.getX() + i, min.getY() + j, 0) > 0) {
-            points.push(new Point(i, j));
+            points.push(new Position(i, j));
           }
         }
       }
 
-      Point gravity = new ClusterStack(points).get_center();
+      Position gravity = new ClusterStack(points).get_center();
 
       // Cluster array
       ClusterStack[] clusters = new ClusterStack[PARAM_K];
@@ -131,21 +133,23 @@ public class HeadDecorator implements ObjectDecorator {
       int optimal = 0;
 
       for (int i = 0; i < clusters.length; i++) {
-        double x_distance = Math.pow((clusters[i].get_center().getPoint_x()
-                - gravity.getPoint_x()), 2);
-        double y_distance = Math.pow((clusters[i].get_center().getPoint_y()), 2);
+        double x_distance = Math.pow((clusters[i].get_center().getX()
+                - gravity.getX()), 2);
+        double y_distance = Math.pow((clusters[i].get_center().getY()), 2);
         if (x_distance + y_distance < d) {
           d = x_distance + y_distance;
           optimal = i;
         }
       }
-      Point[] boundaries = clusters[optimal].min_max();
+      Position[] boundaries = clusters[optimal].min_max();
       
       // save results to TackerObject
-      obj.setProperty(PROPKEY_CENTROID, new Position((int)gravity.getPoint_x(), (int)gravity.getPoint_y()));
+      obj.setProperty(PROPKEY_CENTROID, new Position((int)gravity.getX(), (int)gravity.getY()));
       obj.setProperty(PROPKEY_BBOX, new BoundingBox(
-              new Position((int)boundaries[0].getPoint_x(), (int)boundaries[0].getPoint_y()),
-              new Position((int)boundaries[1].getPoint_x(), (int)boundaries[1].getPoint_y())));
+              new Position((int)boundaries[0].getX(), (int)boundaries[0].getY()),
+              new Position((int)boundaries[1].getX(), (int)boundaries[1].getY())));
+      obj.setProperty(PROPKEY_RADIUS, clusters[optimal].radius());
+
       Position head = (Position)obj.getProperty(PROPKEY_CENTROID);
       
       System.out.println("Head: " + head.getX() + ", " + head.getY());

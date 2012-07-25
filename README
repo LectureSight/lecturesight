@@ -10,5 +10,3 @@ mvn clean install -DdeployTo=</path/to/felix>/lecturesight
 
 cd </path/to/felix>
 ./start_lecturesight
-
-Text
