@@ -1,13 +1,12 @@
 package cv.lecturesight.decorator.head;
 
-import cv.lecturesight.framesource.FrameSource;
-import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.object.ObjectDecorator;
 import cv.lecturesight.object.TrackerObject;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Random;
@@ -39,8 +38,7 @@ public class HeadDecorator implements ObjectDecorator {
   @Reference
   Configuration config;
   @Reference
-  FrameSourceProvider fsp;
-  FrameSource fsource;
+  ForegroundService fgs;
   private int PARAM_K = 7;
   private int MAX_ITER = 100;
 
@@ -59,22 +57,22 @@ public class HeadDecorator implements ObjectDecorator {
 
     // Try to read the image
     try {
-      fsource = fsp.getFrameSource();
-      
-      BufferedImage image = obj.getVisual();
+      BufferedImage image = fgs.getForegroundMapHost();
+      BoundingBox bbox = obj.getBoundingBox();
       WritableRaster r = image.getRaster();
 
       // We will store all points in this stack
       PointStack points = new PointStack();
 
-      int width = image.getWidth();
-      int height = image.getHeight();
+      int width = bbox.getWidth();
+      int height = bbox.getHeight();
 
       // get all points
+      Position min = bbox.getMin();
       for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-          if (r.getSample(i, j, 0) > 0 && r.getSample(i, j, 1) > 0
-                  && r.getSample(i, j, 2) > 0) {
+//          if (r.getSample(i, j, 0) > 0 && r.getSample(i, j, 1) > 0 && r.getSample(i, j, 2) > 0) {
+          if (r.getSample(min.getX() + i, min.getY() + j, 0) > 0) {
             points.push(new Point(i, j));
           }
         }
@@ -148,6 +146,9 @@ public class HeadDecorator implements ObjectDecorator {
       obj.setProperty(PROPKEY_BBOX, new BoundingBox(
               new Position((int)boundaries[0].getPoint_x(), (int)boundaries[0].getPoint_y()),
               new Position((int)boundaries[1].getPoint_x(), (int)boundaries[1].getPoint_y())));
+      Position head = (Position)obj.getProperty(PROPKEY_CENTROID);
+      
+      System.out.println("Head: " + head.getX() + ", " + head.getY());
       
     } catch (Exception e) {
       log.error("Error in head finder!", e);

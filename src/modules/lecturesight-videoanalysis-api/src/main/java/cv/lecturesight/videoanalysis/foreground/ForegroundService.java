@@ -4,6 +4,7 @@ import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.opencl.CLImageDoubleBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
+import java.awt.image.BufferedImage;
 
 /** A Foreground Service is responsible for creating a binary map assigning each
  * pixel in the input image either to the background or a foreground region. 
@@ -36,6 +37,8 @@ public interface ForegroundService {
    * @return CLImage2D foreground map
    */
   CLImage2D getForegroundMap();
+  
+  BufferedImage getForegroundMapHost();
   
   /** Returns the foreground map working buffer.
    * 

@@ -17,6 +17,7 @@ import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.ui.DisplayService;
+import java.awt.image.BufferedImage;
 import org.osgi.service.component.ComponentContext;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
@@ -77,6 +78,7 @@ public class ForegroundServiceImpl implements ForegroundService {
   private CLImage2D fgUpdated;              // foreground map output buffer
   private CLImageDoubleBuffer fgBuffer;     // foreground map working buffer
   private CLIntBuffer activity;             // buffer for activity count of blobs
+  private BufferedImage fgMapHost;
 
   private int[] workDim;                    // dimensions of buffers
   private ConnectedComponentLabeler ccl;    // connected component analyzer
@@ -173,6 +175,11 @@ public class ForegroundServiceImpl implements ForegroundService {
   public ConnectedComponentLabeler getLabeler() {
     return ccl;
   }
+  
+  @Override
+  public BufferedImage getForegroundMapHost() {
+    return fgMapHost;
+  }
   //</editor-fold>
           
   /** Resets all working buffers of this service.
@@ -245,6 +252,7 @@ public class ForegroundServiceImpl implements ForegroundService {
               activity, config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
       fgDecayK.enqueueNDRange(queue, workDim);
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], fgUpdated, 0, 0, bgUpdateMask);
+      fgMapHost = fgUpdated.read(queue);
     }
 
     @Override

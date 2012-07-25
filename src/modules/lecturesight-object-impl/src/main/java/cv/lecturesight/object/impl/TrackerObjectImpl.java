@@ -1,10 +1,8 @@
 package cv.lecturesight.object.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.object.TrackerObject;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;

@@ -5,6 +5,7 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.opencl.api.OCLSignal;
+import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 
 class FrameSourceImpl implements FrameSource {
@@ -51,5 +52,10 @@ class FrameSourceImpl implements FrameSource {
   
   public long getFrameNumber() {
     return frameNumber;
+  }
+
+  @Override
+  public BufferedImage getImageHost() {
+    return uploader.getOutputImageHost();
   }
 }

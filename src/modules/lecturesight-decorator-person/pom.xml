@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-decorator-person-naive</artifactId>
-  <name>LectureSight Decorator Person (naive implementation)</name>
+  <artifactId>lecturesight-decorator-person</artifactId>
+  <name>LectureSight Decorator Person</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
@@ -30,6 +30,11 @@
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-object-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-videoanalysis-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

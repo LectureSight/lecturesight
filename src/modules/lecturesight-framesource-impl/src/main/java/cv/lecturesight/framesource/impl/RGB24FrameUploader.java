@@ -11,6 +11,7 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
+import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class RGB24FrameUploader implements FrameUploader {
   private ByteBuffer hostBuffer;
   private CLByteBuffer gpuRawBuffer;
   private final CLImage2D gpuBuffer;
+  private BufferedImage imageHost;
   private final OCLSignal sig_start;
   private final OCLSignal sig_done;
 
@@ -59,7 +61,8 @@ public class RGB24FrameUploader implements FrameUploader {
       @Override
       public void launch(CLQueue queue) {
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
-        conversionK.enqueueNDRange(queue, workDim, uploadDone);
+        CLEvent conversionDone = conversionK.enqueueNDRange(queue, workDim, uploadDone);
+        imageHost = gpuBuffer.read(queue, conversionDone);
       }
 
       @Override
@@ -84,5 +87,10 @@ public class RGB24FrameUploader implements FrameUploader {
   public void upload(Buffer frame) {
     hostBuffer = (ByteBuffer)frame;     // FIXME not thread-safe!
     ocl.castSignal(sig_start);
+  }
+
+  @Override
+  public BufferedImage getOutputImageHost() {
+    return imageHost;
   }
 }

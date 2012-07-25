@@ -13,7 +13,6 @@ import cv.lecturesight.cca.ConnectedComponentService;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.object.ObjectIdentityService;
 import cv.lecturesight.object.ObjectService;
 import cv.lecturesight.opencl.CLImageDoubleBuffer;
 import cv.lecturesight.opencl.OpenCLService;
