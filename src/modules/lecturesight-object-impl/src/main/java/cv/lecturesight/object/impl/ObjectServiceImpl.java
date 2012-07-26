@@ -331,6 +331,9 @@ public class ObjectServiceImpl implements ObjectService {
     obj.centroid = centroidFinder.getControid(regionId);
     obj.weight = fgLabeler.getSize(regionId);
     obj.lastSeen = timestamp;
+    BufferedImage img = fgs.getForegroundMapHost();
+    WritableRaster r = img.getRaster();
+    obj.ch = new ColorHistogram(r,obj.bbox,256,obj.getColorHistogram());
     return obj;
   }
 
