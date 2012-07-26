@@ -14,5 +14,10 @@ public class AvgColorIdentityServiceImpl implements ObjectIdentityService {
   public TrackerObject match(TrackerObject matchee, List<TrackerObject> others, float threshold) {
     return null;
   }
+
+  @Override
+  public void update(List<TrackerObject> singletons) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
   
 }
