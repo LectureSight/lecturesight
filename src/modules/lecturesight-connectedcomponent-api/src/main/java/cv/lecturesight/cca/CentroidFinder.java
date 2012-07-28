@@ -1,6 +1,6 @@
 package cv.lecturesight.cca;
 
-import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLIntBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.Position;
 
@@ -11,7 +11,7 @@ public interface CentroidFinder {
   }
 
   OCLSignal getSignal(Signal signal);
-  CLBuffer<Integer> getCentroidBuffer();
+  CLIntBuffer getCentroidBuffer();
   Position getControid(int id);
   Position[] getAllCentroids();
 }

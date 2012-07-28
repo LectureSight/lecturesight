@@ -19,7 +19,8 @@
   <dependencies>
     <dependency>
       <groupId>com.nativelibs4java</groupId>
-      <artifactId>javacl-osgi</artifactId>
+      <artifactId>javacl</artifactId>
+      <version>1.0-beta-6</version>
     </dependency>
   </dependencies>
 
@@ -35,7 +36,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <!-- Export-Package>
+            <Export-Package>
               com.nativelibs4java.opencl.*,
               com.nativelibs4java.util.*,
               com.ochafik.util.*,
@@ -45,9 +46,6 @@
               com.sun.jna.*,
               cv.lecturesight.opencl.*;
               version=${project.version}
-            </Export-Package -->
-            <Export-Package>
-              cv.lecturesight.opencl.*; version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>

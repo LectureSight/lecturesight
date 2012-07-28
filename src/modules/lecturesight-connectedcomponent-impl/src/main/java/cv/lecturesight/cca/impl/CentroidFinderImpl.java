@@ -1,6 +1,6 @@
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -10,9 +10,9 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.Position;
+import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
-import org.bridj.Pointer;
 
 public class CentroidFinderImpl implements CentroidFinder {
 
@@ -21,7 +21,7 @@ public class CentroidFinderImpl implements CentroidFinder {
           new EnumMap<CentroidFinder.Signal, OCLSignal>(Signal.class);
   OpenCLService ocl;
   ConnectedComponentLabelerImpl ccli;
-  CLBuffer<Integer> centroids;
+  CLIntBuffer centroids;
   int maxCount, numBlobs;
   int[] centroids_out;
   int[] workDim;
@@ -43,7 +43,7 @@ public class CentroidFinderImpl implements CentroidFinder {
   }
 
   @Override
-  public CLBuffer<Integer> getCentroidBuffer() {
+  public CLIntBuffer getCentroidBuffer() {
     return centroids;
   }
   
@@ -66,7 +66,7 @@ public class CentroidFinderImpl implements CentroidFinder {
   private class FindCentroidsRun implements ComputationRun {
 
     OCLSignal SIG_done = getSignal(Signal.DONE);
-    Pointer<Integer> centroidsH;
+    IntBuffer centroidsH;
     CLKernel addCoordsK = ocl.programs().getKernel("centroid", "add_coordinates");
     CLKernel computeMeansK = ocl.programs().getKernel("centroid", "compute_means");
 
@@ -90,8 +90,8 @@ public class CentroidFinderImpl implements CentroidFinder {
     @Override
     public void land() {
       if (numBlobs > 0) {
-        //centroidsH.get(centroids_out, 0, numBlobs * 2);
-        centroids_out = centroidsH.getInts(numBlobs * 2);
+        centroidsH.get(centroids_out, 0, numBlobs * 2);
+        //centroids_out = centroidsH.getInts(numBlobs * 2);
       }
       ocl.castSignal(SIG_done);
     }

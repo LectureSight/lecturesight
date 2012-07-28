@@ -1,7 +1,7 @@
 package cv.lecturesight.cca.impl;
 
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -12,7 +12,6 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
-import org.bridj.Pointer;
 
 public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler {
 
@@ -25,7 +24,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
           new EnumMap<ConnectedComponentLabeler.Signal, OCLSignal>(ConnectedComponentLabeler.Signal.class);
   private OpenCLService ocl;
   private CLImage2D input;
-  CLBuffer<Integer> labels_work, sizes_work, ids, sizes, changed;
+  CLIntBuffer labels_work, sizes_work, ids, sizes, changed;
   int[] imageDim, bufferDim;
   int[] ids_out, sizes_out;
   long bufferSize;
@@ -83,7 +82,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   }
 
   @Override
-  public CLBuffer<Integer> getLabelBuffer() {
+  public CLIntBuffer getLabelBuffer() {
     return labels_work;
   }
 
@@ -129,7 +128,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   }
   
   @Override
-  public CLBuffer<Integer> getIdBuffer() {
+  public CLIntBuffer getIdBuffer() {
     return ids;
   }
   //</editor-fold>
@@ -166,7 +165,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     CLKernel resetK = ocl.programs().getKernel("labelequiv", "reset_change");
     CLKernel minNeighbourK = ocl.programs().getKernel("labelequiv", "min_neighbour");
     CLKernel updateIndicesK = ocl.programs().getKernel("labelequiv", "update_indices");
-    Pointer<Integer> changedH;
+    IntBuffer changedH;
 
     @Override
     public void launch(CLQueue queue) {
@@ -198,7 +197,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     CLKernel resetK = ocl.programs().getKernel("labelequiv", "reset_change");
     CLKernel getResultsK = ocl.programs().getKernel("labelequiv", "make_blob_ids");
     CLKernel updateResultLabelK = ocl.programs().getKernel("labelequiv", "update_blob_ids");
-    Pointer<Integer> idsH, sizesH;
+    IntBuffer idsH, sizesH;
 
     @Override
     public void launch(CLQueue queue) {
@@ -216,10 +215,10 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     public void land() {
       numBlobs = idsH.get(0);
       numBlobs = numBlobs <= maxBlobs ? numBlobs : maxBlobs;    // FIXME maxBlobs check in kernel seems to be ignored
-//      idsH.get(ids_out, 0, numBlobs);
-//      sizesH.get(sizes_out, 0, numBlobs);
-      ids_out = idsH.getInts(numBlobs);
-      sizes_out = sizesH.getInts(numBlobs);
+      idsH.get(ids_out, 0, numBlobs);
+      sizesH.get(sizes_out, 0, numBlobs);
+//      ids_out = idsH.getInts(numBlobs);
+//      sizes_out = sizesH.getInts(numBlobs);
       ocl.castSignal(SIG_done);
     }
   }

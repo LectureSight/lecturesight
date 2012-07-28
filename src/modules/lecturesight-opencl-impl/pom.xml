@@ -35,14 +35,6 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.nativelibs4java</groupId>
-      <artifactId>javacl-osgi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.nativelibs4java</groupId>
-      <artifactId>javacl-shaded</artifactId>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -69,14 +61,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.opencl</Bundle-SymbolicName>
-            <Import-Package>
+            <!-- Import-Package>
               com.nativelibs4java.opencl.*,
               com.nativelibs4java.util.*, 
               cv.lecturesight.opencl.*, 
               cv.lecturesight.opencl.api.*, 
               cv.lecturesight.util.*, 
               org.osgi.framework
-            </Import-Package>
+            </Import-Package --> 
             <Export-Package>cv.lecturesight.opencl.impl;version=${project.version}</Export-Package>
             <Bundle-Activator>cv.lecturesight.opencl.impl.Activator</Bundle-Activator>
           </instructions>

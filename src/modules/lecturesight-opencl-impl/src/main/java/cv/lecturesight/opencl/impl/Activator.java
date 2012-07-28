@@ -96,6 +96,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
    * @throws Exception
    */
   private CLContext initOpenCL() throws Exception {
+//    Class.forName("com.nativelibs4java.opencl.JavaCL");
     CLContext ctx = null;
 
     // Try to create OpenGL shared context if demanded

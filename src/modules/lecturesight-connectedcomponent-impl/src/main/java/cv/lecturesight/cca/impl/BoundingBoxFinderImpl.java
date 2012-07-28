@@ -1,6 +1,6 @@
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -14,7 +14,6 @@ import cv.lecturesight.util.geometry.Position;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
-import org.bridj.Pointer;
 
 public class BoundingBoxFinderImpl implements BoundingBoxFinder {
 
@@ -24,7 +23,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
           new EnumMap<BoundingBoxFinder.Signal, OCLSignal>(Signal.class);
   OpenCLService ocl;
   ConnectedComponentLabelerImpl ccli;
-  CLBuffer<Integer> boxes;
+  CLIntBuffer boxes;
   int[] bboxBufferDim;
   int[] boxes_out;
 
@@ -44,7 +43,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
   }
   
   @Override
-  public CLBuffer<Integer> getBoxBuffer() {
+  public CLIntBuffer getBoxBuffer() {
     return boxes;
   }
 
@@ -70,7 +69,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
     OCLSignal SIG_done = signals.get(Signal.DONE);
     CLKernel reset_bbox_bufferK = ocl.programs().getKernel("bbox", "reset_bbox_buffer");
     CLKernel compute_bboxesK = ocl.programs().getKernel("bbox", "compute_bboxes");
-    Pointer<Integer> boxesH;
+    IntBuffer boxesH;
 
     {
       reset_bbox_bufferK.setArgs(boxes);
@@ -86,8 +85,8 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
 
     @Override
     public void land() {
-      //boxesH.get(boxes_out, 0, ccli.numBlobs * 4);    // better save numBlobs in BBFI too?
-      boxes_out = boxesH.getInts(ccli.numBlobs * 4);
+      boxesH.get(boxes_out, 0, ccli.numBlobs * 4);    // better save numBlobs in BBFI too?
+      //boxes_out = boxesH.getInts(ccli.numBlobs * 4);
       ocl.castSignal(SIG_done);
     }
   }

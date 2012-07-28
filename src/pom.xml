@@ -122,17 +122,16 @@
         <scope>test</scope>
       </dependency>
 
-       <!-- OpenCL -->
-      <!-- dependency>
+      <!-- OpenCL -->
+      <!--dependency>
         <groupId>com.nativelibs4java</groupId>
         <artifactId>javacl</artifactId>
         <version>1.0-beta-6</version>
       </dependency -->
       <dependency>
         <groupId>com.nativelibs4java</groupId>
-        <artifactId>javacl</artifactId>
+        <artifactId>javacl-jna</artifactId>
         <version>1.0-SNAPSHOT</version>
-        <type>jar</type>
       </dependency>
 
     </dependencies>
