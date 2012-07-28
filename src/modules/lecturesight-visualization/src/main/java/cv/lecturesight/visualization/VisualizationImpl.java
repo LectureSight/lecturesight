@@ -33,7 +33,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   
   final static String PROPKEY_DISPLAY_VISUAL = "display.terminator";
   final static String WINDOWNAME_VISUAL = "visual";
-  final static String SIGNAME_DONE_VISUAL = "visual.VISUAL_DONE";
+  final static String SIGNAME_DONE_VISUAL = "visual.DONE";
 
   private Log log = new Log("Heartbeat");
   @Reference
@@ -95,6 +95,8 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     }
     g.drawString("   t: " + fsource.getFrameNumber(), 2, 26);
     g.drawString("objs: " + objects.length, 2, 36);
+    
+    ocl.castSignal(SIG_done);
   }
 
   @Override

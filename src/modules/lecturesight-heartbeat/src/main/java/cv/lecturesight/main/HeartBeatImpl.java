@@ -111,7 +111,7 @@ public class HeartBeatImpl implements HeartBeat {
     }
     fsrc = null;
     ready = false;
-    log.info("De-initialized");
+    log.info("Stopped");
   }
 
   @Override
@@ -127,9 +127,9 @@ public class HeartBeatImpl implements HeartBeat {
   @Override
   public void go() {
     if (ready) {
-      log.info("Starting");
       iterationsToRun = -1;
       nextFrame();
+      log.info("Started");
     } else {
       throw new IllegalStateException("Cannot start, HeartBeat not initialized");
     }

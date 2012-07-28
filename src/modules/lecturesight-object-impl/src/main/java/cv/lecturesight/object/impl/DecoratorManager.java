@@ -25,13 +25,12 @@ public class DecoratorManager implements EventHandler {
   static final String SERVICE_PROPKEY_PRODUCES = "lecturesight.decorator.produces";
 
   public enum CallType {
-
     EACHFRAME, ONAPPEAR
   }
+  
   private Log log = new Log("Object Decorator Manager");
   private ComponentContext cc;
   private Map<CallType, List<ObjectDecorator>> decorators = new EnumMap<CallType, List<ObjectDecorator>>(CallType.class);
-
   {
     for (CallType t : CallType.values()) {
       decorators.put(t, new LinkedList<ObjectDecorator>());

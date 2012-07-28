@@ -26,6 +26,7 @@ import cv.lecturesight.util.conf.Configuration;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.nio.IntBuffer;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -160,12 +161,26 @@ public class ObjectServiceImpl implements ObjectService {
 
   @Override
   public TrackerObject[] getAllObjects() {
-    return (TrackerObject[]) objects.values().toArray();
+    Collection<TrackerObjectImpl> objs = objects.values();
+    int n = objs.size();
+    TrackerObject[] out = new TrackerObject[n];
+    int idx = 0;
+    for (Iterator<TrackerObjectImpl> it = objs.iterator(); it.hasNext();) {
+      out[idx++] = (TrackerObject) it.next();
+    }
+    return out;
   }
 
   @Override
   public TrackerObject[] getAllTrackedObjects() {
-    return (TrackerObject[]) trackedObjects.values().toArray();
+    Collection<TrackerObjectImpl> objs = trackedObjects.values();
+    int n = objs.size();
+    TrackerObject[] out = new TrackerObject[n];
+    int idx = 0;
+    for (Iterator<TrackerObjectImpl> it = objs.iterator(); it.hasNext();) {
+      out[idx++] = (TrackerObject) it.next();
+    }
+    return out;
   }
 
   @Override
@@ -237,6 +252,7 @@ public class ObjectServiceImpl implements ObjectService {
     }
 
     trackedObjects = newTrackedObjects;
+    System.out.println("Tracker Objects: " + trackedObjects.size());
   }
 
   private List<Integer> makeRegionList() {
@@ -366,10 +382,11 @@ public class ObjectServiceImpl implements ObjectService {
     @Override
     public void launch(CLQueue queue) {
       ocl.utils().setValues(0, (int) label_pairs.getElementCount(), label_pairs, 0);
+      int numBlobs = overlapLabeler.getNumBlobs();
       // gather pairs
-      if (overlapLabeler.getNumBlobs() > 0) {
-        gatherLabelPairsK.setArgs(addresses, labels_current, labels_last, label_pairs, overlapLabeler.getNumBlobs(), Constants.pairsBufferLength);    // TODO length / 2 !!
-        pairsWorkDim[0] = overlapLabeler.getNumBlobs();
+      if (numBlobs > 0) {
+        gatherLabelPairsK.setArgs(addresses, labels_current, labels_last, label_pairs, numBlobs, Constants.pairsBufferLength);    // TODO length / 2 !!
+        pairsWorkDim[0] = numBlobs;
         gatherLabelPairsK.enqueueNDRange(queue, pairsWorkDim);
         pairsH = label_pairs.read(queue);
       }
@@ -380,18 +397,25 @@ public class ObjectServiceImpl implements ObjectService {
 
     @Override
     public void land() {
+      System.out.println("Frame: " + fsrc.getFrameNumber());
       num_corrs = overlapLabeler.getNumBlobs();
       if (num_corrs > 0) {
         pairsH.get(pairs);
-        //pairs = pairsH.getInts();
-        System.out.print(num_corrs + " > ");
-        for (int i=0; i < 20; i++) {
-          int idx = 2 * num_corrs;
+        System.out.print(num_corrs + " ");
+        for (int i=0; i < num_corrs; i++) {
+          int idx = 2 * i;
           System.out.print(pairs[idx] + ":" + pairs[idx++] + " ");
         }
-        System.out.println("\n-------------------------------------------------");
+        System.out.println();
+        int numBlobs = fgLabeler.getNumBlobs();
+        System.out.print(numBlobs + " ");
+        for (int i = 0; i < numBlobs; i++) {
+          System.out.print(fgLabeler.getLabels()[i+1] + " ");
+        }
+        System.out.println("\n");
       }
       updateTracking();
+      System.out.println("\n-------------------------------------------------");
       ocl.castSignal(SIG_done);
     }
   }

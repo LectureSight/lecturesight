@@ -15,8 +15,8 @@ public class ConfigurationFactory implements ServiceFactory {
   final static String DEFAULT_CONF_PATH = "conf";               // bundle resource dir
   final static String DEFAULT_CONF_NAME = "default.properties"; // default config file name
   private static Log log = new Log("ConfigurationFactory");     // Logger
-  static Properties configProps;                               // properties system config
-  static Properties defaultProps;                              // default properties
+  static Properties configProps;                                // systems config properties
+  static Properties defaultProps;                               // systems default properties
 
   public ConfigurationFactory(Properties props, Properties defaults) {
     configProps = props;
@@ -30,7 +30,7 @@ public class ConfigurationFactory implements ServiceFactory {
     // try to find default config in caller bundle
     Enumeration res = bundle.findEntries(DEFAULT_CONF_PATH, DEFAULT_CONF_NAME, false);
     if (res != null && res.hasMoreElements()) {
-      log.debug("Found default config in bundle " + bundleName);
+      log.debug("Found default configuration in bundle " + bundleName);
       try {
         URL configUrl = (URL) res.nextElement();        // get URL of config file
         Properties bundleDefaults = new Properties();

@@ -20,6 +20,7 @@ __kernel void image_and
   {
     pxlR = WHITE;
   }
+  barrier( CLK_GLOBAL_MEM_FENCE );
   write_imageui(result, pos, pxlR);
 }
 
