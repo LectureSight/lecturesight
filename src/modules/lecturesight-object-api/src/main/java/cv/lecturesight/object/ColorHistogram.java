@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package cv.lecturesight.object.impl;
+package cv.lecturesight.object;
 
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
@@ -22,22 +22,24 @@ public class ColorHistogram {
    * Construct a ColorHistogram, given a WritableRaster of the imge and the bin
    * size of the histogram
    * @param img WritableRaster of the image
+   * @param imgc WritableRaster of the scene, contains colored pixels
    * @param bbox BoundingBox
    * @param N Size of the Histogram
    */
-  public ColorHistogram(WritableRaster img, BoundingBox bbox, int N) {
-    ch = compute_ch(img, bbox, N);
+  public ColorHistogram(WritableRaster img, WritableRaster imgc, BoundingBox bbox, int N) {
+    ch = compute_ch(img, imgc, bbox, N);
     this.normalize();
   }
 
   /**
    * Computes a new ColorHistogram, given the actual image and the old histogram
    * @param img WritableRaster of the image
+   * @param imgc WritableRaster of the scene, colored pixels
    * @param bbox BoundingBox
    * @param N Size of the Histogram
    * @param ch1 Old ColorHistogram
    */
-  public ColorHistogram(WritableRaster img, BoundingBox bbox, int N,
+  public ColorHistogram(WritableRaster img, WritableRaster imgc, BoundingBox bbox, int N,
           ColorHistogram ch1) {
 
     // This value should be set in order to determine, how much the older
@@ -46,7 +48,7 @@ public class ColorHistogram {
     // contribute.
     float alpha = 0.5f;
     
-    ch = compute_ch(img, bbox, N);
+    ch = compute_ch(img, imgc, bbox, N);
     this.normalize();
 
     for(int i = 0; i < ch.length; i++) {
@@ -54,19 +56,17 @@ public class ColorHistogram {
         ch[i][j] = (1-alpha)*ch1.ch_value(i, j)+alpha*ch[i][j];
       }
     }
-
-    // not sure if normalization is needed...?
-    this.normalize();
   }
 
   /**
    * Computes the Color Histogram for a given Image
-   * @param img WritableRaster of the Image
+   * @param img WritableRaster of the Image, contains the silhouette of the person
+   * @param imgc WritableRaster of the scene, contains the colored pixels
    * @param bbox Bounding box
    * @param N desired size of histogram
    * @return color histogram
    */
-  private float[][] compute_ch(WritableRaster img, BoundingBox bbox, int N) {
+  private float[][] compute_ch(WritableRaster img, WritableRaster imgc, BoundingBox bbox, int N) {
     // we take the coordinates of the BoundingBox
     int width = bbox.getWidth();
     int height = bbox.getHeight();
@@ -76,8 +76,10 @@ public class ColorHistogram {
     float[][]bins = new float [3][N];
     for(int i = 0; i < width; i++) {
       for (int j = 0; j < height; j++) {
-        for (int rgb = 0; rgb < 3; rgb++) {
-          bins[rgb][(img.getSample(min.getX()+i,min.getY()+j,rgb)*N)/256]++;
+        if(img.getSample(min.getX()+i, min.getY()+j, 0) != 0) {
+          for (int rgb = 0; rgb < 3; rgb++) {
+            bins[rgb][(imgc.getSample(min.getX()+i,min.getY()+j,rgb)*N)/256]++;
+          }
         }
       }
     }
@@ -128,7 +130,8 @@ public class ColorHistogram {
    * @return float Bhattacharya-Distance
    * @throws Exception
    */
-  public double bhattacharya_distance(float[][] ch1) throws Exception {
+  public double bhattacharya_distance(ColorHistogram colorhistogram) throws Exception {
+    float [][] ch1 = colorhistogram.ch;
     if(ch1[0].length != ch[0].length) {
       throw new Exception("Color-Histogramme muessen gleiche Laenge haben!");
     }

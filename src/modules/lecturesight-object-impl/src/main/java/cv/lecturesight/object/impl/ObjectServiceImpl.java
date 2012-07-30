@@ -23,8 +23,6 @@ import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -352,9 +350,6 @@ public class ObjectServiceImpl implements ObjectService {
     obj.weight = fgLabeler.getSize(regionId);
     obj.lastSeen = timestamp;
     objects.put(obj.getId(), obj);
-    //BufferedImage img = fgs.getForegroundMapHost();
-    //WritableRaster r = img.getRaster();
-    // obj.ch = new ColorHistogram(r,obj.bbox,256);
     return obj;
   }
 
@@ -363,9 +358,6 @@ public class ObjectServiceImpl implements ObjectService {
     obj.centroid = centroidFinder.getControid(regionId);
     obj.weight = fgLabeler.getSize(regionId);
     obj.lastSeen = timestamp;
-    //BufferedImage img = fgs.getForegroundMapHost();
-    //WritableRaster r = img.getRaster();
-    // obj.ch = new ColorHistogram(r,obj.bbox,256,obj.getColorHistogram());
     return obj;
   }
 

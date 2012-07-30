@@ -13,7 +13,7 @@ public interface TrackerObject {
   BoundingBox getBoundingBox();
 
   Position getCentroid();
-  
+
   int getWeight();
   
   boolean hasProperty(String key);

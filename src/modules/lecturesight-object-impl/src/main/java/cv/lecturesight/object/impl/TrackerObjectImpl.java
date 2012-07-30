@@ -15,7 +15,6 @@ public class TrackerObjectImpl implements TrackerObject {
   int id;
   BoundingBox bbox = null;
   Position centroid = null;
-  ColorHistogram ch;
   int weight = 0;
   long lastSeen = 0L;
   HashMap<String, Object> props = new HashMap<String, Object>();
@@ -39,10 +38,6 @@ public class TrackerObjectImpl implements TrackerObject {
   @Override
   public Position getCentroid() {
     return centroid;
-  }
-
-  public ColorHistogram getColorHistogram() {
-    return ch;
   }
   
   @Override
