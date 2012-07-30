@@ -114,7 +114,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   }
   
   public int getSize(int id) {
-    return sizes_out[id];
+    return sizes_out[id-1];
   }
   
   @Override
@@ -201,8 +201,6 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
 
     @Override
     public void launch(CLQueue queue) {
-      //resetK.setArgs(ids);
-      //resetK.enqueueTask(queue);
       ocl.utils().setValues(0, (int) ids.getElementCount(), ids, 0);
       getResultsK.setArgs(labels_work, ids, sizes_work, sizes, imageDim[0], imageDim[1], minSize, maxSize, maxBlobs);
       getResultsK.enqueueNDRange(queue, imageDim);

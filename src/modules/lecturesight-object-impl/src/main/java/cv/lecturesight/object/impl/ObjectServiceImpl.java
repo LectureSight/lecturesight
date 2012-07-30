@@ -63,6 +63,7 @@ public class ObjectServiceImpl implements ObjectService {
   private ForegroundService fgs;
 //  @Reference 
 //  private ObjectIdentityService identity;
+  boolean debugEnabled = false;
   int[] workDim;
   FrameSource fsrc;
   ConnectedComponentLabeler fgLabeler, overlapLabeler;
@@ -122,6 +123,7 @@ public class ObjectServiceImpl implements ObjectService {
     ocl.registerLaunch(overlapLabeler.getSignal(ConnectedComponentLabeler.Signal.DONE), new CorrelationRun());
 
     registerDisplays();
+    debugEnabled = config.getBoolean(Constants.PROPKEY_DEBUG);
 
     log.info("Activated");
   }
@@ -193,62 +195,75 @@ public class ObjectServiceImpl implements ObjectService {
     long currentTime = System.currentTimeMillis();
     Map<Integer, TrackerObjectImpl> newTrackedObjects = new TreeMap<Integer, TrackerObjectImpl>();
     List<Integer> regions = makeRegionList();
-    Map<Integer, List<Integer>> mergers = findMergers(regions);
-    Map<Integer, List<Integer>> splitters = findSplitters(regions);
-
-    // care about mergers
-    if (mergers.size() > 0) {
-      for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
-        int currentId = it.next();
-        TrackerObjectImpl newGroup = createTrackerObject(currentId, currentTime);
-        for (Iterator<Integer> git = mergers.get(currentId).iterator(); it.hasNext();) {
-          int mergerId = git.next();
-          TrackerObjectImpl merger = trackedObjects.get(mergerId);
-          if (merger.isGroup()) {
-            newGroup.members.addAll(merger.members);
-            merger.members.clear();
-            merger.group = newGroup;
-            objects.remove(merger.getId());
-          } else {
-            newGroup.members.add(merger);
-          }
-        }
-        newTrackedObjects.put(currentId, newGroup);
-        // TODO call decorators for case: MERGE
-      }
-    }
-
-    // care about splitters
-    if (splitters.size() > 0) {
-      for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
-        int lastId = it.next();
-        TrackerObjectImpl oldObj = trackedObjects.get(lastId);
-        List<Integer> splitterCurrentIds = splitters.get(lastId);
-        int heaviestId = findHeaviestRegion(splitterCurrentIds);    // find biggest region
-        splitterCurrentIds.remove(heaviestId);    
-//        if (oldObj.isGroup()) {
-//          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
-//            // TODO use IdentityServiec here!
+//    Map<Integer, List<Integer>> mergers = findMergers(regions);
+//    Map<Integer, List<Integer>> splitters = findSplitters(regions);
+//
+//    // care about mergers
+//    if (mergers.size() > 0) {
+//      for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
+//        int currentId = it.next();
+//        TrackerObjectImpl newGroup = createTrackerObject(currentId, currentTime);
+//        for (Iterator<Integer> git = mergers.get(currentId).iterator(); it.hasNext();) {
+//          int mergerId = git.next();
+//          TrackerObjectImpl merger = trackedObjects.get(mergerId);
+//          if (merger.isGroup()) {
+//            newGroup.members.addAll(merger.members);
+//            merger.members.clear();
+//            merger.group = newGroup;
+//            objects.remove(merger.getId());
+//          } else {
+//            newGroup.members.add(merger);
 //          }
-//        } else {                  // object that split was recognized as a single object before                  
-          updateTrackerObject(heaviestId, oldObj, currentTime);       // update old object with biggest region data
-          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {     // create new objects for all others
-            createTrackerObject(sit.next(), currentTime);
-          }
 //        }
-      }
-    }
+//        newTrackedObjects.put(currentId, newGroup);
+//        // TODO call decorators for case: MERGE
+//      }
+//    }
+//
+//    // care about splitters
+//    if (splitters.size() > 0) {
+//      for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
+//        int lastId = it.next();
+//        TrackerObjectImpl oldObj = trackedObjects.get(lastId);
+//        List<Integer> splitterCurrentIds = splitters.get(lastId);
+//        int heaviestId = findHeaviestRegion(splitterCurrentIds);    // find biggest region
+//        splitterCurrentIds.remove(heaviestId);
+////        if (oldObj.isGroup()) {
+////          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
+////            // TODO use IdentityServiec here!
+////          }
+////        } else {                  // object that split was recognized as a single object before                  
+//        updateTrackerObject(heaviestId, oldObj, currentTime);       // update old object with biggest region data
+//        for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {     // create new objects for all others
+//          createTrackerObject(sit.next(), currentTime);
+//        }
+////        }
+//      }
+//    }
+//
+//    // care about remaining
+//    for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
+//      int currentId = it.next();
+//      int lastId = findCorrelation(currentId);
+//      if (lastId == 0) {
+//        createTrackerObject(currentId, currentTime);
+//      } else if (lastId > 0) {
+//        TrackerObjectImpl obj = trackedObjects.get(lastId);
+//        updateTrackerObject(currentId, obj, currentTime);
+//      }
+//    }
 
-    // care about remaining
     for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
-      int currentId = it.next();
-      int lastId = findCorrelation(currentId);
-      if (lastId == 0) {
-        createTrackerObject(currentId, currentTime);
-      } else if (lastId > 0) {
-        TrackerObjectImpl obj = trackedObjects.get(lastId);
-        updateTrackerObject(currentId, obj, currentTime);
+      int regionId = it.next();
+      int lastId = findCorrelation(regionId);
+      System.out.println("Correlation: " + regionId + " -> " + lastId);
+      TrackerObjectImpl object;
+      if (lastId > 0) {
+        object = updateTrackerObject(regionId, trackedObjects.get(lastId), currentTime);
+      } else {
+        object = createTrackerObject(regionId, currentTime);
       }
+      newTrackedObjects.put(regionId, object);
     }
 
     trackedObjects = newTrackedObjects;
@@ -257,12 +272,12 @@ public class ObjectServiceImpl implements ObjectService {
 
   private List<Integer> makeRegionList() {
     List<Integer> out = new LinkedList<Integer>();
-    for (int i = 0; i < fgLabeler.getNumBlobs(); i++) {
+    for (int i = 1; i <= fgLabeler.getNumBlobs(); i++) {
       out.add(i);
     }
     return out;
   }
-  
+
   private Integer findHeaviestRegion(List<Integer> ids) {
     int winner = -1, maxWeight = -1;
     for (Iterator<Integer> it = ids.iterator(); it.hasNext();) {
@@ -336,8 +351,9 @@ public class ObjectServiceImpl implements ObjectService {
     obj.centroid = centroidFinder.getControid(regionId);
     obj.weight = fgLabeler.getSize(regionId);
     obj.lastSeen = timestamp;
-    BufferedImage img = fgs.getForegroundMapHost();
-    WritableRaster r = img.getRaster();
+    objects.put(obj.getId(), obj);
+    //BufferedImage img = fgs.getForegroundMapHost();
+    //WritableRaster r = img.getRaster();
     // obj.ch = new ColorHistogram(r,obj.bbox,256);
     return obj;
   }
@@ -347,8 +363,8 @@ public class ObjectServiceImpl implements ObjectService {
     obj.centroid = centroidFinder.getControid(regionId);
     obj.weight = fgLabeler.getSize(regionId);
     obj.lastSeen = timestamp;
-    BufferedImage img = fgs.getForegroundMapHost();
-    WritableRaster r = img.getRaster();
+    //BufferedImage img = fgs.getForegroundMapHost();
+    //WritableRaster r = img.getRaster();
     // obj.ch = new ColorHistogram(r,obj.bbox,256,obj.getColorHistogram());
     return obj;
   }
@@ -397,25 +413,28 @@ public class ObjectServiceImpl implements ObjectService {
 
     @Override
     public void land() {
-      System.out.println("Frame: " + fsrc.getFrameNumber());
+      if (debugEnabled) {
+        System.out.println("\n--[ t=" + fsrc.getFrameNumber() + " ]-----------------------------------------------");
+        System.out.print("Labels: ");
+        int numBlobs = fgLabeler.getNumBlobs();
+        for (int i = 0; i <= numBlobs; i++) {
+          System.out.print(fgLabeler.getLabels()[i] + " ");
+        }
+      }
       num_corrs = overlapLabeler.getNumBlobs();
       if (num_corrs > 0) {
         pairsH.get(pairs);
-        System.out.print(num_corrs + " ");
-        for (int i=0; i < num_corrs; i++) {
-          int idx = 2 * i;
-          System.out.print(pairs[idx] + ":" + pairs[idx++] + " ");
+        if (debugEnabled) {
+          System.out.print("\nPairs : ");
+          System.out.print(num_corrs + " ");
+          for (int i = 0; i < num_corrs; i++) {
+            int idx = 2 * i;
+            System.out.print(pairs[idx] + ":" + pairs[++idx] + " ");
+          }
+          System.out.println();
         }
-        System.out.println();
-        int numBlobs = fgLabeler.getNumBlobs();
-        System.out.print(numBlobs + " ");
-        for (int i = 0; i < numBlobs; i++) {
-          System.out.print(fgLabeler.getLabels()[i+1] + " ");
-        }
-        System.out.println("\n");
       }
       updateTracking();
-      System.out.println("\n-------------------------------------------------");
       ocl.castSignal(SIG_done);
     }
   }

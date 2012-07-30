@@ -49,7 +49,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
 
   @Override
   public BoundingBox getBox(int id) {
-    int index = id * 4;
+    int index = (id-1) * 4;
     Position max = new Position(boxes_out[index++], boxes_out[index++]);
     Position min = new Position(boxes_out[index++], boxes_out[index]);
     return new BoundingBox(min, max);
@@ -58,7 +58,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
   @Override
   public BoundingBox[] getAllBoxes() {
     BoundingBox[] out = new BoundingBox[ccli.numBlobs];
-    for (int i = 0; i < ccli.numBlobs; i++) {
+    for (int i = 1; i <= ccli.numBlobs; i++) {
       out[i] = getBox(i);
     }
     return out;

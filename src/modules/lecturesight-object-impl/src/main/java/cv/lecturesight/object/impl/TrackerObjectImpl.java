@@ -12,7 +12,7 @@ public class TrackerObjectImpl implements TrackerObject {
   
   private static int runningId = 1;
   
-  private int id;
+  int id;
   BoundingBox bbox = null;
   Position centroid = null;
   ColorHistogram ch;

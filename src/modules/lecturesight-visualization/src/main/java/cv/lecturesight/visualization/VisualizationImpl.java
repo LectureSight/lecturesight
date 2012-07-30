@@ -19,6 +19,7 @@ import cv.lecturesight.util.geometry.Position;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.util.Iterator;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -89,9 +90,15 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
       String info = Integer.toString(obj.getId()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
       g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
       
-//      for (Iterator<String> it = obj.getProperties().keySet(); it.hasNext();) {
-//        
-//      }
+      int x = obj.getBoundingBox().getMax().getX() + 1;
+      int y = obj.getBoundingBox().getMin().getY();
+      for (Iterator<String> it = obj.getProperties().keySet().iterator(); it.hasNext();) {
+        String key = it.next();
+        Object val = obj.getProperty(key);
+        String prop = key + ": " + val.toString();
+        g.drawString(prop, x, y);
+        x += 10;
+      }
     }
     g.drawString("   t: " + fsource.getFrameNumber(), 2, 26);
     g.drawString("objs: " + objects.length, 2, 36);

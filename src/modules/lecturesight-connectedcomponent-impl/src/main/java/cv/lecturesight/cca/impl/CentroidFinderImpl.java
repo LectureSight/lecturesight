@@ -49,7 +49,7 @@ public class CentroidFinderImpl implements CentroidFinder {
   
   @Override
   public Position getControid(int id) {
-    int index = id * 2;
+    int index = (id-1) * 2;
     Position pos = new Position(centroids_out[index++], centroids_out[index]);
     return pos;
   }
