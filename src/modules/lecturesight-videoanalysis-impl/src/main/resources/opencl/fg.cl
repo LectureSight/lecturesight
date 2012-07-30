@@ -179,7 +179,6 @@ __kernel void refresh_decay
   write_imageui(output, pos_img, out_pxl);
 }
 
-
 __kernel void gather_activity
 (
   __global int* labels,

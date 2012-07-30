@@ -72,8 +72,7 @@ public class ObjectServiceImpl implements ObjectService {
   CLIntBuffer label_pairs;
   int num_corrs;
   int[] pairs = new int[Constants.pairsBufferLength];
-  CLImage2D overlap;
-  CLImageDoubleBuffer fgBuffer;
+  CLImage2D overlap, current_fg, last_fg;
   int max_objects;
   Map<Integer, TrackerObjectImpl> objects = new TreeMap<Integer, TrackerObjectImpl>();           // contains every obejct ever created, TODO: this must be cleaned!!!
   Map<Integer, TrackerObjectImpl> trackedObjects = new TreeMap<Integer, TrackerObjectImpl>();
@@ -104,7 +103,10 @@ public class ObjectServiceImpl implements ObjectService {
     ocl.utils().setValues(0, (int) labels_last.getElementCount() - 1, labels_last, 0);
 
     // init overlap image
-    fgBuffer = fgs.getForegroundWorkingBuffer();
+    current_fg = fgs.getForegroundMap();
+    last_fg = ocl.context().createImage2D(Usage.InputOutput,
+            Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    ocl.utils().setValues(0, 0, workDim[0], workDim[1], last_fg, 0);
     overlap = ocl.context().createImage2D(Usage.InputOutput,
             Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
 
@@ -198,6 +200,7 @@ public class ObjectServiceImpl implements ObjectService {
 //
 //    // care about mergers
 //    if (mergers.size() > 0) {
+//      System.out.println("Merges detected");
 //      for (Iterator<Integer> it = mergers.keySet().iterator(); it.hasNext();) {
 //        int currentId = it.next();
 //        TrackerObjectImpl newGroup = createTrackerObject(currentId, currentTime);
@@ -220,44 +223,40 @@ public class ObjectServiceImpl implements ObjectService {
 //
 //    // care about splitters
 //    if (splitters.size() > 0) {
+//      System.out.println("Splits detected");
 //      for (Iterator<Integer> it = splitters.keySet().iterator(); it.hasNext();) {
 //        int lastId = it.next();
 //        TrackerObjectImpl oldObj = trackedObjects.get(lastId);
 //        List<Integer> splitterCurrentIds = splitters.get(lastId);
 //        int heaviestId = findHeaviestRegion(splitterCurrentIds);    // find biggest region
-//        splitterCurrentIds.remove(heaviestId);
 ////        if (oldObj.isGroup()) {
 ////          for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {
 ////            // TODO use IdentityServiec here!
 ////          }
 ////        } else {                  // object that split was recognized as a single object before                  
-//        updateTrackerObject(heaviestId, oldObj, currentTime);       // update old object with biggest region data
 //        for (Iterator<Integer> sit = splitterCurrentIds.iterator(); sit.hasNext();) {     // create new objects for all others
-//          createTrackerObject(sit.next(), currentTime);
+//          int currentId = sit.next();
+//          if (currentId == heaviestId) {
+//            newTrackedObjects.put(currentId, updateTrackerObject(currentId, oldObj, currentTime));
+//          } else {
+//            TrackerObjectImpl obj = createTrackerObject(currentId, currentTime);
+//            newTrackedObjects.put(currentId, obj);
+//          }
 //        }
-////        }
-//      }
-//    }
-//
-//    // care about remaining
-//    for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
-//      int currentId = it.next();
-//      int lastId = findCorrelation(currentId);
-//      if (lastId == 0) {
-//        createTrackerObject(currentId, currentTime);
-//      } else if (lastId > 0) {
-//        TrackerObjectImpl obj = trackedObjects.get(lastId);
-//        updateTrackerObject(currentId, obj, currentTime);
 //      }
 //    }
 
     for (Iterator<Integer> it = regions.iterator(); it.hasNext();) {
       int regionId = it.next();
       int lastId = findCorrelation(regionId);
-      System.out.println("Correlation: " + regionId + " -> " + lastId);
       TrackerObjectImpl object;
       if (lastId > 0) {
-        object = updateTrackerObject(regionId, trackedObjects.get(lastId), currentTime);
+        object = trackedObjects.get(lastId);
+        if (object == null) {
+          log.warn(lastId + " is not a known object ID!!");
+        }
+        object = updateTrackerObject(regionId, object, currentTime);
+
       } else {
         object = createTrackerObject(regionId, currentTime);
       }
@@ -265,7 +264,13 @@ public class ObjectServiceImpl implements ObjectService {
     }
 
     trackedObjects = newTrackedObjects;
-    System.out.println("Tracker Objects: " + trackedObjects.size());
+    if (debugEnabled) {
+      System.out.print("Objects: " + trackedObjects.size() + " ");
+      for (Iterator it = trackedObjects.keySet().iterator(); it.hasNext();) {
+        System.out.print(it.next() + " ");
+      }
+      System.out.println();
+    }
   }
 
   private List<Integer> makeRegionList() {
@@ -277,7 +282,7 @@ public class ObjectServiceImpl implements ObjectService {
   }
 
   private Integer findHeaviestRegion(List<Integer> ids) {
-    int winner = -1, maxWeight = -1;
+    int winner = 0, maxWeight = -1;
     for (Iterator<Integer> it = ids.iterator(); it.hasNext();) {
       int id = it.next();
       int weight = fgLabeler.getSize(id);
@@ -344,6 +349,7 @@ public class ObjectServiceImpl implements ObjectService {
   }
 
   private TrackerObjectImpl createTrackerObject(int regionId, long timestamp) {
+    System.out.println("Creating new object on region " + regionId);
     TrackerObjectImpl obj = new TrackerObjectImpl();
     obj.bbox = boxFinder.getBox(regionId);
     obj.centroid = centroidFinder.getControid(regionId);
@@ -354,6 +360,7 @@ public class ObjectServiceImpl implements ObjectService {
   }
 
   private TrackerObjectImpl updateTrackerObject(int regionId, TrackerObjectImpl obj, long timestamp) {
+    System.out.println("Updating object on region " + regionId);
     obj.bbox = boxFinder.getBox(regionId);
     obj.centroid = centroidFinder.getControid(regionId);
     obj.weight = fgLabeler.getSize(regionId);
@@ -368,8 +375,9 @@ public class ObjectServiceImpl implements ObjectService {
 
     @Override
     public void launch(CLQueue queue) {
-      imageAndK.setArgs(fgBuffer.current(), fgBuffer.last(), overlap);
+      imageAndK.setArgs(current_fg, last_fg, overlap);
       imageAndK.enqueueNDRange(queue, workDim);
+      ocl.utils().copyImage(0, 0, workDim[0], workDim[1], current_fg, 0, 0, last_fg);
     }
 
     @Override
@@ -407,7 +415,7 @@ public class ObjectServiceImpl implements ObjectService {
     public void land() {
       if (debugEnabled) {
         System.out.println("\n--[ t=" + fsrc.getFrameNumber() + " ]-----------------------------------------------");
-        System.out.print("Labels: ");
+        System.out.print("Labels : ");
         int numBlobs = fgLabeler.getNumBlobs();
         for (int i = 0; i <= numBlobs; i++) {
           System.out.print(fgLabeler.getLabels()[i] + " ");
@@ -417,7 +425,7 @@ public class ObjectServiceImpl implements ObjectService {
       if (num_corrs > 0) {
         pairsH.get(pairs);
         if (debugEnabled) {
-          System.out.print("\nPairs : ");
+          System.out.print("\nPairs  : ");
           System.out.print(num_corrs + " ");
           for (int i = 0; i < num_corrs; i++) {
             int idx = 2 * i;

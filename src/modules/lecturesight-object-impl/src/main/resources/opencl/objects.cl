@@ -3,6 +3,8 @@ const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK
 #define ENCODE_INDEX(pos) pos.x + pos.y * (width+2)
 #define CLAMP_POS(pos) if (pos.x > width || pos.y > height) return
 #define BLACK (uint4)(0,0,0,255)
+#define RED (uint4)(128,0,0,255)
+#define GREEN (uint4)(128,0,0,255)
 #define WHITE (uint4)(255,255,255,255)
 
 __kernel void image_and

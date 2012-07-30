@@ -16,7 +16,7 @@ import org.osgi.service.component.ComponentContext;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "ls"),
-  @Property(name = "osgi.command.function", value = {"start", "stop", "pause", "restart", "step"})
+  @Property(name = "osgi.command.function", value = {"run", "stop", "pause", "restart", "step"})
 })
 public class ConsoleCommands implements DummyInterface {
 
@@ -28,7 +28,7 @@ public class ConsoleCommands implements DummyInterface {
     log.info("Commands activated");
   }
 
-  public void start(String param[]) {
+  public void run(String param[]) {
     try {
       ensureReady();
       main.go();
