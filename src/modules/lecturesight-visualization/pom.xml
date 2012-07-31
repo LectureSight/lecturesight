@@ -49,7 +49,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-object-api</artifactId>
+      <artifactId>lecturesight-regiontracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -98,7 +98,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.visualization</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.terminator;version=${project.version}</Export-Package>
+            <Export-Package>cv.lecturesight.visualization;version=${project.version}</Export-Package>
           </instructions>
         </configuration>
       </plugin>

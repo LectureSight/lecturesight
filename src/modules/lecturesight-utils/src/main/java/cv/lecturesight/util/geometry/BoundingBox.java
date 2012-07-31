@@ -37,5 +37,13 @@ public class BoundingBox {
   public void setMax(Position max) {
     this.max = max;
   }
-  
+ 
+  @Override
+  public String toString() {
+    return new StringBuilder()
+            .append(min)
+            .append(":")
+            .append(max)
+            .toString();
+  }
 }

@@ -29,5 +29,12 @@ public class Position {
   public void setY(int y) {
     this.y = y;
   }
-  
+ 
+  public String toString() {
+    return new StringBuilder()
+            .append(x)
+            .append("/")
+            .append(y)
+            .toString();
+  }
 }

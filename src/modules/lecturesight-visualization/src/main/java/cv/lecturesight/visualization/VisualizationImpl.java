@@ -5,8 +5,8 @@ import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.object.ObjectService;
-import cv.lecturesight.object.TrackerObject;
+import cv.lecturesight.regiontracker.RegionTracker;
+import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
@@ -45,7 +45,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   private FrameSourceProvider fsp;
   private FrameSource fsource;
   @Reference
-  private ObjectService tracker;
+  private RegionTracker tracker;
   @Reference
   private DisplayService dsps;
 //  CLImage2D visual;
@@ -61,10 +61,10 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     if (config.getBoolean(PROPKEY_DISPLAY_VISUAL)) {
 //      visual = ocl.context().createImage2D(Usage.InputOutput,
 //              Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-//      ocl.registerLaunch(tracker.getSignal(ObjectService.Signal.DONE_CORRELATION), new VisualizationRun());
+//      ocl.registerLaunch(tracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), new VisualizationRun());
 //      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", visual, this, SIG_done);
       dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", fsource.getImage(), 
-              this, tracker.getSignal(ObjectService.Signal.DONE_CORRELATION));
+              this, tracker.getSignal(RegionTracker.Signal.DONE_CORRELATION));
     }
     log.info("Activated.");
   }
@@ -75,11 +75,11 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
   @Override
   public void render(Graphics g) {
-    TrackerObject[] objects = tracker.getAllTrackedObjects();
+    Region[] objects = tracker.getRegions();
     g.setFont(font);
     g.setColor(Color.white);
     for (int i = 0; i < objects.length; i++) {
-      TrackerObject obj = objects[i];
+      Region obj = objects[i];
       
       BoundingBox box = obj.getBoundingBox();
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());

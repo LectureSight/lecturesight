@@ -32,8 +32,8 @@
     <module>modules/lecturesight-connectedcomponent-impl</module>
     <module>modules/lecturesight-videoanalysis-api</module>
     <module>modules/lecturesight-videoanalysis-impl</module>
-    <module>modules/lecturesight-object-api</module>
-    <module>modules/lecturesight-object-impl</module>
+    <module>modules/lecturesight-regiontracker-api</module>
+    <module>modules/lecturesight-regiontracker-impl</module>
     <module>modules/lecturesight-cameraoperator-api</module>
     <!-- module>modules/lecturesight-cameraoperator-impl</module -->
     <module>modules/lecturesight-heartbeat</module>
