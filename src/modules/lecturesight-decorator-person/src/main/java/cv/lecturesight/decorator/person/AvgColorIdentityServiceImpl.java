@@ -1,4 +1,4 @@
-package cv.lecturesight.regiontracker.impl;
+package cv.lecturesight.decorator.person;
 
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
@@ -28,7 +28,7 @@ public class AvgColorIdentityServiceImpl implements ObjectIdentityService {
   @Override
   public Region match(Region matchee, List<Region> others, float threshold) {
     // actual Color-Histogram
-    ColorHistogram ch = (ColorHistogram) matchee.getProperty("ColorHistogram");
+    //ColorHistogram ch = (ColorHistogram) matchee.getProperty("ColorHistogram");
     // initial minimum distance
     double min_distance = Double.MAX_VALUE;
     // we set the actual element to the element to which we have to compare the

@@ -201,7 +201,7 @@ public class RegionTrackerImpl implements RegionTracker {
         if (debugEnabled) {
           System.out.println(groupId + " <--- " + heaviest);
         }
-        RegionImpl region = updateTrackerObject(groupId, trackedRegions.get(heaviest), currentTime);
+        RegionImpl region = updateTrackerObject(groupId, trackedRegions.get(heaviest));
         for (Iterator<Integer> mit = mergerIds.iterator(); mit.hasNext();) {
           int mId = mit.next();
           if (mId != heaviest) {
@@ -234,7 +234,7 @@ public class RegionTrackerImpl implements RegionTracker {
         if (debugEnabled) {
           System.out.println(groupId + ": [" + heaviest + "]");
         }
-        RegionImpl region = updateTrackerObject(heaviest, trackedRegions.get(groupId), currentTime);
+        RegionImpl region = updateTrackerObject(heaviest, trackedRegions.get(groupId));
         newTrackedRegions.put(heaviest, region);
         for (Iterator<Integer> sit = splitterIds.iterator(); sit.hasNext();) {
           int sId = sit.next();
@@ -245,12 +245,12 @@ public class RegionTrackerImpl implements RegionTracker {
                 System.out.println(" u " + sId);
               }
               region.members.remove(match);
-              newTrackedRegions.put(sId, updateTrackerObject(sId, (RegionImpl) match, currentTime));
+              newTrackedRegions.put(sId, updateTrackerObject(sId, (RegionImpl) match));
             } else {
               if (debugEnabled) {
                 System.out.println(" * " + sId);
               }
-              newTrackedRegions.put(sId, createTrackerRegion(sId, currentTime));
+              newTrackedRegions.put(sId, createTrackerRegion(sId));
             }
           }
         }
@@ -277,12 +277,12 @@ public class RegionTrackerImpl implements RegionTracker {
           if (debugEnabled) {
             System.out.println(" u");
           }
-          object = updateTrackerObject(regionId, object, currentTime);
+          object = updateTrackerObject(regionId, object);
         } else {
           if (debugEnabled) {
             System.out.println(" *");
           }
-          object = createTrackerRegion(regionId, currentTime);
+          object = createTrackerRegion(regionId);
         }
         newTrackedRegions.put(regionId, object);
       }
@@ -409,20 +409,20 @@ public class RegionTrackerImpl implements RegionTracker {
     return result;
   }
 
-  private RegionImpl createTrackerRegion(int regionId, long timestamp) {
-    RegionImpl region = new RegionImpl();
-    region.bbox = boxFinder.getBox(regionId);
-    region.centroid = centroidFinder.getControid(regionId);
-    region.weight = fgLabeler.getSize(regionId);
-    region.lastSeen = timestamp;
+  private RegionImpl createTrackerRegion(int regionId) {
+    RegionImpl region = 
+            new RegionImpl(regionId, 
+                    centroidFinder.getControid(regionId), 
+                    boxFinder.getBox(regionId), 
+                    fgLabeler.getSize(regionId));
     return region;
   }
 
-  private RegionImpl updateTrackerObject(int regionId, RegionImpl region, long timestamp) {
-    region.bbox = boxFinder.getBox(regionId);
-    region.centroid = centroidFinder.getControid(regionId);
-    region.weight = fgLabeler.getSize(regionId);
-    region.lastSeen = timestamp;
+  private RegionImpl updateTrackerObject(int regionId, RegionImpl region) {
+    region.update(regionId, 
+            centroidFinder.getControid(regionId), 
+            boxFinder.getBox(regionId), 
+            fgLabeler.getSize(regionId));
     return region;
   }
 

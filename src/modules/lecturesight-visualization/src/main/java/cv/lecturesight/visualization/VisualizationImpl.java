@@ -75,33 +75,37 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
   @Override
   public void render(Graphics g) {
-    Region[] objects = rTracker.getRegions();
+    Region[] regions = rTracker.getRegions();
     g.setFont(font);
-    g.setColor(Color.white);
-    for (int i = 0; i < objects.length; i++) {
-      Region obj = objects[i];
+    g.setColor(Color.lightGray);
+    for (int i = 0; i < regions.length; i++) {
+      Region region = regions[i];
       
-      BoundingBox box = obj.getBoundingBox();
+      BoundingBox box = region.getBoundingBox();
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
       
-      Position pos = obj.getCentroid();
+      Position pos = region.getCentroid();
       g.drawOval(pos.getX(), pos.getY(), 2, 2);
       
-      String info = Integer.toString(obj.getId()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
-      g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
+      //String info = Integer.toString(region.getLabel()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
+      String info = Integer.toString(region.getLabel());
+      g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() + 10);
       
-      int x = obj.getBoundingBox().getMax().getX() + 1;
-      int y = obj.getBoundingBox().getMin().getY();
-      for (Iterator<String> it = obj.getProperties().keySet().iterator(); it.hasNext();) {
-        String key = it.next();
-        Object val = obj.getProperty(key);
-        String prop = key + ": " + val.toString();
-        g.drawString(prop, x, y);
-        x += 10;
-      }
+//      int x = region.getBoundingBox().getMax().getX() + 1;
+//      int y = region.getBoundingBox().getMin().getY();
+//      for (Iterator<String> it = region.getProperties().keySet().iterator(); it.hasNext();) {
+//        String key = it.next();
+//        Object val = region.getProperty(key);
+//        String prop = key + ": " + val.toString();
+//        g.drawString(prop, x, y);
+//        x += 10;
+//      }
     }
-    g.drawString("   t: " + fsource.getFrameNumber(), 2, 26);
-    g.drawString("objs: " + objects.length, 2, 36);
+    
+    g.setColor(Color.white);
+    g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
+    g.drawString("regions : " + regions.length, 2, 36);
+    g.drawString("objects : " , 2, 46);
     
     ocl.castSignal(SIG_done);
   }
