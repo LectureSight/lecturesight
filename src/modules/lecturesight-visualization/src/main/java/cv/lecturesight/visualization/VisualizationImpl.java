@@ -5,11 +5,11 @@ import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.regiontracker.RegionTracker;
-import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
+import cv.lecturesight.regiontracker.Region;
+import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.ui.CustomRenderer;
 import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
@@ -45,7 +45,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   private FrameSourceProvider fsp;
   private FrameSource fsource;
   @Reference
-  private RegionTracker tracker;
+  private RegionTracker rTracker;
   @Reference
   private DisplayService dsps;
 //  CLImage2D visual;
@@ -61,10 +61,10 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     if (config.getBoolean(PROPKEY_DISPLAY_VISUAL)) {
 //      visual = ocl.context().createImage2D(Usage.InputOutput,
 //              Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-//      ocl.registerLaunch(tracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), new VisualizationRun());
+//      ocl.registerLaunch(rTracker.getSignal(ObjectService.Signal.DONE_CORRELATION), new VisualizationRun());
 //      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", visual, this, SIG_done);
       dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", fsource.getImage(), 
-              this, tracker.getSignal(RegionTracker.Signal.DONE_CORRELATION));
+              this, rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION));
     }
     log.info("Activated.");
   }
@@ -75,7 +75,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
   @Override
   public void render(Graphics g) {
-    Region[] objects = tracker.getRegions();
+    Region[] objects = rTracker.getRegions();
     g.setFont(font);
     g.setColor(Color.white);
     for (int i = 0; i < objects.length; i++) {
