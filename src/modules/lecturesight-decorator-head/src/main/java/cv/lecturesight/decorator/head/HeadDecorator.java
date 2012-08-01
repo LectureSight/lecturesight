@@ -1,7 +1,7 @@
 package cv.lecturesight.decorator.head;
 
-import cv.lecturesight.object.ObjectDecorator;
-import cv.lecturesight.object.TrackerObject;
+import cv.lecturesight.regiontracker.ObjectDecorator;
+import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.BoundingBox;
@@ -55,7 +55,7 @@ public class HeadDecorator implements ObjectDecorator {
   }
 
   @Override
-  public void examine(TrackerObject obj) {
+  public void examine(Region obj) {
 
     // Try to read the image
     try {

@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-object-api</artifactId>
+      <artifactId>lecturesight-regiontracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
