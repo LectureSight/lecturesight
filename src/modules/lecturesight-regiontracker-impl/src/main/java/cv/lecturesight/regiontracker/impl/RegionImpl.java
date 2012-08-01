@@ -15,6 +15,7 @@ public class RegionImpl implements Region {
   BoundingBox bbox = null;
   Position centroid = null;
   int weight = 0;
+  int label;
   long firstSeen, lastSeen;
   HashMap<String, Object> props = new HashMap<String, Object>();
   Region group = null;
@@ -29,6 +30,10 @@ public class RegionImpl implements Region {
   @Override
   public int getId() {
     return id;
+  }
+  
+  public int getRegionLabel() {
+    return label;
   }
 
   @Override

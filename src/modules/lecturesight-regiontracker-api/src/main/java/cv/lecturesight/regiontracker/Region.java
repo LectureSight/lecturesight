@@ -8,6 +8,8 @@ public interface Region {
 
   int getId();
   
+  int getRegionLabel();
+  
   long firstSeen();
   
   long lastSeen();

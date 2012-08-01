@@ -1,7 +1,7 @@
-package cv.lecturesight.regiontracker.impl;
+package cv.lecturesight.objecttracker.impl;
 
-import cv.lecturesight.regiontracker.ObjectDecorator;
-import cv.lecturesight.regiontracker.Region;
+import cv.lecturesight.objecttracker.ObjectDecorator;
+import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.util.Log;
 import java.util.Dictionary;
 import java.util.EnumMap;
@@ -39,15 +39,31 @@ public class DecoratorManager implements EventHandler {
 
   public DecoratorManager(ComponentContext cc) {
     this.cc = cc;
+    
+    // scan for already installed Decorators
+    try {
+      ServiceReference[] refs = cc.getBundleContext().getServiceReferences(ObjectDecorator.class.getName(), null);
+      if (refs != null) {
+        for (int i = 0; i < refs.length; i++) {
+          ServiceReference ref = refs[i];
+          if (referencesDecorator(ref)) {
+            installDecorator(ref);
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("Error during scanning for plugins", e);
+    }
+    
     // listen to bundle un-/register events
     String[] topics = new String[]{OSGI_EVENT_REGISTERED, OSGI_EVENT_UNREGISTERED};
     Dictionary<String, Object> props = new Hashtable<String, Object>();
     props.put(EventConstants.EVENT_TOPIC, topics);
     cc.getBundleContext().registerService(EventHandler.class.getName(), this, props);
-    log.info("listening for ObjectDecorators");
+    log.info("Listening for Decorators");
   }
   
-  public void applyDecorators(CallType type, Region obj) {
+  public void applyDecorators(CallType type, TrackerObject obj) {
     for (Iterator<ObjectDecorator> it = decorators.get(type).iterator(); it.hasNext(); ) {
       it.next().examine(obj);
     }
@@ -82,9 +98,9 @@ public class DecoratorManager implements EventHandler {
       CallType type = CallType.valueOf(typeS);
       ObjectDecorator decorator = (ObjectDecorator) cc.getBundleContext().getService(ref);
       decorators.get(type).add(decorator);
-      log.info("Installed Decorator " + name + " of type " + typeS);
+      log.info("Decorator installed: " + name + " (calltype:" + typeS + ")");
     } catch (Exception e) {
-      log.error("Error while installing ObejctDecorator.", e);
+      log.error("Error while installing Decorator.", e);
     }
   }
 
@@ -95,7 +111,7 @@ public class DecoratorManager implements EventHandler {
       ObjectDecorator decorator = (ObjectDecorator) cc.getBundleContext().getService(ref);
       decorators.get(type).remove(decorator);
     } catch (Exception e) {
-      log.error("Error while uninstalling ObejctDecorator.", e);
+      log.error("Error while uninstalling Decorator.", e);
     }
   }
 }

@@ -1,11 +1,11 @@
-package cv.lecturesight.regiontracker;
+package cv.lecturesight.objecttracker;
 
 public interface ObjectDecorator {
 
   /** Examine the given <code>Region</code> and change object properties
    *  based on result.
    * 
-   * @param obj 
+   * @param object TrackerObject to examine (and augment)
    */
-  void examine(Region obj);
+  void examine(TrackerObject object);
 }

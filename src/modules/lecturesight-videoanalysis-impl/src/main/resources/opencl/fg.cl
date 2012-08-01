@@ -198,8 +198,8 @@ __kernel void gather_activity
     {
       int adr = ENCODE_INDEX(pos);
       int idx = -1 * labels[adr];
-//      atom_inc(activity + idx);       // FIXME this line yields CL_INVALID_BINARY on NVIDIA cards
-      activity[idx] = 1;
+      atom_inc(activity + idx);       // FIXME this line yields CL_INVALID_BINARY on NVIDIA cards
+//      activity[idx] = 1;
     }
   }
 }
