@@ -82,7 +82,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.objecttracker.impl</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.objecttracker.simple</Bundle-SymbolicName>
             <Export-Package>cv.lecturesight.objecttracker.impl;version=${project.version}</Export-Package>
           </instructions>
         </configuration>

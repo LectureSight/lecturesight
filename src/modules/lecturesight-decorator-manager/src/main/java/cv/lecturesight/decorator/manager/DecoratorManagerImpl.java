@@ -1,6 +1,7 @@
-package cv.lecturesight.objecttracker.impl;
+package cv.lecturesight.decorator.manager;
 
-import cv.lecturesight.objecttracker.ObjectDecorator;
+import cv.lecturesight.decorator.api.DecoratorManager;
+import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.util.Log;
 import java.util.Dictionary;
@@ -10,23 +11,23 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 
-public class DecoratorManager implements EventHandler {
+@Component(name = "lecturesight.decorator.manager", immediate = true)
+@Service
+public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
 
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
   static final String SERVICE_PROPKEY_NAME = "lecturesight.decorator.name";
   static final String SERVICE_PROPKEY_CALLON = "lecturesight.decorator.callon";
   static final String SERVICE_PROPKEY_PRODUCES = "lecturesight.decorator.produces";
-
-  public enum CallType {
-    EACHFRAME, ONAPPEAR
-  }
   
   private Log log = new Log("Object Decorator Manager");
   private ComponentContext cc;
@@ -37,7 +38,7 @@ public class DecoratorManager implements EventHandler {
     }
   }
 
-  public DecoratorManager(ComponentContext cc) {
+  public DecoratorManagerImpl(ComponentContext cc) {
     this.cc = cc;
     
     // scan for already installed Decorators
@@ -63,6 +64,7 @@ public class DecoratorManager implements EventHandler {
     log.info("Listening for Decorators");
   }
   
+  @Override
   public void applyDecorators(CallType type, TrackerObject obj) {
     for (Iterator<ObjectDecorator> it = decorators.get(type).iterator(); it.hasNext(); ) {
       it.next().examine(obj);
@@ -98,7 +100,7 @@ public class DecoratorManager implements EventHandler {
       CallType type = CallType.valueOf(typeS);
       ObjectDecorator decorator = (ObjectDecorator) cc.getBundleContext().getService(ref);
       decorators.get(type).add(decorator);
-      log.info("Decorator installed: " + name + " (calltype:" + typeS + ")");
+      log.info("Decorator installed: " + name + " (calltype=" + typeS + ")");
     } catch (Exception e) {
       log.error("Error while installing Decorator.", e);
     }

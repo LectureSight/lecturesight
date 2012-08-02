@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Iterator;
+import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -75,11 +76,11 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
   @Override
   public void render(Graphics g) {
-    Region[] regions = rTracker.getRegions();
+    Set<Region> regions = rTracker.getRegions();
     g.setFont(font);
     g.setColor(Color.lightGray);
-    for (int i = 0; i < regions.length; i++) {
-      Region region = regions[i];
+    for (Iterator<Region> it = regions.iterator(); it.hasNext(); ) {
+      Region region = it.next();
       
       BoundingBox box = region.getBoundingBox();
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
@@ -104,7 +105,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     
     g.setColor(Color.white);
     g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
-    g.drawString("regions : " + regions.length, 2, 36);
+    g.drawString("regions : " + regions.size(), 2, 36);
     g.drawString("objects : " , 2, 46);
     
     ocl.castSignal(SIG_done);

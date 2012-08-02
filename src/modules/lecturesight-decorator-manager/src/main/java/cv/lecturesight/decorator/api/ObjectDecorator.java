@@ -1,4 +1,6 @@
-package cv.lecturesight.objecttracker;
+package cv.lecturesight.decorator.api;
+
+import cv.lecturesight.objecttracker.TrackerObject;
 
 public interface ObjectDecorator {
 

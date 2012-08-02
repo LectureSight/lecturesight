@@ -160,14 +160,9 @@ public class RegionTrackerImpl implements RegionTracker {
   }
 
   @Override
-  public Region[] getRegions() {
-    Collection<RegionImpl> objs = trackedRegions.values();
-    int n = objs.size();
-    Region[] out = new Region[n];
-    int idx = 0;
-    for (Iterator<RegionImpl> it = objs.iterator(); it.hasNext();) {
-      out[idx++] = (Region) it.next();
-    }
+  public Set<Region> getRegions() {
+    Set<Region> out = new TreeSet<Region>();
+    out.addAll(trackedRegions.values());
     return out;
   }
 
