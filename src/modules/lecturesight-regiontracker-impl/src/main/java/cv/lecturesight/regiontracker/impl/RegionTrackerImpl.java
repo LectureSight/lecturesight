@@ -160,8 +160,8 @@ public class RegionTrackerImpl implements RegionTracker {
   }
 
   @Override
-  public Set<Region> getRegions() {
-    Set<Region> out = new TreeSet<Region>();
+  public List<Region> getRegions() {
+    List<Region> out = new LinkedList<Region>();
     out.addAll(trackedRegions.values());
     return out;
   }

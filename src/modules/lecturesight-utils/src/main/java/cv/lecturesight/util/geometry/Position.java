@@ -1,6 +1,6 @@
 package cv.lecturesight.util.geometry;
 
-public class Position {
+public class Position implements Cloneable {
   
   private int x, y;
   
@@ -30,6 +30,12 @@ public class Position {
     this.y = y;
   }
   
+  public double distance(Position other) {
+    return Math.sqrt(
+            Math.pow(Math.abs(x - other.x), 2) +
+            Math.pow(Math.abs(y - other.y), 2));
+  }
+  
   @Override
   public String toString() {
     return new StringBuilder()
@@ -37,5 +43,10 @@ public class Position {
             .append(",")
             .append(y)
             .toString();
+  }
+  
+  @Override
+  public Position clone() {
+    return new Position(x,y);
   }
 }

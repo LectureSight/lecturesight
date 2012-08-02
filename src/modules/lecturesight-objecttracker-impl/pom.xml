@@ -34,6 +34,11 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-decorator-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-regiontracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>

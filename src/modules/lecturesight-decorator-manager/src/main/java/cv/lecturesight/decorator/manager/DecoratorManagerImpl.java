@@ -37,8 +37,8 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
       decorators.put(t, new LinkedList<ObjectDecorator>());
     }
   }
-
-  public DecoratorManagerImpl(ComponentContext cc) {
+  
+  protected void activate(ComponentContext cc) {
     this.cc = cc;
     
     // scan for already installed Decorators

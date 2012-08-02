@@ -1,6 +1,6 @@
 package cv.lecturesight.util.geometry;
 
-public class BoundingBox {
+public class BoundingBox implements Cloneable {
 
   private Position min, max;
   
@@ -45,5 +45,10 @@ public class BoundingBox {
             .append("-")
             .append(max)
             .toString();
+  }
+  
+  @Override
+  public BoundingBox clone() {
+    return new BoundingBox(min, max);
   }
 }

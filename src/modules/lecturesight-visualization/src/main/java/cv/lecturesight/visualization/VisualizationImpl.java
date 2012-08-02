@@ -5,6 +5,8 @@ import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
+import cv.lecturesight.objecttracker.ObjectTracker;
+import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
@@ -20,7 +22,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -32,11 +34,10 @@ import org.osgi.service.component.ComponentContext;
 @Component(name = "lecturesight.visualization", immediate = true)
 @Service
 public class VisualizationImpl implements Visualization, CustomRenderer {
-  
+
   final static String PROPKEY_DISPLAY_VISUAL = "display.terminator";
   final static String WINDOWNAME_VISUAL = "visual";
   final static String SIGNAME_DONE_VISUAL = "visual.DONE";
-
   private Log log = new Log("Heartbeat");
   @Reference
   private Configuration config;
@@ -48,24 +49,26 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   @Reference
   private RegionTracker rTracker;
   @Reference
+  private ObjectTracker oTracker;
+  @Reference
   private DisplayService dsps;
 //  CLImage2D visual;
-  OCLSignal SIG_done;
+  OCLSignal sig_DONE;
   int[] workDim;
   private Font font = new Font("Monospaced", Font.PLAIN, 10);
 
   protected void activate(ComponentContext cc) throws Exception {
-    SIG_done = ocl.getSignal(SIGNAME_DONE_VISUAL);
+    sig_DONE = ocl.getSignal(SIGNAME_DONE_VISUAL);
     fsource = fsp.getFrameSource();
 //    workDim = new int[] { fsource.getWidth(), fsource.getHeight() };
-    
+
     if (config.getBoolean(PROPKEY_DISPLAY_VISUAL)) {
 //      visual = ocl.context().createImage2D(Usage.InputOutput,
 //              Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
 //      ocl.registerLaunch(rTracker.getSignal(ObjectService.Signal.DONE_CORRELATION), new VisualizationRun());
-//      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", visual, this, SIG_done);
-      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", fsource.getImage(), 
-              this, rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION));
+//      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", visual, this, sig_DONE);
+      dsps.registerDispaly(WINDOWNAME_VISUAL, "visual", fsource.getImage(),
+              this, oTracker.getSignal());
     }
     log.info("Activated.");
   }
@@ -75,45 +78,60 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   }
 
   @Override
-  public void render(Graphics g) {
-    Set<Region> regions = rTracker.getRegions();
-    g.setFont(font);
-    g.setColor(Color.lightGray);
-    for (Iterator<Region> it = regions.iterator(); it.hasNext(); ) {
-      Region region = it.next();
-      
-      BoundingBox box = region.getBoundingBox();
-      g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
-      
-      Position pos = region.getCentroid();
-      g.drawOval(pos.getX(), pos.getY(), 2, 2);
-      
-      //String info = Integer.toString(region.getLabel()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
-      String info = Integer.toString(region.getLabel());
-      g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() + 10);
-      
-//      int x = region.getBoundingBox().getMax().getX() + 1;
-//      int y = region.getBoundingBox().getMin().getY();
-//      for (Iterator<String> it = region.getProperties().keySet().iterator(); it.hasNext();) {
-//        String key = it.next();
-//        Object val = region.getProperty(key);
-//        String prop = key + ": " + val.toString();
-//        g.drawString(prop, x, y);
-//        x += 10;
-//      }
-    }
-    
-    g.setColor(Color.white);
-    g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
-    g.drawString("regions : " + regions.size(), 2, 36);
-    g.drawString("objects : " , 2, 46);
-    
-    ocl.castSignal(SIG_done);
+  public OCLSignal getSignal() {
+    return sig_DONE;
   }
 
   @Override
-  public OCLSignal getSignal() {
-    return SIG_done;
+  public void render(Graphics g) {
+    g.setFont(font);
+
+    // draw RegionTracker data
+    g.setColor(Color.lightGray);
+    List<Region> regions = rTracker.getRegions();
+    for (Iterator<Region> it = regions.iterator(); it.hasNext();) {
+      Region region = it.next();
+
+      BoundingBox box = region.getBoundingBox();
+      g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
+
+      Position pos = region.getCentroid();
+      g.drawOval(pos.getX(), pos.getY(), 2, 2);
+
+      //String info = Integer.toString(region.getLabel()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
+      String info = Integer.toString(region.getLabel());
+      g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() + 10);
+    }
+
+    // draw RegionTracker data
+    g.setColor(Color.yellow);
+    List<TrackerObject> objects = oTracker.getCurrentlyTracked();
+    for (Iterator<TrackerObject> it = objects.iterator(); it.hasNext();) {
+      TrackerObject object = it.next();
+      BoundingBox box = (BoundingBox) object.getProperty("obj.bbox");
+      g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
+
+      String info = Integer.toString(object.getId());
+      g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() - 10);
+
+//      int x = box.getMax().getX() + 1;
+//      int y = box.getMin().getY();
+//      for (Iterator<String> pit = object.getProperties().keySet().iterator(); pit.hasNext();) {
+//        String key = pit.next();
+//        Object val = object.getProperty(key);
+//        String prop = key + ": " + val.toString();
+//        g.drawString(prop, x, y);
+//        y += 10;
+//      }
+    }
+    
+    // draw frame information
+    g.setColor(Color.white);
+    g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
+    g.drawString("regions : " + regions.size(), 2, 36);
+    g.drawString("objects : ", 2, 46);
+
+    ocl.castSignal(sig_DONE);
   }
 
   private class VisualizationRun implements ComputationRun {
@@ -129,7 +147,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
     @Override
     public void land() {
-      ocl.castSignal(SIG_done);
+      ocl.castSignal(sig_DONE);
     }
   }
 }
