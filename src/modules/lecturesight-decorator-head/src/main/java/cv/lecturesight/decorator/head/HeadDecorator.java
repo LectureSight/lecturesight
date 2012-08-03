@@ -36,6 +36,7 @@ public class HeadDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_CENTROID = "head.center";
   final static String OBJ_PROPKEY_HEAD_BBOX = "head.boundingbox";
   final static String OBJ_PROPKEY_HEAD_RADIUS = "head.radius";
+  final static String OBJ_PROPKEY_HEAD_CLUSTERS = "head.clusters";
   private Log log = new Log("Head Finder");
   @Reference
   Configuration config;
@@ -82,12 +83,16 @@ public class HeadDecorator implements ObjectDecorator {
         Position gravity = new ClusterStack(points).get_center();
 
         // Cluster array
-        ClusterStack[] clusters = new ClusterStack[PARAM_K];
-        Random generator = new Random();
+        ClusterStack[] clusters = object.getProperty(OBJ_PROPKEY_HEAD_CLUSTERS);
 
-        for (int i = 0; i < PARAM_K; i++) {
-          int index = generator.nextInt(points.length());
-          clusters[i] = new ClusterStack(points.index(index));
+        if(clusters == null) {
+          clusters = new ClusterStack[PARAM_K];
+          Random generator = new Random();
+
+          for (int i = 0; i < PARAM_K; i++) {
+            int index = generator.nextInt(points.length());
+            clusters[i] = new ClusterStack(points.index(index));
+          }
         }
 
         int iterations = 0;
@@ -149,6 +154,7 @@ public class HeadDecorator implements ObjectDecorator {
                 new Position(bx + (int) boundaries[0].getX(), by + (int) boundaries[0].getY()),
                 new Position(bx + (int) boundaries[1].getX(), by + (int) boundaries[1].getY())));
         object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, clusters[optimal].radius());
+        object.setProperty(OBJ_PROPKEY_HEAD_CLUSTERS, clusters);
       }
 
 //      Position head = (Position) object.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
