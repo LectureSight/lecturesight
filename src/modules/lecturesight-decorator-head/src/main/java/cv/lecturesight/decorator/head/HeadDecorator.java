@@ -78,76 +78,78 @@ public class HeadDecorator implements ObjectDecorator {
         }
       }
 
-      Position gravity = new ClusterStack(points).get_center();
+      if(points.length() > PARAM_K) {
+        Position gravity = new ClusterStack(points).get_center();
 
-      // Cluster array
-      ClusterStack[] clusters = new ClusterStack[PARAM_K];
-      Random generator = new Random();
+        // Cluster array
+        ClusterStack[] clusters = new ClusterStack[PARAM_K];
+        Random generator = new Random();
 
-      for (int i = 0; i < PARAM_K; i++) {
-        int index = generator.nextInt(points.length());
-        clusters[i] = new ClusterStack(points.index(index));
-      }
-
-      int iterations = 0;
-      boolean noChange = false;
-
-      while (noChange == false && iterations < MAX_ITER) {
-        // Reset clusters
-        for (int i = 0; i < clusters.length; i++) {
-          clusters[i].reset();
+        for (int i = 0; i < PARAM_K; i++) {
+          int index = generator.nextInt(points.length());
+          clusters[i] = new ClusterStack(points.index(index));
         }
-        noChange = true;
-        // check distance for all points
-        for (int i = 0; i < points.length(); i++) {
-          int shortest = 0;
-          // distance between first cluster and actual point
-          double distance = Helper.euclidean_distance(points.index(i),
-                  clusters[0].get_center());
-          // Compute distance to all clusters
-          for (int j = 1; j < clusters.length; j++) {
-            double distance_new = Helper.euclidean_distance(points.index(i),
-                    clusters[j].get_center());
-            if (distance_new < distance) {
-              distance = distance_new;
-              shortest = j;
+
+        int iterations = 0;
+        boolean noChange = false;
+
+        while (noChange == false && iterations < MAX_ITER) {
+          // Reset clusters
+          for (int i = 0; i < clusters.length; i++) {
+            clusters[i].reset();
+          }
+          noChange = true;
+          // check distance for all points
+          for (int i = 0; i < points.length(); i++) {
+            int shortest = 0;
+            // distance between first cluster and actual point
+            double distance = Helper.euclidean_distance(points.index(i),
+                    clusters[0].get_center());
+            // Compute distance to all clusters
+            for (int j = 1; j < clusters.length; j++) {
+              double distance_new = Helper.euclidean_distance(points.index(i),
+                      clusters[j].get_center());
+              if (distance_new < distance) {
+                distance = distance_new;
+                shortest = j;
+              }
+            }
+            // push point to the nearest cluster
+            clusters[shortest].push(points.index(i));
+          }
+          // recalculate the cluster centers
+          for (int i = 0; i < clusters.length; i++) {
+            if (clusters[i].recalculate_center()) {
+              noChange = false;
             }
           }
-          // push point to the nearest cluster
-          clusters[shortest].push(points.index(i));
+          iterations++;
         }
-        // recalculate the cluster centers
+
+        //log.debug("iterations: " + iterations);
+
+        double d = Double.MAX_VALUE;
+        int optimal = 0;
+
         for (int i = 0; i < clusters.length; i++) {
-          if (clusters[i].recalculate_center()) {
-            noChange = false;
+          double x_distance = Math.pow((clusters[i].get_center().getX()
+                  - gravity.getX()), 2);
+          double y_distance = Math.pow((clusters[i].get_center().getY()), 2);
+          if (x_distance + y_distance < d) {
+            d = x_distance + y_distance;
+            optimal = i;
           }
         }
-        iterations++;
+        Position[] boundaries = clusters[optimal].min_max();
+
+        // save results to TackerObject
+        int bx = bbox.getMin().getX(), by = bbox.getMin().getY();
+        object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) bx + gravity.getX(), (int) by + gravity.getY()));
+        object.setProperty(OBJ_PROPKEY_HEAD_BBOX, new BoundingBox(
+                new Position(bx + (int) boundaries[0].getX(), by + (int) boundaries[0].getY()),
+                new Position(bx + (int) boundaries[1].getX(), by + (int) boundaries[1].getY())));
+        object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, clusters[optimal].radius());
       }
-
-      //log.debug("iterations: " + iterations);
-
-      double d = Double.MAX_VALUE;
-      int optimal = 0;
-
-      for (int i = 0; i < clusters.length; i++) {
-        double x_distance = Math.pow((clusters[i].get_center().getX()
-                - gravity.getX()), 2);
-        double y_distance = Math.pow((clusters[i].get_center().getY()), 2);
-        if (x_distance + y_distance < d) {
-          d = x_distance + y_distance;
-          optimal = i;
-        }
-      }
-      Position[] boundaries = clusters[optimal].min_max();
-
-      // save results to TackerObject
-      int bx = bbox.getMin().getX(), by = bbox.getMin().getY();
-      object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) bx + gravity.getX(), (int) by + gravity.getY()));
-      object.setProperty(OBJ_PROPKEY_HEAD_BBOX, new BoundingBox(
-              new Position(bx + (int) boundaries[0].getX(), by + (int) boundaries[0].getY()),
-              new Position(bx + (int) boundaries[1].getX(), by + (int) boundaries[1].getY())));
-      object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, clusters[optimal].radius());
 
 //      Position head = (Position) object.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
 //
