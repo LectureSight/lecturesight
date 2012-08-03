@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-opencl-api</artifactId>
+      <artifactId>lecturesight-decorator-manager</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -29,12 +29,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-framesource-api</artifactId>
+      <artifactId>lecturesight-objecttracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

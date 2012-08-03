@@ -1,7 +1,8 @@
 package cv.lecturesight.decorator.head;
 
-import cv.lecturesight.regiontracker.ObjectDecorator;
-import cv.lecturesight.regiontracker.Region;
+import cv.lecturesight.decorator.api.ObjectDecorator;
+import cv.lecturesight.objecttracker.ObjectTracker;
+import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.BoundingBox;
@@ -25,17 +26,16 @@ import org.osgi.service.component.ComponentContext;
 @Properties({
   @Property(name = "lecturesight.decorator.name", value = "Head Finder"),
   @Property(name = "lecturesight.decorator.callon", value = "EACHFRAME"),
-  @Property(name = "lecturesight.decorator.produces", value = {"head.center", 
+  @Property(name = "lecturesight.decorator.produces", value = {"head.center",
     "head.boundingbox", "head.radius"})
 })
 public class HeadDecorator implements ObjectDecorator {
 
-  final static String PROPKEY_CENTROID = "head.center";
-  final static String PROPKEY_BBOX = "head.boundingbox";
   final static String PROPKEY_K = "k";
   final static String PROPKEY_MAXITER = "iterations.max";
-  final static String PROPKEY_RADIUS = "head.radius";
-  
+  final static String OBJ_PROPKEY_HEAD_CENTROID = "head.center";
+  final static String OBJ_PROPKEY_HEAD_BBOX = "head.boundingbox";
+  final static String OBJ_PROPKEY_HEAD_RADIUS = "head.radius";
   private Log log = new Log("Head Finder");
   @Reference
   Configuration config;
@@ -55,12 +55,11 @@ public class HeadDecorator implements ObjectDecorator {
   }
 
   @Override
-  public void examine(Region obj) {
-
+  public void examine(TrackerObject object) {
     // Try to read the image
     try {
+      BoundingBox bbox = (BoundingBox)object.getProperty(ObjectTracker.OBJ_PROPKEY_BBOX);
       BufferedImage image = fgs.getForegroundMapHost();
-      BoundingBox bbox = obj.getBoundingBox();
       WritableRaster r = image.getRaster();
 
       // We will store all points in this stack
@@ -73,7 +72,6 @@ public class HeadDecorator implements ObjectDecorator {
       Position min = bbox.getMin();
       for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-//          if (r.getSample(i, j, 0) > 0 && r.getSample(i, j, 1) > 0 && r.getSample(i, j, 2) > 0) {
           if (r.getSample(min.getX() + i, min.getY() + j, 0) > 0) {
             points.push(new Position(i, j));
           }
@@ -127,7 +125,7 @@ public class HeadDecorator implements ObjectDecorator {
         iterations++;
       }
 
-      log.debug("iterations: " + iterations);
+      //log.debug("iterations: " + iterations);
 
       double d = Double.MAX_VALUE;
       int optimal = 0;
@@ -142,18 +140,19 @@ public class HeadDecorator implements ObjectDecorator {
         }
       }
       Position[] boundaries = clusters[optimal].min_max();
-      
-      // save results to TackerObject
-      obj.setProperty(PROPKEY_CENTROID, new Position((int)gravity.getX(), (int)gravity.getY()));
-      obj.setProperty(PROPKEY_BBOX, new BoundingBox(
-              new Position((int)boundaries[0].getX(), (int)boundaries[0].getY()),
-              new Position((int)boundaries[1].getX(), (int)boundaries[1].getY())));
-      obj.setProperty(PROPKEY_RADIUS, clusters[optimal].radius());
 
-      Position head = (Position)obj.getProperty(PROPKEY_CENTROID);
-      
-      System.out.println("Head: " + head.getX() + ", " + head.getY());
-      
+      // save results to TackerObject
+      int bx = bbox.getMin().getX(), by = bbox.getMin().getY();
+      object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) bx + gravity.getX(), (int) by + gravity.getY()));
+      object.setProperty(OBJ_PROPKEY_HEAD_BBOX, new BoundingBox(
+              new Position(bx + (int) boundaries[0].getX(), by + (int) boundaries[0].getY()),
+              new Position(bx + (int) boundaries[1].getX(), by + (int) boundaries[1].getY())));
+      object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, clusters[optimal].radius());
+
+//      Position head = (Position) object.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
+//
+//      System.out.println("Head: " + head.getX() + ", " + head.getY());
+
     } catch (Exception e) {
       log.error("Error in head finder!", e);
     }

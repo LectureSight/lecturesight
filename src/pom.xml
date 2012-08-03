@@ -39,7 +39,7 @@
     <module>modules/lecturesight-decorator-manager</module>
     <module>modules/lecturesight-heartbeat</module>
     <module>modules/lecturesight-visualization</module>
-    <!-- module>modules/lecturesight-decorator-head</module -->
+    <module>modules/lecturesight-decorator-head</module>
     <!-- module>modules/lecturesight-decorator-person</module -->
     <!-- module>modules/lecturesight-cameraoperator-api</module -->
     <!-- module>modules/lecturesight-cameraoperator-impl</module -->

@@ -145,7 +145,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
       Set<TrackerObject> newTrackedObjects = new HashSet<TrackerObject>();
       for (Iterator<TrackerObject> it = trackedObjects.iterator(); it.hasNext();) {
         TrackerObject object = it.next();
-        Region lastRegion = (Region) object.getProperty(Constants.OBJ_PROPKEY_REGION);
+        Region lastRegion = (Region) object.getProperty(OBJ_PROPKEY_REGION);
 
         if (candidates.contains(lastRegion)) {            // is the region from last frame still tracked by RegionTracker?
           newTrackedObjects.add(                          // yes --> simply update TrackerObject from region data
@@ -169,8 +169,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
       
       // for all remaining candidates: create new TrackerObjects
       for (Iterator<Region> it = candidates.iterator(); it.hasNext(); ) {
-        newTrackedObjects.add(
-                createTrackerObject(it.next(), currentTime));
+        TrackerObject object = createTrackerObject(it.next(), currentTime);
+        newTrackedObjects.add(object);
+        dManager.applyDecorators(CallType.ONAPPEAR, object);
       }
 
       trackedObjects = newTrackedObjects;
@@ -180,7 +181,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
     private Region findMatchingRegion(TrackerObject object, List<Region> regions) {
       Region result = null;
       //BoundingBox bbox = (BoundingBox)object.getProperty(Constants.OBJ_PROPKEY_BBOX);
-      Position centroid = (Position)object.getProperty(Constants.OBJ_PROPKEY_CENTROID);
+      Position centroid = (Position)object.getProperty(OBJ_PROPKEY_CENTROID);
       double error = Double.MAX_VALUE;
       for (Iterator<Region> it = regions.iterator(); it.hasNext(); ) {
         Region region = it.next();
@@ -198,19 +199,19 @@ public class ObjectTrackerImpl implements ObjectTracker {
 
     private TrackerObject createTrackerObject(Region region, long time) {
       TrackerObject object = new TrackerObject(time);
-      object.setProperty(Constants.OBJ_PROPKEY_REGION, region);
-      object.setProperty(Constants.OBJ_PROPKEY_CENTROID, region.getCentroid().clone());
-      object.setProperty(Constants.OBJ_PROPKEY_BBOX, region.getBoundingBox().clone());
-      object.setProperty(Constants.OBJ_PROPKEY_WEIGHT, region.getWeight());
+      object.setProperty(OBJ_PROPKEY_REGION, region);
+      object.setProperty(OBJ_PROPKEY_CENTROID, region.getCentroid().clone());
+      object.setProperty(OBJ_PROPKEY_BBOX, region.getBoundingBox().clone());
+      object.setProperty(OBJ_PROPKEY_WEIGHT, region.getWeight());
       return object;
     }
 
     private TrackerObject updateTrackerObject(TrackerObject object, Region region, long time) {
       object.setLastSeen(time);
-      object.setProperty(Constants.OBJ_PROPKEY_REGION, region);
-      object.setProperty(Constants.OBJ_PROPKEY_CENTROID, region.getCentroid().clone());
-      object.setProperty(Constants.OBJ_PROPKEY_BBOX, region.getBoundingBox().clone());
-      object.setProperty(Constants.OBJ_PROPKEY_WEIGHT, region.getWeight());
+      object.setProperty(OBJ_PROPKEY_REGION, region);
+      object.setProperty(OBJ_PROPKEY_CENTROID, region.getCentroid().clone());
+      object.setProperty(OBJ_PROPKEY_BBOX, region.getBoundingBox().clone());
+      object.setProperty(OBJ_PROPKEY_WEIGHT, region.getWeight());
       return object;
     }
   }

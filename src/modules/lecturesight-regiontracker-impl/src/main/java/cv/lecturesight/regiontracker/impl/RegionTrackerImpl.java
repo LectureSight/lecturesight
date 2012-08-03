@@ -23,7 +23,6 @@ import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.nio.IntBuffer;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.LinkedList;
