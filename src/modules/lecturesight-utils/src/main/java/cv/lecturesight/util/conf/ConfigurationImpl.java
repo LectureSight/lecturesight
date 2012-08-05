@@ -13,6 +13,11 @@ public class ConfigurationImpl implements Configuration {
   }
 
   @Override
+  public void set(String key, String value) {
+    props.setProperty(key, value);
+  }
+  
+  @Override
   public String get(String key) throws IllegalArgumentException {
     key = ensureBundleName(key);
     String value = props.getProperty(key);
