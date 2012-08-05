@@ -1,0 +1,105 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cv.lecturesight</groupId>
+  <artifactId>lecturesight-ptzcontrol-visca</artifactId>
+  <version>0.3-SNAPSHOT</version>
+  <name>LectureSight PTZ-Camera Control VISCA</name>
+  <packaging>bundle</packaging>
+  
+  <parent>
+    <groupId>cv.lecturesight</groupId>
+    <artifactId>base</artifactId>
+    <version>0.3-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-ptzcontrol-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <version>1.4.4</version>
+        <executions>
+          <execution>
+            <id>generate-scr-scrdescriptor</id>
+            <goals>
+              <goal>scr</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.0.1</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-NativeCode>
+              <!--lib/Linux/i686/libptzcamvisca.so; osname=Linux; processor=x86, -->
+              lib/Linux/x86_64/libptzcamvisca.so; osname=Linux; processor=x86-64
+              <!--
+              lib/macosx/x86/libptzcamvisca.so;
+              osname=Mac OS X;
+              processor=x86; processor=PowerPC,
+
+              lib/solaris/sparc/libptzcamvisca.so;
+              osname=Solaris; processor=Sparc,
+
+              lib/solaris/sparc-64/libptzcamvisca.so;
+              osname=Solaris; processor=Sparc64,
+
+              lib/windows/i368-mingw32/ptzcamvisca.dll;
+              osname=Win32; processor=x86  
+                            -->
+            </Bundle-NativeCode>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -56,6 +56,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   OCLSignal sig_DONE;
   int[] workDim;
   private Font font = new Font("Monospaced", Font.PLAIN, 10);
+  private Font smallFont = new Font("Monospaced", Font.PLAIN, 8);
 
   protected void activate(ComponentContext cc) throws Exception {
     sig_DONE = ocl.getSignal(SIGNAME_DONE_VISUAL);
@@ -84,7 +85,6 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
   @Override
   public void render(Graphics g) {
-    g.setFont(font);
 
     // draw RegionTracker data
     g.setColor(Color.lightGray);
@@ -99,23 +99,34 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
       g.drawOval(pos.getX(), pos.getY(), 2, 2);
 
       //String info = Integer.toString(region.getLabel()) + ": " + Integer.toString(pos.getX()) + "/" + Integer.toString(pos.getY());
+      g.setFont(smallFont);
       String info = Integer.toString(region.getLabel());
       g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() + 10);
     }
 
-    // draw RegionTracker data
-    g.setColor(Color.yellow);
+    // draw ObjectTracker data
     List<TrackerObject> objects = oTracker.getCurrentlyTracked();
     for (Iterator<TrackerObject> it = objects.iterator(); it.hasNext();) {
+      g.setColor(Color.yellow);
       TrackerObject object = it.next();
       BoundingBox box = (BoundingBox) object.getProperty("obj.bbox");
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
 
       String info = Integer.toString(object.getId());
-      g.drawString(info, box.getMin().getX() + 1, box.getMin().getY() - 10);
+      g.setFont(font);
+      g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
+      
+      if (object.hasProperty("head.center")) {
+        g.setColor(Color.cyan);
+        BoundingBox hbox = (BoundingBox) object.getProperty("head.boundingbox");
+        g.drawRect(box.getMin().getX() + hbox.getMin().getX(), 
+                box.getMin().getY() + hbox.getMin().getY(), 
+                hbox.getWidth(), hbox.getHeight());
+      }
 
-//      int x = box.getMax().getX() + 1;
-//      int y = box.getMin().getY();
+//      int x = box.getMin().getX();
+//      int y = box.getMax().getY() + 8;
+//      g.setFont(smallFont);
 //      for (Iterator<String> pit = object.getProperties().keySet().iterator(); pit.hasNext();) {
 //        String key = pit.next();
 //        Object val = object.getProperty(key);
@@ -127,9 +138,10 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     
     // draw frame information
     g.setColor(Color.white);
+    g.setFont(font);
     g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
     g.drawString("regions : " + regions.size(), 2, 36);
-    g.drawString("objects : ", 2, 46);
+    g.drawString("objects : " + objects.size(), 2, 46);
 
     ocl.castSignal(sig_DONE);
   }

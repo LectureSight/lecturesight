@@ -59,7 +59,7 @@ public class HeadDecorator implements ObjectDecorator {
   public void examine(TrackerObject object) {
     // Try to read the image
     try {
-      BoundingBox bbox = (BoundingBox)object.getProperty(ObjectTracker.OBJ_PROPKEY_BBOX);
+      BoundingBox bbox = (BoundingBox) object.getProperty(ObjectTracker.OBJ_PROPKEY_BBOX);
       BufferedImage image = fgs.getForegroundMapHost();
       WritableRaster r = image.getRaster();
 
@@ -79,11 +79,11 @@ public class HeadDecorator implements ObjectDecorator {
         }
       }
 
-      if(points.length() > PARAM_K) {
+      if (points.length() > PARAM_K) {
         Position gravity = new ClusterStack(points).get_center();
 
         // Cluster array
-        ClusterStack[] clusters = object.getProperty(OBJ_PROPKEY_HEAD_CLUSTERS);
+        ClusterStack[] clusters = (ClusterStack[])object.getProperty(OBJ_PROPKEY_HEAD_CLUSTERS);
 
         if(clusters == null) {
           clusters = new ClusterStack[PARAM_K];
@@ -149,18 +149,13 @@ public class HeadDecorator implements ObjectDecorator {
 
         // save results to TackerObject
         int bx = bbox.getMin().getX(), by = bbox.getMin().getY();
-        object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) bx + gravity.getX(), (int) by + gravity.getY()));
+        object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) gravity.getX(), (int) gravity.getY()));
         object.setProperty(OBJ_PROPKEY_HEAD_BBOX, new BoundingBox(
-                new Position(bx + (int) boundaries[0].getX(), by + (int) boundaries[0].getY()),
-                new Position(bx + (int) boundaries[1].getX(), by + (int) boundaries[1].getY())));
-        object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, clusters[optimal].radius());
+                new Position((int) boundaries[0].getX(), (int) boundaries[0].getY()),
+                new Position((int) boundaries[1].getX(), (int) boundaries[1].getY())));
+        object.setProperty(OBJ_PROPKEY_HEAD_RADIUS, new Double(clusters[optimal].radius()));
         object.setProperty(OBJ_PROPKEY_HEAD_CLUSTERS, clusters);
       }
-
-//      Position head = (Position) object.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
-//
-//      System.out.println("Head: " + head.getX() + ", " + head.getY());
-
     } catch (Exception e) {
       log.error("Error in head finder!", e);
     }
