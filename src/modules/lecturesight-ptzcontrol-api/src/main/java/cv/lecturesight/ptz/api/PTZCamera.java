@@ -190,4 +190,8 @@ public interface PTZCamera {
    * @return true to turn AF on and false to turn it off.
    */
   public boolean isAutoFocusSet() throws Exception;
+  
+  public float getPan() throws Exception;
+  
+  public float getTilt() throws Exception;
 }
