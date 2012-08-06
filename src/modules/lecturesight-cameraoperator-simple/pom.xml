@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-profile-manager</artifactId>
-  <name>LectureSight Scene Profile Manager</name>
+  <artifactId>lecturesight-cameraoperator-simple</artifactId>
+  <name>LectureSight (simple) Camera Operator</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
@@ -17,9 +17,14 @@
   </parent>
   
   <dependencies>
-    <!-- dependency>
+    <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-opencl-api</artifactId>
+      <artifactId>lecturesight-cameraoperator-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-util</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -29,17 +34,8 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
+      <artifactId>lecturesight-ptzcontrol-api</artifactId>
       <version>${project.version}</version>
-    </dependency -->
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-util</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.fileinstall</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -56,10 +52,6 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
     </dependency>
   </dependencies>
   
@@ -90,21 +82,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.profile.manager</Bundle-SymbolicName>
-            <Export-Package>
-              cv.lecturesight.profile.api;version=${project.version},
-              cv.lecturesight.profile.manager;version=${project.version}
-            </Export-Package>
+            <Bundle-SymbolicName>cv.lecturesight.cameraoperator.simple</Bundle-SymbolicName>
           </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>
