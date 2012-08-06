@@ -12,7 +12,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Reference;
@@ -101,14 +100,16 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   public SceneProfile loadProfile(InputStream is) throws IllegalArgumentException {
     try {
       SceneProfile out = (SceneProfile) deserializer.unmarshal(is);
+      is.close();
       return out;
     } catch (JAXBException e) {
       String msg = "Unable to deserialize SceneProfile: " + e;
-      log.warn(msg);
+      log.error(msg, e);
       throw new IllegalArgumentException(msg);
-    } finally {
-      IOUtils.closeQuietly(is);
+    } catch (IOException e) {
+      log.warn("Unable to close InputStream: " + e.getMessage());
     }
+    return null;
   }
 
   @Override
