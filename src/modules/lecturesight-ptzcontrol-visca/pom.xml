@@ -47,6 +47,26 @@
   
   <build>
     <plugins>
+      
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>build-native</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <property name="native.classpath" refid="maven.compile.classpath"/>
+                <echo file="${project.build.directory}/compile-classpath" message="${native.classpath}"/>
+                <exec dir="lib/ptzcamvisca" executable="make" failonerror="true"/>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -69,24 +89,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.ptz.visca</Bundle-SymbolicName>
             <Bundle-NativeCode>
-              <!--lib/Linux/i686/libptzcamvisca.so; osname=Linux; processor=x86, -->
+              lib/Linux/i686/libptzcamvisca.so; osname=Linux; processor=x86,
               lib/Linux/x86_64/libptzcamvisca.so; osname=Linux; processor=x86-64
-              <!--
-              lib/macosx/x86/libptzcamvisca.so;
-              osname=Mac OS X;
-              processor=x86; processor=PowerPC,
-
-              lib/solaris/sparc/libptzcamvisca.so;
-              osname=Solaris; processor=Sparc,
-
-              lib/solaris/sparc-64/libptzcamvisca.so;
-              osname=Solaris; processor=Sparc64,
-
-              lib/windows/i368-mingw32/ptzcamvisca.dll;
-              osname=Win32; processor=x86  
-                            -->
             </Bundle-NativeCode>
           </instructions>
         </configuration>
