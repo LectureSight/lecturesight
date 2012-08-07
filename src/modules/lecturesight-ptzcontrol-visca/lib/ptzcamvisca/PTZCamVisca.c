@@ -1000,7 +1000,7 @@ JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getPan
         return 0.0;
     }
     
-    if (pan_pos > elem->visca_struct->max_position[cam_no]->pan)
+/*    if (pan_pos > elem->visca_struct->max_position[cam_no]->pan)
     {
         result =  -1.0 + (float)(
                 (float)(pan_pos - elem->visca_struct->min_position[cam_no]->pan) / 
@@ -1010,9 +1010,22 @@ JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getPan
     {
         result = (float)((float) pan_pos  / (float) elem->visca_struct->max_position[cam_no]->pan);
     }
+*/
+    if (pan_pos > 0)
+    {
+    	result = (float)pan_pos / (float)elem->visca_struct->max_position[cam_no]->pan;
+    }
+    else if (pan_pos < 0) 
+    {
+	result = -1.0 * ((float)pan_pos / (float)elem->visca_struct->min_position[cam_no]->pan);
+    }
+    else
+    {
+	result = 0.0;
+    }
     
 #ifdef DEBUG
-    printf("pan: %f (%i)\n", result, pan_pos);
+    printf("pan : %f (%i) [%i..%i]\n", result, pan_pos, elem->visca_struct->min_position[cam_no]->pan, elem->visca_struct->max_position[cam_no]->pan);
 #endif
     return result;
 }
@@ -1036,6 +1049,7 @@ JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getTilt
         return 0.0;
     }
 
+/*
     if (tilt_pos > elem->visca_struct->max_position[cam_no]->tilt)
     {
         result = -1.0 + (float)(
@@ -1046,9 +1060,23 @@ JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getTilt
     {
         result = (float)((float) tilt_pos / (float) elem->visca_struct->max_position[cam_no]->tilt);
     }
+*/
+
+    if (tilt_pos > 0)
+    {
+    	result = (float)tilt_pos / (float)elem->visca_struct->max_position[cam_no]->tilt;
+    }
+    else if (tilt_pos < 0) 
+    {
+	result = -1.0 * (float)tilt_pos / (float)elem->visca_struct->min_position[cam_no]->tilt;
+    }
+    else
+    {
+	result = 0.0;
+    }
     
 #ifdef DEBUG
-    printf("tilt: %f (%i)\n", result, tilt_pos);
+    printf("tilt: %f (%i) [%i..%i]\n", result, tilt_pos, elem->visca_struct->min_position[cam_no]->tilt, elem->visca_struct->max_position[cam_no]->tilt);
 #endif
     return result;
 }

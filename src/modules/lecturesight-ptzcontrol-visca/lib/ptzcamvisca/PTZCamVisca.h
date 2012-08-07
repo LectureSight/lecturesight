@@ -16,7 +16,7 @@
 
 #ifndef VISCAPosition_t
 	typedef struct {
-		unsigned int pan, tilt, zoom, focus;
+		int pan, tilt, zoom, focus;
 	} VISCAPosition_t;
 #endif
 
@@ -54,7 +54,7 @@ VISCAMap *map = NULL;
 
 
 /************************************************************/
-/*						VISCAMap 							*/
+/* VISCAMap                                                 */
 /************************************************************/
 
 VISCAMap *get_visca_elem(const char *port)

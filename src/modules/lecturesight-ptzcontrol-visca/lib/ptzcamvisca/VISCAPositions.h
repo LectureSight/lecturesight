@@ -8,7 +8,7 @@ int set_default_value(unsigned int model,
 			VISCAPosition_t *min_position, VISCAPosition_t *max_position, 
 			VISCACamSpeed_t *min_speed, VISCACamSpeed_t *max_speed, VISCACamSpeed_t *avg_speed) 
 {
-	unsigned int pan_pos, tilt_pos, zoom_pos, focus_pos;
+	int pan_pos, tilt_pos, zoom_pos, focus_pos;
 	uint8_t pan_speed, tilt_speed;
 	unsigned int zoom_speed_tele, zoom_speed_wide;
 
@@ -55,8 +55,8 @@ int set_default_value(unsigned int model,
 
 		case D70_D70P_MODEL:
 			/* set min value */
-			pan_pos = 0x71DF;
-			tilt_pos = 0xE6CF;
+			pan_pos = -36400;
+			tilt_pos = -6449;
 			zoom_pos = 0x0000;
 			focus_pos = 0x1000;
 			pan_speed = 1;
@@ -73,8 +73,8 @@ int set_default_value(unsigned int model,
 			min_speed->zoom_speed_wide = zoom_speed_wide;
 
 			/* set max value */
-			pan_pos = 0x8E30;
-			tilt_pos = 0x4B0F; //0x195F;
+			pan_pos = 36400;
+			tilt_pos = 19215;
 			zoom_pos = 0x7AC0; 
 			focus_pos = 0xC000; 
 			pan_speed = 18;
