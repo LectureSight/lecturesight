@@ -156,7 +156,7 @@ int remove_visca_elem(const char *port)
 }
 
 /************************************************************/
-/*						VISCAStruct							*/
+/* VISCAStruct                                              */
 /************************************************************/
 
 VISCAStruct *create_visca_struct()

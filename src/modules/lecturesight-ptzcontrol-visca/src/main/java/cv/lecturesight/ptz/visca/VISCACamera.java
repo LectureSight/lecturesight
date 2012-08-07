@@ -350,4 +350,22 @@ public class VISCACamera implements PTZCamera {
    */
   @Override
   public native float getTilt() throws PTZCameraException;
+
+  @Override
+  public native void moveUpLeft() throws PTZCameraException;
+
+  @Override
+  public native void moveUpRight() throws PTZCameraException;
+
+  @Override
+  public native void moveDownLeft() throws PTZCameraException;
+
+  @Override
+  public native void moveDownRight() throws PTZCameraException;
+
+  @Override
+  public native void limitPanTiltUpRight(float pan, float tilt) throws PTZCameraException;
+
+  @Override
+  public native void limitPanTiltDownLeft(float pan, float tilt) throws PTZCameraException;
 }

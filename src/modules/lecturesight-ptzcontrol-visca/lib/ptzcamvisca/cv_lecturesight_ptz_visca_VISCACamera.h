@@ -271,6 +271,54 @@ JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getPan
 JNIEXPORT jfloat JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_getTilt
   (JNIEnv *, jobject);
 
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    moveUpLeft
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_moveUpLeft
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    moveUpRight
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_moveUpRight
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    moveDownLeft
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_moveDownLeft
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    moveDownRight
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_moveDownRight
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    limitPanTiltUpRight
+ * Signature: (FF)V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_limitPanTiltUpRight
+  (JNIEnv *, jobject, jfloat, jfloat);
+
+/*
+ * Class:     cv_lecturesight_ptz_visca_VISCACamera
+ * Method:    limitPanTiltDownLeft
+ * Signature: (FF)V
+ */
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_limitPanTiltDownLeft
+  (JNIEnv *, jobject, jfloat, jfloat);
+
 #ifdef __cplusplus
 }
 #endif
