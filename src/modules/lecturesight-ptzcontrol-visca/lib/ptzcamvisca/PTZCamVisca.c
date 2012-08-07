@@ -712,6 +712,82 @@ JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_moveRight
     }
 }
 
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_upLeft
+(JNIEnv *env, jobject obj)
+{
+    int cam_no = get_cam_number(env, obj);
+    const char *port = get_port(env, obj);
+    const char *port_name = get_port_name(env, obj);
+    VISCAMap *elem = get_visca_elem(port);
+
+    if (!initialized(elem)) return;
+
+    if (VISCA_set_pantilt_upleft(elem->interface, elem->visca_struct->camera[cam_no],
+                                 elem->visca_struct->speed[cam_no]->pan_speed,
+                                 elem->visca_struct->speed[cam_no]->tilt_speed) != VISCA_SUCCESS)
+    {
+        throwException(env, PTZ_CAM_EXCEPTION, 
+                "Can not move up/left (port '%s' camera %d)", port_name, cam_no+1);
+    }
+}
+
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_upRight
+(JNIEnv *env, jobject obj)
+{
+    int cam_no = get_cam_number(env, obj);
+    const char *port = get_port(env, obj);
+    const char *port_name = get_port_name(env, obj);
+    VISCAMap *elem = get_visca_elem(port);
+
+    if (!initialized(elem)) return;
+
+    if (VISCA_set_pantilt_upright(elem->interface, elem->visca_struct->camera[cam_no],
+                                  elem->visca_struct->speed[cam_no]->pan_speed,
+                                  elem->visca_struct->speed[cam_no]->tilt_speed) != VISCA_SUCCESS)
+    {
+        throwException(env, PTZ_CAM_EXCEPTION, 
+                "Can not move up/left (port '%s' camera %d)", port_name, cam_no+1);
+    }
+}
+
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_downLeft
+(JNIEnv *env, jobject obj)
+{
+    int cam_no = get_cam_number(env, obj);
+    const char *port = get_port(env, obj);
+    const char *port_name = get_port_name(env, obj);
+    VISCAMap *elem = get_visca_elem(port);
+
+    if (!initialized(elem)) return;
+
+    if (VISCA_set_pantilt_downleft(elem->interface, elem->visca_struct->camera[cam_no],
+                                   elem->visca_struct->speed[cam_no]->pan_speed,
+                                   elem->visca_struct->speed[cam_no]->tilt_speed) != VISCA_SUCCESS)
+    {
+        throwException(env, PTZ_CAM_EXCEPTION, 
+                "Can not move up/left (port '%s' camera %d)", port_name, cam_no+1);
+    }
+}
+
+JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_downRight
+(JNIEnv *env, jobject obj)
+{
+    int cam_no = get_cam_number(env, obj);
+    const char *port = get_port(env, obj);
+    const char *port_name = get_port_name(env, obj);
+    VISCAMap *elem = get_visca_elem(port);
+
+    if (!initialized(elem)) return;
+
+    if (VISCA_set_pantilt_downright(elem->interface, elem->visca_struct->camera[cam_no],
+                                    elem->visca_struct->speed[cam_no]->pan_speed,
+                                    elem->visca_struct->speed[cam_no]->tilt_speed) != VISCA_SUCCESS)
+    {
+        throwException(env, PTZ_CAM_EXCEPTION, 
+                "Can not move up/left (port '%s' camera %d)", port_name, cam_no+1);
+    }
+}
+
 JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_stopMove
 (JNIEnv *env, jobject obj)
 {
