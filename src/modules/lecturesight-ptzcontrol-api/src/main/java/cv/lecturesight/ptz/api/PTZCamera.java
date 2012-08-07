@@ -147,6 +147,18 @@ public interface PTZCamera {
    */
   public void moveRight() throws Exception;
 
+  public void moveUpLeft() throws Exception;
+  
+  public void moveUpRight() throws Exception;
+  
+  public void moveDownLeft() throws Exception;
+  
+  public void moveDownRight() throws Exception;
+  
+  public void limitPanTiltUpRight(float pan, float tilt) throws Exception;
+  
+  public void limitPanTiltDownLeft(float pan, float tilt) throws Exception;
+  
   /**
    * Stop moving the camera.
    */
