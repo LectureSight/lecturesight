@@ -39,6 +39,16 @@ public class CameraControlPanel extends JPanel implements MouseListener {
     g.setColor(Color.black);
     g.fillRect(0, 0, getWidth(), getHeight());
     
+    g.setColor(Color.green);
+    g.drawRect(1, 1, 20, 10);
+    Color fillColor = model.isMoving() ? Color.green : Color.black;
+    Color textColor = model.isMoving() ? Color.black : Color.green;
+    String status = model.isMoving() ? "MOV" : "STL";
+    g.setColor(fillColor);
+    g.fillRect(2, 2, 19, 9);
+    g.setColor(textColor);
+    g.drawString(status, 2, 10);
+    
     // coordinate cross
     g.setColor(Color.green);
     g.drawLine(1, rootY, getWidth()-2, rootY);

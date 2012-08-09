@@ -5,12 +5,15 @@ import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-/** Camera Steering Worker Implementation
+/** Camera Steering SteeringWorker Implementation
  *
  */
 @Component(name = "lecturesight.ptz.steering.worker", immediate = true)
@@ -33,8 +36,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   PTZCamera camera;
   private CameraMovementModel model;
   CameraMovementUI ui;
-  private Thread workerThread = null;
-  float dt = 0.2f, dt2 = 0.05f, dt_xy = 0.02f, damp_pan, damp_tilt;
+  SteeringWorker worker;
+  ScheduledExecutorService executor = null;
+  float dt_a = 0.2f, dt_b = 0.05f, dt_xy = 0.02f, damp_pan, damp_tilt;
   boolean move_snap = false;
   boolean steering = false;
 
@@ -58,8 +62,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   void updateConfiguration() {
-    dt = config.getFloat(PROPKEY_THRESHALPHA);
-    dt2 = config.getFloat(PROPKEY_THRESHBETA);
+    dt_a = config.getFloat(PROPKEY_THRESHALPHA);
+    dt_b = config.getFloat(PROPKEY_THRESHBETA);
     dt_xy = config.getFloat(PROPKEY_THRESHXY);
     damp_pan = config.getFloat(PROPKEY_DAMP_PAN);
     damp_tilt = config.getFloat(PROPKEY_DAMP_TILT);
@@ -72,11 +76,14 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   @Override
-  public void setSteering(boolean on) {
-    if (on == false) {
+  public void setSteering(boolean b) {
+    if (b == false) {
       stopMoving();
+      log.info("Steering OFF");
+    } else {
+      log.info("Steering ON");
     }
-    steering = on;
+    steering = b;
   }
 
   @Override
@@ -96,10 +103,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void start() {
-    if (workerThread == null) {
+    if (executor == null) {
       updateConfiguration();
-      workerThread = new Thread(new Worker(config.getInt(PROPKEY_INTERVAL)));
-      workerThread.start();
+      executor = Executors.newScheduledThreadPool(1);
+      worker = new SteeringWorker();
+      executor.scheduleAtFixedRate(worker, 0, config.getInt(PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
       log.info("Started");
     } else {
       log.warn("Already running!");
@@ -108,10 +116,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void stop() {
-    if (workerThread != null) {
+    if (executor != null) {
       setSteering(false);
-      workerThread.interrupt();
-      workerThread = null;
+      worker.interrupt();
+      executor.shutdownNow();
+      executor = null;
       log.info("Stopped");
     } else {
       log.warn("Nothing to stop");
@@ -134,99 +143,91 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     return model.getTargetPosition();
   }
 
-  private class Worker implements Runnable {
+  private class SteeringWorker implements Runnable {
 
-    int interval;
     boolean running = true;
     NormalizedPosition last_pos = model.getActualPosition();
     NormalizedPosition current_pos;
 
-    public Worker(int interval) {
-      this.interval = interval;
-    }
-
     @Override
     public void run() {
       while (running) {
+
+        // get current position of camera
         try {
-          // get current position of camera
-          try {
-            current_pos = new NormalizedPosition(camera.getPan(), camera.getTilt());
-            model.setActualPosition(current_pos);
-            model.setMoving(last_pos.getX() != current_pos.getX() || last_pos.getY() != current_pos.getY());
-            ui.update();
-          } catch (Exception e) {
-            log.warn("Unable to update actual postion: " + e.getMessage());
-          }
+          current_pos = new NormalizedPosition(camera.getPan(), camera.getTilt());
+          model.setActualPosition(current_pos);
+          model.setMoving(last_pos.getX() != current_pos.getX() || last_pos.getY() != current_pos.getY());
+          ui.update();
+        } catch (Exception e) {
+          log.warn("Unable to update actual postion: " + e.getMessage());
+        }
 
-          // compute raw, absolute and euclidean distance btw actual position and target position
-          float dx = model.getActualPosition().getX() - model.getTargetPosition().getX();
-          float dx_abs = (float) Math.abs(dx);
-          float dy = model.getActualPosition().getY() - model.getTargetPosition().getY();
-          float dy_abs = (float) Math.abs(dy);
-          float d = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        // compute raw, absolute and euclidean distance btw actual position and target position
+        float dx = model.getActualPosition().getX() - model.getTargetPosition().getX();
+        float dx_abs = (float) Math.abs(dx);
+        float dy = model.getActualPosition().getY() - model.getTargetPosition().getY();
+        float dy_abs = (float) Math.abs(dy);
+        float d = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
 
-          try {
-            if (steering && d > dt2) {                  // did we reach target?
+        try {
+          if (steering && d > dt_b) {                  // did we reach target?
 
-              if (dx_abs < dt) {
-                float r = dx_abs / dt;
-                camera.setPanSpeed(damp_pan * r);
-              } else {
-                camera.setPanSpeed(damp_pan * 1.0f);
-              }
-
-              if (dy_abs < dt) {
-                float r = dy_abs / dt;
-                camera.setTiltSpeed(damp_tilt * r);
-              } else {
-                camera.setTiltSpeed(damp_tilt * 1.0f);
-              }
-
-              if (dx > dt_xy && dy < dt_xy) {
-                camera.moveUpLeft();
-
-              } else if (dx < dt_xy && dy < dt_xy) {
-                camera.moveUpRight();
-
-              } else if (dx > dt_xy && dy > dt_xy) {
-                camera.moveDownLeft();
-
-              } else if (dx < dt_xy && dy > dt_xy) {
-                camera.moveDownRight();
-
-              } else if (dx < dt_xy) {
-                camera.moveRight();
-
-              } else if (dx > dt_xy) {
-                camera.moveLeft();
-
-              } else if (dy < dt_xy) {
-                camera.moveUp();
-
-              } else if (dy > dt_xy) {
-                camera.moveDown();
-
-              }
+            if (dx_abs < dt_a) {
+              float r = dx_abs / dt_a;
+              camera.setPanSpeed(damp_pan * r);
             } else {
-              camera.stopMove();
-              if (move_snap) {
-                camera.move(
-                        model.getTargetPosition().getX(),
-                        model.getTargetPosition().getY());
-              }
+              camera.setPanSpeed(damp_pan * 1.0f);
             }
 
-          } catch (Exception e) {
-            log.warn("Unable to set camera movement: " + e.getMessage());
+            if (dy_abs < dt_a) {
+              float r = dy_abs / dt_a;
+              camera.setTiltSpeed(damp_tilt * r);
+            } else {
+              camera.setTiltSpeed(damp_tilt * 1.0f);
+            }
+
+            if (dx > dt_xy && dy < dt_xy) {
+              camera.moveUpLeft();
+
+            } else if (dx < dt_xy && dy < dt_xy) {
+              camera.moveUpRight();
+
+            } else if (dx > dt_xy && dy > dt_xy) {
+              camera.moveDownLeft();
+
+            } else if (dx < dt_xy && dy > dt_xy) {
+              camera.moveDownRight();
+
+            } else if (dx < dt_xy) {
+              camera.moveRight();
+
+            } else if (dx > dt_xy) {
+              camera.moveLeft();
+
+            } else if (dy < dt_xy) {
+              camera.moveUp();
+
+            } else if (dy > dt_xy) {
+              camera.moveDown();
+
+            }
+          } else {
+            camera.stopMove();
+            if (move_snap) {
+              camera.move(
+                      model.getTargetPosition().getX(),
+                      model.getTargetPosition().getY());
+            }
           }
 
-          last_pos = current_pos;
-          Thread.sleep(interval);
-        } catch (InterruptedException e) {
-          running = false;
+        } catch (Exception e) {
+          log.warn("Unable to set camera movement: " + e.getMessage());
         }
+
+        last_pos = current_pos;
       }
+      log.info("Worker thread exiting...");
     }
 
     public void interrupt() {

@@ -86,5 +86,6 @@ public class ConsoleCommands implements DummyInterface {
   
   public void update(String[] args) {
     ((CameraSteeringWorkerImpl)steerer).updateConfiguration();
+    log.info("Updated configuration");
   }
 }
