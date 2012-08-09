@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-ptzcontrol-api</artifactId>
+      <artifactId>lecturesight-steeringworker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
