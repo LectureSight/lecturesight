@@ -10,6 +10,8 @@
  */
 package cv.lecturesight.cameraoperator.simple;
 
+import cv.lecturesight.ptz.steering.impl.CameraControlPanel;
+import cv.lecturesight.ptz.steering.impl.CameraMovementModel;
 import cv.lecturesight.util.Log;
 import java.awt.BorderLayout;
 import javax.swing.UIManager;
@@ -117,7 +119,7 @@ public class CameraControlUI extends javax.swing.JFrame {
     java.awt.EventQueue.invokeLater(new Runnable() {
 
       public void run() {
-        new CameraControlUI().setVisible(true);
+        // NOP
       }
     });
   }

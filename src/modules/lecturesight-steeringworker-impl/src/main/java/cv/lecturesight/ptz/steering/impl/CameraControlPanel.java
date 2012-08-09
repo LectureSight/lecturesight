@@ -1,5 +1,6 @@
-package cv.lecturesight.cameraoperator.simple;
+package cv.lecturesight.ptz.steering.impl;
 
+import cv.lecturesight.ptz.steering.impl.CameraMovementModel;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
@@ -93,9 +94,10 @@ public class CameraControlPanel extends JPanel implements MouseListener {
   
   @Override
   public void mouseClicked(MouseEvent e) {
-    NormalizedPosition tpos = model.getTargetPosition();
-    tpos.setX(normalizer.normalizeX(e.getX()));
-    tpos.setY(normalizer.normalizeY(e.getY()));
+    NormalizedPosition tpos = new NormalizedPosition(
+            normalizer.normalizeX(e.getX()),
+            normalizer.normalizeY(e.getY()));
+    model.setTargetPosition(tpos);
     repaint();
   }
 

@@ -5,7 +5,7 @@
 #include "../libvisca-1.1.0/visca/libvisca.h"
 #include "cv_lecturesight_ptz_visca_VISCACamera.h"
 
-#define DEBUG
+#define NDEBUG
 
 #ifndef VISCACamSpeed_t
 	typedef struct {

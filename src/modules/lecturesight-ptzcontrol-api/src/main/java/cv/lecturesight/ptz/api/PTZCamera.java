@@ -206,4 +206,6 @@ public interface PTZCamera {
   public float getPan() throws Exception;
   
   public float getTilt() throws Exception;
+  
+  public String getPortName();
 }

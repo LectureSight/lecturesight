@@ -282,7 +282,7 @@ JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_setPanSpeed
     elem->visca_struct->speed[cam_no]->pan_speed = min + ((max - min) * pan_speed);
 
 #ifdef DEBUG
-    printf("panspeed set to %d\n", elem->visca_struct->speed[cam_no]->pan_speed);
+    printf("pan speed set to %d\n", elem->visca_struct->speed[cam_no]->pan_speed);
 #endif
 }
 
@@ -311,8 +311,7 @@ JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_setTiltSpeed
     elem->visca_struct->speed[cam_no]->tilt_speed = min + ((max - min) * tilt_speed);
 
 #ifdef DEBUG
-	printf("tiltspeed min: %d, max: %d, curr: %d\n", min, max, elem->visca_struct->speed[cam_no]->tilt_speed);
-    printf("tiltspeed set to %d\n", elem->visca_struct->speed[cam_no]->tilt_speed);
+    printf("tilt speed set to %d\n", elem->visca_struct->speed[cam_no]->tilt_speed);
 #endif
 }
 
@@ -656,27 +655,31 @@ JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_limitPanTiltUp
         return;
     }
 
-    if (pan < 0)
+    if (pan > 0)
     {
-        pos->pan = 0xFFFF - ((0xFFFF - elem->visca_struct->min_position[cam_no]->pan) * (pan * -1)) / 16;
+    	pos->pan = elem->visca_struct->max_position[cam_no]->pan * pan;
+    }
+    else if (pan < 0) 
+    {
+	pos->pan = elem->visca_struct->min_position[cam_no]->pan * pan;
     }
     else
     {
-        pos->pan = elem->visca_struct->max_position[cam_no]->pan * pan / 16;
+	pos->pan = 0;
     }
 
-    if (tilt < 0)
+    if (tilt > 0)
     {
-        pos->tilt = 0xFFFF - ((0xFFFF - elem->visca_struct->min_position[cam_no]->tilt) * (tilt * -1)) / 16;
+    	pos->tilt = elem->visca_struct->max_position[cam_no]->tilt * tilt;
+    }
+    else if (tilt < 0) 
+    {
+	pos->tilt = elem->visca_struct->min_position[cam_no]->tilt * tilt;
     }
     else
     {
-        pos->tilt = elem->visca_struct->max_position[cam_no]->tilt * tilt / 16;
+	pos->tilt = 0;
     }
-
-#ifdef DEBUG
-    printf("cam %d move(%.2f, %.2f) -> pan: 0x%x, tilt: 0x%x\n", cam_no, pan, tilt, pos->pan, pos->tilt);
-#endif
 
     if (VISCA_set_pantilt_limit_upright(elem->interface, elem->visca_struct->camera[cam_no], pos->pan, pos->tilt) != VISCA_SUCCESS)
     {
@@ -707,27 +710,31 @@ JNIEXPORT void JNICALL Java_cv_lecturesight_ptz_visca_VISCACamera_limitPanTiltDo
         return;
     }
 
-    if (pan < 0)
+    if (pan > 0)
     {
-        pos->pan = 0xFFFF - ((0xFFFF - elem->visca_struct->min_position[cam_no]->pan) * (pan * -1)) / 16;
+    	pos->pan = elem->visca_struct->max_position[cam_no]->pan * pan;
+    }
+    else if (pan < 0) 
+    {
+	pos->pan = elem->visca_struct->min_position[cam_no]->pan * pan;
     }
     else
     {
-        pos->pan = elem->visca_struct->max_position[cam_no]->pan * pan / 16;
+	pos->pan = 0;
     }
 
-    if (tilt < 0)
+    if (tilt > 0)
     {
-        pos->tilt = 0xFFFF - ((0xFFFF - elem->visca_struct->min_position[cam_no]->tilt) * (tilt * -1)) / 16;
+    	pos->tilt = elem->visca_struct->max_position[cam_no]->tilt * tilt;
+    }
+    else if (tilt < 0) 
+    {
+	pos->tilt = elem->visca_struct->min_position[cam_no]->tilt * tilt;
     }
     else
     {
-        pos->tilt = elem->visca_struct->max_position[cam_no]->tilt * tilt / 16;
+	pos->tilt = 0;
     }
-
-#ifdef DEBUG
-    printf("cam %d move(%.2f, %.2f) -> pan: 0x%x, tilt: 0x%x\n", cam_no, pan, tilt, pos->pan, pos->tilt);
-#endif
 
     if (VISCA_set_pantilt_limit_downleft(elem->interface, elem->visca_struct->camera[cam_no], pos->pan, pos->tilt) != VISCA_SUCCESS)
     {

@@ -20,7 +20,7 @@ public class VISCACamera implements PTZCamera {
   }
   private int camNo;
   private String port = "";
-  private String portName = "port1";
+  private String portName = "";
 
   public VISCACamera(String portName) {
     this.portName = portName;
@@ -46,6 +46,7 @@ public class VISCACamera implements PTZCamera {
    * Returns comm port name.
    * @return port name
    */
+  @Override
   public String getPortName() {
     return portName;
   }

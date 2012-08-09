@@ -71,7 +71,7 @@ public class VISCACameraFactory implements DummyInterface {
     int cam = 1;
     VISCACamera service = null;
     do {
-      logger.info("Initializing VISCA Camera " + cam + " on " + device);
+      logger.info("Initializing camera " + cam + " on " + device);
       service = new VISCACamera(portName);
       if (!service.initialize(device, cam)) {
         logger.error("Failed to initialize camera on port " + device);
@@ -108,6 +108,6 @@ public class VISCACameraFactory implements DummyInterface {
     }
     registrations.add(registration);
 
-    logger.info("Registered VISCA camera: " + portName);
+    logger.info("Registered camera: " + portName);
   }
 }
