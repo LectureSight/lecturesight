@@ -9,7 +9,7 @@ class CameraMovementUI {
   
   public CameraMovementUI(CameraMovementModel model) {
     controlPanel = new CameraControlPanel(model);
-    window.setTitle("PTZ Conrtol:  " + model.getCameraName());
+    window.setTitle("PTZ Control:  " + model.getCameraName());
     window.add(controlPanel);
     window.pack();
   }
