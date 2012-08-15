@@ -131,6 +131,11 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   public CLIntBuffer getIdBuffer() {
     return ids;
   }
+  
+  @Override
+  public CLIntBuffer getSizeBuffer() {
+    return sizes;
+  }
   //</editor-fold>
 
   /** Initialization Run :
@@ -216,8 +221,6 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
       numBlobs = numBlobs <= maxBlobs ? numBlobs : maxBlobs;    // FIXME maxBlobs check in kernel seems to be ignored
       idsH.get(ids_out, 0, numBlobs);
       sizesH.get(sizes_out, 0, numBlobs);
-//      ids_out = idsH.getInts(numBlobs);
-//      sizes_out = sizesH.getInts(numBlobs);
       ocl.castSignal(SIG_done);
     }
   }
