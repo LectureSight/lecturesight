@@ -52,4 +52,5 @@ public interface ForegroundService {
    */
   ConnectedComponentLabeler getLabeler();
 
+  int getActivity(int id);
 }
