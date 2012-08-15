@@ -212,6 +212,7 @@ public class RegionTrackerImpl implements RegionTracker {
 //            }
           }
         }
+        ((RegionImpl)region).splitter = false;
         newTrackedRegions.put(groupId, region);
       }
     }
@@ -229,6 +230,7 @@ public class RegionTrackerImpl implements RegionTracker {
           System.out.println(groupId + ": [" + heaviest + "]");
         }
         RegionImpl region = updateTrackerObject(heaviest, trackedRegions.get(groupId));
+        region.splitter = true;
         newTrackedRegions.put(heaviest, region);
         for (Iterator<Integer> sit = splitterIds.iterator(); sit.hasNext();) {
           int sId = sit.next();
@@ -239,12 +241,15 @@ public class RegionTrackerImpl implements RegionTracker {
                 System.out.println(" u " + sId);
               }
               region.members.remove(match);
+              ((RegionImpl)match).splitter = true;
               newTrackedRegions.put(sId, updateTrackerObject(sId, (RegionImpl) match));
             } else {
               if (debugEnabled) {
                 System.out.println(" * " + sId);
               }
-              newTrackedRegions.put(sId, createTrackerRegion(sId));
+              RegionImpl newRegion = createTrackerRegion(sId);
+              newRegion.splitter = true;
+              newTrackedRegions.put(sId, newRegion);
             }
           }
         }
@@ -262,23 +267,24 @@ public class RegionTrackerImpl implements RegionTracker {
         if (debugEnabled) {
           System.out.print(regionId + " <--- " + lastId);
         }
-        RegionImpl object;
+        RegionImpl region;
         if (lastId > 0) {
-          object = trackedRegions.get(lastId);
-          if (object == null) {
+          region = trackedRegions.get(lastId);
+          if (region == null) {
             log.warn("Region " + lastId + " was not present in last frame!");
           }
           if (debugEnabled) {
             System.out.println(" u");
           }
-          object = updateTrackerObject(regionId, object);
+          region = updateTrackerObject(regionId, region);
         } else {
           if (debugEnabled) {
             System.out.println(" *");
           }
-          object = createTrackerRegion(regionId);
+          region = createTrackerRegion(regionId);
         }
-        newTrackedRegions.put(regionId, object);
+        ((RegionImpl)region).splitter = false;
+        newTrackedRegions.put(regionId, region);
       }
     }
 

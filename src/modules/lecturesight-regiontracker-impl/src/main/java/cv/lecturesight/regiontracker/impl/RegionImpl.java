@@ -14,6 +14,7 @@ public class RegionImpl implements Region {
   int label;
   Region group = null;
   Set<Region> members = new HashSet<Region>();
+  boolean splitter = false;
 
   public RegionImpl(int label, Position centroid, BoundingBox bbox, int weight) {
     this.label = label;
@@ -49,6 +50,11 @@ public class RegionImpl implements Region {
     return weight;
   }
 
+  @Override
+  public boolean isSplitter() {
+    return splitter;
+  }
+  
   @Override
   public boolean isGroup() {
     return !members.isEmpty();
