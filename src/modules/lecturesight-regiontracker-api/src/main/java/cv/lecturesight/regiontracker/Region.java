@@ -14,6 +14,8 @@ public interface Region {
 
   int getWeight();
   
+  boolean isSplitter();
+  
   boolean isGroup();
   
   boolean isGroupMember();
