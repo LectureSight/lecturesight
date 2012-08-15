@@ -14,6 +14,7 @@ public interface ConnectedComponentLabeler {
   void doLabels();
   CLIntBuffer getLabelBuffer();
   CLIntBuffer getIdBuffer();
+  CLIntBuffer getSizeBuffer();
   void setMinBlobSize(int numPixels);
   void setMaxBlobSize(int numPixels);
   int getNumBlobs();
