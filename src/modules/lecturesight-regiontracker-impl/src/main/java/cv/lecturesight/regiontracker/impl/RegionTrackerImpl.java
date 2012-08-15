@@ -230,7 +230,8 @@ public class RegionTrackerImpl implements RegionTracker {
           System.out.println(groupId + ": [" + heaviest + "]");
         }
         RegionImpl region = updateTrackerObject(heaviest, trackedRegions.get(groupId));
-        region.splitter = false;
+        region.splitter = true;
+        region.members.clear();
         newTrackedRegions.put(heaviest, region);
         for (Iterator<Integer> sit = splitterIds.iterator(); sit.hasNext();) {
           int sId = sit.next();
@@ -248,6 +249,7 @@ public class RegionTrackerImpl implements RegionTracker {
                 System.out.println(" * " + sId);
               }
               RegionImpl newRegion = createTrackerRegion(sId);
+              region.members.add(newRegion);
               newRegion.splitter = true;
               newTrackedRegions.put(sId, newRegion);
             }
