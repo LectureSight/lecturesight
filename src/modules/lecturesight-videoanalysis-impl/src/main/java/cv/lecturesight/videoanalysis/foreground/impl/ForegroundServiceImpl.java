@@ -1,5 +1,6 @@
 package cv.lecturesight.videoanalysis.foreground.impl;
 
+import com.nativelibs4java.opencl.CLFloatBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
@@ -21,6 +22,8 @@ import java.awt.image.BufferedImage;
 import org.osgi.service.component.ComponentContext;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.EnumMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -78,7 +81,9 @@ public class ForegroundServiceImpl implements ForegroundService {
   private CLImage2D fgUpdated;              // foreground map output buffer
   private CLImageDoubleBuffer fgBuffer;     // foreground map working buffer
   private CLIntBuffer activity;             // buffer for activity count of blobs
+  private int[] activities;
   private BufferedImage fgMapHost;
+  private CLFloatBuffer activity_ratio;
 
   private int[] workDim;                    // dimensions of buffers
   private ConnectedComponentLabeler ccl;    // connected component analyzer
@@ -109,7 +114,9 @@ public class ForegroundServiceImpl implements ForegroundService {
     fgBuffer = new CLImageDoubleBuffer(
             ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]),
             ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]));
-    activity = ocl.context().createIntBuffer(Usage.InputOutput, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS));
+    activity = ocl.context().createIntBuffer(Usage.InputOutput, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1);
+    activity_ratio = ocl.context().createFloatBuffer(Usage.InputOutput, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1);
+    activities = new int[config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1];
 
     reset();    // initialize working buffers
     
@@ -180,6 +187,10 @@ public class ForegroundServiceImpl implements ForegroundService {
   public BufferedImage getForegroundMapHost() {
     return fgMapHost;
   }
+  
+  public int getActivity(int id) {
+    return activities[id];              // FIXME id+1 ???
+  }
   //</editor-fold>
           
   /** Resets all working buffers of this service.
@@ -230,13 +241,16 @@ public class ForegroundServiceImpl implements ForegroundService {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_CLEANING);
     OCLSignal SIG_startBGUpdate = bgmodel.getSignal(BackgroundModel.Signal.DO_UPDATE);
-    int[] bufferDim = new int[]{(int) activity.getElementCount()};                  // dimensions of the activity buffer
+    int[] bufferDim = new int[]{(int) activity.getElementCount()-1};                  // dimensions of the activity buffer
     CLKernel resetBuffer = ocl.programs().getKernel("fg", "reset_buffer");          // kernel that resets the activity buffer
     CLKernel fgRemoveSmallK = ocl.programs().getKernel("fg", "remove_smallblobs");  // kernel that removes small blobs
     CLKernel fgGatherActivity = ocl.programs().getKernel("fg", "gather_activity");  // kernel that computes the activity of blobs
+    CLKernel fgActRatioK = ocl.programs().getKernel("fg", "compute_activity_ratios");
     CLKernel fgDecayK = ocl.programs().getKernel("fg", "refresh_decay");            // kernel that refrshes/ages blobs
     CLImage2D bgUpdateMask = bgmodel.getUpdateMap();
-
+    IntBuffer activityH;
+    FloatBuffer ratiosH;
+    
     {
       resetBuffer.setArgs(activity, 0);     // parameters for reset kernel can be set once
     }
@@ -248,15 +262,39 @@ public class ForegroundServiceImpl implements ForegroundService {
       resetBuffer.enqueueNDRange(queue, bufferDim);                                                       // reset activity buffer
       fgGatherActivity.setArgs(ccl.getLabelBuffer(), activity, fgBuffer.last(), updateMap, workDim[0]);   // compute blob activity
       fgGatherActivity.enqueueNDRange(queue, workDim);
+      fgActRatioK.setArgs(activity, ccl.getSizeBuffer(), activity_ratio);                                         // compute activity activity_ratio
+      fgActRatioK.enqueueNDRange(queue, bufferDim);
       fgDecayK.setArgs(fgBuffer.last(), fgBuffer.current(), fgUpdated, ccl.getLabelBuffer(),              // refresh/age blobs
-              activity, config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
+              activity_ratio, config.getFloat(Constants.PROPKEY_DECAY_THRESHRATIO), config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
       fgDecayK.enqueueNDRange(queue, workDim);
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], fgUpdated, 0, 0, bgUpdateMask);
       fgMapHost = fgUpdated.read(queue);
+      activityH = activity.read(queue);
+//      ratiosH = activity_ratio.read(queue);
     }
 
     @Override
     public void land() {
+      
+//      activityH.get(activities, 0, activities.length);
+//      for (int i = 1; i < 20; i++) {
+//        System.out.print(activities[i] + " ");
+//      }
+//      System.out.println();
+//      
+//      for (int i = 1; i < 20; i++) {
+//        System.out.print(ccl.getSize(i) + " ");
+//      }
+//      System.out.println();
+//      
+//      float[] ratiosA = new float[20];
+//      ratiosH.get(ratiosA, 0, 20);
+//      for (int i = 1; i < 20; i++) {
+//        System.out.print(ratiosA[i] + " ");
+//      }
+//      
+//      System.out.println("\n----------------------------------");
+      
       ocl.castSignal(SIG_startBGUpdate);
       ocl.castSignal(SIG_done);     // cast completion signal
     }

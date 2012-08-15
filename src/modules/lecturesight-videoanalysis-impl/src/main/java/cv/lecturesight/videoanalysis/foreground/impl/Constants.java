@@ -7,6 +7,7 @@ public class Constants {
   final static String PROPKEY_CCL_MAXBLOBS = "foreground.ccl.maxblobs";
   final static String PROPKEY_CCL_MINSIZE = "foreground.ccl.blobsize.min";
   final static String PROPKEY_CCL_MAXSIZE = "foreground.ccl.blobsize.max";
+  final static String PROPKEY_DECAY_THRESHRATIO = "foreground.decay.threshold";
   final static String PROPKEY_DECAY_ALPHA = "foreground.decay.alpha";
   final static String SIGNAME_DONE_UPDATE = "cv.lecturesight.foregorund.update.DONE";
   final static String SIGNAME_DONE_CLEANING = "cv.lecturesight.foreground.cleaning.DONE";

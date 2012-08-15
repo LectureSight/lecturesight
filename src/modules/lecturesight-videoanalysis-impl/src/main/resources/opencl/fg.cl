@@ -71,12 +71,12 @@ __kernel void update_foreground
 	uint4 mask_pxl = read_imageui(update_mask, sampler, pos);
 	if (mask_pxl.s0 == 255)
 	{
-		write_imageui(output, pos, 0);
+     write_imageui(output, pos, 0);
 	}
 	else if (mask_pxl.s1 == 255)
 	{
-		write_imageui(output, pos, 255);
-	}		
+     write_imageui(output, pos, 255);
+	}
 }
 
 
@@ -127,6 +127,7 @@ __kernel void image_dilate8
 	{
 		out_pxl = 255;
 	}
+  barrier( CLK_GLOBAL_MEM_FENCE );
 	write_imageui(output, pos, out_pxl);
 }
 
@@ -147,7 +148,8 @@ __kernel void refresh_decay
   __write_only image2d_t current,
   __write_only image2d_t output,
   __global     int* labels,
-  __global     int* activity,
+  __global     float* activity_ratio,
+               float threshold,
                int alpha,
                int width 
 )
@@ -161,19 +163,20 @@ __kernel void refresh_decay
   {
     int adr = ENCODE_INDEX(pos);
     int id = -1 * labels[adr];
-    if (activity[id] != 0) 
+    if (activity_ratio[id] > threshold) 
     {
       val = 255;
     }
     else 
     {
-      val = in_pxl.s0 - alpha;
+      val = in_pxl.s0 - ((1 - activity_ratio[id]) * alpha);
       if (val < 0) 
       {
         val=0;
       }
     }
   }
+  barrier( CLK_GLOBAL_MEM_FENCE );
   uint4 out_pxl = (uint4)(val, val, val, 255);
   write_imageui(current, pos_img, out_pxl);
   write_imageui(output, pos_img, out_pxl);
@@ -198,9 +201,25 @@ __kernel void gather_activity
     {
       int adr = ENCODE_INDEX(pos);
       int idx = -1 * labels[adr];
-      atom_inc(activity + idx);       // FIXME this line yields CL_INVALID_BINARY on NVIDIA cards
-//      activity[idx] = 1;
+      atom_inc(activity + idx);      
     }
   }
 }
 
+__kernel void compute_activity_ratios
+(
+    __global int* activities,
+    __global int* sizes,
+    __global float* ratios
+)
+{
+    int pos = get_global_id(0);
+    float activity = (float)activities[pos+1];
+    float size = (float)sizes[pos];
+    float result = 0.0;
+    if (size > 0.0) {
+        result = activity / size;
+    }
+    barrier( CLK_GLOBAL_MEM_FENCE );    
+    ratios[pos+1] = result;
+}
