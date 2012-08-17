@@ -10,13 +10,13 @@ MACHINE		:= $(shell uname -m)
 ################################################################################
 default: install
 
-libptzcamvisca.so: cv_lecturesight_ptz_visca_VISCACamera.h PTZCamVisca.o libvisca.o
+libptzcamvisca.so: cv_lecturesight_ptz_visca_LibVISCACamera.h PTZCamVisca.o libvisca.o
 	$(CC) $(CFLAGS) -shared -o libptzcamvisca.so PTZCamVisca.o $(LIBVISCA_PATH)/.libs/libvisca*.o
 	
-cv_lecturesight_ptz_visca_VISCACamera.h: 
-	$(JAVAH) -classpath ../../target/classes cv.lecturesight.ptz.visca.VISCACamera
+cv_lecturesight_ptz_visca_LibVISCACamera.h: 
+	$(JAVAH) -classpath ../../target/classes cv.lecturesight.ptz.visca.LibVISCACamera
 	
-PTZCamVisca.o: PTZCamVisca.c PTZCamVisca.h VISCAPositions.h
+PTZCamVisca.o: PTZCamVisca.c PTZCamVisca.h
 	$(CC) $(CFLAGS) -I $(JAVA_HOME)/include -I $(JAVA_HOME)/include/linux -c PTZCamVisca.c
 
 libvisca.o: 
