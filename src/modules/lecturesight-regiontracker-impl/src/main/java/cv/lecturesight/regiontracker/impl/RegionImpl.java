@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class RegionImpl implements Region {
 
+  long firstSeenTS, lastMoveTS;
   BoundingBox bbox = null;
   Position centroid = null;
   int weight = 0;
@@ -16,15 +17,20 @@ public class RegionImpl implements Region {
   Set<Region> members = new HashSet<Region>();
   boolean splitter = false;
 
-  public RegionImpl(int label, Position centroid, BoundingBox bbox, int weight) {
+  public RegionImpl(int label, long time, Position centroid, BoundingBox bbox, int weight) {
+    this.firstSeenTS = time;
+    this.lastMoveTS = time;
     this.label = label;
     this.centroid = centroid;
     this.bbox = bbox;
     this.weight = weight;
   }
   
-  public void update(int label, Position centroid, BoundingBox bbox, int weight) {
+  public void update(int label, long time, Position centroid, BoundingBox bbox, int weight) {
     this.label = label;
+    if (this.centroid != centroid) {
+      lastMoveTS = time;
+    }
     this.centroid = centroid;
     this.bbox = bbox;
     this.weight = weight;
@@ -35,6 +41,16 @@ public class RegionImpl implements Region {
     return label;
   }
 
+  @Override
+  public long getFirstSeenTime() {
+    return firstSeenTS;
+  }
+
+  @Override
+  public long getLastMoveTime() {
+    return lastMoveTS;
+  }
+  
   @Override
   public BoundingBox getBoundingBox() {
     return bbox;

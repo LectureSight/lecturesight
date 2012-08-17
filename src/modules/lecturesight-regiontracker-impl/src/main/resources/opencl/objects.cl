@@ -48,3 +48,20 @@ __kernel void gather_label_pairs
   }
 }
 
+__kernel void set_region
+(
+    __write_only image2d_t fg_map,
+    __global     int*      labels,
+    int x, int y, int width, int id, int val
+)
+{
+    int2 pos = (int2)(get_global_id(0)+x, get_global_id(1)+y);
+    int adr = ENCODE_INDEX(pos);
+    int px_id = -1 * labels[adr];
+    if (px_id == id) {
+        uint4 out_pxl = (uint4)(val, val, val, 255);
+        write_imageui(fg_map, pos, out_pxl);
+    }
+}
+
+
