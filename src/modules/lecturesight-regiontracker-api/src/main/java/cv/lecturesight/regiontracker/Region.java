@@ -8,6 +8,10 @@ public interface Region {
   
   int getLabel();
 
+  long getFirstSeenTime();
+  
+  long getLastMoveTime();
+  
   BoundingBox getBoundingBox();
 
   Position getCentroid();

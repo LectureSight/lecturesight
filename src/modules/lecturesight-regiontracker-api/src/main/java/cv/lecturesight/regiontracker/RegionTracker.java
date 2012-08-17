@@ -19,6 +19,7 @@ public interface RegionTracker {
   Region getRegionByLabel(int id);
   List<Region> getRegions();
   int numRegions();
-  void discardRegion(Region obj);
+  void strengthenRegion(Region region);
+  void discardRegion(Region region);
   
 }
