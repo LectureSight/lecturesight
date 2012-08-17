@@ -14,6 +14,14 @@
     <version>0.3-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
+  
+  <dependencies>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -33,6 +41,5 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-  </dependencies>
+  
 </project>
