@@ -13,6 +13,8 @@ public class RegionImpl implements Region {
   Position centroid = null;
   int weight = 0;
   int label;
+  float tr_x = 0;
+  float tr_y = 0;
   Region group = null;
   Set<Region> members = new HashSet<Region>();
   boolean splitter = false;

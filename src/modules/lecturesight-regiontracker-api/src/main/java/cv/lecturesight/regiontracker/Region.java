@@ -15,7 +15,7 @@ public interface Region {
   BoundingBox getBoundingBox();
 
   Position getCentroid();
-
+  
   int getWeight();
   
   boolean isSplitter();

@@ -45,9 +45,10 @@
     <module>modules/lecturesight-steeringworker-api</module>
     <module>modules/lecturesight-steeringworker-impl</module>
     <module>modules/lecturesight-profile-manager</module>
-    <!-- module>modules/lecturesight-cameraoperator-simple</module -->
+    <module>modules/lecturesight-cameraoperator-api</module>
+    <module>modules/lecturesight-cameraoperator-simple</module>
+    <module>modules/lecturesight-decorator-color</module>
     <!-- module>modules/lecturesight-decorator-person</module -->
-    <!-- module>modules/lecturesight-cameraoperator-api</module -->
     <!-- module>modules/lecturesight-cameraoperator-impl</module -->
   </modules>
 

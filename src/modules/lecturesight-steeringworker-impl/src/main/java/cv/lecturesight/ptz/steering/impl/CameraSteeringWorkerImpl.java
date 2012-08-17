@@ -118,7 +118,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   public void stop() {
     if (executor != null) {
       setSteering(false);
-      worker.interrupt();
       executor.shutdownNow();
       executor = null;
       log.info("Stopped");
@@ -145,7 +144,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   private class SteeringWorker implements Runnable {
 
-    boolean running = true;
     NormalizedPosition last_pos = model.getActualPosition();
     NormalizedPosition current_pos;
 
@@ -224,10 +222,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       }
 
       last_pos = current_pos;
-    }
-
-    public void interrupt() {
-      running = false;
     }
   }
 }

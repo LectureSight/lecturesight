@@ -9,5 +9,6 @@ public class Constants {
   static final String PROPKEY_HEIGHTMAX = "height.max";
   static final String PROPKEY_MATCHTHRESH = "regionmatch.threshold";
   static final String PROPKEY_TTL = "ttl";
-  
+  static final String PROPKEY_CHTHRESHOLD = "chthreshold";
+  static final String PROPKEY_DISTANCETHRESH = "distancethreshold";  
 }

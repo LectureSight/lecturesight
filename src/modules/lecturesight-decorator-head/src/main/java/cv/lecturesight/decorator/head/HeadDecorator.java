@@ -37,6 +37,8 @@ public class HeadDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_BBOX = "head.boundingbox";
   final static String OBJ_PROPKEY_HEAD_RADIUS = "head.radius";
   final static String OBJ_PROPKEY_HEAD_CLUSTERS = "head.clusters";
+  final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
+  
   private Log log = new Log("Head Finder");
   @Reference
   Configuration config;
@@ -78,6 +80,8 @@ public class HeadDecorator implements ObjectDecorator {
           }
         }
       }
+      
+      object.setProperty(OBJ_PROPKEY_BW_PIXELS, (float) points.length()/(width*height+1));
 
       if (points.length() > PARAM_K) {
         Position gravity = new ClusterStack(points).get_center();
@@ -149,7 +153,9 @@ public class HeadDecorator implements ObjectDecorator {
 
         // save results to TackerObject
         int bx = bbox.getMin().getX(), by = bbox.getMin().getY();
-        object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position((int) gravity.getX(), (int) gravity.getY()));
+        object.setProperty(OBJ_PROPKEY_HEAD_CENTROID, new Position(
+          (int) clusters[optimal].get_center().getX(), 
+          (int) clusters[optimal].get_center().getY()));
         object.setProperty(OBJ_PROPKEY_HEAD_BBOX, new BoundingBox(
                 new Position((int) boundaries[0].getX(), (int) boundaries[0].getY()),
                 new Position((int) boundaries[1].getX(), (int) boundaries[1].getY())));
@@ -157,7 +163,7 @@ public class HeadDecorator implements ObjectDecorator {
         object.setProperty(OBJ_PROPKEY_HEAD_CLUSTERS, clusters);
       }
     } catch (Exception e) {
-      log.error("Error in head finder!", e);
+      log.error("Error in head finder!", e.getCause());
     }
   }
 }

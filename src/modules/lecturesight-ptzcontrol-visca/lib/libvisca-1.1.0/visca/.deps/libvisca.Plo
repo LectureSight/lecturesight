@@ -1,7 +1,7 @@
 libvisca.lo: libvisca.c libvisca.h /usr/include/termios.h \
  /usr/include/features.h /usr/include/bits/predefs.h \
  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/bits/termios.h /usr/include/sys/ttydefaults.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h
@@ -20,7 +20,7 @@ libvisca.h:
 
 /usr/include/gnu/stubs.h:
 
-/usr/include/gnu/stubs-32.h:
+/usr/include/gnu/stubs-64.h:
 
 /usr/include/bits/types.h:
 

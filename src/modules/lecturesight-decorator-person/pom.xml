@@ -22,6 +22,11 @@
       <artifactId>lecturesight-opencl-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+   <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-decorator-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-util</artifactId>
@@ -82,7 +87,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.decorator.head</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.decorator.person</Bundle-SymbolicName>
             <Export-Package>cv.lecturesight.decorator.person;version=${project.version}</Export-Package>
           </instructions>
         </configuration>

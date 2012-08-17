@@ -23,6 +23,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -36,6 +37,7 @@ import org.osgi.service.component.ComponentContext;
 public class VisualizationImpl implements Visualization, CustomRenderer {
 
   final static String PROPKEY_DISPLAY_VISUAL = "display.terminator";
+  static final String OBJ_PROPKEY_COLOR = "obj.color";
   final static String WINDOWNAME_VISUAL = "visual";
   final static String SIGNAME_DONE_VISUAL = "visual.DONE";
   private Log log = new Log("Heartbeat");
@@ -57,7 +59,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
   int[] workDim;
   private Font font = new Font("Monospaced", Font.PLAIN, 10);
   private Font smallFont = new Font("Monospaced", Font.PLAIN, 8);
-
+  
   protected void activate(ComponentContext cc) throws Exception {
     sig_DONE = ocl.getSignal(SIGNAME_DONE_VISUAL);
     fsource = fsp.getFrameSource();
@@ -106,9 +108,10 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
 
     // draw ObjectTracker data
     List<TrackerObject> objects = oTracker.getCurrentlyTracked();
+    Map<Integer, TrackerObject> all_o = oTracker.getAllObjects();
     for (Iterator<TrackerObject> it = objects.iterator(); it.hasNext();) {
-      g.setColor(Color.yellow);
       TrackerObject object = it.next();
+      g.setColor((Color) object.getProperty(OBJ_PROPKEY_COLOR));
       BoundingBox box = (BoundingBox) object.getProperty("obj.bbox");
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
 
@@ -142,6 +145,7 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     g.drawString("      t : " + fsource.getFrameNumber(), 2, 26);
     g.drawString("regions : " + regions.size(), 2, 36);
     g.drawString("objects : " + objects.size(), 2, 46);
+    g.drawString("tracked objects : "+ all_o.size(), 2, 56);
 
     ocl.castSignal(sig_DONE);
   }

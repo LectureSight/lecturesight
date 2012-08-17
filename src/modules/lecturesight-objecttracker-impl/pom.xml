@@ -17,6 +17,21 @@
   </parent>
   
   <dependencies>
+   <dependency>
+     <groupId>cv.lecturesight</groupId>
+     <artifactId>lecturesight-framesource-api</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-videoanalysis-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-decorator-color</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-opencl-api</artifactId>
