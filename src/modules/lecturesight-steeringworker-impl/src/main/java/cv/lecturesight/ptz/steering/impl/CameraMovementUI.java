@@ -7,7 +7,7 @@ class CameraMovementUI {
   private JFrame window = new JFrame();
   private CameraControlPanel controlPanel;
   
-  public CameraMovementUI(CameraMovementModel model) {
+  public CameraMovementUI(CameraPositionModel model) {
     controlPanel = new CameraControlPanel(model);
     window.setTitle("PTZ Control:  " + model.getCameraName());
     window.add(controlPanel);

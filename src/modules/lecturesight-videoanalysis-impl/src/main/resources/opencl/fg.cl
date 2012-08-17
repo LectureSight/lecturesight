@@ -157,13 +157,13 @@ __kernel void refresh_decay
   int2 pos_img = (int2)(get_global_id(0), get_global_id(1));
   int2 pos = (int2)(pos_img.x+1, pos_img.y+1);
   
-  int val = 0;
   uint4 in_pxl = read_imageui(input, sampler, pos_img);
-  if (in_pxl.s0 != 0) 
+  int val = in_pxl.s0;
+  if (val != 0) 
   {
     int adr = ENCODE_INDEX(pos);
     int id = -1 * labels[adr];
-    if (activity_ratio[id] > threshold) 
+    if (id > 0 && activity_ratio[id] > threshold) 
     {
       val = 255;
     }

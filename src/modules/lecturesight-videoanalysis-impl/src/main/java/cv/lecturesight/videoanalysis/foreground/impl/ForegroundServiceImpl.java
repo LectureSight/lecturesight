@@ -189,10 +189,10 @@ public class ForegroundServiceImpl implements ForegroundService {
   }
   
   public int getActivity(int id) {
-    return activities[id];              // FIXME id+1 ???
+    return activities[id+1];              
   }
   //</editor-fold>
-          
+  
   /** Resets all working buffers of this service.
    * 
    */
@@ -270,31 +270,11 @@ public class ForegroundServiceImpl implements ForegroundService {
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], fgUpdated, 0, 0, bgUpdateMask);
       fgMapHost = fgUpdated.read(queue);
       activityH = activity.read(queue);
-//      ratiosH = activity_ratio.read(queue);
     }
 
     @Override
     public void land() {
-      
-//      activityH.get(activities, 0, activities.length);
-//      for (int i = 1; i < 20; i++) {
-//        System.out.print(activities[i] + " ");
-//      }
-//      System.out.println();
-//      
-//      for (int i = 1; i < 20; i++) {
-//        System.out.print(ccl.getSize(i) + " ");
-//      }
-//      System.out.println();
-//      
-//      float[] ratiosA = new float[20];
-//      ratiosH.get(ratiosA, 0, 20);
-//      for (int i = 1; i < 20; i++) {
-//        System.out.print(ratiosA[i] + " ");
-//      }
-//      
-//      System.out.println("\n----------------------------------");
-      
+      activityH.get(activities);
       ocl.castSignal(SIG_startBGUpdate);
       ocl.castSignal(SIG_done);     // cast completion signal
     }

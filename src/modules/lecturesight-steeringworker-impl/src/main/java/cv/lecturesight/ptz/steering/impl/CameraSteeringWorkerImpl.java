@@ -5,6 +5,7 @@ import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
+import cv.lecturesight.util.geometry.Position;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,16 +35,19 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   Configuration config;
   @Reference
   PTZCamera camera;
-  private CameraMovementModel model;
+  private CameraPositionModel model;
   CameraMovementUI ui;
   SteeringWorker worker;
   ScheduledExecutorService executor = null;
   float dt_a = 0.2f, dt_b = 0.05f, dt_xy = 0.02f, damp_pan, damp_tilt;
+  int maxspeed_pan, maxspeed_tilt;
   boolean move_snap = false;
   boolean steering = false;
 
   protected void activate(ComponentContext cc) throws Exception {
-    model = new CameraMovementModel(camera.getPortName());
+    model = new CameraPositionModel(camera);
+    maxspeed_pan = camera.getProfile().getPanMaxSpeed();
+    maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
     ui = new CameraMovementUI(model);
     if (config.getBoolean(PROPKEY_SHOWUI)) {
       ui.show(true);
@@ -52,7 +56,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       start();
       setSteering(true);
     }
-    log.info("Activated. Steering " + camera.getPortName());
+    log.info("Activated. Steering " + camera.getName());
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
@@ -144,84 +148,122 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   private class SteeringWorker implements Runnable {
 
-    NormalizedPosition last_pos = model.getActualPosition();
-    NormalizedPosition current_pos;
+    Position cam_pos;
+    Position target_pos;
+    NormalizedPosition cam_posn;
+    NormalizedPosition last_posn = model.getActualPosition();
 
     @Override
     public void run() {
       // get current position of camera
       try {
-        current_pos = new NormalizedPosition(camera.getPan(), camera.getTilt());
-        model.setActualPosition(current_pos);
-        model.setMoving(last_pos.getX() != current_pos.getX() || last_pos.getY() != current_pos.getY());
-        ui.update();
+        cam_pos = camera.getPosition();
+        model.setCamPosition(cam_pos);
+        cam_posn = model.toNormalizedCoordinates(cam_pos);
+        model.setActualPosition(cam_posn);
+        if (!steering) {
+          model.setMoving(last_posn.getX() != cam_posn.getX() || last_posn.getY() != cam_posn.getY());
+        }
       } catch (Exception e) {
         log.warn("Unable to update actual postion: " + e.getMessage());
       }
 
-      // compute raw, absolute and euclidean distance btw actual position and target position
-      float dx = model.getActualPosition().getX() - model.getTargetPosition().getX();
-      float dx_abs = (float) Math.abs(dx);
-      float dy = model.getActualPosition().getY() - model.getTargetPosition().getY();
-      float dy_abs = (float) Math.abs(dy);
-      float d = (float) Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+      if (steering) {
+        target_pos = model.toCameraCoordinates(model.getTargetPosition());
 
-      try {
-        if (steering && d > dt_b) {                  // did we reach target?
-
-          if (dx_abs < dt_a) {
-            float r = dx_abs / dt_a;
-            camera.setPanSpeed(damp_pan * r);
-          } else {
-            camera.setPanSpeed(damp_pan * 1.0f);
-          }
-
-          if (dy_abs < dt_a) {
-            float r = dy_abs / dt_a;
-            camera.setTiltSpeed(damp_tilt * r);
-          } else {
-            camera.setTiltSpeed(damp_tilt * 1.0f);
-          }
-
-          if (dx > dt_xy && dy < dt_xy) {
-            camera.moveUpLeft();
-
-          } else if (dx < dt_xy && dy < dt_xy) {
-            camera.moveUpRight();
-
-          } else if (dx > dt_xy && dy > dt_xy) {
-            camera.moveDownLeft();
-
-          } else if (dx < dt_xy && dy > dt_xy) {
-            camera.moveDownRight();
-
-          } else if (dx < dt_xy) {
-            camera.moveRight();
-
-          } else if (dx > dt_xy) {
-            camera.moveLeft();
-
-          } else if (dy < dt_xy) {
-            camera.moveUp();
-
-          } else if (dy > dt_xy) {
-            camera.moveDown();
-
-          }
+        int dx = cam_pos.getX() - target_pos.getX();
+        int dx_abs = Math.abs(dx);
+        int dy = cam_pos.getY() - target_pos.getY();
+        int dy_abs = Math.abs(dy);
+        
+        // adjust pan speed
+        int stop_x = 50;
+        int alpha_x = 4000;
+        
+        int ps;
+        if (model.isMoving() && dx_abs < stop_x) {
+          ps = 0;
         } else {
-          camera.stopMove();
-          if (move_snap) {
-            camera.move(
-                    model.getTargetPosition().getX(),
-                    model.getTargetPosition().getY());
+          if (dx_abs < alpha_x) {
+            ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
+          } else {
+            ps = maxspeed_pan;
           }
         }
 
-      } catch (Exception e) {
-        log.warn("Unable to set camera movement: " + e.getMessage());
-      }
+        // adjust tilt speed
+        int stop_y = 500;
+        int alpha_y = 2000;
 
-      last_pos = current_pos;
+        // adjust pan speed
+        int ts;
+        if (model.isMoving() && dy_abs < stop_y) {
+          ts = 0;
+        } else {
+          if (dy_abs < alpha_y) {
+            ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
+          } else {
+            ts = maxspeed_tilt;
+          }
+        }
+
+        String status = "pan = " + ps + "  tilt = " + ts + "  dx = " + dx + "  dy = " + dy + " cmd:";
+        
+        // set speed on camera
+        if (ps == 0 && ts == 0) {
+          if (model.isMoving()) {
+            camera.stopMove();
+            model.setMoving(false);
+            status += " STOP";
+          } else {
+            status += " STILL";
+          }
+          
+        } else if (dx < 0 && dy < 0) {
+          camera.moveUpRight(ps, ts);
+          model.setMoving(true);
+          status += " UP-RIGHT";
+
+        } else if (dx < 0 && dy > 0) {
+          camera.moveDownRight(ps, ts);
+          model.setMoving(true);
+          status += " DOWN-RIGHT";
+
+        } else if (dx > 0 && dy < 0) {
+          camera.moveUpLeft(ps, ts);
+          model.setMoving(true);
+          status += " UP-LEFT";
+
+        } else if (dx > 0 && dy > 0) {
+          camera.moveDownLeft(ps, ts);
+          model.setMoving(true);
+          status += " DOWN_LEFT";
+
+        } else if (dx < 0) {
+          camera.moveRight(ps);
+          model.setMoving(true);
+          status += " RIGHT";
+
+        } else if (dx > 0) {
+          camera.moveLeft(ps);
+          model.setMoving(true);
+          status += " LEFT";
+
+        } else if (dy < 0) {
+          camera.moveUp(ts);
+          model.setMoving(true);
+          status += " UP";
+
+        } else if (dy > 0) {
+          camera.moveDown(ts);
+          model.setMoving(true);
+          status += " DOWN";
+        }
+        model.setStatus(status);
+      }
+      
+      ui.update();
+      last_posn = cam_posn;
     }
   }
 }
