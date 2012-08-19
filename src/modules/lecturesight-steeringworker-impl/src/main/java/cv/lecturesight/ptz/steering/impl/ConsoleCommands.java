@@ -83,9 +83,4 @@ public class ConsoleCommands implements DummyInterface {
       ((CameraSteeringWorkerImpl)steerer).ui.show(false);
     }
   }
-  
-  public void update(String[] args) {
-    ((CameraSteeringWorkerImpl)steerer).updateConfiguration();
-    log.info("Updated configuration");
-  }
 }

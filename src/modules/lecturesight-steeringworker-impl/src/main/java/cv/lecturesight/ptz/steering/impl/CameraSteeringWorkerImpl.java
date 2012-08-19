@@ -24,10 +24,10 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   final static String PROPKEY_AUTOSTART = "autostart";
   final static String PROPKEY_SHOWUI = "ui.show";
   final static String PROPKEY_INTERVAL = "interval";
-  final static String PROPKEY_THRESHALPHA = "thresh.alpha";
-  final static String PROPKEY_THRESHBETA = "thresh.beta";
-  final static String PROPKEY_THRESHXY = "thresh.xy";
-  final static String PROPKEY_SNAP = "move.snap";
+  final static String PROPKEY_ALPHAX = "move.alpha.x";
+  final static String PROPKEY_ALPHAY = "move.alpha.y";
+  final static String PROPKEY_STOPX = "move.stop.x";
+  final static String PROPKEY_STOPY = "move.stop.y";
   final static String PROPKEY_DAMP_PAN = "move.damp.pan";
   final static String PROPKEY_DAMP_TILT = "move.damp.tilt";
   private Log log = new Log("Camera Steering Worker");
@@ -39,7 +39,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   CameraMovementUI ui;
   SteeringWorker worker;
   ScheduledExecutorService executor = null;
-  float dt_a = 0.2f, dt_b = 0.05f, dt_xy = 0.02f, damp_pan, damp_tilt;
   int maxspeed_pan, maxspeed_tilt;
   boolean move_snap = false;
   boolean steering = false;
@@ -47,7 +46,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   protected void activate(ComponentContext cc) throws Exception {
     model = new CameraPositionModel(camera);
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
-    maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
+    maxspeed_tilt = (int)(0.7 * camera.getProfile().getTiltMaxSpeed());
     ui = new CameraMovementUI(model);
     if (config.getBoolean(PROPKEY_SHOWUI)) {
       ui.show(true);
@@ -63,15 +62,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     stop();
     ui.show(false);
     log.info("Deactivated");
-  }
-
-  void updateConfiguration() {
-    dt_a = config.getFloat(PROPKEY_THRESHALPHA);
-    dt_b = config.getFloat(PROPKEY_THRESHBETA);
-    dt_xy = config.getFloat(PROPKEY_THRESHXY);
-    damp_pan = config.getFloat(PROPKEY_DAMP_PAN);
-    damp_tilt = config.getFloat(PROPKEY_DAMP_TILT);
-    move_snap = config.getBoolean(PROPKEY_SNAP);
   }
 
   @Override
@@ -108,7 +98,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   @Override
   public void start() {
     if (executor == null) {
-      updateConfiguration();
       executor = Executors.newScheduledThreadPool(1);
       worker = new SteeringWorker();
       executor.scheduleAtFixedRate(worker, 0, config.getInt(PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
@@ -155,6 +144,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
     @Override
     public void run() {
+      int stop_x = config.getInt(PROPKEY_STOPX);
+      int alpha_x = config.getInt(PROPKEY_ALPHAX);
+      int stop_y = config.getInt(PROPKEY_STOPY);
+      int alpha_y = config.getInt(PROPKEY_ALPHAY);
+      
       // get current position of camera
       try {
         cam_pos = camera.getPosition();
@@ -177,9 +171,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
         int dy_abs = Math.abs(dy);
         
         // adjust pan speed
-        int stop_x = 50;
-        int alpha_x = 4000;
-        
         int ps;
         if (model.isMoving() && dx_abs < stop_x) {
           ps = 0;
@@ -192,10 +183,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
         }
 
         // adjust tilt speed
-        int stop_y = 500;
-        int alpha_y = 2000;
-
-        // adjust pan speed
         int ts;
         if (model.isMoving() && dy_abs < stop_y) {
           ts = 0;
@@ -219,42 +206,42 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
             status += " STILL";
           }
           
-        } else if (dx < 0 && dy < 0) {
+        } else if (dx < 0 && dy < 0 && ps > 0 && ts > 0) {
           camera.moveUpRight(ps, ts);
           model.setMoving(true);
           status += " UP-RIGHT";
 
-        } else if (dx < 0 && dy > 0) {
+        } else if (dx < 0 && dy > 0 && ps > 0 && ts > 0) {
           camera.moveDownRight(ps, ts);
           model.setMoving(true);
           status += " DOWN-RIGHT";
 
-        } else if (dx > 0 && dy < 0) {
+        } else if (dx > 0 && dy < 0 && ps > 0 && ts > 0) {
           camera.moveUpLeft(ps, ts);
           model.setMoving(true);
           status += " UP-LEFT";
 
-        } else if (dx > 0 && dy > 0) {
+        } else if (dx > 0 && dy > 0 && ps > 0 && ts > 0) {
           camera.moveDownLeft(ps, ts);
           model.setMoving(true);
           status += " DOWN_LEFT";
 
-        } else if (dx < 0) {
+        } else if (dx < 0 && ps > 0 && ts == 0) {
           camera.moveRight(ps);
           model.setMoving(true);
           status += " RIGHT";
 
-        } else if (dx > 0) {
+        } else if (dx > 0 && ps > 0 && ts == 0) {
           camera.moveLeft(ps);
           model.setMoving(true);
           status += " LEFT";
 
-        } else if (dy < 0) {
+        } else if (dy < 0 && ps == 0 && ts > 0) {
           camera.moveUp(ts);
           model.setMoving(true);
           status += " UP";
 
-        } else if (dy > 0) {
+        } else if (dy > 0 && ps == 0 && ts > 0) {
           camera.moveDown(ts);
           model.setMoving(true);
           status += " DOWN";

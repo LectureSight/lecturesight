@@ -17,7 +17,7 @@ public class CameraPositionModel {
   private int tilt_min;
   private int tilt_max;
   boolean moving = false;
-  private String status;
+  private String status = "N/A";
 
   public CameraPositionModel(PTZCamera camera) {
     this.camera = camera;
