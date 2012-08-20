@@ -2,10 +2,10 @@ package cv.lecturesight.objecttracker.impl;
 
 import cv.lecturesight.decorator.api.DecoratorManager;
 import cv.lecturesight.decorator.api.DecoratorManager.CallType;
-import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.decorator.color.ColorHistogram;
+import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.opencl.OpenCLService;
@@ -20,8 +20,6 @@ import cv.lecturesight.util.geometry.Position;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -60,10 +58,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
   private Map<Integer, TrackerObject> allObjects = new TreeMap<Integer, TrackerObject>();
   private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
 //  private List<Region> regions = new LinkedList<Region>();
-  int width_min, width_max, height_min, height_max, timeToLive;
+  int width_min, width_max, height_min, height_max, timeToLive, channel_number;
   float matchThreshold, chThreshold, distanceThreshold;
   private List<Color> color_list = new LinkedList<Color>();
-  final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
   final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
 
   @Reference
@@ -100,6 +97,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
     chThreshold = config.getFloat(Constants.PROPKEY_CHTHRESHOLD);
     matchThreshold = config.getFloat(Constants.PROPKEY_MATCHTHRESH);
     distanceThreshold = config.getFloat(Constants.PROPKEY_DISTANCETHRESH);
+    channel_number = config.getInt(Constants.PROPKEY_CHANNEL_NUMBER);
   }
 
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
@@ -197,8 +195,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
       
       List<TrackerObject> trackedObjects1 = new LinkedList<TrackerObject>();
       for(TrackerObject obj : trackedObjects) {
-        if(currentTime - obj.lastSeen() < timeToLive)
+        if(currentTime - obj.lastSeen() < timeToLive) {
           trackedObjects1.add(obj);
+        }
       }
 
       List<TrackerObject> newTrackedObjects = assign_new(trackedObjects1, candidates);
@@ -216,7 +215,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
         BoundingBox bbox = region.getBoundingBox();
         double err = centroid.distance(region.getCentroid());
         //System.out.println("Error = " + err);
-        if (err <= matchThreshold && bbox.getWidth() >= width_min/3
+        if (err <= distanceThreshold && bbox.getWidth() >= width_min/3
                 && bbox.getWidth() <= width_max
                 && bbox.getHeight() >= height_min/3
                 && bbox.getHeight() <= height_min) {
@@ -235,7 +234,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
       double error = Double.MAX_VALUE;
       for (Region r1 : regions) {
         double err = centroid.distance(r1.getCentroid());
-        if(err <= matchThreshold) {
+        if(err <= distanceThreshold) {
           if(err < error) {
             error = err;
             result = r1;
@@ -249,11 +248,13 @@ public class ObjectTrackerImpl implements ObjectTracker {
       // we set the actual element to the element to which we have to compare the
       // rest. This is to assure, that match does not fail if called with an empty
       // list.
-      if(allObjects.isEmpty()) return null;
+      if(allObjects.isEmpty()) {
+        return null;
+      }
       
       double min_distance = 1.0;
       TrackerObject result = null;
-      ColorHistogram ch = new ColorHistogram(img, imgc, r.getBoundingBox(), 256);
+      ColorHistogram ch = new ColorHistogram(img, imgc, r.getBoundingBox(), channel_number);
       
       for(TrackerObject act : allObjects.values()) {
         if(act.lastSeen() - currentTime != 0) {
@@ -281,8 +282,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
       allObjects.put(object.getId(), object);
       dManager.applyDecorators(CallType.EACHFRAME, object);
       Color c = Color.yellow;
-      if(color_list.size() > 0)
+      if(!color_list.isEmpty()) {
         c = color_list.remove(color_list.size()-1);
+      }
       object.setProperty(OBJ_PROPKEY_COLOR, c);
       return object;
     }
@@ -335,14 +337,15 @@ public class ObjectTrackerImpl implements ObjectTracker {
 
     private boolean checkSplitter(Region lastRegion) {
       if(lastRegion.isSplitter()) {
-        Set<Region> regions = lastRegion.getGroupMembers();
-        for(Region r : regions) {
+        Set<Region> regions1 = lastRegion.getGroupMembers();
+        for(Region r : regions1) {
           BoundingBox bbox = r.getBoundingBox();
           if(bbox.getWidth()     >= width_min
              && bbox.getWidth()  <= width_max
              && bbox.getHeight() >= height_min
-             && bbox.getHeight() <= height_max)
+             && bbox.getHeight() <= height_max) {
             return true;
+          }
         }
       }
       return false;
@@ -516,13 +519,19 @@ public class ObjectTrackerImpl implements ObjectTracker {
               List<TrackerObject> n_list = assign(candidates, trackedObjects);
               n_list.add(obj_new);
               return n_list;
-            }
+            } 
           }
         }
       }
       return null;
     }
     
+    /**
+     * Recursively assigns a list of TrackerObjects to a List of Regions
+     * @param trackerObjects
+     * @param candidates
+     * @return new list with assigned and updated TrackerObjects
+     */
     private List<TrackerObject> assign_new(List<TrackerObject> trackerObjects, List<Region> candidates) {
      if(trackerObjects.isEmpty() && candidates.isEmpty()) {
        return new LinkedList<TrackerObject>();
@@ -530,9 +539,12 @@ public class ObjectTrackerImpl implements ObjectTracker {
      else{
        // mehr Kandidaten als TrackedObjects -> erst zuweisen, dann neu erstellen!
        if(trackerObjects.size() < candidates.size()) {
-         if(trackerObjects.size() == 0) {
+         if(trackerObjects.isEmpty()) {
+           // einfach mal mit dem ersten Kandidaten anfangen
            Region cand = candidates.get(0);
+           // bestes TrackerObject suchen
            TrackerObject obj = matchColorHistogram(cand, matchThreshold, currentTime);
+           // wenn es das nicht gibt, Neues erstellen
            if(obj == null) {
              obj = createTrackerObject(cand, currentTime);
              candidates.remove(cand);
@@ -540,6 +552,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
              new_list.add(obj);
              return new_list;
            }
+           // wenn es das gibt, updaten
            else {
              updateTrackerObject(obj, cand, currentTime);
              candidates.remove(cand);
@@ -548,7 +561,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
              return new_list;
            }
          }
+         // es gibt mehr als 0 TrackerObjects und mehr als 1 Candidate
          else {
+           // wir ermitteln dasjenige Paar, welches die kleinste Distanz hat.
            TrackerObject winner = null;
            Region best_region = null;
            double min_distance1 = Double.MAX_VALUE;
@@ -568,7 +583,9 @@ public class ObjectTrackerImpl implements ObjectTracker {
                best_region = winner_region;
              }
            }
+           // wir haben ein Paar gefunden!
            if(winner != null) {
+             // updaten und weiter!
              updateTrackerObject(winner, best_region, currentTime);
              candidates.remove(best_region);
              trackerObjects.remove(winner);
@@ -576,25 +593,32 @@ public class ObjectTrackerImpl implements ObjectTracker {
              new_list.add(winner);
              return new_list;
            }
+           // wir haben kein Paar gefunden... :(
            else {
+             // wir ermitteln dasjenige TrackerObject, welches die größte Distanz
+             // zu allen Kandidaten aufweist
              Region loser = null;
              double max_distance = 0;
              for(Region cand : candidates) {
                double min_distance = Double.MAX_VALUE;
                for(TrackerObject obj : trackerObjects) {
                  double distance = distance(obj, cand);
-                 if(distance < min_distance)
+                 if(distance < min_distance) {
                    min_distance = distance;
+                 }
                }
                if(min_distance > max_distance) {
                  max_distance = min_distance;
                  loser = cand;
                }
              }
+             // wir sehen nach ob wir ein passendes TrackerObject auf Halde haben
              TrackerObject loser_obj = matchColorHistogram(loser, matchThreshold, currentTime);
+             // wir haben! also: schnell updaten!
              if(loser_obj != null) {
                updateTrackerObject(loser_obj, loser, currentTime);
              }
+             // wir haben nüscht jefunden, ergo: neu erstellen!
              else {
                loser_obj = createTrackerObject(loser, currentTime);
              }
@@ -688,6 +712,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
          }
          // Ach Mist, es gibt keine Kandidaten, aber noch TrackerObjects...
          else {
+           // wir suchen uns einfach die beste Region!
            double min_distance = Double.MAX_VALUE;
            TrackerObject winner = null;
            Region winner_region = null;
@@ -701,13 +726,16 @@ public class ObjectTrackerImpl implements ObjectTracker {
                  w_region = r;
                }
              }
-             if(min_distance1 < min_distance && min_distance1 < matchThreshold) {
+             if(min_distance1 < min_distance && min_distance1 < distanceThreshold) {
                min_distance = min_distance1;
                winner = obj;
                winner_region = w_region;
              }
            }
+           // wir haben eine gefunden... :)
            if(winner != null) {
+             // jetzt wird das TrackerObject um die entsprechende X/Y-Koordinate
+             // bewegt...
              moveTrackerObject(winner, winner_region.getCentroid(), currentTime);
              regions.remove(winner_region);
              trackerObjects.remove(winner);
@@ -715,6 +743,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
              new_list.add(winner);
              return new_list;
            }
+           // wir haben keine gefunden?? na egal, einfach alle TrackerObjects behalten
            else {
              List<TrackerObject> new_list = new LinkedList<TrackerObject>();
              new_list.addAll(trackerObjects);
@@ -738,7 +767,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
       try {
         // Compute ColorHistogram distance
         BoundingBox bbox = r.getBoundingBox();
-        ColorHistogram ch1 = new ColorHistogram(img, imgc, bbox, 256);
+        ColorHistogram ch1 = new ColorHistogram(img, imgc, bbox, channel_number);
         ColorHistogram ch2 = (ColorHistogram) object.getProperty(OBJ_PROPKEY_COLOR_HISTOGRAM);
         double d2 = ch1.bhattacharya_distance(ch2);
         // if some region splitted beforehand, we don't consider the physical
@@ -748,18 +777,15 @@ public class ObjectTrackerImpl implements ObjectTracker {
           Position centroid = (Position) object.getProperty(OBJ_PROPKEY_CENTROID);
           Position r_centroid = r.getCentroid();
           double d1 = centroid.distance(r_centroid);
-          if(d1 < distanceThreshold)
-            return Math.sqrt(d1*d2);
-//          if(d1 < matchThreshold && d2 < chThreshold)           
-//            return Math.sqrt(d1*d2);
-//          if(d1 < matchThreshold)
+//          if(d1 < distanceThreshold) {
+          return d1*d2;
+//          }
         }
         return d2;
       } catch (Exception ex) {
         Logger.getLogger(ObjectTrackerImpl.class.getName()).log(Level.SEVERE, null, ex);
       }
       return Double.MAX_VALUE;
-    }
-    
+    } 
   }
 }

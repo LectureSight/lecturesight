@@ -38,7 +38,7 @@ public class ColorDecorator implements ObjectDecorator {
   ForegroundService fgs;
   @Reference
   private FrameSourceProvider fsp;
-  private int width_min, width_max, height_min, height_max;
+  private int width_min, width_max, height_min, height_max, channel_number;
 
   protected void activate(ComponentContext cc) throws Exception {
     log.info("BrainzzZ!");
@@ -46,6 +46,7 @@ public class ColorDecorator implements ObjectDecorator {
     width_max = config.getInt("width.max");
     height_min = config.getInt("height.min");
     height_max = config.getInt("height.max");
+    channel_number = config.getInt("channel.number");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
@@ -56,7 +57,8 @@ public class ColorDecorator implements ObjectDecorator {
   public void examine(TrackerObject object) {
     // Try to read the image
     try {
-      BoundingBox bbox = (BoundingBox) object.getProperty(ObjectTracker.OBJ_PROPKEY_BBOX);
+      BoundingBox bbox = (BoundingBox) object.getProperty(
+              ObjectTracker.OBJ_PROPKEY_BBOX);
 
       BufferedImage sil = fgs.getForegroundMapHost();
       
@@ -65,13 +67,15 @@ public class ColorDecorator implements ObjectDecorator {
       WritableRaster img = sil.getRaster();
       WritableRaster imgc = scene.getRaster();
       
-      ColorHistogram ch = (ColorHistogram) object.getProperty(OBJ_PROPKEY_COLOR_HISTOGRAM);
+      ColorHistogram ch = (ColorHistogram) object.getProperty(
+              OBJ_PROPKEY_COLOR_HISTOGRAM);
       if(ch == null) {
         object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, 
-              new ColorHistogram(img, imgc, bbox, 256));
+              new ColorHistogram(img, imgc, bbox, channel_number));
       }
       else {
-        object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, new ColorHistogram(img, imgc, bbox, 256, ch));
+        object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, new ColorHistogram(
+                img, imgc, bbox, channel_number, ch));
       }
     } catch (Exception e) {
         log.error("Error in color decorator!", e);
