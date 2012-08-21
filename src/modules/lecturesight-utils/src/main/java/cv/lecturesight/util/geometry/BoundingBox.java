@@ -51,4 +51,15 @@ public class BoundingBox implements Cloneable {
   public BoundingBox clone() {
     return new BoundingBox(min, max);
   }
+
+  public boolean contains(Position p) {
+    if(p.getX() < max.getX() &&
+       p.getX() > min.getX() &&
+       p.getY() < max.getY() &&
+       p.getY() > min.getY()) {
+      return true;
+    }
+    return false;
+  }
+  
 }

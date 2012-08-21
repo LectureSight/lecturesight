@@ -70,12 +70,17 @@ public class ColorDecorator implements ObjectDecorator {
       ColorHistogram ch = (ColorHistogram) object.getProperty(
               OBJ_PROPKEY_COLOR_HISTOGRAM);
       if(ch == null) {
+        //log.info("ColorHistogram erstellt fuer TrackerObject "+object.getId());
         object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, 
               new ColorHistogram(img, imgc, bbox, channel_number));
       }
       else {
-        object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, new ColorHistogram(
-                img, imgc, bbox, channel_number, ch));
+        //log.info("ColorHistogram geupdated fuer TrackerObject "+object.getId());
+        ColorHistogram ch2 = new ColorHistogram(
+                img, imgc, bbox, channel_number, ch);
+        object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, ch2);
+        double dist = ch.bhattacharya_distance(ch2);
+        //log.info("ColorHistogram-Update-Difference fuer TrackerObject "+object.getId()+": "+dist);
       }
     } catch (Exception e) {
         log.error("Error in color decorator!", e);

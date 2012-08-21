@@ -15,6 +15,8 @@ public interface ObjectTracker {
   static final String OBJ_PROPKEY_WEIGHT = "obj.weight";
   static final String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
   static final String OBJ_PROPKEY_COLOR = "obj.color";
+  static final String OBJ_PROPKEY_INSCENE = "obj.in_scene";
+  static final String OBJ_PROPKEY_MOVEMENT = "obj.movement";
   
   OCLSignal getSignal();
   

@@ -123,5 +123,18 @@ public class SimpleCameraOperator implements CameraOperator {
       }
       return out;
     }
+    
+    private TrackerObject findeHeaviestTrackedObject(List<TrackerObject> objects) {
+      TrackerObject out = null;
+      int maxWeight = 0;
+      for(TrackerObject obj : objects) {
+        Integer weight = (Integer) obj.getProperty("obj.movement");
+        if(weight > maxWeight) {
+          maxWeight = weight;
+          out = obj;
+        }
+      }
+      return out;
+    }
   }
 }
