@@ -9,6 +9,8 @@ import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.videoanalysis.backgroundmodel.BackgroundModel;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.cca.ConnectedComponentService;
+import cv.lecturesight.framesource.FrameSource;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.videoanalysis.change.ChangeDetector;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.opencl.CLImageDoubleBuffer;
@@ -67,6 +69,10 @@ public class ForegroundServiceImpl implements ForegroundService {
   private DisplayService dsps;              // display service
   
   @Reference
+  private FrameSourceProvider fsp;
+  private FrameSource fsrc;
+  
+  @Reference
   private BackgroundModel bgmodel;          // background model service
   
   @Reference
@@ -102,6 +108,7 @@ public class ForegroundServiceImpl implements ForegroundService {
     signals.put(Signal.DONE_CLEANING, ocl.getSignal(Constants.SIGNAME_DONE_CLEANING));
 
     // get input data pointers
+    fsrc = fsp.getFrameSource();
     change = changedetect.getChangeMapDilated();
     bgdiff = bgmodel.getDifferenceMap();
     
@@ -214,6 +221,9 @@ public class ForegroundServiceImpl implements ForegroundService {
     OCLSignal SIG_done = signals.get(Signal.DONE_ADDSUB);
     CLKernel computeAddSubMaskK = ocl.programs().getKernel("fg", "compute_add_sub_mask");   // kernel that computes the update map
     CLKernel updateForegroundK = ocl.programs().getKernel("fg", "update_foreground");       // kernel that performs for foreground update
+    CLKernel erode_FGBG_lr = ocl.programs().getKernel("fg", "erode_fg_bg_lr");
+    CLKernel erode_FGBG_rl = ocl.programs().getKernel("fg", "erode_fg_bg_rl");
+    int[] erodeDim = new int[] {workDim[1]};
 
     @Override
     public void launch(CLQueue queue) {
@@ -222,6 +232,12 @@ public class ForegroundServiceImpl implements ForegroundService {
       computeAddSubMaskK.enqueueNDRange(queue, workDim);
       updateForegroundK.setArgs(updateMap, fgBuffer.last());    // perform foreground mask update
       updateForegroundK.enqueueNDRange(queue, workDim);
+      erode_FGBG_lr.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
+              config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
+      erode_FGBG_lr.enqueueNDRange(queue, erodeDim);
+      erode_FGBG_rl.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
+              config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
+      erode_FGBG_rl.enqueueNDRange(queue, erodeDim);
     }
 
     @Override
@@ -262,10 +278,11 @@ public class ForegroundServiceImpl implements ForegroundService {
       resetBuffer.enqueueNDRange(queue, bufferDim);                                                       // reset activity buffer
       fgGatherActivity.setArgs(ccl.getLabelBuffer(), activity, fgBuffer.last(), updateMap, workDim[0]);   // compute blob activity
       fgGatherActivity.enqueueNDRange(queue, workDim);
-      fgActRatioK.setArgs(activity, ccl.getSizeBuffer(), activity_ratio);                                         // compute activity activity_ratio
+      fgActRatioK.setArgs(activity, ccl.getSizeBuffer(), activity_ratio);                                 // compute activity activity_ratio
       fgActRatioK.enqueueNDRange(queue, bufferDim);
       fgDecayK.setArgs(fgBuffer.last(), fgBuffer.current(), fgUpdated, ccl.getLabelBuffer(),              // refresh/age blobs
-              activity_ratio, config.getFloat(Constants.PROPKEY_DECAY_THRESHRATIO), config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
+              activity_ratio, config.getFloat(Constants.PROPKEY_DECAY_THRESHRATIO), 
+              config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
       fgDecayK.enqueueNDRange(queue, workDim);
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], fgUpdated, 0, 0, bgUpdateMask);
       fgMapHost = fgUpdated.read(queue);

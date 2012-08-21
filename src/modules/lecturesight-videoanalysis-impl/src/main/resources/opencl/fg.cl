@@ -8,6 +8,8 @@ const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK
 #define BLACK (uint4)(0,0,0,255)
 #define GREEN (uint4)(0,255,0,255)
 #define RED   (uint4)(255,0,0,255)
+#define MAXINT 2147483647
+
 
 int read_val
 (
@@ -223,3 +225,71 @@ __kernel void compute_activity_ratios
     barrier( CLK_GLOBAL_MEM_FENCE );    
     ratios[pos+1] = result;
 }
+
+__kernel void erode_fg_bg_lr
+(
+  __read_only image2d_t input,
+  __read_only image2d_t fg_map_in,
+  __write_only image2d_t fg_map_out,
+  int thresh, int width
+)
+{
+    int y = get_global_id(0);
+    uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+
+    for (int x=0; x < width; x++)
+    {
+        int2 pos = (int2)(x, y);
+        uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
+        if (pxl_val.s0 > 0)
+        {
+            uint4 val = read_imageui(input, sampler, pos);
+            uint4 diff4 = abs_diff(val, last_val);
+            int diff = diff4.s0 + diff4.s1 + diff4.s2;
+            if (diff < thresh) {
+                pxl_val = BLACK;
+            }           
+        }
+        else
+        {
+            last_val = read_imageui(input, sampler, pos);
+        }
+        barrier( CLK_GLOBAL_MEM_FENCE );    
+        write_imageui(fg_map_out, pos, pxl_val);
+    }
+}
+
+__kernel void erode_fg_bg_rl
+(
+  __read_only image2d_t input,
+  __read_only image2d_t fg_map_in,
+  __write_only image2d_t fg_map_out,
+  int thresh, int width
+)
+{
+    int y = get_global_id(0);
+    uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+
+    for (int x=width; x >= 0; x--)
+    {
+        int2 pos = (int2)(x, y);
+        uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
+        if (pxl_val.s0 > 0)
+        {
+            uint4 val = read_imageui(input, sampler, pos);
+            uint4 diff4 = abs_diff(val, last_val);
+            int diff = diff4.s0 + diff4.s1 + diff4.s2;
+            if (diff < thresh) {
+                pxl_val = BLACK;
+            }           
+        }
+        else
+        {
+            last_val = read_imageui(input, sampler, pos);
+        }
+        barrier( CLK_GLOBAL_MEM_FENCE );    
+        write_imageui(fg_map_out, pos, pxl_val);
+    }
+}
+
+
