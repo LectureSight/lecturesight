@@ -1,7 +1,7 @@
 #pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics: enable
 #pragma OPENCL EXTENSION cl_khr_global_int32_extended_atomics : enable
 
-#define CLAMP_POS(pos) if (pos.x >= width || pos.y >= height) return
+#define CLAMP_POS(pos) if (pos.x > width || pos.y > height) return
 #define ENCODE_INDEX(pos) pos.x + pos.y * (width+2)
 
 __kernel void add_coordinates
