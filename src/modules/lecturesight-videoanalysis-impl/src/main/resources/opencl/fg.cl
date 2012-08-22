@@ -235,7 +235,8 @@ __kernel void erode_fg_bg_lr
 )
 {
     int y = get_global_id(0);
-    uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    // uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    uint4 last_val = (uint4)(0, 0, 0, 255);
 
     for (int x=0; x < width; x++)
     {
@@ -268,9 +269,10 @@ __kernel void erode_fg_bg_rl
 )
 {
     int y = get_global_id(0);
-    uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    //uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    uint4 last_val = (uint4)(0, 0, 0, 255);
 
-    for (int x=width; x >= 0; x--)
+    for (int x=width-1; x >= 0; x--)
     {
         int2 pos = (int2)(x, y);
         uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
