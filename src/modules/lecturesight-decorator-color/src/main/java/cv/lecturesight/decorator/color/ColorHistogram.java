@@ -16,7 +16,7 @@ import java.awt.image.WritableRaster;
 public class ColorHistogram {
  
   // Color histogram is stored in 2D-Array, first dimension R/G/B, second values
-  private float[][]ch;
+  private float[][][]ch;
   public boolean mist = false;
  
   /**
@@ -54,7 +54,9 @@ public class ColorHistogram {
  
     for(int i = 0; i < ch.length; i++) {
       for(int j = 0; j < ch[i].length; j++) {
-        ch[i][j] = (1-alpha)*ch1.ch_value(i, j)+alpha*ch[i][j];
+        for(int k = 0; k < ch[i][j].length; k++) {
+          ch[i][j][k] = (1-alpha)*ch1.ch_value(i, j, k)+alpha*ch[i][j][k];
+        }
       }
     }
   }
@@ -67,20 +69,20 @@ public class ColorHistogram {
    * @param N desired size of histogram
    * @return color histogram
    */
-  private float[][] compute_ch(WritableRaster img, WritableRaster imgc, BoundingBox bbox, int N) {
+  private float[][][] compute_ch(WritableRaster img, WritableRaster imgc, BoundingBox bbox, int N) {
     // we take the coordinates of the BoundingBox
     int width = bbox.getWidth();
     int height = bbox.getHeight();
     Position min = bbox.getMin();
  
     // intialize histogram
-    float[][]bins = new float [3][N];
+    float[][][]bins = new float [N][N][N];
     for(int i = 0; i < width; i++) {
       for (int j = 0; j < height; j++) {
         if(img.getSample(min.getX()+i, min.getY()+j, 0) != 0) {
-          for (int rgb = 0; rgb < 3; rgb++) {
-            bins[rgb][(imgc.getSample(min.getX()+i,min.getY()+j,rgb)*N)/256]++;
-          }
+          bins[(imgc.getSample(min.getX()+i,min.getY()+j,0)*N)/256]
+              [(imgc.getSample(min.getX()+i,min.getY()+j,1)*N)/256]
+              [(imgc.getSample(min.getX()+i,min.getY()+j,2)*N)/256]++;
         }
       }
     }
@@ -89,14 +91,16 @@ public class ColorHistogram {
  
   /**
    * Sums up a two-dimensional float array
-   * @param bins float array, 2D
+   * @param bins float array, 3D
    * @return float sum of the array
    */
-  private static float sum(float[][] bins) {
+  private static float sum(float[][][] bins) {
     float sum = 0;
     for(int i = 0; i < bins.length; i++) {
       for(int j = 0; j < bins[i].length; j++) {
-        sum += bins[i][j];
+        for(int k = 0; k < bins[i][j].length; k++) {
+          sum += bins[i][j][k];
+        }
       }
     }
     return sum;
@@ -108,11 +112,11 @@ public class ColorHistogram {
    * @param i
    * @return
    */
-  private float ch_value(int i, int j) {
-    return ch[i][j];
+  private float ch_value(int i, int j, int k) {
+    return ch[i][j][k];
   }
   
-  public float[][] get_ch() {
+  public float[][][] get_ch() {
     return ch;
   }
  
@@ -124,7 +128,9 @@ public class ColorHistogram {
     if (sum != 0) {
       for(int i = 0; i < ch.length; i++) {
         for(int j = 0; j < ch[i].length; j++) {
-          ch[i][j] /= sum;
+          for(int k = 0; k < ch[i][j].length; k++) {
+            ch[i][j][k] /= sum;
+          }
         }
       }
     }
@@ -141,15 +147,17 @@ public class ColorHistogram {
    * @throws Exception
    */
   public double bhattacharya_distance(ColorHistogram colorhistogram) throws Exception {
-    float [][] ch1 = colorhistogram.get_ch();
+    float [][][] ch1 = colorhistogram.get_ch();
     if(ch1[0].length != ch[0].length) {
       throw new Exception("Color-Histogramme muessen gleiche Laenge haben!");
     }
     // Compute Bhattacharya Coefficient
     double bf = 0;
     for(int i = 0; i < ch1.length; i++) {
-      for(int j= 0; j < ch1[i].length; j++) {
-        bf += Math.sqrt(ch1[i][j]*ch[i][j]);
+      for(int j = 0; j < ch1[i].length; j++) {
+        for(int k = 0; k < ch1[i][j].length; k++) {
+          bf += Math.sqrt(ch1[i][j][k]*ch[i][j][k]);
+        }
       }
     }
     return (1-bf);

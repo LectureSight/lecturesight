@@ -109,9 +109,9 @@ public class VisualizationImpl implements Visualization, CustomRenderer {
     // draw ObjectTracker data
     List<TrackerObject> objects = oTracker.getCurrentlyTracked();
     Map<Integer, TrackerObject> all_o = oTracker.getAllObjects();
-    for (Iterator<TrackerObject> it = objects.iterator(); it.hasNext();) {
-      TrackerObject object = it.next();
+    for (TrackerObject object : objects) {
       g.setColor((Color) object.getProperty(OBJ_PROPKEY_COLOR));
+
       BoundingBox box = (BoundingBox) object.getProperty("obj.bbox");
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
 

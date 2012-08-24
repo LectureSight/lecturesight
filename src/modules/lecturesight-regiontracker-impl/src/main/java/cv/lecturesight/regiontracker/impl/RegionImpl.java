@@ -28,6 +28,7 @@ public class RegionImpl implements Region {
     this.weight = weight;
   }
   
+  @Override
   public void update(int label, long time, Position centroid, BoundingBox bbox, int weight) {
     this.label = label;
     if (this.centroid != centroid) {

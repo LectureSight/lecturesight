@@ -57,7 +57,8 @@ public class ObjectTrackerImpl implements ObjectTracker {
   private TrackerUpdate trackerUpdate;
   private Map<Integer, TrackerObject> allObjects = new TreeMap<Integer, TrackerObject>();
   private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
-  private List<TrackerObject> hypotheses = new LinkedList<TrackerObject>();
+//  private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
+//  private List<TrackerObject> hypotheses = new LinkedList<TrackerObject>();
 //  private List<Region> regions = new LinkedList<Region>();
   int width_min, width_max, height_min, height_max, timeToLive, channel_number;
   float matchThreshold, chThreshold, distanceThreshold;
@@ -65,6 +66,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
   final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
   final static String OBJ_PROPKEY_MOVEMENT = "obj.movement";
   final static String OBJ_PROPKEY_INSCENE = "obj.in_scene";
+  final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
 
   @Reference
   ForegroundService fgs;
@@ -202,29 +204,38 @@ public class ObjectTrackerImpl implements ObjectTracker {
         }
       }
       
-      List<TrackerObject> trackedObjects1 = new LinkedList<TrackerObject>();
-      for(TrackerObject obj : hypotheses) {
-        if(currentTime - obj.lastSeen() < timeToLive) {
-          trackedObjects1.add(obj);
-        }
-      }
+//      List<TrackerObject> trackedObjects1 = new LinkedList<TrackerObject>();
+//      for(TrackerObject obj : hypotheses) {
+//        if(currentTime - obj.lastSeen() < timeToLive) {
+//          trackedObjects1.add(obj);
+//        }
+//      }
 
-      List<TrackerObject> newHypotheses = assign_new(trackedObjects1, candidates);
-      hypotheses = newHypotheses;
+//      List<TrackerObject> newHypotheses = assign_new(hypotheses, candidates);
+//      hypotheses = newHypotheses;
+//      
+//      List<TrackerObject> newTrackedObjects = new LinkedList<TrackerObject>();
+//      for(TrackerObject obj : hypotheses) {
+//        int movement = (Integer) obj.getProperty(OBJ_PROPKEY_MOVEMENT);
+//        if(movement > 15) {
+//          newTrackedObjects.add(obj);
+//          if(!allObjects.containsValue(obj) &&
+//             !allObjects.containsKey(obj.getId())) {
+//            allObjects.put(obj.getId(), obj);
+//          }
+//        }
+//      }
+            
+      List<TrackerObject> newTrackerObjects = assign_new(trackedObjects, candidates);
       
-      List<TrackerObject> newTrackedObjects = new LinkedList<TrackerObject>();
-      for(TrackerObject obj : hypotheses) {
-        int movement = (Integer) obj.getProperty(OBJ_PROPKEY_MOVEMENT);
-        if(movement > 15) {
-          newTrackedObjects.add(obj);
-          if(!allObjects.containsValue(obj) &&
-             !allObjects.containsKey(obj.getId())) {
-            allObjects.put(obj.getId(), obj);
-          }
+      for(TrackerObject obj : newTrackerObjects) {
+        if(!allObjects.containsValue(obj) &&
+                !allObjects.containsKey(obj.getId())) {
+          allObjects.put(obj.getId(), obj);
         }
       }
-      
-      trackedObjects = newTrackedObjects;
+            
+      trackedObjects = newTrackerObjects;
       
       ocl.castSignal(sig_DONE);
     }
@@ -239,122 +250,102 @@ public class ObjectTrackerImpl implements ObjectTracker {
      if(trackerObjects.isEmpty() && candidates.isEmpty()) {
        return new LinkedList<TrackerObject>();
      }
-     else{
-       // mehr Kandidaten als TrackedObjects -> erst zuweisen, dann neu erstellen!
-       if(trackerObjects.size() < candidates.size()) {
-         if(trackerObjects.isEmpty()) {
-           // einfach mal mit dem ersten Kandidaten anfangen
-           Region cand = candidates.get(0);
-           // bestes TrackerObject suchen
-           TrackerObject obj = matchColorHistogram(cand, currentTime);
-           // wenn es das nicht gibt, Neues erstellen
-           if(obj == null) {
-             obj = createTrackerObject(cand, currentTime);
-             candidates.remove(cand);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(obj);
-             return new_list;
-           }
-           // wenn es das gibt, updaten
-           else {
-             updateTrackerObject(obj, cand, currentTime);
-             candidates.remove(cand);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(obj);
-             return new_list;
-           }
+     // mehr Kandidaten als TrackedObjects -> erst zuweisen, dann neu erstellen!
+     if(trackerObjects.size() < candidates.size()) {
+       if(trackerObjects.isEmpty()) {
+         // einfach mal mit dem ersten Kandidaten anfangen
+         Region cand = candidates.get(0);
+         // bestes TrackerObject suchen
+         TrackerObject obj = matchColorHistogram(cand, currentTime);
+         // wenn es das nicht gibt, Neues erstellen
+         if(obj == null) {
+           obj = createTrackerObject(cand, currentTime);
+           candidates.remove(cand);
+           List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+           new_list.add(obj);
+           return new_list;
          }
-         // es gibt mehr als 0 TrackerObjects und mehr als 1 Candidate
+         // wenn es das gibt, updaten
          else {
-           // wir ermitteln dasjenige Paar, welches die kleinste Distanz hat.
-           TrackerObject winner = null;
-           Region best_region = null;
-           double min_distance1 = Double.MAX_VALUE;
-           for(TrackerObject obj : trackerObjects) {
-             Region winner_region = null;
-             double min_distance = Double.MAX_VALUE;
-             for(Region r : candidates) {
-               double distance = distance(obj, r);
-               if(distance < min_distance) {
-                 winner_region = r;
-                 min_distance = distance;
-               }
-             }
-             if(min_distance < min_distance1 && min_distance < matchThreshold) {
-               min_distance1 = min_distance;
-               winner = obj;
-               best_region = winner_region;
-             }
-           }
-           // wir haben ein Paar gefunden!
-           if(winner != null) {
-             // updaten und weiter!
-             updateTrackerObject(winner, best_region, currentTime);
-             candidates.remove(best_region);
-             trackerObjects.remove(winner);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(winner);
-             return new_list;
-           }
-           // wir haben kein Paar gefunden... :(
-           else {
-             // wir ermitteln dasjenige TrackerObject, welches die größte Distanz
-             // zu allen Kandidaten aufweist
-             Region loser = null;
-             double max_distance = 0;
-             for(Region cand : candidates) {
-               double min_distance = Double.MAX_VALUE;
-               for(TrackerObject obj : trackerObjects) {
-                 double distance = distance(obj, cand);
-                 if(distance < min_distance) {
-                   min_distance = distance;
-                 }
-               }
-               if(min_distance > max_distance) {
-                 max_distance = min_distance;
-                 loser = cand;
-               }
-             }
-             // wir sehen nach ob wir ein passendes TrackerObject auf Halde haben
-             TrackerObject loser_obj = matchColorHistogram(loser, currentTime);
-             // wir haben! also: schnell updaten!
-             if(loser_obj != null) {
-               updateTrackerObject(loser_obj, loser, currentTime);
-             }
-             // wir haben nüscht jefunden, ergo: neu erstellen!
-             else {
-               loser_obj = createTrackerObject(loser, currentTime);
-             }
-             candidates.remove(loser);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(loser_obj);
-           }
+           updateTrackerObject(obj, cand, currentTime);
+           candidates.remove(cand);
+           List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+           new_list.add(obj);
+           return new_list;
          }
        }
-       if(trackerObjects.size() == candidates.size()) {
-         // wir suchen die besten matches raus, wenn einer schlechter als 
-         // threshold ist, heißt das wohl, dass wir nen neuen kandidaten haben.
-         TrackerObject winner = null;
-         Region best_region = null;
-         double min_distance1 = Double.MAX_VALUE;
-         for(TrackerObject obj : trackerObjects) {
-           Region winner_region = null;
-           double min_distance = Double.MAX_VALUE;
-           for(Region r : candidates) {
-             double distance = distance(obj, r);
-             if(distance < min_distance) {
-               winner_region = r;
-               min_distance = distance;
-             }
-           }
-           if(min_distance < min_distance1) {
-             min_distance1 = min_distance;
-             winner = obj;
-             best_region = winner_region;
-           }
+       // es gibt mehr als 0 TrackerObjects und mehr als 1 Candidate
+       else {
+         // wir ermitteln dasjenige Paar, welches die kleinste Distanz hat.
+         Match m = shortestDistance(trackerObjects, candidates, matchThreshold);
+         TrackerObject winner = m.getObj();
+         Region best_region = m.getRegion();
+         // wir haben ein Paar gefunden!
+         if(winner != null) {
+           // updaten und weiter!
+           updateTrackerObject(winner, best_region, currentTime);
+           candidates.remove(best_region);
+           trackerObjects.remove(winner);
+           List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+           new_list.add(winner);
+           return new_list;
          }
+         // wir haben kein Paar gefunden... :(
+         else {
+           // wir ermitteln dasjenige TrackerObject, welches die größte Distanz
+           // zu allen Kandidaten aufweist
+           Region loser = greatestDistance(trackerObjects, candidates);
+           // wir sehen nach ob wir ein passendes TrackerObject auf Halde haben
+           TrackerObject loser_obj = matchColorHistogram(loser, currentTime);
+           // wir haben! also: schnell updaten!
+           if(loser_obj != null) {
+             updateTrackerObject(loser_obj, loser, currentTime);
+           }
+           // wir haben nüscht jefunden, ergo: neu erstellen!
+           else {
+             loser_obj = createTrackerObject(loser, currentTime);
+           }
+           candidates.remove(loser);
+           List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+           new_list.add(loser_obj);
+         }
+       }
+     }
+     if(trackerObjects.size() == candidates.size()) {
+       // wir suchen die besten matches raus, wenn einer schlechter als 
+       // threshold ist, heißt das wohl, dass wir nen neuen kandidaten haben.
+       Match m = shortestDistance(trackerObjects, candidates, matchThreshold);
+       // wir haben da nen guten Match, also hauen wir das auch aufeinander!!
+       TrackerObject winner = m.getObj();
+       Region best_region = m.getRegion();
+       if(winner != null) {
+         updateTrackerObject(winner, best_region, currentTime);
+         candidates.remove(best_region);
+         trackerObjects.remove(winner);
+         List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+         new_list.add(winner);
+         return new_list;
+       }
+       // der Match war wohl nicht so toll... na dann: neu erstellen!
+       else {
+         Region r = greatestDistance(trackerObjects, candidates);
+         TrackerObject new_to = createTrackerObject(r, currentTime);
+         candidates.remove(r);
+         List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+         new_list.add(new_to);
+         return new_list;
+       }
+     }
+     if(trackerObjects.size() > candidates.size()) {
+       // wir haben da wohl mindestens ein TrackerObject zu viel, bzw. nen Kandidaten zu wenig...
+       // Idee ist: Wenn es nen Kandidaten gibt, wird der wohl mal zuerst gematcht.
+       // falls das nicht der Fall ist, suchen wir uns die nächstbeste Region...
+       if(!candidates.isEmpty()) {
+         Match m = shortestDistance(trackerObjects, candidates, matchThreshold);
+         TrackerObject winner = m.getObj();
+         Region best_region = m.getRegion();
          // wir haben da nen guten Match, also hauen wir das auch aufeinander!!
-         if(min_distance1 < matchThreshold) {
+         if(winner != null) {
            updateTrackerObject(winner, best_region, currentTime);
            candidates.remove(best_region);
            trackerObjects.remove(winner);
@@ -364,94 +355,40 @@ public class ObjectTrackerImpl implements ObjectTracker {
          }
          // der Match war wohl nicht so toll... na dann: neu erstellen!
          else {
-           TrackerObject new_to = createTrackerObject(best_region, currentTime);
-           candidates.remove(best_region);
+           Region r = greatestDistance(trackerObjects, candidates);
+           TrackerObject new_to = createTrackerObject(r, currentTime);
+           candidates.remove(r);
            List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
            new_list.add(new_to);
            return new_list;
          }
        }
-       if(trackerObjects.size() > candidates.size()) {
-         // wir haben da wohl mindestens ein TrackerObject zu viel, bzw. nen Kandidaten zu wenig...
-         // Idee ist: Wenn es nen Kandidaten gibt, wird der wohl mal zuerst gematcht.
-         // falls das nicht der Fall ist, suchen wir uns die nächstbeste Region...
-         if(!candidates.isEmpty()) {
-           TrackerObject winner = null;
-           Region best_region = null;
-           double min_distance1 = Double.MAX_VALUE;
-           for(TrackerObject obj : trackerObjects) {
-             Region winner_region = null;
-             double min_distance = Double.MAX_VALUE;
-             for(Region r : candidates) {
-               double distance = distance(obj, r);
-               if(distance < min_distance) {
-                 winner_region = r;
-                 min_distance = distance;
-               }
-             }
-             if(min_distance < min_distance1) {
-               min_distance1 = min_distance;
-               winner = obj;
-               best_region = winner_region;
-             }
-           }
-           // wir haben da nen guten Match, also hauen wir das auch aufeinander!!
-           if(min_distance1 < matchThreshold) {
-             updateTrackerObject(winner, best_region, currentTime);
-             candidates.remove(best_region);
-             trackerObjects.remove(winner);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(winner);
-             return new_list;
-           }
-           // der Match war wohl nicht so toll... na dann: neu erstellen!
-           else {
-             TrackerObject new_to = createTrackerObject(best_region, currentTime);
-             candidates.remove(best_region);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(new_to);
-             return new_list;
-           }
-         }
-         // Ach Mist, es gibt keine Kandidaten, aber noch TrackerObjects...
-         else {
-           // wir suchen uns einfach die beste Region!
-           double min_distance = Double.MAX_VALUE;
-           TrackerObject winner = null;
-           Region winner_region = null;
-           for(TrackerObject obj : trackerObjects) {
-             Region w_region = null;
-             double min_distance1 = Double.MAX_VALUE;
-             for(Region r : regions) {
-               double dist = distance(obj, r);
-               if(dist < min_distance1) {
-                 min_distance1 = dist;
-                 w_region = r;
-               }
-             }
-             if(min_distance1 < min_distance && min_distance1 < distanceThreshold) {
-               min_distance = min_distance1;
-               winner = obj;
-               winner_region = w_region;
-             }
-           }
-           // wir haben eine gefunden... :)
+       // Ach Mist, es gibt keine Kandidaten, aber noch TrackerObjects...
+       else {
+         // wir suchen uns einfach die beste Region!
+         Match m = shortestDistance(trackerObjects, regions, matchThreshold);
+         TrackerObject winner = m.getObj();
+         Region winner_region = m.getRegion();
+         // wir haben eine gefunden... :)
+         if(winner != null) {
+           // jetzt wird das TrackerObject um die entsprechende X/Y-Koordinate
+           // bewegt...
+           DoubleTuple move_mean = meanDistance(regions, winner_region, winner);
            if(winner != null) {
-             // jetzt wird das TrackerObject um die entsprechende X/Y-Koordinate
-             // bewegt...
-             moveTrackerObject(winner, winner_region.getCentroid(), currentTime);
-             regions.remove(winner_region);
-             trackerObjects.remove(winner);
-             List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
-             new_list.add(winner);
-             return new_list;
+             moveTrackerObject(winner, move_mean, currentTime);
            }
-           // wir haben keine gefunden?? na egal, einfach alle TrackerObjects behalten
-           else {
-             List<TrackerObject> new_list = new LinkedList<TrackerObject>();
-             new_list.addAll(trackerObjects);
-             return new_list;
-           }
+           //moveTrackerObject(winner, winner_region.getCentroid(), currentTime);
+           regions.remove(winner_region);
+           trackerObjects.remove(winner);
+           List<TrackerObject> new_list = assign_new(trackerObjects, candidates);
+           new_list.add(winner);
+           return new_list;
+         }
+         // wir haben keine gefunden?? na egal, einfach alle TrackerObjects behalten
+         else {
+           List<TrackerObject> new_list = new LinkedList<TrackerObject>();
+           new_list.addAll(trackerObjects);
+           return new_list;
          }
        }
      }
@@ -478,6 +415,101 @@ public class ObjectTrackerImpl implements ObjectTracker {
         }
       }
       return result;
+    }
+    
+    /**
+     * Compute the pair out of trackerObjects/regions with minimum distance
+     * @param trackerObjects
+     * @param regions
+     * @param threshold
+     * @return 
+     */
+    private Match shortestDistance(List<TrackerObject> trackerObjects, 
+      List<Region> regions, double threshold) {
+     
+      TrackerObject winner = null;
+      Region best_region = null;
+      double min_distance1 = Double.MAX_VALUE;
+      for(TrackerObject obj : trackerObjects) {
+        Region winner_region = null;
+        double min_distance = Double.MAX_VALUE;
+        for(Region r : regions) {
+          double distance = distance(obj, r);
+          if(distance < min_distance) {
+            winner_region = r;
+            min_distance = distance;
+          }
+        }
+        if(min_distance < min_distance1 && min_distance < threshold) {
+          min_distance1 = min_distance;
+          winner = obj;
+          best_region = winner_region;
+        }
+     }
+     Match result = new Match(winner, best_region);
+     return result;
+    }
+
+    /**
+     * Find out the region out of regions, which has the maximum distance to all
+     * trackerObjects
+     * @param trackerObjects
+     * @param regions
+     * @return 
+     */
+    private Region greatestDistance(List<TrackerObject> trackerObjects,
+      List<Region> regions) {
+      
+      Region loser = null;
+      double max_distance = 0;
+      for(Region cand : regions) {
+        double min_distance = Double.MAX_VALUE;
+        for(TrackerObject obj : trackerObjects) {
+          double distance = distance(obj, cand);
+          if(distance < min_distance) {
+            min_distance = distance;
+          }
+        }
+        if(min_distance > max_distance) {
+          max_distance = min_distance;
+          loser = cand;
+        }
+      }
+      
+      return loser;
+    }
+    
+    private BoundingBox resizeBoundingBox(BoundingBox bbox1, BoundingBox bbox2) {
+      int min_x ,min_y, max_x, max_y;
+      
+      if(bbox1.getMin().getX() > bbox2.getMin().getX()) {
+        min_x = bbox2.getMin().getX();
+      }
+      else {
+        min_x = bbox1.getMin().getX();
+      }
+      if(bbox1.getMin().getY() > bbox2.getMin().getY()) {
+        min_y = bbox2.getMin().getY();
+      }
+      else {
+        min_y = bbox1.getMin().getY();
+      }
+      if(bbox1.getMax().getX() > bbox2.getMax().getX()) {
+        max_x = bbox1.getMax().getX();
+      }
+      else {
+        max_x = bbox2.getMax().getX();
+      }
+      if(bbox1.getMax().getY() > bbox2.getMax().getY()) {
+        max_y = bbox1.getMax().getY();
+      }
+      else {
+        max_y = bbox2.getMax().getY();
+      }
+
+      BoundingBox b = new BoundingBox(new Position(min_x, min_y), 
+                                      new Position(max_x, max_y));
+      return b;
     }
     
     private Region findMatchingRegion(Region region, List<Region> regions) {
@@ -542,7 +574,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
       object.setProperty(OBJ_PROPKEY_COLOR, c);
       return object;
     }
-
+    
     private TrackerObject updateTrackerObject(TrackerObject object, Region region, long time) {
       object.setLastSeen(time);
       int in_scene = (Integer) object.getProperty(OBJ_PROPKEY_INSCENE);
@@ -606,6 +638,49 @@ public class ObjectTrackerImpl implements ObjectTracker {
       object.setProperty(OBJ_PROPKEY_BBOX, bbox);
       return object;
     }
+    
+    private TrackerObject moveTrackerObject(TrackerObject winner, 
+            DoubleTuple move_mean, long currentTime) {
+      BoundingBox bbox = ((BoundingBox) winner.getProperty(OBJ_PROPKEY_BBOX)).clone();
+      Position centroid = ((Position) winner.getProperty(OBJ_PROPKEY_CENTROID)).clone();
+      double d_x = move_mean.d1;
+      double d_y = move_mean.d2;
+      Position min = move_mean.min;
+      Position max = move_mean.max;
+      Position newmin = new Position((int) (bbox.getMin().getX()-d_x),
+              (int) (bbox.getMin().getY()-d_y));
+      Position newmax = new Position((int) (bbox.getMax().getX()-d_x),
+              (int) (bbox.getMax().getY()-d_y));
+
+      int dif_x_min = newmin.getX()-min.getX();
+      int dif_x_max = newmax.getX()-max.getX();
+      int dif_y_min = newmin.getY()-min.getY();
+      int dif_y_max = newmax.getY()-max.getY();
+      
+      if(dif_x_min < dif_x_max) {d_x += dif_x_min;}
+      if(dif_x_min > dif_x_max) {d_x += dif_x_max;}
+      if(dif_y_min < dif_y_max) {d_y += dif_y_min;}
+      if(dif_y_min > dif_y_max) {d_y += dif_y_max;}
+        
+      d_x *= 0.8;
+      d_y *= 0.8;
+      
+      bbox.setMin(new Position((int)(bbox.getMin().getX()-d_x),(int)(bbox.getMin().getY()-d_y)));
+      bbox.setMax(new Position((int)(bbox.getMax().getX()-d_x),(int)(bbox.getMax().getY()-d_y)));
+      centroid.setX((int)(centroid.getX()-d_x));
+      centroid.setY((int)(centroid.getY()-d_y));
+      double distance = Math.sqrt(d_x*d_x + d_y*d_y);
+      int movement = (Integer) winner.getProperty(OBJ_PROPKEY_MOVEMENT);
+      if(distance < width_max/5 && distance > 0) {
+        winner.setProperty(OBJ_PROPKEY_MOVEMENT, ++movement);
+      }
+      winner.setLastSeen(currentTime);
+      int in_scene = (Integer) winner.getProperty(OBJ_PROPKEY_INSCENE);
+      winner.setProperty(OBJ_PROPKEY_INSCENE, ++in_scene);
+      winner.setProperty(OBJ_PROPKEY_CENTROID, centroid);
+      winner.setProperty(OBJ_PROPKEY_BBOX, bbox);
+      return winner;
+    }
 
     private boolean checkSplitter(Region lastRegion) {
       if(lastRegion.isSplitter()) {
@@ -656,44 +731,40 @@ public class ObjectTrackerImpl implements ObjectTracker {
       }
       return Double.MAX_VALUE;
     } 
-  }
-  
-  private List<Region> merge(List<Region> regions, TrackerObject obj) {
-    BoundingBox bbox = ((BoundingBox) obj.getProperty(OBJ_PROPKEY_BBOX)).clone();
-    bbox.setMin(new Position(bbox.getMin().getX()-width_min/2,bbox.getMin().getY()-width_min/2));
-    bbox.setMax(new Position(bbox.getMax().getX()+width_min/2,bbox.getMax().getY()+width_min/2));
-    List<Region> return_regions = new LinkedList();
-    for(Region r : regions) {
-      Position p = r.getCentroid();
-      if(bbox.contains(p)) {
-        return_regions.add(r);
-      }
-    }
-    if(return_regions.size() > 1) {
-      regions.removeAll(return_regions);
 
-      int min_x = Integer.MAX_VALUE, min_y = Integer.MAX_VALUE, max_x = 0, max_y = 0;
-      for(Region r : return_regions) {
-        if(r.getBoundingBox().getMin().getX() < min_x)
-          min_x = r.getBoundingBox().getMin().getX();
-        if(r.getBoundingBox().getMin().getY() < min_y)
-          min_y = r.getBoundingBox().getMin().getY();
-        if(r.getBoundingBox().getMax().getX() > max_x)
-          max_x = r.getBoundingBox().getMax().getX();
-        if(r.getBoundingBox().getMax().getY() > max_y)
-          max_y = r.getBoundingBox().getMax().getY();
-      }
-      Region r = return_regions.get(0);
-      BoundingBox bbox1 = new BoundingBox(
-              new Position(min_x, min_y), new Position(max_x, max_y));
-      Position new_centroid = new Position(min_x+(max_x - min_x)/2,
-              min_y+(max_y - min_y)/2);
-      r.update(r.getLabel(), r.getLastMoveTime(), new_centroid, bbox1, r.getWeight());
+    private DoubleTuple meanDistance(List<Region> regions, 
+            Region winner_region, TrackerObject winner) {
+
+      List<Region> candidates = new LinkedList<Region>();
+      Position centroid = winner_region.getCentroid();
+      Position centroid2 = (Position) winner.getProperty(OBJ_PROPKEY_CENTROID);
       
-      log.info("Ich habe "+return_regions.size()+" Regions gemergt!");
-
-      regions.add(r);
+      double mean_x = 0;
+      double mean_y = 0;
+      int number = 0, min_x = Integer.MAX_VALUE, min_y = Integer.MAX_VALUE,
+              max_x = 0, max_y = 0;
+      
+      for(Region r : regions) {
+        Position centroid_r = r.getCentroid();
+        double dist = centroid.distance(centroid_r);
+        if(dist < distanceThreshold) {
+          Position min = r.getBoundingBox().getMin();
+          Position max = r.getBoundingBox().getMax();
+          if(min.getX() < min_x) { min_x = min.getX(); }
+          if(min.getY() < min_y) { min_y = min.getY(); }
+          if(max.getX() > max_x) { max_x = max.getX(); }
+          if(max.getY() > max_y) { max_y = max.getY(); }
+          mean_x += centroid2.getX()-centroid_r.getX();
+          mean_y += centroid2.getY()-centroid_r.getY();
+          number++;
+        }
+      }
+      mean_x /= number;
+      mean_y /= number;
+      
+      DoubleTuple result = new DoubleTuple(mean_x, mean_y, 
+              new Position(min_x, min_y), new Position(max_x, max_y));
+      return result;
     }
-    return regions;
   }
 }
