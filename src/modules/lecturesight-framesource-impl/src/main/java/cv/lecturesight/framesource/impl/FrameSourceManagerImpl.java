@@ -1,5 +1,6 @@
 package cv.lecturesight.framesource.impl;
 
+import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
@@ -7,7 +8,6 @@ import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceManager;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.Dictionary;

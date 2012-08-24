@@ -543,9 +543,10 @@ public class ObjectTrackerImpl implements ObjectTracker {
       for(TrackerObject act : allObjects.values()) {
         if(act.lastSeen() - currentTime != 0) {
           try {
-            ColorHistogram ch1 = (ColorHistogram) act.getProperty(OBJ_PROPKEY_COLOR_HISTOGRAM);
-            double distance = ch.bhattacharya_distance(ch1);
-            if(distance < min_distance && distance < chThreshold) {
+//            ColorHistogram ch1 = (ColorHistogram) act.getProperty(OBJ_PROPKEY_COLOR_HISTOGRAM);
+            double distance = distance(act, r);
+//            double distance = ch.bhattacharya_distance(ch1);
+            if(distance < min_distance && distance < matchThreshold) {
               min_distance = distance;
               result = act;
             }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
  name="lecturesight.display" immediate="true" activate="activate">
-  <implementation class="cv.lecturesight.ui.impl.DisplayServiceFactory" />
+  <implementation class="cv.lecturesight.display.impl.DisplayServiceFactory" />
   <property name="service.description" value="Display Service" />
   <service>
-    <provide interface="cv.lecturesight.ui.DisplayService" />
+    <provide interface="cv.lecturesight.display.DisplayService" />
   </service>
   <reference cardinality="1..1" interface="cv.lecturesight.opencl.OpenCLService"
     name="OpenCL" policy="static" bind="setOpenCL"/>

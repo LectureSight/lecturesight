@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-ui-api</artifactId>
+      <artifactId>lecturesight-display-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

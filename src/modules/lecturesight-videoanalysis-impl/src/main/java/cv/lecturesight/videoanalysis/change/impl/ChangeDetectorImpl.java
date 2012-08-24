@@ -4,6 +4,7 @@ import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
+import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.videoanalysis.change.ChangeDetector;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
@@ -11,7 +12,6 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.ui.DisplayService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
@@ -29,7 +29,7 @@ public class ChangeDetectorImpl implements ChangeDetector {
 
   Log log = new Log("Change Detector Service");
   @Reference
-  private Configuration config;
+  Configuration config;
   @Reference
   private OpenCLService ocl;
   @Reference

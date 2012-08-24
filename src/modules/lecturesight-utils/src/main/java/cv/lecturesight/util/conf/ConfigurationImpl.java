@@ -14,6 +14,7 @@ public class ConfigurationImpl implements Configuration {
 
   @Override
   public void set(String key, String value) {
+    key = ensureBundleName(key);
     props.setProperty(key, value);
   }
   
