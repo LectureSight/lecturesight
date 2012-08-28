@@ -1,5 +1,6 @@
 package cv.lecturesight.videoanalysis.change.impl;
 
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
@@ -12,7 +13,6 @@ public class DisplayPanel extends JLabel implements HierarchyListener {
   
   public DisplayPanel() {
     super();
-    
   }
 
   @Override
@@ -32,10 +32,20 @@ public class DisplayPanel extends JLabel implements HierarchyListener {
     super.removeNotify();
   }
 
+  private boolean amIVisible() {
+        Container c = getParent();
+        while (c != null)
+            if (!c.isVisible())
+                return false;
+            else
+                c = c.getParent();
+        return true;
+  }
+
   @Override
   public void hierarchyChanged(HierarchyEvent e) {
     if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
-      System.out.println("Is me showing? " + isShowing());
+      System.out.println("Is me showing? " + amIVisible());
     }
   }
 }

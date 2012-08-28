@@ -7,15 +7,19 @@ public class ChangeDetectorUIFrame extends javax.swing.JPanel {
 
   ChangeDetectUI parent;
   
+  
   public ChangeDetectorUIFrame(ChangeDetectUI parent) {
     this.parent = parent;
-     // set operating system look-and-feel
+    
+    // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
     }
     initComponents();
-    DisplayPanel display = new DisplayPanel();
+    
+    // get OpenCL buffer displays
+    
     displayContainer.setLayout(new BorderLayout());
     displayContainer.add(display, BorderLayout.CENTER);
   }

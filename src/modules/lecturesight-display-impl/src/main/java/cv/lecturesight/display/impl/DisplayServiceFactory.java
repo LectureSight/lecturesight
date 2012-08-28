@@ -1,6 +1,5 @@
 package cv.lecturesight.display.impl;
 
-import cv.lecturesight.display.DisplayRegistration;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
@@ -25,7 +24,7 @@ public class DisplayServiceFactory implements ServiceFactory {
   private OpenCLService ocl;
   
   private Configuration config;
-  static Map<Integer, DisplayRegistration> displays = new HashMap<Integer, DisplayRegistration>();
+  static Map<Integer, DisplayRegistrationImpl> displays = new HashMap<Integer, DisplayRegistrationImpl>();
   static Set<String> autoShow = new TreeSet<String>();
 
   protected void activate(ComponentContext cc) {

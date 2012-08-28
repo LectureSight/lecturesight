@@ -2,14 +2,13 @@ package cv.lecturesight.display;
 
 import cv.lecturesight.opencl.api.OCLSignal;
 import java.awt.image.BufferedImage;
+import javax.swing.JLabel;
 
 public interface Display {
 
-  void setTitle(String title);
-  String getTitle();
   OCLSignal getSignal();
   BufferedImage getImage();
-  void show();
-  void hide();
-  boolean isActive();
+  JLabel getDisplayLabel();
+  void setCustomRenderer(CustomRenderer renderer);
+
 }

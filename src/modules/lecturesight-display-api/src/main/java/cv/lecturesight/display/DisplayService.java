@@ -6,10 +6,10 @@ import java.util.Set;
 
 public interface DisplayService {
 
-  DisplayRegistration registerDisplay(String id, String title, CLImage2D image, OCLSignal trigger);
-  DisplayRegistration registerDispaly(String id, String title, CLImage2D image, CustomRenderer renderer, OCLSignal trigger);
-  Display getWindowByNumber(int num);
-  Display getWindowById(String id);
-  Set<DisplayRegistration> getAllDisplays();
+  DisplayRegistration registerDisplay(String sid, CLImage2D image, OCLSignal trigger);
+  Set<DisplayRegistration> getDisplayRegistrations();
+  Display getDisplayByRegistration(DisplayRegistration reg);
+  Display getDisplayByNumber(int num);
+  Display getDisplayBySID(String sid);
 
 }

@@ -8,43 +8,31 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-public class DisplayWindowImpl implements Display, WindowListener {
+public class DisplayImpl implements Display {
 
   OpenCLService ocl;
   OCLSignal trigger, SIG_done;
   ComputationRun workingRun;
   private CLImage2D image;
   private CustomRenderer renderer = null;
-  private JFrame frame = new JFrame();
-  private JLabel label = new JLabel();
-  private boolean active = false;
 
-  public DisplayWindowImpl(String title, CLImage2D image) {
+  public DisplayImpl(String title, CLImage2D image) {
     frame.setTitle(title);
     this.image = image;
     initComponents();
     initRun();
   }
 
-  public DisplayWindowImpl(String title, CLImage2D image, CustomRenderer renderer) {
+  public DisplayImpl(String title, CLImage2D image, CustomRenderer renderer) {
     frame.setTitle(title);
     this.image = image;
     this.renderer = renderer;
     initComponents();
     initRun();
-  }
-
-  private void initComponents() {
-    frame.setSize((int) image.getWidth(), (int) image.getHeight());
-    frame.getContentPane().add(label);
-    frame.setResizable(false);
-    frame.addWindowListener(this);
   }
 
   private void initRun() {
@@ -66,16 +54,6 @@ public class DisplayWindowImpl implements Display, WindowListener {
         ocl.castSignal(SIG_done);
       }
     };
-  }
-
-  @Override
-  public void setTitle(String title) {
-    frame.setTitle(title);
-  }
-
-  @Override
-  public String getTitle() {
-    return frame.getTitle();
   }
 
   @Override
@@ -151,6 +129,11 @@ public class DisplayWindowImpl implements Display, WindowListener {
 
   @Override
   public BufferedImage getImage() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public JLabel getDisplayLabel() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 }
