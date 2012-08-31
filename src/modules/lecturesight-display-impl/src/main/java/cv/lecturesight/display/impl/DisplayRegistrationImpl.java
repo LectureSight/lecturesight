@@ -2,12 +2,11 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayRegistration;
 
-public abstract class DisplayRegistrationImpl implements DisplayRegistration {
+public class DisplayRegistrationImpl implements DisplayRegistration {
 
   private static int nextId = 0;
   private final int id;
   private String sid;
-  protected boolean active; 
 
   public DisplayRegistrationImpl(String sid) {
     this.sid = sid;
@@ -23,14 +22,8 @@ public abstract class DisplayRegistrationImpl implements DisplayRegistration {
   public String getSID() {
     return sid;
   }
-
-  @Override
-  public void setActive(boolean active) {
-    this.active = active;
-  }
   
-  @Override
-  public boolean isActive() {
-    return active;
+  public boolean equals(DisplayRegistrationImpl other) {
+    return id == other.id && sid.equals(other.sid);
   }
 }

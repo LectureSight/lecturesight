@@ -12,7 +12,7 @@ public class Constants {
   final static String PROPKEY_TIMETOLIVE = "ttl";
   final static String PROPKEY_DISPLAY_OVERLAP = "display.overlap";
   final static String PROPKEY_DEBUG = "debug";
-  final static String WINDOWNAME_OVERLAP = "Region Tracker: Temporal Overlap";
+  final static String WINDOWNAME_OVERLAP = "regions.temporal.overlap";
   final static String SIGNAME_DONE_COMPUTE_OVERLAP = "regiontracker.COMPUTE_OVERLAP_DONE";
   final static String SIGNAME_DONE_CORRELATION = "regiontracker.CORRELATION_DONE";
   final static int    pairsBufferLength = 1024;

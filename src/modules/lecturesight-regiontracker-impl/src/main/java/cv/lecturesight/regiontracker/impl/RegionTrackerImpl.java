@@ -132,8 +132,7 @@ public class RegionTrackerImpl implements RegionTracker {
   private void registerDisplays() {
     // register overlap display if configured
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_OVERLAP)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, "temporal overlap",
-              overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
+      dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
     }
   }
   //</editor-fold>

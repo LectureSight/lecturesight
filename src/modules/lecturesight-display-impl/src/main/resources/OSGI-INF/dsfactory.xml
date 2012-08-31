@@ -8,6 +8,4 @@
   </service>
   <reference cardinality="1..1" interface="cv.lecturesight.opencl.OpenCLService"
     name="OpenCL" policy="static" bind="setOpenCL"/>
-  <reference cardinality="1..1" interface="cv.lecturesight.util.conf.Configuration"
-    name="Configuration" policy="static" bind="setConfiguration"/>
 </scr:component>

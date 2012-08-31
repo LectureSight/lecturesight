@@ -33,12 +33,12 @@ public class HeartBeatImpl implements HeartBeat {
   private FrameSource fsrc;
   private OCLSignal[] listenTo;
   private OCLSignalBarrier barrier;
-  private OCLSignal SIG_BEGINFRAME;
+  private OCLSignal sig_BEGINFRAME;
   private boolean ready = false;
   private int iterationsToRun = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
-    SIG_BEGINFRAME = ocl.getSignal("BEGIN-FRAME");
+    sig_BEGINFRAME = ocl.getSignal("BEGIN-FRAME");
     log.info("Activated.");
     if (config.getBoolean(PROPKEY_AUTOSTART)) {
       init();
@@ -57,7 +57,7 @@ public class HeartBeatImpl implements HeartBeat {
 
   private void nextFrame() {
     try {
-      ocl.castSignal(SIG_BEGINFRAME);
+      ocl.castSignal(sig_BEGINFRAME);
       fsrc.captureFrame();
     } catch (FrameSourceException e) {
       log.error("Unable to capture frame", e);

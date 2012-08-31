@@ -88,13 +88,13 @@ public class BackgroundModelImpl implements BackgroundModel {
 
   private void registerDisplays() {
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_DIFF)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_DIFF, "bg diff", diffMap, signals.get(Signal.DONE_DIFF));
+      dsps.registerDisplay(Constants.WINDOWNAME_DIFF, diffMap, signals.get(Signal.DONE_DIFF));
     }
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_MODEL)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_MODEL, "bg model", background, signals.get(Signal.DONE_DIFF));
+      dsps.registerDisplay(Constants.WINDOWNAME_MODEL, background, signals.get(Signal.DONE_DIFF));
     }
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_UPDATEMAP)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_UPDATEMAP, "update map", updateMap, signals.get(Signal.DONE_DIFF));
+      dsps.registerDisplay(Constants.WINDOWNAME_UPDATEMAP, updateMap, signals.get(Signal.DONE_DIFF));
     }
   }
 

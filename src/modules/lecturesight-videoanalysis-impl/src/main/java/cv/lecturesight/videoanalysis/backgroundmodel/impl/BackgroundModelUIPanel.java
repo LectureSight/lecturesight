@@ -1,15 +1,14 @@
-package cv.lecturesight.videoanalysis.change.impl;
+package cv.lecturesight.videoanalysis.backgroundmodel.impl;
 
+import cv.lecturesight.display.DisplayService;
 import javax.swing.UIManager;
 
-public class ChangeDetectorUIFrame extends javax.swing.JPanel {
-
-  private enum Views {RAW,DILATED};
+public class BackgroundModelUIPanel extends javax.swing.JPanel {
   
-  ChangeDetectUI parent;
+  DisplayService dsps;
   
-  public ChangeDetectorUIFrame(ChangeDetectUI parent) {
-    this.parent = parent;
+  BackgroundModelUIPanel(DisplayService dsps) {
+    this.dsps = dsps;
     
     // set operating system look-and-feel
     try {
@@ -17,9 +16,9 @@ public class ChangeDetectorUIFrame extends javax.swing.JPanel {
     } catch (Exception e) {
     }
     initComponents();
-        
-    viewTabs.add("raw", parent.dsps.getDisplayBySID(Constants.WINDOWNAME_CHANGE_RAW).getDisplayPanel());
-    viewTabs.add("dilated", parent.dsps.getDisplayBySID(Constants.WINDOWNAME_CHANGE_DILATED).getDisplayPanel());
+
+    viewTabs.add("model", dsps.getDisplayBySID(Constants.WINDOWNAME_MODEL).getDisplayPanel());
+    viewTabs.add("diff", dsps.getDisplayBySID(Constants.WINDOWNAME_DIFF).getDisplayPanel());
   }
 
   @SuppressWarnings("unchecked")
@@ -29,8 +28,6 @@ public class ChangeDetectorUIFrame extends javax.swing.JPanel {
     outputPanel = new javax.swing.JPanel();
     viewTabs = new javax.swing.JTabbedPane();
     optionsPanel = new javax.swing.JPanel();
-    thresholdLabel = new javax.swing.JLabel();
-    thresholdSlider = new javax.swing.JSlider();
 
     outputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Output", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
@@ -44,40 +41,20 @@ public class ChangeDetectorUIFrame extends javax.swing.JPanel {
     );
     outputPanelLayout.setVerticalGroup(
       outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(viewTabs, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)
+      .addComponent(viewTabs, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
     );
 
     optionsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
-
-    thresholdLabel.setText("Threshold:");
-
-    thresholdSlider.setMaximum(255);
-    thresholdSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-      public void stateChanged(javax.swing.event.ChangeEvent evt) {
-        thresholdSliderStateChanged(evt);
-      }
-    });
 
     javax.swing.GroupLayout optionsPanelLayout = new javax.swing.GroupLayout(optionsPanel);
     optionsPanel.setLayout(optionsPanelLayout);
     optionsPanelLayout.setHorizontalGroup(
       optionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(optionsPanelLayout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(thresholdLabel)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(thresholdSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 666, Short.MAX_VALUE)
-        .addContainerGap())
+      .addGap(0, 767, Short.MAX_VALUE)
     );
     optionsPanelLayout.setVerticalGroup(
       optionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(optionsPanelLayout.createSequentialGroup()
-        .addGroup(optionsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(optionsPanelLayout.createSequentialGroup()
-            .addGap(12, 12, 12)
-            .addComponent(thresholdLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
-          .addComponent(thresholdSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap())
+      .addGap(0, 55, Short.MAX_VALUE)
     );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -96,15 +73,9 @@ public class ChangeDetectorUIFrame extends javax.swing.JPanel {
     );
   }// </editor-fold>//GEN-END:initComponents
 
-private void thresholdSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_thresholdSliderStateChanged
-  parent.setThreshold(thresholdSlider.getValue());
-}//GEN-LAST:event_thresholdSliderStateChanged
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel optionsPanel;
   private javax.swing.JPanel outputPanel;
-  private javax.swing.JLabel thresholdLabel;
-  private javax.swing.JSlider thresholdSlider;
   private javax.swing.JTabbedPane viewTabs;
   // End of variables declaration//GEN-END:variables
 

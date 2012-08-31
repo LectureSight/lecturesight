@@ -4,22 +4,29 @@ import cv.lecturesight.display.Display;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 public class DisplayWindow implements WindowListener {
   
-  private JFrame frame = new JFrame();
-  private JLabel displayLabel = new JLabel();
+  String title = "";
+  Display display;
+  JFrame frame;
   
   public DisplayWindow(String title, Display display) {
-    
+    this.title = title;
+    this.display = display;
+    initComponents();
   }
   
   private void initComponents() {
-    frame.setSize((int) image.getWidth(), (int) image.getHeight());
-    frame.getContentPane().add(displayLabel);
+    frame = new JFrame(title);
+    frame.getContentPane().add(display.getDisplayPanel());
     frame.setResizable(false);
     frame.addWindowListener(this);
+  }
+  
+  // TODO deactivate image fatching when made invisible
+  public void setVisible(boolean b) {
+    frame.setVisible(b);  
   }
 
   @Override

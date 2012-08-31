@@ -163,7 +163,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private void activateProvider(String mrl) {
     try {
       FrameSource fs = createFrameSource(mrl);
-      dsps.registerDisplay(WINDOWNAME_INPUT, "input", fs.getImage(), fs.getSignal());
+      dsps.registerDisplay(WINDOWNAME_INPUT, fs.getImage(), fs.getSignal());
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {

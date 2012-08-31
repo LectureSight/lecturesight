@@ -1,9 +1,8 @@
-package cv.lecturesight.videoanalysis.change.impl;
+package cv.lecturesight.framesource.impl.ui;
 
 import cv.lecturesight.display.DisplayService;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.gui.api.UserInterface;
-import cv.lecturesight.util.conf.Configuration;
-import cv.lecturesight.videoanalysis.change.ChangeDetector;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -12,33 +11,26 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name = "lecturesight.videoanalysis.change.ui", immediate = true)
+@Component(name = "lecturesight.framesource.ui", immediate = true)
 @Service
 @Properties({
-  @Property(name = "lecturesight.gui.title", value = "Change Detection")
+  @Property(name = "lecturesight.gui.title", value = "Input")
 })
-public class ChangeDetectUI implements UserInterface {
-
+public class FrameSourceProviderUI implements UserInterface {
+  
   @Reference
-  Configuration config;
-  @Reference
-  ChangeDetector parent;
+  FrameSourceProvider fsp;
   @Reference
   DisplayService dsps;
   
-  private JPanel ui;
+  JPanel ui;
   
   protected void activate(ComponentContext cc) {
-    ui = new ChangeDetectorUIFrame(this);
-  }
-  
-  void setThreshold(int thresh) {
-    config.set(Constants.PROPKEY_THRESH, Integer.toString(thresh));
+    ui = new FrameSourceProviderUIPanel(dsps.getDisplayBySID("input"));
   }
   
   @Override
   public JPanel getPanel() {
     return ui;
   }
-  
 }

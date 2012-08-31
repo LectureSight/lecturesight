@@ -2,87 +2,51 @@ package cv.lecturesight.display.impl;
 
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLQueue;
-import cv.lecturesight.display.CustomRenderer;
 import cv.lecturesight.display.Display;
+import cv.lecturesight.display.DisplayListener;
+import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class DisplayImpl implements Display {
 
   OpenCLService ocl;
-  OCLSignal trigger, SIG_done;
+  OCLSignal trigger, sig_DONE;
   ComputationRun workingRun;
-  private CLImage2D image;
-  private CustomRenderer renderer = null;
+  private CLImage2D imageCL;
+  private BufferedImage imageHost;
+  private boolean active = false;
+  private Set<DisplayListener> listeners = new HashSet<DisplayListener>();
 
-  public DisplayImpl(String title, CLImage2D image) {
-    frame.setTitle(title);
-    this.image = image;
-    initComponents();
-    initRun();
-  }
-
-  public DisplayImpl(String title, CLImage2D image, CustomRenderer renderer) {
-    frame.setTitle(title);
-    this.image = image;
-    this.renderer = renderer;
-    initComponents();
-    initRun();
-  }
-
-  private void initRun() {
-    workingRun = new ComputationRun() {
-
-      BufferedImage hostImage;
-
-      @Override
-      public void launch(CLQueue queue) {
-        hostImage = image.read(queue);
-      }
-
-      @Override
-      public void land() {
-        if (renderer != null) {
-          renderer.render(hostImage.createGraphics());
-        }
-        label.setIcon(new ImageIcon(hostImage));
-        ocl.castSignal(SIG_done);
-      }
-    };
+  public DisplayImpl(OpenCLService ocl, OCLSignal trigger, CLImage2D imageCL) {
+    this.ocl = ocl;
+    this.trigger = trigger;
+    this.imageCL = imageCL;
+    this.imageHost = new BufferedImage((int) imageCL.getWidth(), (int) imageCL.getHeight(), BufferedImage.TYPE_INT_RGB);
+    sig_DONE = ocl.getSignal("Display-" + UUID.randomUUID().toString());
+    workingRun = new WorkingRun();
   }
 
   @Override
   public OCLSignal getSignal() {
-    return SIG_done;
+    return sig_DONE;
   }
 
   @Override
-  public void show() {
-    activate();
-    frame.setVisible(true);
-  }
-
-  @Override
-  public void hide() {
-    deactivate();
-    frame.setVisible(false);
-  }
-
-  // TODO: synchronize
-  private void activate() {
+  public void activate() {
     if (!active) {
       ocl.registerLaunch(trigger, workingRun);
       active = true;
     }
   }
 
-  // TODO: synchronize
-  private void deactivate() {
+  @Override
+  public void deactivate() {
     if (active) {
       ocl.unregisterLaunch(trigger, workingRun);
       active = false;
@@ -95,45 +59,46 @@ public class DisplayImpl implements Display {
   }
 
   @Override
-  public void windowClosing(WindowEvent we) {
-    deactivate();
+  public BufferedImage getImage() {
+    return imageHost;
   }
 
   @Override
-  public void windowIconified(WindowEvent we) {
-    deactivate();
+  public DisplayPanel getDisplayPanel() {
+    return new DisplayPanelImpl(this);
   }
 
   @Override
-  public void windowDeiconified(WindowEvent we) {
+  public void addListener(DisplayListener listener) {
+    listeners.add(listener);
     activate();
   }
 
-  // <editor-fold defaultstate="collapsed" desc="Unused WindowListener methods">
   @Override
-  public void windowOpened(WindowEvent we) {
+  public void removeListener(DisplayListener listener) {
+    listeners.remove(listener);
+    if (listeners.isEmpty()) {
+      deactivate();
+    }
   }
 
-  @Override
-  public void windowClosed(WindowEvent we) {
+  private void notifyListeners() {
+    for (DisplayListener l : listeners) {
+      l.imageUpdated(imageHost);
+    }
   }
 
-  @Override
-  public void windowActivated(WindowEvent we) {
-  }
+  private class WorkingRun implements ComputationRun {
 
-  @Override
-  public void windowDeactivated(WindowEvent we) {
-  }
-  // </editor-fold>
+    @Override
+    public void launch(CLQueue queue) {
+      imageHost = imageCL.read(queue);
+    }
 
-  @Override
-  public BufferedImage getImage() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  @Override
-  public JLabel getDisplayLabel() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public void land() {
+      ocl.castSignal(sig_DONE);
+      notifyListeners();
+    }
   }
 }

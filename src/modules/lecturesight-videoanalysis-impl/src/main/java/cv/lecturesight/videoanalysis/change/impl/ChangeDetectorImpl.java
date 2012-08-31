@@ -69,12 +69,10 @@ public class ChangeDetectorImpl implements ChangeDetector {
 
   private void registerDisplays() {
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_RAW)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, "IF-Diff",
-              changeMapRaw, signals.get(Signal.DONE_DETECTION));
+      dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, changeMapRaw, signals.get(Signal.DONE_DETECTION));
     }
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_DILATED)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_DILATED, "IF-Diff dilated",
-              changeMapDilated, signals.get(Signal.DONE_DETECTION));
+      dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_DILATED, changeMapDilated, signals.get(Signal.DONE_DETECTION));
     }
   }
 
