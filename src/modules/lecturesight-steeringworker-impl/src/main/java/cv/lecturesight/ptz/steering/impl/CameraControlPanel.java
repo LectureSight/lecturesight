@@ -41,7 +41,12 @@ public class CameraControlPanel extends JPanel implements MouseListener {
     
     // status string at bottom of viewport
     g.setColor(Color.green);
-    g.drawString(model.getStatus(), 2, getHeight() - 3);
+    int y = getHeight() - 33;
+    for (String ln : model.getStatus().split("\\n")) {
+      g.drawString(ln, 2, y);
+      y += 10;
+    }
+    
     
     g.drawRect(1, 1, 20, 10);
     Color fillColor = model.isMoving() ? Color.green : Color.black;
@@ -62,7 +67,7 @@ public class CameraControlPanel extends JPanel implements MouseListener {
     g.drawString(Integer.toString(model.getPan_min()), 2, rootY - 2);
     g.drawLine(getWidth()-2, rootY-3, getWidth()-2, rootY + 3);
     g.drawLine(rootX + (rootX/2), rootY-3, rootX + (rootX/2), rootY + 3);
-    g.drawString(Integer.toString(model.getPan_max()), getWidth() - 20, rootY + 11);
+    g.drawString(Integer.toString(model.getPan_max()), getWidth() - 30, rootY + 11);
     
     // y axis
     g.drawLine(rootX, 1, rootX, getHeight()-2);

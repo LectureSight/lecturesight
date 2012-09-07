@@ -73,14 +73,4 @@ public class ConsoleCommands implements DummyInterface {
   public void home(String[] args) {
     steerer.setTargetPosition(new NormalizedPosition(0.0f, 0.0f));
   }
-  
-  public void ui(String[] args) {
-    if (args.length < 1) {
-      System.out.println("Usage: cs:ui show|hide");
-    } else if (args[0].equalsIgnoreCase("show")) {
-      ((CameraSteeringWorkerImpl)steerer).ui.show(true);
-    } else if (args[0].equalsIgnoreCase("hide")) {
-      ((CameraSteeringWorkerImpl)steerer).ui.show(false);
-    }
-  }
 }

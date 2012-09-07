@@ -16,5 +16,4 @@ public interface CameraSteeringWorker {
   void setTargetPosition(NormalizedPosition pos);
   NormalizedPosition getTargetPosition();
   NormalizedPosition getActualPosition();
-
 }

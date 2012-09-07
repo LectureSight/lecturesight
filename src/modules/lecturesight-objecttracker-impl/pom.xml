@@ -17,11 +17,21 @@
   </parent>
   
   <dependencies>
-   <dependency>
-     <groupId>cv.lecturesight</groupId>
-     <artifactId>lecturesight-framesource-api</artifactId>
-     <version>${project.version}</version>
-   </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-display-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-gui-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-framesource-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-videoanalysis-api</artifactId>
@@ -103,7 +113,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.objecttracker.simple</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.objecttracker.impl;version=${project.version}</Export-Package>
+            <Export-Package>
+              cv.lecturesight.objecttracker.impl;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

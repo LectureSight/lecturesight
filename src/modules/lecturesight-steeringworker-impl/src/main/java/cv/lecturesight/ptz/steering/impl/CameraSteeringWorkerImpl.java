@@ -22,7 +22,6 @@ import org.osgi.service.component.ComponentContext;
 public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   final static String PROPKEY_AUTOSTART = "autostart";
-  final static String PROPKEY_SHOWUI = "ui.show";
   final static String PROPKEY_INTERVAL = "interval";
   final static String PROPKEY_ALPHAX = "move.alpha.x";
   final static String PROPKEY_ALPHAY = "move.alpha.y";
@@ -36,7 +35,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   @Reference
   PTZCamera camera;
   private CameraPositionModel model;
-  CameraMovementUI ui;
+  private CameraControlPanel controlPanel;
   SteeringWorker worker;
   ScheduledExecutorService executor = null;
   int maxspeed_pan, maxspeed_tilt;
@@ -47,10 +46,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     model = new CameraPositionModel(camera);
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = (int)(0.7 * camera.getProfile().getTiltMaxSpeed());
-    ui = new CameraMovementUI(model);
-    if (config.getBoolean(PROPKEY_SHOWUI)) {
-      ui.show(true);
-    }
+    controlPanel = new CameraControlPanel(model);
     if (config.getBoolean(PROPKEY_AUTOSTART)) {
       start();
       setSteering(true);
@@ -60,7 +56,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   protected void deactivate(ComponentContext cc) throws Exception {
     stop();
-    ui.show(false);
     log.info("Deactivated");
   }
 
@@ -122,7 +117,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   @Override
   public void setTargetPosition(NormalizedPosition pos) {
     model.setTargetPosition(pos);
-    ui.update();
+    controlPanel.repaint();
   }
 
   @Override
@@ -133,6 +128,10 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   @Override
   public NormalizedPosition getActualPosition() {
     return model.getTargetPosition();
+  }
+
+  CameraControlPanel getControlPanel() {
+    return controlPanel;
   }
 
   private class SteeringWorker implements Runnable {
@@ -194,7 +193,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
           }
         }
 
-        String status = "pan = " + ps + "  tilt = " + ts + "  dx = " + dx + "  dy = " + dy + " cmd:";
+        String status = "dx = " + dx + "  dy = " + dy + "\nv_pan = " + ps + "  v_tilt = " + ts +  "\ncmd:";
         
         // set speed on camera
         if (ps == 0 && ts == 0) {
@@ -249,7 +248,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
         model.setStatus(status);
       }
       
-      ui.update();
+      controlPanel.repaint();
       last_posn = cam_posn;
     }
   }
