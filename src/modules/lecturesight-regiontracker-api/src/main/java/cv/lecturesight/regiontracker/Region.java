@@ -29,4 +29,8 @@ public interface Region {
   Set<Region> getGroupMembers();
 
   void update(int label, long lastMoveTime, Position new_centroid, BoundingBox bbox1, int weight);
+
+  void setAxis(double dist);
+
+  double getAxis();
 }
