@@ -20,18 +20,22 @@ public class RGB24FrameUploader implements FrameUploader {
 
   private final String UID = UUID.randomUUID().toString();
   private final OpenCLService ocl;
-  private final CLKernel conversionK;
+  private final FrameGrabber grabber;
+  private final CLKernel conversionK, maskK;
   private final int [] workDim;
   private final long bufferSize;
   private ByteBuffer hostBuffer;
   private CLByteBuffer gpuRawBuffer;
-  private final CLImage2D gpuBuffer;
+  private final CLImage2D gpuBuffer, temp;
+  private CLImage2D mask = null;
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
   private final OCLSignal sig_done;
+  private BufferedImage maskImage = null;
 
   public RGB24FrameUploader(OpenCLService clService, FrameGrabber grabber) {
     this.ocl = clService;
+    this.grabber = grabber;
 
     // create signals
     sig_start = ocl.getSignal(UID + "_START");
@@ -43,17 +47,19 @@ public class RGB24FrameUploader implements FrameUploader {
     gpuBuffer = ocl.context().createImage2D(Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
+    temp = ocl.context().createImage2D(Usage.InputOutput,
+            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            grabber.getWidth(), grabber.getHeight());
 
     // set up conversion kernel
     conversionK = ocl.programs().getKernel("conversions", "RGB24_RGBAUint8");
-    conversionK.setArg(0, grabber.getWidth());
-    conversionK.setArg(1, grabber.getHeight());
-    conversionK.setArg(2, gpuRawBuffer);
-    conversionK.setArg(3, gpuBuffer);
+    
+    // set up mask kernel
+    maskK = ocl.programs().getKernel("conversions", "apply_mask");
 
     workDim = new int[] {grabber.getWidth(), grabber.getHeight()};
 
-    System.out.println("Computed buffer size: " + bufferSize);
+    // System.out.println("Computed buffer size: " + bufferSize);
 
     // set up conversion run
     ocl.registerLaunch(sig_start, new ComputationRun() {
@@ -61,8 +67,16 @@ public class RGB24FrameUploader implements FrameUploader {
       @Override
       public void launch(CLQueue queue) {
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
-        CLEvent conversionDone = conversionK.enqueueNDRange(queue, workDim, uploadDone);
-        imageHost = gpuBuffer.read(queue, conversionDone);
+        if (mask != null) {
+          conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, temp);
+          conversionK.enqueueNDRange(queue, workDim, uploadDone);
+          maskK.setArgs(temp, mask, gpuBuffer);
+          maskK.enqueueNDRange(queue, workDim);
+        } else {
+          conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, gpuBuffer);
+          conversionK.enqueueNDRange(queue, workDim, uploadDone);
+        }
+        imageHost = gpuBuffer.read(queue);
       }
 
       @Override
@@ -92,5 +106,11 @@ public class RGB24FrameUploader implements FrameUploader {
   @Override
   public BufferedImage getOutputImageHost() {
     return imageHost;
+  }
+  
+  @Override
+  public void setMask(BufferedImage mask) {
+    this.maskImage = mask; 
+    this.mask = ocl.context().createImage2D(Usage.InputOutput, maskImage, false);
   }
 }

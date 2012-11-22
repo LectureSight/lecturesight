@@ -37,7 +37,7 @@ public class MainGUI implements DummyInterface {
   }
   
   void uninstall(UserInterface ui) {
-    log.info("Uninstalling");
+    log.info("Uninstalling " + ui.getClass().getName());
     window.removeUI(ui);
   }
   

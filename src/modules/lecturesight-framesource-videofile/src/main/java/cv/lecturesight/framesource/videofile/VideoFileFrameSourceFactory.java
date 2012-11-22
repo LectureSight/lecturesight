@@ -61,7 +61,7 @@ public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
     try {
       VideoFilePipeline grabber = new VideoFilePipeline(videoFile);
       children.add(grabber);
-      log.log(log.LOG_INFO, "Create FrameGrabber on video file " + input);
+      log.log(log.LOG_INFO, "Created FrameGrabber on video file " + input);
       return grabber;
     } catch (UnableToLinkElementsException e) {
       throw new FrameSourceException("Error while creating FrameGrabber: " + e.getMessage());

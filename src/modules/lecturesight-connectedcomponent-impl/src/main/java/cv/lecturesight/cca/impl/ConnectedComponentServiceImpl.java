@@ -23,7 +23,7 @@ public class ConnectedComponentServiceImpl implements ConnectedComponentService 
   final static String PROPKEY_MAX_BLOBS = "blobs.max";
   final static String PROPKEY_BLOBSIZE_MIN = "blobsize.min";
   final static String PROPKEY_BLOBSIZE_MAX = "blobsize.max";
-  private Log log = new Log("CCA Service");
+  private Log log = new Log("Connected Component Analysis Service");
   @Reference
   private Configuration config;
   @Reference

@@ -10,10 +10,14 @@ import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,6 +35,7 @@ import org.osgi.service.event.EventHandler;
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
+  final static String PROPKEY_MASK = "input.mask";
   final static String WINDOWNAME_INPUT = "input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
@@ -42,7 +47,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private OpenCLService ocl;
   @Reference
   private DisplayService dsps;
-  Log log = new Log("FrameSourceManager");
+  Log log = new Log("Frame Source Manager");
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
@@ -91,8 +96,19 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
         FrameGrabberFactory factory = sourceTypes.get(fsd.getType());
         FrameGrabber grabber = factory.createFrameGrabber(fsd.getLocator(), fsd.getConfiguration());
         FrameUploader uploader = createFrameUploader(grabber);
+        
         if (uploader == null) {
           throw new FrameSourceException("Could not create FrameUploader for pixel format " + grabber.getPixelFormat().name());
+        } else {
+          String maskFile = config.get(PROPKEY_MASK);
+          if (!maskFile.isEmpty() && !maskFile.equalsIgnoreCase("none")) {
+            try {
+              BufferedImage mask = ImageIO.read(new File(maskFile));
+              uploader.setMask(mask);
+            } catch (IOException e) {
+              log.warn("Could not load scene mask: " + maskFile + ": " + e.getMessage());
+            }
+          }
         }
         newSource = new FrameSourceImpl(grabber, uploader);
       } else {
@@ -106,15 +122,15 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   }
 
   private FrameUploader createFrameUploader(FrameGrabber grabber) {
-    FrameUploader loader = null;
+    FrameUploader uploader = null;
     switch (grabber.getPixelFormat()) {     // TODO replace this implementation with a Class.forName() mechanism!
       case RGB_8BIT:
-        loader = new RGB24FrameUploader(ocl, grabber);
+        uploader = new RGB24FrameUploader(ocl, grabber);
         break;
       default:
         break;
     }
-    return loader;
+    return uploader;
   }
 
   @Override
