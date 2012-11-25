@@ -1,7 +1,8 @@
 package cv.lecturesight.gui.impl;
 
+import cv.lecturesight.display.DisplayRegistration;
+import cv.lecturesight.display.DisplayRegistrationListener;
 import cv.lecturesight.gui.api.UserInterface;
-import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.Log;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -12,7 +13,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 @Component(name="lecturesight.gui", immediate=true)
 @Service
-public class MainGUI implements DummyInterface {
+public class MainGUI implements DisplayRegistrationListener {
   
   Log log = new Log("UI");
   UserInterfaceTracker uiTracker;
@@ -33,12 +34,22 @@ public class MainGUI implements DummyInterface {
   
   void install(UserInterface ui, String title) {
     log.info("Installing interface \"" + title + "\": " + ui);
-    window.addUI(ui, title);
+    window.addController(ui, title);
   }
   
   void uninstall(UserInterface ui) {
     log.info("Uninstalling " + ui.getClass().getName());
-    window.removeUI(ui);
+    window.removeController(ui);
+  }
+
+  @Override
+  public void displayAdded(DisplayRegistration reg) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public void displayRemoved(DisplayRegistration reg) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
   
   private class UserInterfaceTracker extends ServiceTracker {

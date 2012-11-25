@@ -11,5 +11,7 @@ public interface DisplayService {
   Display getDisplayByRegistration(DisplayRegistration reg);
   Display getDisplayByNumber(int num);
   Display getDisplayBySID(String sid);
+  void addRegistrationListener(DisplayRegistrationListener listener);
+  void removeRegistrationListener(DisplayRegistrationListener listener);
 
 }

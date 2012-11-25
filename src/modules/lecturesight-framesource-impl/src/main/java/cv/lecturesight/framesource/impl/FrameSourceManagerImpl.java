@@ -55,6 +55,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
 
+    log.info("Starting....");
+    
     // scan for plugins already installed
     try {
       ServiceReference[] refs = cc.getBundleContext().getServiceReferences(FrameGrabberFactory.class.getName(), null);
