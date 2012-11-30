@@ -1,3 +1,20 @@
+/* Copyright (C) 2012 Benjamin Wulff
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ */
 package cv.lecturesight.cameraoperator.simple;
 
 import cv.lecturesight.framesource.FrameSource;
@@ -7,6 +24,7 @@ import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
+import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
@@ -26,6 +44,9 @@ public class SimpleCameraOperator implements CameraOperator {
   Log log = new Log("Simple Camera Operator");
   
   @Reference
+  Configuration config;
+  
+  @Reference
   ObjectTracker tracker;
   
   @Reference
@@ -36,8 +57,8 @@ public class SimpleCameraOperator implements CameraOperator {
   FrameSource fsrc;
   
   int interval = 200;
-  float limit_left = -0.2f;
-  float limit_right = 0.2f;
+  float limit_left = -0.33f;
+  float limit_right = 0.33f;
   float limit_top = 0.23f;
   float limit_down = -0.58f;
   float rx_pos, rx_neg;
@@ -52,6 +73,7 @@ public class SimpleCameraOperator implements CameraOperator {
     rx_pos = 1.0f / limit_right;
     rx_neg = -1.0f / limit_left;
     start();
+    log.info("Timeout is " + config.getInt("timeout") + " ms");
     log.info("Activated");
   }
 
@@ -91,6 +113,7 @@ public class SimpleCameraOperator implements CameraOperator {
   private class CameraOperatorWorker implements Runnable {
     
     NormalizedPosition pos_home = new NormalizedPosition(0.0f, 0.0f);
+    long last_seen = 0;
     
     @Override
     public void run() {

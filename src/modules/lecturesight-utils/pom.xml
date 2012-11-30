@@ -55,8 +55,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package>
+            <!-- Export-Package>
 	            cv.lecturesight.util.*;version=${project.version}
+            </Export-Package -->
+            <Export-Package>
+	            cv.lecturesight.util,
+              cv.lecturesight.util.conf,
+              cv.lecturesight.util.geometry
             </Export-Package>
             <Bundle-Activator>cv.lecturesight.util.Activator</Bundle-Activator>
           </instructions>

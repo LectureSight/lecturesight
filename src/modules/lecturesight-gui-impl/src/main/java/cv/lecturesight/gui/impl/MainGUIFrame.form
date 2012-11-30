@@ -1,22 +1,12 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="mainMenu">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="profileMenu">
+        <Menu class="javax.swing.JMenu" name="servicesMenu">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Profile"/>
-          </Properties>
-        </Menu>
-        <Menu class="javax.swing.JMenu" name="controllersMenu">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Controllers"/>
-          </Properties>
-        </Menu>
-        <Menu class="javax.swing.JMenu" name="displaysMenu">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Displays"/>
+            <Property name="text" type="java.lang.String" value="Services"/>
           </Properties>
         </Menu>
       </SubComponents>
@@ -49,7 +39,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="desktop" alignment="0" pref="422" max="32767" attributes="0"/>
+          <Component id="desktop" alignment="0" pref="450" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>

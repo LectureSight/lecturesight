@@ -18,41 +18,77 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
-  <modules>
-    <module>modules/lecturesight-utils</module>
-    <module>modules/lecturesight-opencl-api</module>
-    <module>modules/lecturesight-opencl-impl</module>
-    <module>modules/lecturesight-display-api</module>
-    <module>modules/lecturesight-display-impl</module>
-    <module>modules/lecturesight-framesource-api</module>
-    <module>modules/lecturesight-framesource-impl</module>
-    <module>modules/lecturesight-framesource-v4l</module>
-    <module>modules/lecturesight-framesource-videofile</module>
-    <module>modules/lecturesight-connectedcomponent-api</module>
-    <module>modules/lecturesight-connectedcomponent-impl</module>
-    <module>modules/lecturesight-videoanalysis-api</module>
-    <module>modules/lecturesight-videoanalysis-impl</module>
-    <module>modules/lecturesight-regiontracker-api</module>
-    <module>modules/lecturesight-regiontracker-impl</module>
-    <module>modules/lecturesight-objecttracker-api</module>
-    <module>modules/lecturesight-objecttracker-impl</module>
-    <module>modules/lecturesight-decorator-manager</module>
-    <module>modules/lecturesight-heartbeat</module>
-    <!-- module>modules/lecturesight-visualization</module -->
-    <module>modules/lecturesight-decorator-head</module>
-    <module>modules/lecturesight-ptzcontrol-api</module>
-    <module>modules/lecturesight-ptzcontrol-visca</module>
-    <module>modules/lecturesight-steeringworker-api</module>
-    <module>modules/lecturesight-steeringworker-impl</module>
-    <module>modules/lecturesight-profile-manager</module>
-    <module>modules/lecturesight-cameraoperator-api</module>
-    <module>modules/lecturesight-cameraoperator-simple</module>
-    <module>modules/lecturesight-decorator-color</module>
-    <module>modules/lecturesight-gui-api</module>
-    <module>modules/lecturesight-gui-impl</module>
-    <!-- module>modules/lecturesight-decorator-person</module -->
-    <!-- module>modules/lecturesight-cameraoperator-impl</module -->
-  </modules>
+  <profiles>
+    
+    <profile>
+      <id>full</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-opencl-api</module>
+        <module>modules/lecturesight-opencl-impl</module>
+        <module>modules/lecturesight-display-api</module>
+        <module>modules/lecturesight-display-impl</module>
+        <module>modules/lecturesight-framesource-api</module>
+        <module>modules/lecturesight-framesource-impl</module>
+        <module>modules/lecturesight-framesource-v4l</module>
+        <module>modules/lecturesight-framesource-videofile</module>
+        <module>modules/lecturesight-connectedcomponent-api</module>
+        <module>modules/lecturesight-connectedcomponent-impl</module>
+        <module>modules/lecturesight-videoanalysis-api</module>
+        <module>modules/lecturesight-videoanalysis-impl</module>
+        <module>modules/lecturesight-regiontracker-api</module>
+        <module>modules/lecturesight-regiontracker-impl</module>
+        <module>modules/lecturesight-objecttracker-api</module>
+        <module>modules/lecturesight-objecttracker-impl</module>
+        <module>modules/lecturesight-decorator-manager</module>
+        <module>modules/lecturesight-heartbeat</module>
+        <!-- module>modules/lecturesight-visualization</module -->
+        <module>modules/lecturesight-decorator-head</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-visca</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-profile-manager</module>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
+        <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
+        <module>modules/lecturesight-decorator-color</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+        <!-- module>modules/lecturesight-decorator-person</module -->
+        <!-- module>modules/lecturesight-cameraoperator-impl</module -->
+      </modules>      
+    </profile>
+    
+    <profile>
+      <id>ptz-only</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-visca</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+      </modules>            
+    </profile>
+    
+    <profile>
+      <id>headless</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>  
+      </modules>
+    </profile>
+    
+  </profiles>
 
   <build>
     <defaultGoal>install</defaultGoal>
@@ -173,14 +209,14 @@
     </repository>
 	
     <repository>
-        <id>blackpad-nexus</id>
-        <url>http://www.blackpad.fr</url>
-        <releases>
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
+      <id>blackpad-nexus</id>
+      <url>http://www.blackpad.fr</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
@@ -200,6 +236,17 @@
       <id>wsmirnow</id>
       <name>Waldemar Smirnow</name>
       <email>wsmirnow@uos.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uos.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>afecke</id>
+      <name>Alexander Fecke</name>
+      <email>afecke@uos.de</email>
       <organization>University of Osnabrueck</organization>
       <organizationUrl>http://www.uos.de/</organizationUrl>
       <roles>
