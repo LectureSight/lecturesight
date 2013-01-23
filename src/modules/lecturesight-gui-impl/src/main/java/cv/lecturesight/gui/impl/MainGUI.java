@@ -49,12 +49,12 @@ public class MainGUI implements DummyInterface {
   }
   
   void install(UserInterface ui) {
-    log.info("Installing interface \"" + ui.getTitle() + "\": " + ui);
+    log.info("Installing interface: " + ui.getTitle());
     window.addServiceUI(ui);
   }
   
   void uninstall(UserInterface ui) {
-    log.info("Uninstalling " + ui.getClass().getName());
+    log.info("Uninstalling interface: " + ui.getTitle());
     window.removeServiceUI(ui);
   }
   

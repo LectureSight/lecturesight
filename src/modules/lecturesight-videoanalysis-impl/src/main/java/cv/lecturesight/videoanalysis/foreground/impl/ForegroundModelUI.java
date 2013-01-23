@@ -43,7 +43,7 @@ public class ForegroundModelUI implements UserInterface {
   JPanel ui;
   
   protected void activate(ComponentContext cc) {
-    ui = new ForegroundModelUIPanel(dsps);
+    ui = new ForegroundModelUIPanel2(dsps);
   }
 
   @Override

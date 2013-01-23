@@ -29,32 +29,36 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
 
   private DisplayImpl display;
   private BufferedImage image;
+  private Dimension size;
 
   public DisplayPanelImpl(DisplayImpl display) {
     this.display = display;
+    this.size = display.getSize();
     image = display.getImage();
   }
 
   @Override
   public void paint(Graphics g) {
+    //System.out.println("PAINT");
+    display.addListener(this);
     image = display.getImage();
 
     int x = 0, y = 0;
 
-    if (image.getWidth() < getWidth() || image.getHeight() < getHeight()) {
-      x = (getWidth() - image.getWidth()) / 2;
-      y = (getHeight() - image.getHeight()) / 2;
+    if (size.getWidth() < getWidth() || size.getHeight() < getHeight()) {
+      x = (getWidth() - (int) size.getWidth()) / 2;
+      y = (getHeight() - (int) size.getHeight()) / 2;
     }
 
     g.drawImage(image, x, y, this);
 
     if (hasCustomRenderer()) {
-      getCustomRenderer().render(g.create(x, y, image.getWidth(), image.getHeight()));
+      getCustomRenderer().render(g.create(x, y, (int) size.getWidth(), (int) size.getHeight()));
     }
   }
 
   public Dimension getPrefferedSize() {
-    return new Dimension(image.getWidth(), image.getHeight());
+    return new Dimension((int) size.getWidth(), (int) size.getHeight());
   }
 
   @Override
@@ -75,14 +79,17 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
     super.removeNotify();
   }
 
+  // TODO is this really the maximum of control we can get over the rendering state of the display??
   @Override
   public void hierarchyChanged(HierarchyEvent e) {
-    if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0) {
-      if (isShowing()) {
-        display.addListener(this);
-      } else {
-        display.removeListener(this);
-      }
+    if ((HierarchyEvent.SHOWING_CHANGED & e.getChangeFlags()) != 0
+            && (e.getChanged().isVisible() || this.getParent().isShowing())) {
+
+      //System.out.println("ACTIVATE DISPLAYLISTENER");
+      display.addListener(this);
+    } else {
+      //System.out.println("DEACTIVATE DISPLAYLISTENER");
+      display.removeListener(this);
     }
   }
 }

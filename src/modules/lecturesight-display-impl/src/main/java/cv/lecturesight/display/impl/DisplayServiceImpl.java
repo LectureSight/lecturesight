@@ -53,9 +53,9 @@ public class DisplayServiceImpl implements DisplayService {
     notifyObservers(EVENT_TYPE.ADDED, reg);
     
     // register UI for new display
-    //DisplayUI ui = new DisplayUI(display, id);
-    //Dictionary<String, Object> props = new Hashtable<String, Object>();
-    //parent.componentContext.getBundleContext().registerService(UserInterface.class.getName(), ui, props);
+    DisplayUI ui = new DisplayUI(display, id);
+    Dictionary<String, Object> props = new Hashtable<String, Object>();
+    parent.componentContext.getBundleContext().registerService(UserInterface.class.getName(), ui, props);
     
     return reg;
   }

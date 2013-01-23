@@ -18,10 +18,12 @@
 package cv.lecturesight.display;
 
 import cv.lecturesight.opencl.api.OCLSignal;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 public interface Display {
 
+  Dimension getSize();
   OCLSignal getSignal();
   BufferedImage getImage();
   DisplayPanel getDisplayPanel();

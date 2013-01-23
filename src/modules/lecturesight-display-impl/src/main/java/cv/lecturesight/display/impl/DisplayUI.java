@@ -20,6 +20,9 @@ package cv.lecturesight.display.impl;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.gui.api.UserInterface;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
 import javax.swing.JPanel;
 
 public class DisplayUI implements UserInterface {
@@ -32,9 +35,12 @@ public class DisplayUI implements UserInterface {
     this.title = title;
     displayPanel = display.getDisplayPanel();
     ui = new JPanel();
-    ui.add(displayPanel);
-    ui.setPreferredSize(displayPanel.getPreferredSize());
-    ui.setSize(displayPanel.getPreferredSize());
+    ui.setLayout(new BorderLayout());
+    ui.setBackground(Color.black);
+    Dimension size = display.getSize();
+    ui.setSize(size);
+    ui.setPreferredSize(size);
+    ui.add(displayPanel, BorderLayout.CENTER);
   }
   
   @Override

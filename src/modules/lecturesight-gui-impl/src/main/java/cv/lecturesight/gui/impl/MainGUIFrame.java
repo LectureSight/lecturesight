@@ -18,6 +18,7 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.gui.api.UserInterface;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import javax.swing.event.InternalFrameListener;
 
 public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,InternalFrameListener {
 
-  Map<JMenuItem, UserInterface> menuItems = new HashMap<JMenuItem, UserInterface>();
+  Map<JMenuItem, UserInterface> servicesMenuItems = new HashMap<JMenuItem, UserInterface>();
   Map<UserInterface, JInternalFrame> visibleUIs = new HashMap<UserInterface, JInternalFrame>();
   
   public MainGUIFrame() {
@@ -47,7 +48,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
     JMenuItem item = new JMenuItem(ui.getTitle());
     item.addActionListener(this);
     servicesMenu.add(item);
-    menuItems.put(item, ui);
+    servicesMenuItems.put(item, ui);
   }
 
   public void removeServiceUI(UserInterface ui) {
@@ -57,14 +58,14 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   @Override
   public void actionPerformed(ActionEvent e) {
     JMenuItem source = (JMenuItem)e.getSource();
-    UserInterface ui = menuItems.get(source);
+    UserInterface ui = servicesMenuItems.get(source);
     if (!visibleUIs.containsKey(ui)) {
       JInternalFrame iframe = new JInternalFrame();
       iframe.setTitle(ui.getTitle());
+      iframe.setBackground(Color.black);
       JPanel content = ui.getPanel();
       iframe.getContentPane().add(content);
       iframe.setSize(content.getPreferredSize());
-      System.out.println("Preferred Size of Content is " + content.getPreferredSize().width + "x" + content.getPreferredSize().width);
       iframe.setResizable(true);
       iframe.setClosable(true);
       iframe.setIconifiable(true);
@@ -73,6 +74,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
       iframe.pack();
       iframe.setVisible(true);
       desktop.add(iframe);
+      content.repaint();
       visibleUIs.put(ui, iframe);
     }
   }

@@ -91,50 +91,58 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
   }
 
   @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-        scrollPane = new javax.swing.JScrollPane();
-        configTable = new javax.swing.JTable();
+    scrollPane = new javax.swing.JScrollPane();
+    configTable = new javax.swing.JTable();
+    jToolBar2 = new javax.swing.JToolBar();
 
-        configTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+    configTable.setModel(new javax.swing.table.DefaultTableModel(
+      new Object [][] {
 
-            },
-            new String [] {
-                "Key", "Value"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, true
-            };
+      },
+      new String [] {
+        "Key", "Value"
+      }
+    ) {
+      Class[] types = new Class [] {
+        java.lang.String.class, java.lang.String.class
+      };
+      boolean[] canEdit = new boolean [] {
+        false, true
+      };
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
+      public Class getColumnClass(int columnIndex) {
+        return types [columnIndex];
+      }
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        scrollPane.setViewportView(configTable);
+      public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return canEdit [columnIndex];
+      }
+    });
+    scrollPane.setViewportView(configTable);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable configTable;
-    private javax.swing.JScrollPane scrollPane;
-    // End of variables declaration//GEN-END:variables
+    jToolBar2.setRollover(true);
+
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+      .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+    );
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE))
+    );
+  }// </editor-fold>//GEN-END:initComponents
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JTable configTable;
+  private javax.swing.JToolBar jToolBar2;
+  private javax.swing.JScrollPane scrollPane;
+  // End of variables declaration//GEN-END:variables
 }

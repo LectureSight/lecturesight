@@ -25,6 +25,7 @@ import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +36,7 @@ public class DisplayImpl implements Display {
   OpenCLService ocl;
   OCLSignal trigger, sig_DONE;
   ComputationRun workingRun;
+  private int width, height;
   private CLImage2D imageCL;
   private BufferedImage imageHost;
   private boolean active = false;
@@ -44,7 +46,9 @@ public class DisplayImpl implements Display {
     this.ocl = ocl;
     this.trigger = trigger;
     this.imageCL = imageCL;
-    this.imageHost = new BufferedImage((int) imageCL.getWidth(), (int) imageCL.getHeight(), BufferedImage.TYPE_INT_RGB);
+    this.width = (int) imageCL.getWidth();
+    this.height = (int) imageCL.getHeight();
+    this.imageHost = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     sig_DONE = ocl.getSignal("Display-" + UUID.randomUUID().toString());
     workingRun = new WorkingRun();
   }
@@ -87,7 +91,9 @@ public class DisplayImpl implements Display {
 
   @Override
   public void addListener(DisplayListener listener) {
-    listeners.add(listener);
+    if (!listeners.contains(listener)) {
+      listeners.add(listener);
+    }
     activate();
   }
 
@@ -103,6 +109,11 @@ public class DisplayImpl implements Display {
     for (DisplayListener l : listeners) {
       l.imageUpdated(imageHost);
     }
+  }
+
+  @Override
+  public Dimension getSize() {
+    return new Dimension(width, height);
   }
 
   private class WorkingRun implements ComputationRun {
