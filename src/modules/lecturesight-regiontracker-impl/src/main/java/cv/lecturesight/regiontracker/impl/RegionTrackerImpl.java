@@ -147,10 +147,7 @@ public class RegionTrackerImpl implements RegionTracker {
    * 
    */
   private void registerDisplays() {
-    // register overlap display if configured
-    if (config.getBoolean(Constants.PROPKEY_DISPLAY_OVERLAP)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
-    }
+    dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
   }
   //</editor-fold>
 
@@ -537,13 +534,15 @@ public class RegionTrackerImpl implements RegionTracker {
     public void launch(CLQueue queue) {
       setRegionK.setArgs(fgs.getForegroundWorkingBuffer().current(), fgLabeler.getLabelBuffer(),
               region.getBoundingBox().getMin().getX(), region.getBoundingBox().getMin().getY(), 
-              region.getBoundingBox().getWidth(), region.getLabel(), value);
+              workDim[0], region.getLabel(), value);
       setRegionK.enqueueNDRange(queue, regionDim);
     }
 
     @Override
     public void land() {
-      log.debug("Set region " + region.getLabel() + " to " + value);
+      if (debugEnabled) {
+        log.debug("Set region " + region.getLabel() + " to " + value);
+      }
     }
   }
 }

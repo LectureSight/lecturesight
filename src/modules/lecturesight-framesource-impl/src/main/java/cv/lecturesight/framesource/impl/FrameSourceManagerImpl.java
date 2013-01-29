@@ -53,7 +53,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_MASK = "input.mask";
-  final static String WINDOWNAME_INPUT = "input";
+  final static String WINDOWNAME_INPUT = "Video Input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";

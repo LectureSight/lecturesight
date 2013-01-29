@@ -15,14 +15,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.videoanalysis.change.impl;
+package cv.lecturesight.objecttracker.clustering;
 
 public class Constants {
 
-  final static String SIGNAME_DONE_DETECTION = "cv.lecturesight.change.detect.DONE";
-  final static String SIGNAME_DONE_CLEANING = "cv.lecturesight.change.clean.DONE";
-  final static String PROPKEY_THRESH = "changedetect.threshold";
-  final static String WINDOWNAME_CHANGE_RAW = "Interframe Change";
-  final static String WINDOWNAME_CHANGE_DILATED = "Interframe Change Dilated";
-  
+  static final String SIGNAME_DONE = "objecttracker.DONE";
+  static final String PROPKEY_TEMPWIDTH = "template.width";
+  static final String PROPKEY_TEMPHEIGHT = "template.height";
+  static final String PROPKEY_WIDTHMAX = "width.max";
+  static final String PROPKEY_HEIGHTMAX = "height.max"; 
+  static final String PROPKEY_WEIGHTMIN = "weight.min"; 
+  static final String PROPKEY_DISTMAX = "match.dist.max"; 
+
 }

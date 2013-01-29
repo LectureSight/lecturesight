@@ -167,15 +167,9 @@ public class ForegroundServiceImpl implements ForegroundService {
   /** Register displays if configured 
    * 
    */
-  private void registerDisplays() {
-    // register update map display if configured
-    if (config.getBoolean(Constants.PROPKEY_DISPLAY_UPDATEMAP)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_UPDATEMAP, updateMap, signals.get(Signal.DONE_ADDSUB));
-    }
-    // register foreground map display if configured
-    if (config.getBoolean(Constants.PROPKEY_DISPLAY_FOREGROUNDMAP)) {
-      dsps.registerDisplay(Constants.WINDOWNAME_FOREGROUNDMAP, fgUpdated, signals.get(Signal.DONE_CLEANING));
-    }
+  private void registerDisplays() {    
+    dsps.registerDisplay(Constants.WINDOWNAME_UPDATEMAP, updateMap, signals.get(Signal.DONE_ADDSUB));
+    dsps.registerDisplay(Constants.WINDOWNAME_FOREGROUNDMAP, fgUpdated, signals.get(Signal.DONE_CLEANING));
   }
   //</editor-fold>
 

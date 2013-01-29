@@ -113,6 +113,15 @@ public class RGB24FrameUploader implements FrameUploader {
   public CLImage2D getOutputImage() {
     return gpuBuffer;
   }
+  
+  @Override
+  public CLImage2D getRawOutputImage() {
+    if (mask != null) {
+      return temp;
+    } else {
+      return gpuBuffer;
+    }
+  }
 
   @Override
   public void upload(Buffer frame) {

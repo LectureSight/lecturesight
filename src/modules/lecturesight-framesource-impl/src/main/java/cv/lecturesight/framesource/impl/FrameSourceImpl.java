@@ -45,6 +45,11 @@ class FrameSourceImpl implements FrameSource {
   public CLImage2D getImage() {
     return uploader.getOutputImage();
   }
+  
+  @Override
+  public CLImage2D getRawImage() {
+    return uploader.getRawOutputImage();
+  }
 
   @Override
   public void captureFrame() throws FrameSourceException {

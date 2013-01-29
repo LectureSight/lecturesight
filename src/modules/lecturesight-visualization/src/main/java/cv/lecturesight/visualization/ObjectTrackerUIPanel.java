@@ -15,18 +15,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.objecttracker.impl;
+package cv.lecturesight.visualization;
 
 import cv.lecturesight.display.CustomRenderer;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
+import cv.lecturesight.regiontracker.Region;
+import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.util.geometry.BoundingBox;
+import cv.lecturesight.util.geometry.Position;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -37,26 +41,44 @@ public class ObjectTrackerUIPanel extends JPanel implements CustomRenderer {
   private Display display;
   private DisplayPanel displayPanel;
   private ObjectTracker oTracker;
+  private RegionTracker rTracker;
   private Font font = new Font("Monospaced", Font.PLAIN, 10);
+  private Font smallfont = new Font("Monospaced", Font.PLAIN, 8);
 
-  public ObjectTrackerUIPanel(Display display, ObjectTracker oTracker) {
+  public ObjectTrackerUIPanel(Display display, RegionTracker rTracker, ObjectTracker oTracker) {
     this.display = display;
+    this.rTracker = rTracker;
     this.oTracker = oTracker;
     initComponents();
     displayPanel = display.getDisplayPanel();
     displayPanel.setCustomRenderer(this);
-    outputPanel.setLayout(new BorderLayout());
-    outputPanel.add(displayPanel, BorderLayout.CENTER);
+    this.setBackground(Color.black);
+    this.setLayout(new BorderLayout());
+    this.add(displayPanel, BorderLayout.CENTER);
+    this.setSize(display.getSize());
+    this.setPreferredSize(display.getSize());
   }
 
   @Override
   public void render(Graphics g) {
 
+    // draw RegionTracker data
+    List<Region> regions = rTracker.getRegions();
+    for (Region region : regions) {
+      g.setColor(Color.yellow);
+      Position pos = region.getCentroid();
+      g.drawLine(pos.getX(), pos.getY()-1, pos.getX()-1, pos.getY());
+      g.drawLine(pos.getX(), pos.getY()-1, pos.getX()+1, pos.getY());
+      g.drawLine(pos.getX(), pos.getY()+1, pos.getX()-1, pos.getY());
+      g.drawLine(pos.getX(), pos.getY()+1, pos.getX()+1, pos.getY());
+    }
+    
     // draw ObjectTracker data
     List<TrackerObject> objects = oTracker.getCurrentlyTracked();
     Map<Integer, TrackerObject> all_o = oTracker.getAllObjects();
     for (TrackerObject object : objects) {
-      g.setColor((Color) object.getProperty(OBJ_PROPKEY_COLOR));
+      //g.setColor((Color) object.getProperty(OBJ_PROPKEY_COLOR));
+      g.setColor(Color.white);
 
       BoundingBox box = (BoundingBox) object.getProperty("obj.bbox");
       g.drawRect(box.getMin().getX(), box.getMin().getY(), box.getWidth(), box.getHeight());
@@ -66,23 +88,24 @@ public class ObjectTrackerUIPanel extends JPanel implements CustomRenderer {
       g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
 
       if (object.hasProperty("head.center")) {
-        g.setColor(Color.cyan);
+        g.setColor(Color.yellow);
         BoundingBox hbox = (BoundingBox) object.getProperty("head.boundingbox");
         g.drawRect(box.getMin().getX() + hbox.getMin().getX(),
                 box.getMin().getY() + hbox.getMin().getY(),
                 hbox.getWidth(), hbox.getHeight());
       }
 
-//      int x = box.getMin().getX();
-//      int y = box.getMax().getY() + 8;
-//      g.setFont(smallFont);
-//      for (Iterator<String> pit = object.getProperties().keySet().iterator(); pit.hasNext();) {
-//        String key = pit.next();
-//        Object val = object.getProperty(key);
-//        String prop = key + ": " + val.toString();
-//        g.drawString(prop, x, y);
-//        y += 10;
-//      }
+      int x = box.getMin().getX();
+      int y = box.getMax().getY() + 8;
+      g.setFont(smallfont);
+      g.setColor(Color.white);
+      for (Iterator<String> pit = object.getProperties().keySet().iterator(); pit.hasNext();) {
+        String key = pit.next();
+        Object val = object.getProperty(key);
+        String prop = key + ": " + val.toString();
+        g.drawString(prop, x, y);
+        y += 10;
+      }
     }
 
     // draw frame information
@@ -93,40 +116,20 @@ public class ObjectTrackerUIPanel extends JPanel implements CustomRenderer {
   }
 
   @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-        outputPanel = new javax.swing.JPanel();
-        viewTabs = new javax.swing.JTabbedPane();
-
-        outputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Output", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
-
-        viewTabs.setTabPlacement(javax.swing.JTabbedPane.RIGHT);
-
-        javax.swing.GroupLayout outputPanelLayout = new javax.swing.GroupLayout(outputPanel);
-        outputPanel.setLayout(outputPanelLayout);
-        outputPanelLayout.setHorizontalGroup(
-            outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(viewTabs, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
-        );
-        outputPanelLayout.setVerticalGroup(
-            outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(viewTabs, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(outputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(outputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel outputPanel;
-    private javax.swing.JTabbedPane viewTabs;
-    // End of variables declaration//GEN-END:variables
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+    this.setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 468, Short.MAX_VALUE)
+    );
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 351, Short.MAX_VALUE)
+    );
+  }// </editor-fold>//GEN-END:initComponents
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  // End of variables declaration//GEN-END:variables
 }

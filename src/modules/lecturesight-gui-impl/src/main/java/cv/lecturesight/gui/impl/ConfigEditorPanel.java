@@ -18,8 +18,10 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.util.Log;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -48,10 +50,12 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
 
   public void update() {
     
-    Set<String> keySet = systemConfiguration.stringPropertyNames();
-    data = new Object[keySet.size()][2];
+    List<String> keyList = new LinkedList<String>();
+    keyList.addAll(systemConfiguration.stringPropertyNames());
+    Collections.sort(keyList);
+    data = new Object[keyList.size()][2];
     int i = 0;
-    for (String key : keySet) {
+    for (String key : keyList) {
       data[i][0] = key;
       data[i++][1] = systemConfiguration.getProperty(key);
     }

@@ -27,9 +27,8 @@ public class Constants {
   final static String PROPKEY_HEIGHT_MIN = "height.min";
   final static String PROPKEY_HEIGHT_MAX = "height.max";
   final static String PROPKEY_TIMETOLIVE = "ttl";
-  final static String PROPKEY_DISPLAY_OVERLAP = "display.overlap";
   final static String PROPKEY_DEBUG = "debug";
-  final static String WINDOWNAME_OVERLAP = "regions.temporal.overlap";
+  final static String WINDOWNAME_OVERLAP = "Regions Interframe Overlap";
   final static String SIGNAME_DONE_COMPUTE_OVERLAP = "regiontracker.COMPUTE_OVERLAP_DONE";
   final static String SIGNAME_DONE_CORRELATION = "regiontracker.CORRELATION_DONE";
   final static int    pairsBufferLength = 1024;

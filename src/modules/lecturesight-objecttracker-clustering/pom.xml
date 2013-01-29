@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-visualization</artifactId>
-  <name>LectureSight Visualization</name>
+  <artifactId>lecturesight-objecttracker-clustering</artifactId>
+  <name>LectureSight Clustering Object Tracker</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
@@ -19,12 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-connectedcomponent-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-videoanalysis-api</artifactId>
+      <artifactId>lecturesight-display-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -34,12 +29,17 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-display-api</artifactId>
+      <artifactId>lecturesight-framesource-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-framesource-api</artifactId>
+      <artifactId>lecturesight-videoanalysis-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-decorator-color</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -54,12 +54,17 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
+      <artifactId>lecturesight-objecttracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-objecttracker-api</artifactId>
+      <artifactId>lecturesight-decorator-manager</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-regiontracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -107,8 +112,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.visualization</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.terminator;version=${project.version}</Export-Package>
+            <Bundle-SymbolicName>cv.lecturesight.objecttracker.simple</Bundle-SymbolicName>
+            <Export-Package>
+              cv.lecturesight.objecttracker.impl;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

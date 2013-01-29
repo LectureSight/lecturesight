@@ -25,6 +25,8 @@ public interface FrameSource {
 
   OCLSignal getSignal();
 
+  CLImage2D getRawImage();
+  
   CLImage2D getImage();
   
   BufferedImage getImageHost();

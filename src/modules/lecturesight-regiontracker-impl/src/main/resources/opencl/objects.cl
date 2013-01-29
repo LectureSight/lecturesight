@@ -58,9 +58,10 @@ __kernel void set_region
     int2 pos = (int2)(get_global_id(0)+x, get_global_id(1)+y);
     int adr = ENCODE_INDEX(pos);
     int px_id = -1 * labels[adr];
-    if (px_id != 0) {
+    if (px_id == id) {
         uint4 out_pxl = (uint4)(val, val, val, 255);
-        write_imageui(fg_map, pos, out_pxl);
+        int2 wpos = (int2)(pos.x-1, pos.y-1);
+        write_imageui(fg_map, wpos, out_pxl);
     }
 }
 

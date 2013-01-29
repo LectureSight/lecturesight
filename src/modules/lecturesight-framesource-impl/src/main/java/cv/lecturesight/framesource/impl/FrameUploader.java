@@ -26,6 +26,8 @@ public interface FrameUploader {
 
   OCLSignal getSignal();
 
+  CLImage2D getRawOutputImage();
+  
   CLImage2D getOutputImage();
   
   BufferedImage getOutputImageHost();
