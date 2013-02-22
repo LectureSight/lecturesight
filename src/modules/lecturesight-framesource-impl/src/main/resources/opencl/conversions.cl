@@ -31,6 +31,29 @@ __kernel void RGB24_RGBAUint8
 	write_imageui(dest, pos, pixel);	// write pixel
 }
 
+__kernel void Intensity8_RGBAUint8
+(
+	int width,
+	int height,
+	__global uchar* src,
+	write_only image2d_t dest
+)
+{
+	int2 pos = (int2)(get_global_id(0), get_global_id(1));
+	ulong src_idx = pos.y * width + pos.x;
+	
+	uchar val = src[src_idx];		// get pixel data
+	
+	uint4 pixel = (uint4)(			// compose BGRA pixel
+		(uint)val,
+		(uint)val,
+		(uint)val,
+		255
+	);
+
+	write_imageui(dest, pos, pixel);	// write pixel
+}
+
 __kernel void apply_mask
 (
     read_only  image2d_t src,

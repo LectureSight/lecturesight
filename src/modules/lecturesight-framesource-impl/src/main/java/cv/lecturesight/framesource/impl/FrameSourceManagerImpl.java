@@ -142,9 +142,12 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   private FrameUploader createFrameUploader(FrameGrabber grabber) {
     FrameUploader uploader = null;
-    switch (grabber.getPixelFormat()) {     // TODO replace this implementation with a Class.forName() mechanism!
+    switch (grabber.getPixelFormat()) {     // TODO replace this implementation with a plugin mechanism!
       case RGB_8BIT:
         uploader = new RGB24FrameUploader(ocl, grabber);
+        break;
+      case INTENSITY_8BIT:
+        uploader = new IntensityFrameUploader(ocl, grabber);
         break;
       default:
         break;
