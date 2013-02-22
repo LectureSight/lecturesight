@@ -85,7 +85,7 @@ public class ObjectTrackerUIPanel extends JPanel implements CustomRenderer {
 
       String info = Integer.toString(object.getId());
       g.setFont(font);
-      //g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
+      g.drawString(info, box.getMin().getX(), box.getMin().getY() - 1);
 
       if (object.hasProperty("head.center")) {
         g.setColor(Color.yellow);

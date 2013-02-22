@@ -151,6 +151,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     return controlPanel;
   }
 
+  @Override
+  public void setZoom(int factor) {
+    camera.zoom(factor);
+  }
+
   private class SteeringWorker implements Runnable {
 
     Position cam_pos;

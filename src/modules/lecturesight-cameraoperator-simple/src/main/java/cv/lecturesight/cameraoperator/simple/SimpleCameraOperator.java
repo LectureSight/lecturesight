@@ -106,7 +106,9 @@ public class SimpleCameraOperator implements CameraOperator {
 
   @Override
   public void reset() {
-    log.info("Reset not implemented");
+    NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
+    camera.setTargetPosition(neutral);
+    
   }
   
   
@@ -130,7 +132,6 @@ public class SimpleCameraOperator implements CameraOperator {
           npos_target.setX(npos_obj.getX() / rx_pos);
         }
         camera.setTargetPosition(npos_target);
-        //System.out.println("TARGET: " + npos_target.getX() + " " + npos_target.getY());
       }
     }
     

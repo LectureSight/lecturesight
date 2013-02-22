@@ -31,6 +31,7 @@ public interface CameraSteeringWorker {
   boolean isMoving();
   void stopMoving();
   void setTargetPosition(NormalizedPosition pos);
+  void setZoom(int factor);
   NormalizedPosition getTargetPosition();
   NormalizedPosition getActualPosition();
 }
