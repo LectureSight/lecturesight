@@ -55,7 +55,7 @@ public class DisplayServiceImpl implements DisplayService {
     // register UI for new display
     DisplayUI ui = new DisplayUI(display, id);
     Dictionary<String, Object> props = new Hashtable<String, Object>();
-    parent.componentContext.getBundleContext().registerService(UserInterface.class.getName(), ui, props);
+    parent.bundleContext.registerService(UserInterface.class.getName(), ui, props);
     
     return reg;
   }

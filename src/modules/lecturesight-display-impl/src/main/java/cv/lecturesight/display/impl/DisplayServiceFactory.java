@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
 
 public class DisplayServiceFactory implements ServiceFactory {
 
@@ -34,25 +34,25 @@ public class DisplayServiceFactory implements ServiceFactory {
 
   private Log log = new Log("Display");
   private OpenCLService ocl;
-  ComponentContext componentContext;
+  BundleContext bundleContext;
   
   Map<DisplayRegistrationImpl, DisplayImpl> displays = new HashMap<DisplayRegistrationImpl, DisplayImpl>();
 
-  protected void activate(ComponentContext cc) {
-    this.componentContext = cc;
-    registerCommands(cc);
+  public DisplayServiceFactory(BundleContext bc) {
+    this.bundleContext = bc;
+    registerCommands();
     log.info("Activated");
   }
 
-  private void registerCommands(ComponentContext cc) {
+  private void registerCommands() {
     DisplayCommands commandImpl = new DisplayCommands(this);
     Dictionary<String, Object> commands = new Hashtable<String, Object>();
     commands.put("osgi.command.scope", "display");
     commands.put("osgi.command.function", DisplayCommands.commands);
-    cc.getBundleContext().registerService(DisplayCommands.class.getName(), commandImpl, commands);
+    bundleContext.registerService(DisplayCommands.class.getName(), commandImpl, commands);
   }
   
-  protected void deactivate(ComponentContext cc) {
+  public void deactivate() {
     log.info("Deactivated");
   }
 

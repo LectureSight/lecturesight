@@ -50,14 +50,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -73,9 +65,7 @@
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.display</Bundle-SymbolicName>
             <Export-Package>cv.lecturesight.display.impl;version=${project.version}</Export-Package>
-            <Service-Component>
-              OSGI-INF/dsfactory.xml
-            </Service-Component>
+            <Bundle-Activator>cv.lecturesight.display.impl.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

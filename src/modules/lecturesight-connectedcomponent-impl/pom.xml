@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr</artifactId>
+      <artifactId>maven-scr-plugin</artifactId>
     </dependency>
   </dependencies>
 
