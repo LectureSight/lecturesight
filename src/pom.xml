@@ -43,18 +43,18 @@
         <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-objecttracker-api</module>
         <module>modules/lecturesight-objecttracker-impl</module>
-        <!-- module>modules/lecturesight-objecttracker-clustering</module -->
+        <module>modules/lecturesight-objecttracker-clustering</module>
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-heartbeat</module>
         <module>modules/lecturesight-visualization</module>
         <module>modules/lecturesight-decorator-head</module>
-        <!-- <module>modules/lecturesight-ptzcontrol-api</module> -->
-        <!-- module>modules/lecturesight-ptzcontrol-visca</module -->
-        <!-- <module>modules/lecturesight-steeringworker-api</module> -->
-        <!-- <module>modules/lecturesight-steeringworker-impl</module> -->
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-visca</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-impl</module>
         <module>modules/lecturesight-profile-manager</module>
-        <!-- <module>modules/lecturesight-cameraoperator-api</module> -->
-        <!-- <module>modules/lecturesight-cameraoperator-simple</module> -->
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
         <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
         <module>modules/lecturesight-decorator-color</module>
         <module>modules/lecturesight-gui-api</module>
