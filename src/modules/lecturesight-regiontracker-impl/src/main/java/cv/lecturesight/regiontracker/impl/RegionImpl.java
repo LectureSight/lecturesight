@@ -30,6 +30,8 @@ public class RegionImpl implements Region {
   Position centroid = null;
   int weight = 0;
   int label;
+  double tr_x = 0;
+  double tr_y = 0;
   double axis = 0;
   Region group = null;
   Set<Region> members = new HashSet<Region>();

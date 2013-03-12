@@ -1,20 +1,3 @@
-/* Copyright (C) 2012 Benjamin Wulff
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *
- */
 package cv.lecturesight.objecttracker.impl;
 
 import cv.lecturesight.decorator.api.DecoratorManager;
@@ -71,16 +54,19 @@ public class ObjectTrackerImpl implements ObjectTracker {
   private DecoratorManager dManager;
   
   OCLSignal sig_DONE;
-  private TrackerUpdate trackerUpdate;
+  private ObjectTrackerImpl.TrackerUpdate trackerUpdate;
   private Map<Integer, TrackerObject> allObjects = new TreeMap<Integer, TrackerObject>();
   private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
 //  private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
 //  private List<TrackerObject> hypotheses = new LinkedList<TrackerObject>();
 //  private List<Region> regions = new LinkedList<Region>();
   int width_min, width_max, height_min, height_max, timeToLive, channel_number;
-  float matchThreshold, chThreshold, distanceThreshold_X, distanceThreshold_Y;
+  float matchThreshold, chThreshold, distanceThreshold;
   private List<Color> color_list = new LinkedList<Color>();
   final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
+  final static String OBJ_PROPKEY_MOVEMENT = "obj.movement";
+  final static String OBJ_PROPKEY_INSCENE = "obj.in_scene";
+  final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
 
   @Reference
   ForegroundService fgs;
@@ -90,7 +76,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
   protected void activate(ComponentContext cc) throws Exception {
     updateConfiguration();
     sig_DONE = ocl.getSignal(Constants.SIGNAME_DONE);
-    trackerUpdate = new TrackerUpdate();
+    trackerUpdate = new ObjectTrackerImpl.TrackerUpdate();
     ocl.registerTriggerable(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), trackerUpdate);
     log.info("Activated");
     color_list.add(Color.BLUE);
@@ -115,8 +101,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
     timeToLive = config.getInt(Constants.PROPKEY_TTL);
     chThreshold = config.getFloat(Constants.PROPKEY_CHTHRESHOLD);
     matchThreshold = config.getFloat(Constants.PROPKEY_MATCHTHRESH);
-    distanceThreshold_X = config.getFloat(Constants.PROPKEY_DISTANCETHRESH_X);
-    distanceThreshold_Y = config.getFloat(Constants.PROPKEY_DISTANCETHRESH_Y);
+    distanceThreshold = config.getFloat(Constants.PROPKEY_DISTANCETHRESH);
     channel_number = config.getInt(Constants.PROPKEY_CHANNEL_NUMBER);
   }
 
@@ -219,12 +204,12 @@ public class ObjectTrackerImpl implements ObjectTracker {
         }
       }
       
-      List<TrackerObject> trackedObjects1 = new LinkedList<TrackerObject>();
-      for(TrackerObject obj : trackedObjects) {
-        if(currentTime - obj.lastSeen() < timeToLive) {
-          trackedObjects1.add(obj);
-        }
-      }
+//      List<TrackerObject> trackedObjects1 = new LinkedList<TrackerObject>();
+//      for(TrackerObject obj : trackedObjects) {
+//        if(currentTime - obj.lastSeen() < timeToLive) {
+//          trackedObjects1.add(obj);
+//        }
+//      }
 
 //      List<TrackerObject> newHypotheses = assign_new(hypotheses, candidates);
 //      hypotheses = newHypotheses;
@@ -241,7 +226,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
 //        }
 //      }
             
-      List<TrackerObject> newTrackerObjects = assign_new(trackedObjects1, candidates);
+      List<TrackerObject> newTrackerObjects = assign_new(trackedObjects, candidates);
       
       for(TrackerObject obj : newTrackerObjects) {
         if(!allObjects.containsValue(obj) &&
@@ -410,27 +395,27 @@ public class ObjectTrackerImpl implements ObjectTracker {
      return null;
     }
     
-//    private Region findMatchingRegion(TrackerObject object, List<Region> regions) {
-//      Region result = null;
-//      //BoundingBox bbox = (BoundingBox)object.getProperty(Constants.OBJ_PROPKEY_BBOX);
-//      Position centroid = (Position)object.getProperty(OBJ_PROPKEY_CENTROID);
-//      double error = Double.MAX_VALUE;
-//      for (Region region : regions) {
-//        BoundingBox bbox = region.getBoundingBox();
-//        double err = centroid.distance(region.getCentroid());
-//        //System.out.println("Error = " + err);
-//        if (err <= distanceThreshold && bbox.getWidth() >= width_min/3
-//                && bbox.getWidth() <= width_max
-//                && bbox.getHeight() >= height_min/3
-//                && bbox.getHeight() <= height_min) {
-//          if (err < error) {
-//            error = err;
-//            result = region;
-//          }
-//        }
-//      }
-//      return result;
-//    }
+    private Region findMatchingRegion(TrackerObject object, List<Region> regions) {
+      Region result = null;
+      //BoundingBox bbox = (BoundingBox)object.getProperty(Constants.OBJ_PROPKEY_BBOX);
+      Position centroid = (Position)object.getProperty(OBJ_PROPKEY_CENTROID);
+      double error = Double.MAX_VALUE;
+      for (Region region : regions) {
+        BoundingBox bbox = region.getBoundingBox();
+        double err = centroid.distance(region.getCentroid());
+        //System.out.println("Error = " + err);
+        if (err <= distanceThreshold && bbox.getWidth() >= width_min/3
+                && bbox.getWidth() <= width_max
+                && bbox.getHeight() >= height_min/3
+                && bbox.getHeight() <= height_min) {
+          if (err < error) {
+            error = err;
+            result = region;
+          }
+        }
+      }
+      return result;
+    }
     
     /**
      * Compute the pair out of trackerObjects/regions with minimum distance
@@ -527,21 +512,21 @@ public class ObjectTrackerImpl implements ObjectTracker {
       return b;
     }
     
-//    private Region findMatchingRegion(Region region, List<Region> regions) {
-//      Region result = null;
-//      Position centroid = region.getCentroid();
-//      double error = Double.MAX_VALUE;
-//      for (Region r1 : regions) {
-//        double err = centroid.distance(r1.getCentroid());
-//        if(err <= distanceThreshold) {
-//          if(err < error) {
-//            error = err;
-//            result = r1;
-//          }
-//        }
-//      }
-//      return result;
-//    }
+    private Region findMatchingRegion(Region region, List<Region> regions) {
+      Region result = null;
+      Position centroid = region.getCentroid();
+      double error = Double.MAX_VALUE;
+      for (Region r1 : regions) {
+        double err = centroid.distance(r1.getCentroid());
+        if(err <= distanceThreshold) {
+          if(err < error) {
+            error = err;
+            result = r1;
+          }
+        }
+      }
+      return result;
+    }
 
     private TrackerObject matchColorHistogram(Region r, long currentTime) {
       // we set the actual element to the element to which we have to compare the
@@ -728,12 +713,12 @@ public class ObjectTrackerImpl implements ObjectTracker {
         BoundingBox bbox = r.getBoundingBox();
         ColorHistogram ch1 = new ColorHistogram(img, imgc, bbox, channel_number);
         ColorHistogram ch2 = (ColorHistogram) object.getProperty(OBJ_PROPKEY_COLOR_HISTOGRAM);
-        long lastSeen_d = currentTime - object.lastSeen();
-        long factor = 1;
-        if(lastSeen_d > timeToLive)
-          factor = 0;
-        else
-          factor = 1 - lastSeen_d/timeToLive;
+//        long lastSeen_d = currentTime - object.lastSeen();
+//        long factor = 1;
+//        if(lastSeen_d > timeToLive)
+//          factor = 0;
+//        else
+//          factor = 1 - lastSeen_d/timeToLive;
         
         double d2 = ch1.bhattacharya_distance(ch2);
         // if some region splitted beforehand, we don't consider the physical
@@ -742,11 +727,14 @@ public class ObjectTrackerImpl implements ObjectTracker {
           // compute physical distance
           Position centroid = (Position) object.getProperty(OBJ_PROPKEY_CENTROID);
           Position r_centroid = r.getCentroid();
-          double diag = Math.sqrt(img.getWidth()*img.getWidth()+img.getHeight()*img.getHeight())/2;
-          double d1 = (centroid.distance(r_centroid)/diag)*factor;
+          double diag = Math.sqrt(img.getWidth()*img.getWidth()+img.getHeight()*img.getHeight())*2;
+          double d1 = centroid.distance(r_centroid)/diag;
+          
+          //double diag = Math.sqrt(img.getWidth()*img.getWidth()+img.getHeight()*img.getHeight())/2;
+          //double d1 = (centroid.distance(r_centroid)/diag)*factor;
 //          if(d1 < distanceThreshold) {
-          if(d1 > d2) return d1;
-          //return Math.sqrt(d1*d2);
+          //if(d1 > d2) return d1;
+          return Math.sqrt(d1*d2);
 //          }
         }
         return d2;
@@ -758,39 +746,49 @@ public class ObjectTrackerImpl implements ObjectTracker {
 
     private DoubleTuple meanDistance(List<Region> regions, 
             Region winner_region, TrackerObject winner) {
-
-      Position winner_region_centroid = winner_region.getCentroid();
-      Position old_centroid = (Position) winner.getProperty(OBJ_PROPKEY_CENTROID);
+      
+      List<Region> candidates = new LinkedList<Region>();
+      
+      Position centroid = winner_region.getCentroid();
+      Position centroid2 = (Position) winner.getProperty(OBJ_PROPKEY_CENTROID);
+                
+      //Position winner_region_centroid = winner_region.getCentroid();
+      //Position old_centroid = (Position) winner.getProperty(OBJ_PROPKEY_CENTROID);
       
       double mean_x = 0;
       double mean_y = 0;
       int number = 0, min_x = Integer.MAX_VALUE, min_y = Integer.MAX_VALUE,
               max_x = 0, max_y = 0;
       
-      double dist_gesamt = 0;
+      //double dist_gesamt = 0;
       
       for(Region r : regions) {
-        if(Math.abs(r.getCentroid().getX()-winner_region_centroid.getX()) < distanceThreshold_X
-          && Math.abs(r.getCentroid().getY() - winner_region_centroid.getY()) < distanceThreshold_Y) {
-          BoundingBox bbox = r.getBoundingBox();
-          double dist1 = Math.sqrt(bbox.getHeight()*bbox.getHeight()+bbox.getWidth()*bbox.getWidth());
-          r.setAxis(dist1);
-          dist_gesamt += dist1;
-        }
-      }
-      
-      for(Region r : regions) {
+//        if(Math.abs(r.getCentroid().getX()-winner_region_centroid.getX()) < distanceThreshold_X
+//          && Math.abs(r.getCentroid().getY() - winner_region_centroid.getY()) < distanceThreshold_Y) {
+//          BoundingBox bbox = r.getBoundingBox();
+//          double dist1 = Math.sqrt(bbox.getHeight()*bbox.getHeight()+bbox.getWidth()*bbox.getWidth());
+//          r.setAxis(dist1);
+//          dist_gesamt += dist1;
+//        }
+//      }
+//      
+//      for(Region r : regions) {
         Position centroid_r = r.getCentroid();
-        if(Math.abs(centroid_r.getX()-winner_region_centroid.getX()) < distanceThreshold_X
-          && Math.abs(centroid_r.getY() - winner_region_centroid.getY()) < distanceThreshold_Y) {
+        double dist = centroid.distance(centroid_r);
+ 	 
+        if(dist < distanceThreshold) {
+                  //if(Math.abs(centroid_r.getX()-winner_region_centroid.getX()) < distanceThreshold_X
+        //  && Math.abs(centroid_r.getY() - winner_region_centroid.getY()) < distanceThreshold_Y) {
           Position min = r.getBoundingBox().getMin();
           Position max = r.getBoundingBox().getMax();
           if(min.getX() < min_x) { min_x = min.getX(); }
           if(min.getY() < min_y) { min_y = min.getY(); }
           if(max.getX() > max_x) { max_x = max.getX(); }
           if(max.getY() > max_y) { max_y = max.getY(); }
-          mean_x += (old_centroid.getX()-centroid_r.getX())*(r.getAxis()/dist_gesamt);
-          mean_y += (old_centroid.getY()-centroid_r.getY())*(r.getAxis()/dist_gesamt);
+          mean_x += centroid2.getX() - centroid_r.getX();
+          mean_y += centroid2.getY() - centroid_r.getY();
+          //mean_x += (old_centroid.getX()-centroid_r.getX())*(r.getAxis()/dist_gesamt);
+          //mean_y += (old_centroid.getY()-centroid_r.getY())*(r.getAxis()/dist_gesamt);
           number++;
         }
       }
