@@ -48,6 +48,7 @@ public class Activator implements BundleActivator, ServiceListener {
     if (oclRef != null) {
       activateService((OpenCLService)bc.getService(oclRef));
     }
+    bc.addServiceListener(this, serviceFilter);
   }
 
   private void activateService(OpenCLService ocl) {
