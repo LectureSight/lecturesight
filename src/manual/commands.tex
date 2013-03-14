@@ -1,0 +1,32 @@
+
+\newcommand{\image}[3]{
+\begin{figure}[h!]
+ \begin{center}
+ #3
+ \end{center}
+ \caption{#2}
+ \label{#1}
+\end{figure}
+}
+
+\newcommand{\moduledoc}[2]{
+  %\section{\input{../modules/lecturesight-#1/manual/module.name}}
+  \section{#1}                                          % not so nice work-around for problem with line above
+  \input{../modules/lecturesight-#2/manual/module}
+}
+
+\newcommand{\configproperties}{
+  \subsection{Configuration Properties}
+}
+
+\newcommand{\property}[3]{
+  \setlength{\tabcolsep}{0pt}
+  \noindent\begin{tabularx}{\textwidth}{l}
+    \textbf{#1}\\\hline\hline
+    \noindent {\small Default: \texttt{#2}}\\\hline
+  \end{tabularx}
+  \setlength{\tabcolsep}{5pt}
+  \vspace{1pt}\\
+  #3
+  \vspace{15pt}
+}
