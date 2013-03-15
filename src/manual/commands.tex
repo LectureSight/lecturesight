@@ -30,3 +30,23 @@
   #3
   \vspace{15pt}
 }
+
+\newcommand{\bundlefile}[1]{
+  \setlength{\tabcolsep}{0pt}
+  \begin{tabularx}{\textwidth}{l}
+    Bundle File: \textbf{#1}\\\hline
+  \end{tabularx}
+  \setlength{\tabcolsep}{5pt}
+}
+
+\newcommand{\consolecommand}[3]{
+  \setlength{\tabcolsep}{0pt}
+  \noindent\begin{tabularx}{\textwidth}{l}
+    \textbf{#1}\\\hline\hline
+    \noindent {\small\texttt{#2}}\\\hline
+  \end{tabularx}
+  \setlength{\tabcolsep}{5pt}
+  \vspace{1pt}\\
+  #3
+  \vspace{15pt}
+}

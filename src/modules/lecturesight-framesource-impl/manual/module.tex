@@ -1,3 +1,4 @@
+\bundlefile{lecturesight-framesource-impl.jar}
 
 The FrameSource bundle provides the infrastructure responsible for managing FrameSource implementations. It discovers video input plugins and is responsible for setting up \textit{FrameSources} with the propper input plugin. It also registers the \textit{FrameSourceProvider} service on startup, which is the point in the system where other services get the (masked) input image from the overview camera.
 
@@ -23,11 +24,11 @@ MRL of the video input from the overview camera that is served by the FrameSourc
 \property{cv.lecturesight.framesource.input.mask}{none}{
 The path to the input mask image file for masking the input provided by the \textit{FrameSourceProvider}. The masking is deactivated if value is \texttt{none}. Otherwise the provided mask image is laoded when the framesource is activated and the mask is applied to each input frame before it is made availabel to consuming services: Each pixel in the input frame is set to black if the first component of the color value of the corresponding pixel in the mask image equals 0.\\
 
-\image{A mask image}{img-mask}{
+\image{img-framesource-mask}{A mask image}{
 \includegraphics[width=0.5\textwidth]{../modules/lecturesight-framesource-impl/manual/mask.png}
 }
 
-\image{A masked input frame}{img-mask}{
+\image{img-framesource-output}{A masked input frame}{
 \includegraphics[width=0.5\textwidth]{../modules/lecturesight-framesource-impl/manual/output.png}
 }
 
