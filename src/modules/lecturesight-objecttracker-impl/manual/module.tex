@@ -1,26 +1,34 @@
 \bundlefile{lecturesight-objecttracker-impl.jar}
 
-Bundle description.
+The bundle provides an Object Tracker Service for tracking and re-discovering of objects. It relies on the Foreground Region Tracker Service and considers moving regions of a reasonable size as objects of interest. In each frame, all candidate regions are checked against all objects in scene (we use a combined distance measure from physical distance and color histogram distance). Candidate regions which cannot be matched to existing objects create new objects, objects which cannot be matched to existing candidate regions stay active for a short time, until they are considered to not be part of the scene any more. New objects are checked against older inactive objects, using the distance measure.
 
 \configproperties
 
 \property{cv.lecturesight.regiontracker.maxnum}{30}{
 $[1 \dots \text{MAX\_INT}]$ Maximum number of regions that should be tracked.}
 
-\property{cv.lecturesight.objecttracker.simple.width.min}{15}{Property description}
+\property{cv.lecturesight.objecttracker.simple.width.min}{15}{
+$[1 \dots \text{MAX\_INT}]$ Minimum width of a region, that can be considered as being a human in the scene.}
 
-\property{cv.lecturesight.objecttracker.simple.width.max}{60}{Property description}
+\property{cv.lecturesight.objecttracker.simple.width.max}{60}{
+$[1 \dots \text{MAX\_INT}]$ Maximum width of a region, that can be considered as being a human in the scene.}
 
-\property{cv.lecturesight.objecttracker.simple.height.min}{12}{Property description}
+\property{cv.lecturesight.objecttracker.simple.height.min}{12}{
+$[1 \dots \text{MAX\_INT}]$ Minimum height of a region, that can be considered as being a human in the scene.}
 
-\property{cv.lecturesight.objecttracker.simple.height.max}{100}{Property description}
+\property{cv.lecturesight.objecttracker.simple.height.max}{100}{
+$[1 \dots \text{MAX\_INT}]$ Maximum height of a region, that can be considered as being a human in the scene.}
 
-\property{cv.lecturesight.objecttracker.simple.ttl}{600000}{Property description}
+\property{cv.lecturesight.objecttracker.simple.ttl}{600000}{
+$[1 \dots \text{MAX\_INT}]$ Time after which a not moving object is assumed to have left the scene. (in milliseconds)}
 
-\property{cv.lecturesight.objecttracker.simple.regionmatch.threshold}{5.0}{Property description}
+\property{cv.lecturesight.objecttracker.simple.regionmatch.threshold}{5.0}{
+$[0 \dots \text{MAX\_DOUBLE}]$ Threshold, which defines minimum similarity of two objects in terms of the described distance measure. If $\text{distance}(\text{obj}_1, \text{obj}_2) > \text{regionmatch.threshold}$, two objects are assumed to be distinct.}
 
-\property{cv.lecturesight.objecttracker.simple.chthreshold}{0.12}{Property description}
+\property{cv.lecturesight.objecttracker.simple.chthreshold}{0.12}{unused}
 
-\property{cv.lecturesight.objecttracker.simple.distancethreshold}{15.0}{Property description}
+\property{cv.lecturesight.objecttracker.simple.distancethreshold}{15.0}{
+$[0 \dots \text{MAX\_DOUBLE}]$ Threshold, which defines minimum similarity of two objects in terms of the euclidean distance. If $\text{distance}(\text{obj}_1, \text{obj}_2) > \text{distancethreshold}$, two objects are assumed to be distinct. It is used in cases, where color histogram information plays no role.}
 
-\property{cv.lecturesight.objecttracker.simple.channel.number}{4}{Property description}
+\property{cv.lecturesight.objecttracker.simple.channel.number}{4}{
+$[1 \dots 255]$ Color Histograms of objects are stored three-dimensional arrays, where dimensions represent R/G/B channels. The cannel number defines the bin number of the histogram. A histogram with bin number $255$ therefore distinguishes 16 million different colors.}
