@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.main;
 
-interface HeartBeat {
+public interface HeartBeat {
 
   boolean isReady();
   boolean isRunning();
