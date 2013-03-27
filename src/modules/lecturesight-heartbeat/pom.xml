@@ -63,6 +63,17 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>maven-scr-plugin</artifactId>
     </dependency>
+    <dependency>
+      <groupId>net.fortuna.ical4j</groupId>
+      <artifactId>ical4j</artifactId>
+      <version>1.0-rc2-patched</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.fileinstall</artifactId>
+      <version>3.2.6</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
   
   <version>0.3-SNAPSHOT</version>

@@ -2,7 +2,7 @@
 
 The bundle provides a FrameSource implementation that reads frames from a video file. It is based on GStreamer. It depends on the set of codecs installed in the host operating systems what formats are supported. Standard MPEG file formats should always be supported since they are included in most standard installations. 
 
-\subsection{Usage}
+\subsubsection{Usage}
 
 The \texttt{type} for this FrameSource implementation is \textbf{file}. The \texttt{path} is the path to a video file. There are no arguments for this FrameSource implementation. 
 \\~\\
@@ -10,7 +10,7 @@ Example usage: \hspace{30pt} \texttt{file://testvideos/sample.mpg}
 \\~\\
 The example MRL tells the system to create a FrameSource from the file \texttt{testvideos/sample.mpg}.
 
-\subsection{Requirments}
+\subsubsection{Requirments}
 
 The implementation is based on GStreamer4Java. The bundle does not provide the native libraries, they have to be installed in the host operating system.
 \\~\\
