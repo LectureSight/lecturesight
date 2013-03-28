@@ -21,6 +21,7 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -101,7 +102,6 @@ public class VISCACameraFactory implements DummyInterface {
     for (String device : config.getList(PROPKEY_SERIALPORTS)) {
       initPort(SERVICE_NAME_PREFIX + portNum++, device);
     }
-    log.info("Activated");
   }
 
   protected void deactivate(ComponentContext context) {
@@ -124,10 +124,19 @@ public class VISCACameraFactory implements DummyInterface {
   }
 
   private void initPort(String portName, String device) {
+    // check if device file existst and we can r/w
+    File deviceFile = new File(device);
+    if (!deviceFile.exists()) {
+      throw new IllegalArgumentException("Device not found: " + device);
+    }
+    if (!(deviceFile.canRead() && deviceFile.canWrite())) {
+      throw new IllegalArgumentException("Device " + device + "is not accessable. Try adujusting file system rights on device.");
+    }
+            
+    // init VISAC devices
     int cam = 1;
     LibVISCACamera viscaPort = null;
     do {
-      log.info("Initializing camera " + cam + " on " + device);
       viscaPort = new LibVISCACamera(portName);
       if (!viscaPort.initialize(device, cam)) {
         log.error("Failed to initialize camera on port " + device);
@@ -142,6 +151,7 @@ public class VISCACameraFactory implements DummyInterface {
       } else {
         service = new VISCACamera(camName, viscaPort, defaultProfile);
       }
+      log.info("Initialized camera " + cam + " on " + device);
       registerService(portName, service);
     } while (++cam <= viscaPort.getConnectedCams());
   }
