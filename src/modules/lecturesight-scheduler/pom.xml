@@ -78,7 +78,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.scheduler</Bundle-SymbolicName>
             <Export-Package>cv.lecturesight.scheduler;version=${project.version}</Export-Package>
           </instructions>
         </configuration>

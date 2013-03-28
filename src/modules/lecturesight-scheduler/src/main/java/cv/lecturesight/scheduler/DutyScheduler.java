@@ -24,6 +24,7 @@ public class DutyScheduler implements ArtifactInstaller {
 
   final static String PROPKEY_LEADTIME = "trackeing.leadtime";
   final static String PROPKEY_FILENAME = "schedule.file";
+  final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String SCHEDULE_DIRECTORY = "schedule";
   private Log log = new Log("Duty Scheduler");
   @Reference
@@ -36,13 +37,13 @@ public class DutyScheduler implements ArtifactInstaller {
   private EventList events = new EventList();
 
   protected void activate(ComponentContext cc) {
-//    scheduleFileName = config.get(PROPKEY_FILENAME);
-//    File scheduleFile = new File(SCHEDULE_DIRECTORY + File.separator + scheduleFileName);
-//    if (scheduleFile.exists()) {
-//      loadEvents(scheduleFile);
-//    }
+    scheduleFileName = config.get(PROPKEY_FILENAME);
+    File scheduleFile = new File(SCHEDULE_DIRECTORY + File.separator + scheduleFileName);
+    if (scheduleFile.exists()) {
+      loadEvents(scheduleFile);
+    }
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
-    log.info("Activated. Listening for iCal file.");
+    log.info("Activated. Listening for changes on " + SCHEDULE_DIRECTORY + File.separator + scheduleFileName);
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -56,29 +57,31 @@ public class DutyScheduler implements ArtifactInstaller {
 
   private void loadEvents(File file) {
     log.info("Loading schedule from " + file.getName());
-    
+
+    long timeZoneOffset = config.getLong(PROPKEY_TZOFFSET);
+
     synchronized (events) {
       try {
         List<VEvent> eventList = ICalendar.parseVEvents(new FileInputStream(file));
-        
-        events.clear();     // clear schedule before loading new events
+
+        events.clear();  // clear schedule before loading new events
         for (VEvent vevent : eventList) {
-          
-          // create start event
+
+          // create start event, apply configured time zone offset to UTC dates from iCal
           Date startDate = vevent.getStart();
-          Event startEvent = new Event(startDate.getTime(), Event.Action.START_TRACKING);
+          Event startEvent = new Event(startDate.getTime() + timeZoneOffset, Event.Action.START_TRACKING);
           events.add(startEvent);
-          
-          // create stop event
+
+          // create stop event, apply configured time zone offset to UTC dates from iCal
           Date stopDate = vevent.getEnd();
-          Event stopEvent = new Event(stopDate.getTime(), Event.Action.STOP_TRACKING);
+          Event stopEvent = new Event(stopDate.getTime() + timeZoneOffset, Event.Action.STOP_TRACKING);
           events.add(stopEvent);
-          
-          log.debug("Created event.  Start: " + startDate.toString() + "  End: " + stopDate.toString());
-          
-          eventExecutor.reset();
+
+          log.debug("Created event.  Start: " + startDate.toString() + "  End: " + stopDate.toString() + " (times are UTC)");
         }
-        
+        events.cutHead(System.currentTimeMillis());
+        eventExecutor.reset();
+
       } catch (Exception e) {
         log.error("Unable to load calendar. ", e);
         throw new RuntimeException("Unable to load calendar. ", e);
@@ -128,22 +131,24 @@ public class DutyScheduler implements ArtifactInstaller {
     return file.getName().equals(scheduleFileName) && file.getParent().equals(SCHEDULE_DIRECTORY);
   }
 
-  /** <code>Runnable</code> that is responsible for starting and stopping the
+  /**
+   * <code>Runnable</code> that is responsible for starting and stopping the
    * tracking.
    */
   class EventExecutor implements Runnable {
 
     Event current = null;
     Event next = null;
+    long now;
 
     public void reset() {
       current = null;
       next = null;
     }
-    
+
     @Override
     public void run() {
-      long now = System.currentTimeMillis();
+      now = System.currentTimeMillis();
 
       synchronized (events) {
         // try to load last event if we don't have one
@@ -151,36 +156,41 @@ public class DutyScheduler implements ArtifactInstaller {
           current = events.getLastBefore(now);
         }
 
-        // ensure action associated with last event was set in motion
-        if (current != null && now >= current.getTime()) {
-          switch (current.getAction()) {
-            case START_TRACKING:
-              ensureTrackingON();
-              break;
-            case STOP_TRACKING:
-              ensureTrackingOFF();
-              break;
-            case START_CAMERACONTROL:
-              ensureCameraControlON();
-              break;
-            case STOP_CAMERACONTROL:
-              ensureCameraControlOFF();
-              break;
-          }
-        }
+        ensureEvents();
 
-        // check if <code>next</code> has become <code>current</code>
+        // check if next has become current
         if (next != null && now >= next.getTime()) {
           if (current != null) {           // remove last from events
             events.remove(current);
           }
           current = next;
+          ensureEvents();
           next = null;
         }
 
         // try to load next event if we don't have one
         if (next == null) {
           next = events.getNextAfter(now);
+        }
+      }
+    }
+
+    void ensureEvents() {
+      // ensure action associated with current event was set in motion
+      if (current != null && now >= current.getTime()) {
+        switch (current.getAction()) {
+          case START_TRACKING:
+            ensureTrackingON();
+            break;
+          case STOP_TRACKING:
+            ensureTrackingOFF();
+            break;
+          case START_CAMERACONTROL:
+            ensureCameraControlON();
+            break;
+          case STOP_CAMERACONTROL:
+            ensureCameraControlOFF();
+            break;
         }
       }
     }
