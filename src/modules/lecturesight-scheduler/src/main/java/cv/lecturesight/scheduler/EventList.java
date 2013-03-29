@@ -7,13 +7,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-/** An sorted list of <code>Event</code> from which an event nearest to a 
+/** 
+ * An sorted list of <code>Event</code> from which an event nearest to a 
  * certain point in time can be retrieved.
  */
 public class EventList {
   
+  /* <code>TreeSet</code> of <code>Event</code>, implements <code>SortedSet</code>
+   * so it's <code>Iterator</code> returns elements in natural order.
+   */
   Set<Event> events = new TreeSet<Event>();
 
+  /** 
+   * Returns the event from this list that is the closest before <code>time</code>,
+   * <code>null</code> if no such element could be found.
+   * 
+   * @param time point in time
+   * @return Event closest before time
+   */
   synchronized Event getLastBefore(long time) {
     Event lastBefore = null;
     for (Iterator<Event> it = events.iterator(); it.hasNext();) {
@@ -27,14 +38,20 @@ public class EventList {
     return lastBefore;
   }
 
+  /** Returns the next <code>Event</code> after <code>time</code>, <code>null</code> 
+   * if no such element could be found.
+   * 
+   * @param time point in time
+   * @return Event next event after time
+   */
   synchronized Event getNextAfter(long time) {
     for (Iterator<Event> it = events.iterator(); it.hasNext();) {
       Event event = it.next();
-      if (time <= event.getTime()) {
-        return event;
+      if (time <= event.getTime()) {  // element after time?
+        return event;                 // return first occurance
       }
     }
-    return null;        
+    return null;      // nothing found, so we return null
   }
   
   /** Remove all events from the beginning of the list to the last event before
@@ -57,18 +74,36 @@ public class EventList {
     }
   }
   
+  /** 
+   * Add an event to the list.
+   * 
+   * @param event to be added to this list
+   */
   synchronized void add(Event e) {
     events.add(e);
   }
   
+  /** 
+   * Add all events from a collection of events to this list.
+   * 
+   * @param events to be added to this list
+   */
   synchronized void addAll(Collection<Event> events) {
     this.events.addAll(events);
   }
   
+  /**
+   * Removes an event from this list.
+   * 
+   * @param event to be removed
+   */
   synchronized void remove(Event event) {
     events.remove(event);
   }
   
+  /** 
+   * Removes all events from the list.
+   */
   synchronized void clear() {
     events.clear();
   }

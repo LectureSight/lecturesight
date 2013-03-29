@@ -10,11 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 
-/** A very limited ICal parser that does just the basic stuff we need for the
+/**
+ * A very limited ICal parser that does just the basic stuff we need for the
  * scheduler module.
  */
 public class ICalendar {
-  
+
   // String constants
   static final String VEVENT_BEGIN = "BEGIN:VEVENT";
   static final String VEVENT_END = "END:VEVENT";
@@ -25,26 +26,35 @@ public class ICalendar {
   
   // Date format used in Matterhorn ICal files
   static DateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
-  
-  public static List<VEvent> parseVEvents(InputStream is) throws IOException, ICalendarException {
+
+  /**
+   * Parses the iCal delivered by <code>stream</code> and returns a <code>List</code>
+   * of all sane (having start and end time) events found.
+   * 
+   * @param stream that delivers the iCal data
+   * @return List of VEvents that could be parsed
+   * @throws IOException
+   * @throws ICalendarException 
+   */
+  public static List<VEvent> parseVEvents(InputStream stream) throws IOException, ICalendarException {
     List<VEvent> result = new LinkedList<VEvent>();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
     String line;
     VEvent current = null;
     int lineNumber = 0;
     while ((line = reader.readLine()) != null) {
       lineNumber++;
       line = line.trim();   // just to be sure
-      
+
       // VEVENT:BEGIN
       if (line.startsWith(VEVENT_BEGIN)) {
         if (current != null) {
           throw new ICalendarException("Begin of new event before end of current event at line " + lineNumber);
         }
         current = new VEvent();
-        
-      // DTSTART  
+
+        // DTSTART  
       } else if (line.startsWith(DTSTART)) {
         if (current == null) {
           throw new ICalendarException("Start date without event at line " + lineNumber);
@@ -54,8 +64,8 @@ public class ICalendar {
         } catch (ParseException e) {
           throw new ICalendarException("Unable to parse start date at line " + lineNumber, e);
         }
-        
-      // DTEND
+
+        // DTEND
       } else if (line.startsWith(DTEND)) {
         if (current == null) {
           throw new ICalendarException("End date without event at line " + lineNumber);
@@ -65,22 +75,22 @@ public class ICalendar {
         } catch (ParseException e) {
           throw new ICalendarException("Unable to parse start date at line " + lineNumber, e);
         }
-        
-      // SUMMARY
+
+        // SUMMARY
       } else if (line.startsWith(SUMMARY)) {
         if (current == null) {
           throw new ICalendarException("Summary without event at line " + lineNumber);
         }
         current.summary = line.substring(SUMMARY.length());
-        
-      // LOCATION
+
+        // LOCATION
       } else if (line.startsWith(LOCATION)) {
         if (current == null) {
           throw new ICalendarException("Location without event at line " + lineNumber);
         }
         current.location = line.substring(LOCATION.length());
-        
-      // VEVENT:END
+
+        // VEVENT:END
       } else if (line.startsWith(VEVENT_END)) {
         if (current == null) {
           throw new ICalendarException("End of event without event to end at line " + lineNumber);
@@ -95,7 +105,7 @@ public class ICalendar {
         current = null;
       }
     }
-    
+
     return result;
   }
 }
