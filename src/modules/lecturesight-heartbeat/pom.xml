@@ -103,11 +103,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.main;version=${project.version}</Export-Package>
+            <Bundle-SymbolicName>cv.lecturesight.heartbeat</Bundle-SymbolicName>
+            <Export-Package>cv.lecturesight.heartbeat.api;version=${project.version}</Export-Package>
           </instructions>
         </configuration>
       </plugin>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

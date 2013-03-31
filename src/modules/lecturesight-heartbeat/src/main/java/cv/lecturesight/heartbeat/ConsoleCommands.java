@@ -15,8 +15,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.main;
+package cv.lecturesight.heartbeat;
 
+import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.Log;
 import org.apache.felix.scr.annotations.Component;

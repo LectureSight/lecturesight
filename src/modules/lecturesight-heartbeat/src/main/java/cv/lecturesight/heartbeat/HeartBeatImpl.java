@@ -15,8 +15,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.main;
+package cv.lecturesight.heartbeat;
 
+import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.framesource.FrameSourceProvider;
@@ -34,12 +35,12 @@ import org.osgi.service.component.ComponentContext;
 /** Implementation of Service API
  *
  */
-@Component(name = "lecturesight.main", immediate = true)
+@Component(name = "lecturesight.heartbeat", immediate = true)
 @Service
 public class HeartBeatImpl implements HeartBeat {
 
-  static final String PROPKEY_LISTENTO = "heartbeat.listens.to";
-  static final String PROPKEY_AUTOSTART = "heartbeat.autostart";
+  static final String PROPKEY_LISTENTO = "listens.to";
+  static final String PROPKEY_AUTOSTART = "autostart";
   private Log log = new Log("Heartbeat");
   @Reference
   private Configuration config;
