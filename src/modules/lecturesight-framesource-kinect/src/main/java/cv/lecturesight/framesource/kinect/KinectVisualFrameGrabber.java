@@ -1,10 +1,10 @@
-package cv.lecturesight.framesource.v4l;
+package cv.lecturesight.framesource.kinect;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.Buffer;
 
-public class KinectDepthFrameGrabber implements FrameGrabber {
+public class KinectVisualFrameGrabber implements FrameGrabber {
 
   @Override
   public int getWidth() {
@@ -18,7 +18,7 @@ public class KinectDepthFrameGrabber implements FrameGrabber {
 
   @Override
   public PixelFormat getPixelFormat() {
-    return PixelFormat.INTENSITY_8BIT;
+    return PixelFormat.RGB_8BIT;
   }
 
   @Override

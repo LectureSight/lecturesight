@@ -1,4 +1,4 @@
-package cv.lecturesight.framesource.v4l;
+package cv.lecturesight.framesource.kinect;
 
 public class Constants {
 
