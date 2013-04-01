@@ -196,6 +196,11 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
     JFileChooser chooser = new JFileChooser();
     if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
+      if (file.exists() && JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
+              this, "The file " + file.getName() + " already exists. Do you want to replace it?", 
+              "Replace file", JOptionPane.YES_NO_OPTION)) {
+        return;
+      }
       try {
         config.saveSystemConfiguration(new FileOutputStream(file));
       } catch (Exception e) {
