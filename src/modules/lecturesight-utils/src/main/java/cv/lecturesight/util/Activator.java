@@ -83,11 +83,11 @@ public final class Activator implements BundleActivator {
     confFactoryReg = context.registerService(Configuration.class.getName(), confFactory, null);
     
     // register config service
-    ConfigurationService confService = new ConfigurationServiceImpl(systemProperties);
+    ConfigurationService confService = new ConfigurationServiceImpl(systemProperties, defaultProperties);
     context.registerService(ConfigurationService.class.getName(), confService, null);
 
     // register config commands
-    ConfigCommands commandImpl = new ConfigCommands(systemProperties, defaultProperties);
+    ConfigCommands commandImpl = new ConfigCommands((ConfigurationServiceImpl)confService);
     Dictionary<String, Object> commands = new Hashtable<String, Object>();
     commands.put("osgi.command.scope", "config");
     commands.put("osgi.command.function", ConfigCommands.commands);
