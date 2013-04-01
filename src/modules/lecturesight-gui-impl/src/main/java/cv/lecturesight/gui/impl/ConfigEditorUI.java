@@ -37,7 +37,7 @@ public class ConfigEditorUI implements UserInterface {
     ConfigurationService configService;
     
     protected void activate(ComponentContext cc) {
-      editorPanel = new ConfigEditorPanel(configService.getSystemConfiguration(), log);
+      editorPanel = new ConfigEditorPanel(configService, log);
       log.info("Activated");
     }
     

@@ -18,10 +18,16 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.util.Log;
+import cv.lecturesight.util.conf.ConfigurationService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -29,6 +35,7 @@ import javax.swing.event.TableModelListener;
 public class ConfigEditorPanel extends javax.swing.JPanel {
 
   private Log log;
+  private ConfigurationService config;
   private Properties systemConfiguration;
   private Object[][] data;
   private String[] columns = new String[]{"Key", "Value"};
@@ -36,13 +43,15 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
   /**
    * Creates new form ConfigEditorPanel
    */
-  public ConfigEditorPanel(Properties config, Log log) {
+  public ConfigEditorPanel(ConfigurationService cs, Log log) {
     this.log = log;
-    this.systemConfiguration = config;
+    this.config = cs;
+    this.systemConfiguration = config.getSystemConfiguration();
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
+      log.warn("Unable to set operating system look-and-feel. " + e.getMessage());
     }
     initComponents();
     update();
@@ -101,6 +110,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
     scrollPane = new javax.swing.JScrollPane();
     configTable = new javax.swing.JTable();
     jToolBar2 = new javax.swing.JToolBar();
+    loadButton = new javax.swing.JButton();
+    saveButton = new javax.swing.JButton();
 
     configTable.setModel(new javax.swing.table.DefaultTableModel(
       new Object [][] {
@@ -127,7 +138,30 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
     });
     scrollPane.setViewportView(configTable);
 
+    jToolBar2.setFloatable(false);
     jToolBar2.setRollover(true);
+
+    loadButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/folder_wrench.png"))); // NOI18N
+    loadButton.setFocusable(false);
+    loadButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    loadButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    loadButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        loadButtonActionPerformed(evt);
+      }
+    });
+    jToolBar2.add(loadButton);
+
+    saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/disk.png"))); // NOI18N
+    saveButton.setFocusable(false);
+    saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    saveButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        saveButtonActionPerformed(evt);
+      }
+    });
+    jToolBar2.add(saveButton);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -144,9 +178,37 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
         .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
+
+  private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadButtonActionPerformed
+    JFileChooser chooser = new JFileChooser();
+    if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+      File file = chooser.getSelectedFile();
+      try {
+        config.loadSystemConfiguration(new FileInputStream(file));
+        update();
+      } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Failed to load system configuration:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }//GEN-LAST:event_loadButtonActionPerformed
+
+  private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+    JFileChooser chooser = new JFileChooser();
+    if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+      File file = chooser.getSelectedFile();
+      try {
+        config.saveSystemConfiguration(new FileOutputStream(file));
+      } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Failed to save system configuration:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
+  }//GEN-LAST:event_saveButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTable configTable;
   private javax.swing.JToolBar jToolBar2;
+  private javax.swing.JButton loadButton;
+  private javax.swing.JButton saveButton;
   private javax.swing.JScrollPane scrollPane;
   // End of variables declaration//GEN-END:variables
 }
