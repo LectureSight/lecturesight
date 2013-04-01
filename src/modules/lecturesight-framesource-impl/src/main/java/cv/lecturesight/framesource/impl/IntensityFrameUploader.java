@@ -30,6 +30,7 @@ public class IntensityFrameUploader implements FrameUploader {
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
   private final OCLSignal sig_done;
+  private final OCLSignal sig_newframe;
   private BufferedImage maskImage = null;
 
   public IntensityFrameUploader(OpenCLService clService, FrameGrabber grabber) {
@@ -39,6 +40,7 @@ public class IntensityFrameUploader implements FrameUploader {
     // create signals
     sig_start = ocl.getSignal(UID + "_START");
     sig_done = ocl.getSignal(UID + "_DONE");
+    sig_newframe = ocl.getSignal(FrameUploader.SIG_NEWFRAME);
 
     // set up gpu buffgers
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
@@ -81,6 +83,7 @@ public class IntensityFrameUploader implements FrameUploader {
       @Override
       public void land() {
         ocl.castSignal(sig_done);
+        ocl.castSignal(sig_newframe);
       }
 
     });

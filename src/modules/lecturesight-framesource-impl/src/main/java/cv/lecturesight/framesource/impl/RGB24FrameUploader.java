@@ -48,6 +48,7 @@ public class RGB24FrameUploader implements FrameUploader {
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
   private final OCLSignal sig_done;
+  private final OCLSignal sig_newframe;
   private BufferedImage maskImage = null;
 
   public RGB24FrameUploader(OpenCLService clService, FrameGrabber grabber) {
@@ -57,6 +58,7 @@ public class RGB24FrameUploader implements FrameUploader {
     // create signals
     sig_start = ocl.getSignal(UID + "_START");
     sig_done = ocl.getSignal(UID + "_DONE");
+    sig_newframe = ocl.getSignal(FrameUploader.SIG_NEWFRAME);
 
     // set up gpu buffgers
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
@@ -99,6 +101,7 @@ public class RGB24FrameUploader implements FrameUploader {
       @Override
       public void land() {
         ocl.castSignal(sig_done);
+        ocl.castSignal(sig_newframe);
       }
 
     });

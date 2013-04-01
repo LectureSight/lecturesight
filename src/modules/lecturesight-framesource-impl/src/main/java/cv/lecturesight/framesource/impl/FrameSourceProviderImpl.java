@@ -39,5 +39,4 @@ public class FrameSourceProviderImpl implements FrameSourceProvider {
   public FrameSource getFrameSource() {
     return source;
   }
-
 }

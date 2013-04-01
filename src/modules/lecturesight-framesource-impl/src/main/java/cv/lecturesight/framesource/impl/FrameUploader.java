@@ -24,6 +24,8 @@ import java.nio.Buffer;
 
 public interface FrameUploader {
 
+  final String SIG_NEWFRAME = "framesource.NEWFRAME";
+  
   OCLSignal getSignal();
 
   CLImage2D getRawOutputImage();
