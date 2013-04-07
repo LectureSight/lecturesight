@@ -18,11 +18,13 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 
-public class DisplayWindow implements WindowListener {
+public class DisplayWindow implements WindowListener, KeyListener {
   
   String title = "";
   Display display;
@@ -32,6 +34,7 @@ public class DisplayWindow implements WindowListener {
     this.title = title;
     this.display = display;
     initComponents();
+    
   }
   
   private void initComponents() {
@@ -73,5 +76,17 @@ public class DisplayWindow implements WindowListener {
   @Override
   public void windowDeactivated(WindowEvent e) {
   }
-  
+
+  @Override
+  public void keyTyped(KeyEvent e) {
+    System.out.println("Key Code: " + e.getKeyCode());
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+  }
+
+  @Override
+  public void keyReleased(KeyEvent e) {
+  }
 }

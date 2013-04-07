@@ -1,0 +1,9 @@
+\bundlefile{lecturesight-decorator-head.jar}
+
+The bundle provides a service that implements an \texttt{ObjectDecorator}. It purpose is to find the head of a tracked person. A K-means clustering is performed on the foreground pixels of a given object creating a Voronoi tessellation. The prototypes of the clustering are the centroids of the cells. The prototype with the smallest $y$ value that is closest to the vertical centroid axis of the whole object is chosen as the prototype for the head. Thus the cell associated with the chosen prototype should hold the pixels that make up the image of the head of the analyzed person. A detailed description of the method is given in \cite{6424707}.
+
+\configproperties
+
+\property{cv.lecturesight.decorator.head.k}{7}{Number of prototypes for the clustering (K).}
+
+\property{cv.lecturesight.decorator.head.iterations.max}{100}{Maximum number of iterations for the clustering algorithm in one run.}

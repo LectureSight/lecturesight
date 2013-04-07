@@ -39,10 +39,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * Implementation of the API for general Pan-Tilt-Zoom-Cameras (based on VISCA Camera Protocoll).
- * This is a factory viscaPort for VISCACamera.
- * 
- * API: @see cv.lecturesight.ptz.api.PTZCamera
+ * Implementation of the API for general Pan-Tilt-Zoom-Cameras (based on VISCA
+ * Camera Protocoll). This is a factory viscaPort for VISCACamera.
+ *
+ * API:
+ *
+ * @see cv.lecturesight.ptz.api.PTZCamera
  */
 @Component(name = "cv.lecturesight.ptz.visca", immediate = true)
 @Service
@@ -53,29 +55,34 @@ public class VISCACameraFactory implements DummyInterface {
   private final static String PROPKEY_MODEL_ID = "camera.model.id";
   private final static String PROPKEY_MODEL_NAME = "camera.model.name";
   private final static String PROPKEY_VENDOR_NAME = "camera.vendor.name";
-  
   Log log = new Log("VISCA Factory");
-  
   @Reference
   Configuration config;
-  
-  /** OSGI Component context */
+  /**
+   * OSGI Component context
+   */
   ComponentContext context;
-  /** Comm port to viscaPort map (up to 7 services, see visca spec.)*/
+  /**
+   * Comm port to viscaPort map (up to 7 services, see visca spec.)
+   */
   Map<String, List<VISCACamera>> services = new HashMap<String, List<VISCACamera>>();
-  /** Service registrations */
+  /**
+   * Service registrations
+   */
   List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
-  /** Camera model properties */
+  /**
+   * Camera model properties
+   */
   Properties defaultProfile;
-  Map<Integer, Properties> cameraProfiles = new HashMap<Integer,Properties>();
+  Map<Integer, Properties> cameraProfiles = new HashMap<Integer, Properties>();
 
   protected void activate(ComponentContext context) {
     this.context = context;
-    
+
     // load device profiles
     Enumeration entryURLs = context.getBundleContext().getBundle().findEntries("profiles", "*.properties", false);
-    while(entryURLs.hasMoreElements()) {
-      URL url = (URL)entryURLs.nextElement();
+    while (entryURLs.hasMoreElements()) {
+      URL url = (URL) entryURLs.nextElement();
       try {
         Properties props = new Properties();
         props.load(url.openStream());
@@ -96,11 +103,13 @@ public class VISCACameraFactory implements DummyInterface {
         log.warn("Failed to load device profile from " + url.toString() + " : " + e.getMessage());
       }
     }
-    
+
     // init devices on configured serial ports
-    int portNum = 1;
-    for (String device : config.getList(PROPKEY_SERIALPORTS)) {
-      initPort(SERVICE_NAME_PREFIX + portNum++, device);
+    if (!config.get(PROPKEY_SERIALPORTS).isEmpty()) {
+      int portNum = 1;
+      for (String device : config.getList(PROPKEY_SERIALPORTS)) {
+        initPort(SERVICE_NAME_PREFIX + portNum++, device);
+      }
     }
   }
 
@@ -132,7 +141,7 @@ public class VISCACameraFactory implements DummyInterface {
     if (!(deviceFile.canRead() && deviceFile.canWrite())) {
       throw new IllegalArgumentException("Device " + device + "is not accessable. Try adujusting file system rights on device.");
     }
-            
+
     // init VISAC devices
     int cam = 1;
     LibVISCACamera viscaPort = null;
@@ -158,7 +167,7 @@ public class VISCACameraFactory implements DummyInterface {
 
   /**
    * Register VISCACamera viscaPort with OSGI framework.
-   * 
+   *
    * @param portName port name (from configuration)
    * @param viscaPort VISCACamera viscaPort
    */
@@ -184,8 +193,8 @@ public class VISCACameraFactory implements DummyInterface {
     }
     registrations.add(registration);
 
-    log.info("Registered camera " + camName + ": " + 
-            service.props.getProperty(PROPKEY_VENDOR_NAME) + " " + 
-            service.props.getProperty(PROPKEY_MODEL_NAME));
+    log.info("Registered camera " + camName + ": "
+            + service.props.getProperty(PROPKEY_VENDOR_NAME) + " "
+            + service.props.getProperty(PROPKEY_MODEL_NAME));
   }
 }

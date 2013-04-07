@@ -53,15 +53,45 @@ The video processing portions of the system haven nearly entriely been implement
 For use in a real-time scenarion it is suggested to use a GPU with a least six OpenCL \textit{compute units} and at least 512 MB of graphics memory. Such a configuration can be found, for example, in grpahics card equipped with the Nvidia GT 220 chip set. For Nvidia GPUs the number of \textit{CUDA units} divided by eight yields the number of OpenCL compute units. The GT 220 a number of 48 CUDA units is stated, thus the GPU provides 6 compute units in OpenCL.
 
 ~\\\noindent\textbf{Overview Camera}\\
-As overview camera USB webcams as well as SD video cameras connected to a fast frame grabber device can be used. 
+As overview camera USB webcams as well as analog SD video cameras connected to a fast frame grabber device can be used. 
 
-Though the resolution for the overview camera should be chosen not too high in order not to jeopardize real-time performance (usually VGA), teh qualtiy of the model chose as overview camera directly impacts tracking accuracy and reliability. Cheap USB webcams, for example, show a habit strongly and sometimes seemingly randomly adjusting color channels. Such behavior can compromise correct function of the tracker. With higher qualtiy (HD) webcams color and contrast stable images can be achieved which is optimal for the video analysis. 
+Though the resolution for the overview camera should be chosen not too high in order not to jeopardize real-time performance (usually VGA), the image qualtiy of the model chose as overview camera directly impacts tracking accuracy and reliability. Cheap USB webcams, for example, sometimes show a habit of aggressively adjusting color channels. Such behavior can compromise correct function of the tracker. With higher quality (720p) web-cams color and contrast stable images can be achieved which is optimal for the video analysis. 
 
-Also most stationary analog video cameras produce a stable image that suffices the needs of the tracking algortihms. In order to use an analog video camera as the overview camera, a frame grabber has to convert the analog signal to digital frames. It is suggested to use interal PCI(e) frame grabber hardware with direct memory access (DMA). Such frame grabbers often write the converted raw frame directly into the host systems memory avoding unnecessary memory copy or encoding/decoding operations that can produce 
+Also most stationary analog video cameras produce a stable image that suffices the needs of the tracking algorithms. In order to use an analog video camera as the overview camera, a frame grabber has to convert the analog signal to digital frames. It is suggested to use interal PCI(e) frame grabber hardware with direct memory access (DMA). Such frame grabbers write raw frame directly into the host systems memory from where they can directly be copied to GPU memory, thus avoding unnecessary memory copy or encoding/decoding operations that can produce delays.
 
 \subsubsection{Software}
 
+The OSGI-bundles that make up LectureSight come with all their dependencies included. Thus there is no need for third-party software to be installed on the host system except the OpenCL implementation. The OpenCL implementation is usually part of the driver package that comes with the graphics card. For Nvidia products the Linux driver can be downloaded from the website
+\\~\\
+\texttt{http://www.nvidia.com/object/unix.html}
+\\~\\
+For ATI products the Linux driver can be downloaded from
+\\~\\
+\texttt{http://support.amd.com/de/gpudownload/linux/Pages/radeon\_linux.aspx}
+\\~\\
+The driver installations include the OpenCL library implementation suitable for the particular graphics card and should install an \texttt{.icd} file under\\ \texttt{/etc/OpenCL/vendors} that points to the library file.
+
 \subsection{Installation}
+
+The software can be obtained as pre-compiled binary packages or as source code checked out from the Subversion repository via the following command line
+\\~\\
+\texttt{svn co http://opencast.jira.com/svn/LECTURESIGHT/trunk}
+\\~\\
+The pre-compiled binary distribution for production systems can be downloaded via the following command line
+\\~\\
+\texttt{wget https://opencast.jira.com/...}
+\\~\\
+Extract the software to \texttt{/opt/lecturesight}
+\\~\\
+\texttt{tar xfvz lecturesight-0.3.1-production.tar.gz}\\
+\texttt{mv lecturesight /opt}
+\\~\\
+Change into the lecturesight directory and start the software
+\\~\\
+\texttt{cd /opt/lecturesight}\\
+\texttt{./bin/start\_lecturesight.sh}
+\\~\\
+
 
 \subsection{Configuration}
 
@@ -100,6 +130,7 @@ In this section detailed manuals about all bundles that hold implementations of 
 \moduledoc{Decorator Color Histrogram}{decorator-color}
 \moduledoc{Decorator Head}{decorator-head}
 \moduledoc{VISC Protocol PTZ Driver}{ptzcontrol-visca}
+\moduledoc{iCal Scheduler}{scheduler}
 
 \backmatter
 %\include{glossary}
