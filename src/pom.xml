@@ -42,7 +42,7 @@
         <module>modules/lecturesight-regiontracker-api</module>
         <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-objecttracker-api</module>
-        <module>modules/lecturesight-objecttracker-impl</module>
+        <!-- module>modules/lecturesight-objecttracker-impl</module -->
         <module>modules/lecturesight-objecttracker-clustering</module>
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-heartbeat</module>
@@ -186,7 +186,7 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.fileinstall</artifactId>
-        <version>3.1.4</version>
+        <version>3.2.0</version>
       </dependency>
       
       <!-- SCR Annotations -->
@@ -232,10 +232,6 @@
   
   <repositories>
     <repository>
-      <id>nativelibs4java-repo</id>
-      <url>http://nativelibs4java.sourceforge.net/maven</url>
-    </repository>
-    <repository>
       <id>sonatype</id>
       <name>Sonatype OSS Snapshots Repository</name>
       <url>http://oss.sonatype.org/content/groups/public</url>
@@ -247,6 +243,26 @@
       <layout>default</layout>
     </repository>
     
+    <!-- for JavaCL -->
+    <repository>
+      <id>nativelibs4java-repo</id>
+      <url>http://nativelibs4java.sourceforge.net/maven</url>
+    </repository>
+    
+    <!-- We want to use the iCal4J version that is used in Matterhorn -->
+    <repository>
+      <id>opencast</id>
+      <name>Opencast Repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    
+    <!-- blackpad often breaks build -->
     <repository>
       <id>blackpad-nexus</id>
       <url>http://www.blackpad.fr</url>

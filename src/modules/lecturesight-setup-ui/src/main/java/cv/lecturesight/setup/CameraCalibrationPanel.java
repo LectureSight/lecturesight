@@ -1,18 +1,40 @@
 package cv.lecturesight.setup;
 
-/**
- *
- * @author wulff
- */
-public class CameraCalibrationPanel extends javax.swing.JPanel {
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 
+
+public class CameraCalibrationPanel extends javax.swing.JPanel implements HierarchyListener{
+
+  private CameraCalibrationUI parent;
+  
   /**
    * Creates new form CameraCalibrationPanel
    */
-  public CameraCalibrationPanel() {
+  public CameraCalibrationPanel(CameraCalibrationUI parent) {
     initComponents();
   }
 
+  @Override
+  public void hierarchyChanged(HierarchyEvent e) {    
+    if (e.getChangeFlags() == 1) {
+      parent.takeControl();
+    } else if (e.getChangeFlags() == 4) {
+      parent.abandonControl();
+    }
+  }
+  
+  @Override
+  public void addNotify() {
+    super.addNotify();
+    addHierarchyListener(this);
+  }
+
+  @Override
+  public void removeNotify() {
+    removeHierarchyListener(this);
+    super.removeNotify();
+  }
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -368,4 +390,5 @@ public class CameraCalibrationPanel extends javax.swing.JPanel {
   private javax.swing.JPanel verticalControlsPanel;
   private javax.swing.JPanel videoFrameHolder;
   // End of variables declaration//GEN-END:variables
+
 }

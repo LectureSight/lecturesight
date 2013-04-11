@@ -24,6 +24,7 @@ import java.util.Properties;
 public interface ConfigurationService {
 
   public Properties getSystemConfiguration();
+  public Properties getSystemDefaults();
   public void loadSystemConfiguration(InputStream is);
   public void saveSystemConfiguration(OutputStream os);
 }

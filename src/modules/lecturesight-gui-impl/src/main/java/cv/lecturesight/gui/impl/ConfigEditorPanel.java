@@ -36,7 +36,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
 
   private Log log;
   private ConfigurationService config;
-  private Properties systemConfiguration;
+  private Properties systemConfiguration, systemDefaults;
   private Object[][] data;
   private String[] columns = new String[]{"Key", "Value"};
 
@@ -47,6 +47,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
     this.log = log;
     this.config = cs;
     this.systemConfiguration = config.getSystemConfiguration();
+    this.systemDefaults = config.getSystemDefaults();
+    
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -56,7 +58,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
     initComponents();
     update();
   }
-
+  
   public void update() {
     
     List<String> keyList = new LinkedList<String>();

@@ -19,16 +19,6 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-connectedcomponent-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-videoanalysis-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-gui-api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -54,12 +44,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-objecttracker-api</artifactId>
+      <artifactId>lecturesight-steeringworker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

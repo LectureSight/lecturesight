@@ -9,7 +9,7 @@ import org.apache.felix.scr.annotations.Service;
 @Service
 public class CameraCalibrationUI implements UserInterface {
 
-  
+  CameraCalibrationPanel panel = new CameraCalibrationPanel(this);
   
   @Override
   public String getTitle() {
@@ -18,12 +18,17 @@ public class CameraCalibrationUI implements UserInterface {
 
   @Override
   public JPanel getPanel() {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return panel;
   }
 
   @Override
   public boolean isResizeable() {
     return true;
   }
+
+  void takeControl() {
+  }
   
+  void abandonControl() {
+  }
 }

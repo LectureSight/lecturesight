@@ -69,7 +69,7 @@ public class RGB24FrameUploader implements FrameUploader {
     temp = ocl.context().createImage2D(Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
-
+    
     // set up conversion kernel
     conversionK = ocl.programs().getKernel("conversions", "RGB24_RGBAUint8");
     

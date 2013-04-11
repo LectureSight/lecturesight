@@ -38,6 +38,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   public Properties getSystemConfiguration() {
     return config;
   }
+  
+  @Override
+  public Properties getSystemDefaults() {
+    return defaults;
+  }
 
   @Override
   public void loadSystemConfiguration(InputStream is) {
