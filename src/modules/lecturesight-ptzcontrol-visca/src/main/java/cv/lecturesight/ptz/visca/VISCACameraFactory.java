@@ -155,12 +155,15 @@ public class VISCACameraFactory implements DummyInterface {
       log.info("Model ID: " + modelId);
       VISCACamera service;
       String camName = portName + "-" + viscaPort.getCamNo();
+      String cameraModel = "Default";
       if (cameraProfiles.containsKey(modelId)) {
-        service = new VISCACamera(camName, viscaPort, cameraProfiles.get(modelId));
+        Properties profile = cameraProfiles.get(modelId);
+        service = new VISCACamera(camName, viscaPort, profile);
+        cameraModel = profile.getProperty("camera.vendor.name") + " " + profile.getProperty("camera.model.name");
       } else {
         service = new VISCACamera(camName, viscaPort, defaultProfile);
       }
-      log.info("Initialized camera " + cam + " on " + device);
+      log.info("Initialized " + cameraModel + " on " + device + " (bus id: " + cam + ")");
       registerService(portName, service);
     } while (++cam <= viscaPort.getConnectedCams());
   }

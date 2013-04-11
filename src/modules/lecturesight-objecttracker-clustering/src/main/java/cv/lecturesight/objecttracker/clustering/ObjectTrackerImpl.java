@@ -185,10 +185,17 @@ public class ObjectTrackerImpl implements ObjectTracker {
    *
    */
   private class TrackerUpdate implements Triggerable {
+    
+    final static int CONFIG_REFRESH_ITERATIONS = 10;
+    private int lastUpdated = 0;
 
     // TODO call Decorators
     @Override
     public void triggered(OCLSignal signal) {
+      if (++lastUpdated > CONFIG_REFRESH_ITERATIONS) {
+        updateConfiguration();
+        lastUpdated = 0;
+      }
       long time = System.currentTimeMillis();
       
       newAssignments = new HashMap<Region, TrackerObject>();
@@ -201,8 +208,6 @@ public class ObjectTrackerImpl implements ObjectTracker {
       for (Region region : regions) {
         TrackerObject object = regionAssignments.get(region);
         if (object == null) {
-          
-          
           
           if (region.getWeight() >= weight_min) {
             object = findMatchingObject(region);
@@ -262,15 +267,11 @@ public class ObjectTrackerImpl implements ObjectTracker {
           Position oPos = new Position(oBox.getMin().getX() + oBox.getWidth()/2,
                   oBox.getMin().getY() + oBox.getHeight()/2);
           double distance = region.getCentroid().distance(oPos);
-          //System.out.println("DIST:  " + distance);
           if (distance < winner_dist) {
             winner = obj;
           }
         }
       }
-//      if (winner != null) {
-//        System.out.println("MATCH");
-//      }
       return winner;
     }
     
