@@ -76,12 +76,16 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     }
   }
 
-  @Override
-  public void finalize() throws Throwable {
-    super.finalize();
+  void shutdown() {
     log.info("Shutting down");
     grabber.stopCapture();
     device.releaseFrameGrabber();
     device.release();
+  }
+  
+  @Override
+  public void finalize() throws Throwable {
+    super.finalize();
+    shutdown();
   }
 }

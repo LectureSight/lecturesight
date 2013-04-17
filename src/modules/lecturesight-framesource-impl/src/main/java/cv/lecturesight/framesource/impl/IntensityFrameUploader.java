@@ -17,11 +17,12 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public class IntensityFrameUploader implements FrameUploader {
+
   private final String UID = UUID.randomUUID().toString();
   private final OpenCLService ocl;
   private final FrameGrabber grabber;
   private final CLKernel conversionK, maskK;
-  private final int [] workDim;
+  private final int[] workDim;
   private final long bufferSize;
   private ByteBuffer hostBuffer;
   private CLByteBuffer gpuRawBuffer;
@@ -32,6 +33,7 @@ public class IntensityFrameUploader implements FrameUploader {
   private final OCLSignal sig_done;
   private final OCLSignal sig_newframe;
   private BufferedImage maskImage = null;
+  private ComputationRun uploadRun;
 
   public IntensityFrameUploader(OpenCLService clService, FrameGrabber grabber) {
     this.ocl = clService;
@@ -42,7 +44,7 @@ public class IntensityFrameUploader implements FrameUploader {
     sig_done = ocl.getSignal(UID + "_DONE");
     sig_newframe = ocl.getSignal(FrameUploader.SIG_NEWFRAME);
 
-    // set up gpu buffgers
+    // set up gpu buffers
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
     gpuRawBuffer = ocl.context().createByteBuffer(CLMem.Usage.InputOutput, bufferSize);
     gpuBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
@@ -54,17 +56,16 @@ public class IntensityFrameUploader implements FrameUploader {
 
     // set up conversion kernel
     conversionK = ocl.programs().getKernel("conversions", "Intensity8_RGBAUint8");
-    
+
     // set up mask kernel
     maskK = ocl.programs().getKernel("conversions", "apply_mask");
 
-    workDim = new int[] {grabber.getWidth(), grabber.getHeight()};
+    workDim = new int[]{grabber.getWidth(), grabber.getHeight()};
 
     // System.out.println("Computed buffer size: " + bufferSize);
 
     // set up conversion run
-    ocl.registerLaunch(sig_start, new ComputationRun() {
-
+    uploadRun = new ComputationRun() {
       @Override
       public void launch(CLQueue queue) {
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
@@ -85,8 +86,14 @@ public class IntensityFrameUploader implements FrameUploader {
         ocl.castSignal(sig_done);
         ocl.castSignal(sig_newframe);
       }
+    };
+    ocl.registerLaunch(sig_start, uploadRun);
+  }
 
-    });
+  @Override
+  public void destroy() {
+    // deregister this uploaders computationRun
+    ocl.unregisterLaunch(sig_start, uploadRun);
   }
 
   @Override
@@ -98,7 +105,7 @@ public class IntensityFrameUploader implements FrameUploader {
   public CLImage2D getOutputImage() {
     return gpuBuffer;
   }
-  
+
   @Override
   public CLImage2D getRawOutputImage() {
     if (mask != null) {
@@ -110,7 +117,7 @@ public class IntensityFrameUploader implements FrameUploader {
 
   @Override
   public void upload(Buffer frame) {
-    hostBuffer = (ByteBuffer)frame;     // FIXME not thread-safe!
+    hostBuffer = (ByteBuffer) frame;     // FIXME not thread-safe!
     ocl.castSignal(sig_start);
   }
 
@@ -118,10 +125,10 @@ public class IntensityFrameUploader implements FrameUploader {
   public BufferedImage getOutputImageHost() {
     return imageHost;
   }
-  
+
   @Override
   public void setMask(BufferedImage mask) {
-    this.maskImage = mask; 
+    this.maskImage = mask;
     this.mask = ocl.context().createImage2D(CLMem.Usage.InputOutput, maskImage, false);
   }
 }

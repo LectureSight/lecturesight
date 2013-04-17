@@ -23,6 +23,8 @@ import java.awt.image.BufferedImage;
 
 public interface FrameSource {
 
+  String getType();
+  
   OCLSignal getSignal();
 
   CLImage2D getRawImage();

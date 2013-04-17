@@ -1,18 +1,47 @@
 package cv.lecturesight.setup;
 
+import cv.lecturesight.display.CustomRenderer;
+import cv.lecturesight.display.Display;
+import cv.lecturesight.display.DisplayPanel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import javax.swing.UIManager;
 
-
-public class CameraCalibrationPanel extends javax.swing.JPanel implements HierarchyListener{
+public class CameraCalibrationPanel extends javax.swing.JPanel implements HierarchyListener, CustomRenderer {
 
   private CameraCalibrationUI parent;
+  Display cameraDisplay = null;
+  DisplayPanel cameraDisplayPanel = null;
   
   /**
    * Creates new form CameraCalibrationPanel
    */
   public CameraCalibrationPanel(CameraCalibrationUI parent) {
+    // set operating system look-and-feel
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+      // bad luck
+    }
     initComponents();
+    cameraDisplayHolder.setLayout(new BorderLayout());
+  }
+  
+  void setCameraDisplay(Display display) {
+    cameraDisplay = display;
+    cameraDisplayPanel = cameraDisplay.getDisplayPanel();
+    cameraDisplayPanel.setCustomRenderer(this);
+    cameraDisplayHolder.add(cameraDisplayPanel, BorderLayout.CENTER);
+    cameraDisplay.activate();
+  }
+  
+  void removeCameraDisplay() {
+    cameraDisplay.deactivate();
+    cameraDisplayHolder.remove(cameraDisplayPanel);
   }
 
   @Override
@@ -21,6 +50,12 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
       parent.takeControl();
     } else if (e.getChangeFlags() == 4) {
       parent.abandonControl();
+      if (cameraDisplay != null) {
+        cameraDisplay.deactivate();
+      }
+      if (cameraDisplayPanel != null) {
+        cameraDisplayHolder.remove(cameraDisplayPanel);
+      }
     }
   }
   
@@ -45,7 +80,7 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
   private void initComponents() {
 
     cameraControlPanel = new javax.swing.JPanel();
-    videoFrameHolder = new javax.swing.JPanel();
+    cameraDisplayHolder = new javax.swing.JPanel();
     verticalControlsPanel = new javax.swing.JPanel();
     upButton = new javax.swing.JButton();
     downButton = new javax.swing.JButton();
@@ -61,42 +96,73 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
     boundsPanel4 = new javax.swing.JPanel();
     leftBoundButton4 = new javax.swing.JButton();
     rightBoundButton4 = new javax.swing.JButton();
-    leftBoundText4 = new javax.swing.JTextField();
-    rightBoundText4 = new javax.swing.JTextField();
+    leftBoundText = new javax.swing.JTextField();
+    rightBoundText = new javax.swing.JTextField();
     upperBoundButton4 = new javax.swing.JButton();
-    upperBoundText4 = new javax.swing.JTextField();
+    upperBoundText = new javax.swing.JTextField();
     bottomBoundButton4 = new javax.swing.JButton();
-    bottomBoundText4 = new javax.swing.JTextField();
+    bottomBoundText = new javax.swing.JTextField();
     dialogControlsPanel = new javax.swing.JPanel();
     saveButton = new javax.swing.JButton();
-    cancelButton = new javax.swing.JButton();
 
     cameraControlPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Production Camera", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
-    videoFrameHolder.setBackground(new java.awt.Color(1, 1, 1));
+    cameraDisplayHolder.setBackground(new java.awt.Color(1, 1, 1));
 
-    javax.swing.GroupLayout videoFrameHolderLayout = new javax.swing.GroupLayout(videoFrameHolder);
-    videoFrameHolder.setLayout(videoFrameHolderLayout);
-    videoFrameHolderLayout.setHorizontalGroup(
-      videoFrameHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+    javax.swing.GroupLayout cameraDisplayHolderLayout = new javax.swing.GroupLayout(cameraDisplayHolder);
+    cameraDisplayHolder.setLayout(cameraDisplayHolderLayout);
+    cameraDisplayHolderLayout.setHorizontalGroup(
+      cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGap(0, 0, Short.MAX_VALUE)
     );
-    videoFrameHolderLayout.setVerticalGroup(
-      videoFrameHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+    cameraDisplayHolderLayout.setVerticalGroup(
+      cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGap(0, 0, Short.MAX_VALUE)
     );
 
     upButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-090.png"))); // NOI18N
     upButton.setToolTipText("turn camera up");
+    upButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        upButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        upButtonMouseReleased(evt);
+      }
+    });
 
     downButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-270.png"))); // NOI18N
     downButton.setToolTipText("turn camera down");
+    downButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        downButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        downButtonMouseReleased(evt);
+      }
+    });
 
     fastDownButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-skip-270.png"))); // NOI18N
     fastDownButton.setToolTipText("turn camera down fast");
+    fastDownButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        fastDownButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        fastDownButtonMouseReleased(evt);
+      }
+    });
 
     fastUpButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-skip-090.png"))); // NOI18N
     fastUpButton.setToolTipText("turn camera up fast");
+    fastUpButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        fastUpButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        fastUpButtonMouseReleased(evt);
+      }
+    });
 
     javax.swing.GroupLayout verticalControlsPanelLayout = new javax.swing.GroupLayout(verticalControlsPanel);
     verticalControlsPanel.setLayout(verticalControlsPanelLayout);
@@ -120,20 +186,52 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
         .addComponent(downButton)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(fastDownButton)
-        .addContainerGap(96, Short.MAX_VALUE))
+        .addContainerGap(108, Short.MAX_VALUE))
     );
 
     fastLeftButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-skip-180.png"))); // NOI18N
     fastLeftButton.setToolTipText("turn camera left fast");
+    fastLeftButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        fastLeftButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        fastLeftButtonMouseReleased(evt);
+      }
+    });
 
     leftButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-180.png"))); // NOI18N
     leftButton.setToolTipText("turn camera left");
+    leftButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        leftButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        leftButtonMouseReleased(evt);
+      }
+    });
 
     rightButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow.png"))); // NOI18N
     rightButton.setToolTipText("turn camera right");
+    rightButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        rightButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        rightButtonMouseReleased(evt);
+      }
+    });
 
     fastRightButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-skip.png"))); // NOI18N
     fastRightButton.setToolTipText("turn camera right fast");
+    fastRightButton.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mousePressed(java.awt.event.MouseEvent evt) {
+        fastRightButtonMousePressed(evt);
+      }
+      public void mouseReleased(java.awt.event.MouseEvent evt) {
+        fastRightButtonMouseReleased(evt);
+      }
+    });
 
     javax.swing.GroupLayout horizontalControlsPanelLayout = new javax.swing.GroupLayout(horizontalControlsPanel);
     horizontalControlsPanel.setLayout(horizontalControlsPanelLayout);
@@ -162,6 +260,11 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
 
     homeButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-in.png"))); // NOI18N
     homeButton.setToolTipText("turn camera to home position");
+    homeButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        homeButtonActionPerformed(evt);
+      }
+    });
 
     javax.swing.GroupLayout homeButtonPanelLayout = new javax.swing.GroupLayout(homeButtonPanel);
     homeButtonPanel.setLayout(homeButtonPanelLayout);
@@ -185,7 +288,7 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, cameraControlPanelLayout.createSequentialGroup()
         .addGroup(cameraControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(horizontalControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(videoFrameHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(cameraControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(verticalControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -196,7 +299,7 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
       .addGroup(cameraControlPanelLayout.createSequentialGroup()
         .addGap(2, 2, 2)
         .addGroup(cameraControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(videoFrameHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
           .addComponent(verticalControlsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(cameraControlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -208,18 +311,33 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
 
     leftBoundButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-stop-180.png"))); // NOI18N
     leftBoundButton4.setToolTipText("set left bound");
+    leftBoundButton4.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        leftBoundButton4ActionPerformed(evt);
+      }
+    });
 
     rightBoundButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-stop.png"))); // NOI18N
     rightBoundButton4.setToolTipText("set right bound");
-
-    leftBoundText4.addActionListener(new java.awt.event.ActionListener() {
+    rightBoundButton4.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        leftBoundText4ActionPerformed(evt);
+        rightBoundButton4ActionPerformed(evt);
+      }
+    });
+
+    leftBoundText.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        leftBoundTextActionPerformed(evt);
       }
     });
 
     upperBoundButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-stop-090.png"))); // NOI18N
     upperBoundButton4.setToolTipText("set top bound");
+    upperBoundButton4.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        upperBoundButton4ActionPerformed(evt);
+      }
+    });
 
     bottomBoundButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/arrow-stop-270.png"))); // NOI18N
     bottomBoundButton4.setToolTipText("set bottom bound");
@@ -239,19 +357,19 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
           .addGroup(boundsPanel4Layout.createSequentialGroup()
             .addComponent(rightBoundButton4)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(rightBoundText4, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
+            .addComponent(rightBoundText, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
           .addGroup(boundsPanel4Layout.createSequentialGroup()
             .addComponent(leftBoundButton4)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(leftBoundText4)))
+            .addComponent(leftBoundText)))
         .addGap(18, 18, 18)
         .addGroup(boundsPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
           .addComponent(upperBoundButton4)
           .addComponent(bottomBoundButton4))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(boundsPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(upperBoundText4, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-          .addComponent(bottomBoundText4))
+          .addComponent(upperBoundText, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+          .addComponent(bottomBoundText))
         .addContainerGap())
     );
     boundsPanel4Layout.setVerticalGroup(
@@ -260,31 +378,32 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
         .addContainerGap()
         .addGroup(boundsPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(leftBoundButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(leftBoundText4)
+          .addComponent(leftBoundText)
           .addComponent(upperBoundButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(upperBoundText4))
+          .addComponent(upperBoundText))
         .addGap(13, 13, 13)
         .addGroup(boundsPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(rightBoundText4, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(rightBoundText, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
           .addGroup(boundsPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
             .addComponent(bottomBoundButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(bottomBoundText4))
+            .addComponent(bottomBoundText))
           .addComponent(rightBoundButton4))
         .addContainerGap(16, Short.MAX_VALUE))
     );
 
     saveButton.setText("Save");
-
-    cancelButton.setText("Cancel");
+    saveButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        saveButtonActionPerformed(evt);
+      }
+    });
 
     javax.swing.GroupLayout dialogControlsPanelLayout = new javax.swing.GroupLayout(dialogControlsPanel);
     dialogControlsPanel.setLayout(dialogControlsPanelLayout);
     dialogControlsPanelLayout.setHorizontalGroup(
       dialogControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dialogControlsPanelLayout.createSequentialGroup()
-        .addContainerGap(492, Short.MAX_VALUE)
-        .addComponent(cancelButton)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(saveButton)
         .addContainerGap())
     );
@@ -292,9 +411,7 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
       dialogControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, dialogControlsPanelLayout.createSequentialGroup()
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGroup(dialogControlsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(saveButton)
-          .addComponent(cancelButton))
+        .addComponent(saveButton)
         .addContainerGap())
     );
 
@@ -318,32 +435,108 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
     );
   }// </editor-fold>//GEN-END:initComponents
 
-  private void leftBoundText4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leftBoundText4ActionPerformed
+  private void leftBoundTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leftBoundTextActionPerformed
     // TODO add your handling code here:
-  }//GEN-LAST:event_leftBoundText4ActionPerformed
+  }//GEN-LAST:event_leftBoundTextActionPerformed
 
   private void bottomBoundButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bottomBoundButton4ActionPerformed
-    // TODO add your handling code here:
+    bottomBoundText.setText(Integer.toString(parent.camera.getPosition().getY()));
   }//GEN-LAST:event_bottomBoundButton4ActionPerformed
 
+  private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+    parent.saveParameters(
+            Integer.parseInt(leftBoundText.getText()),
+            Integer.parseInt(rightBoundText.getText()),
+            Integer.parseInt(upperBoundText.getText()),
+            Integer.parseInt(bottomBoundText.getText()));
+  }//GEN-LAST:event_saveButtonActionPerformed
+
+  private void homeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_homeButtonActionPerformed
+    parent.camera.moveHome();
+  }//GEN-LAST:event_homeButtonActionPerformed
+
+  private void fastLeftButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastLeftButtonMousePressed
+    parent.camera.moveLeft(parent.pan_fast);
+  }//GEN-LAST:event_fastLeftButtonMousePressed
+
+  private void fastLeftButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastLeftButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_fastLeftButtonMouseReleased
+
+  private void leftButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_leftButtonMousePressed
+    parent.camera.moveLeft(parent.pan_slow);
+  }//GEN-LAST:event_leftButtonMousePressed
+
+  private void leftButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_leftButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_leftButtonMouseReleased
+
+  private void rightButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_rightButtonMousePressed
+    parent.camera.moveRight(parent.pan_slow);
+  }//GEN-LAST:event_rightButtonMousePressed
+
+  private void rightButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_rightButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_rightButtonMouseReleased
+
+  private void fastRightButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastRightButtonMousePressed
+    parent.camera.moveRight(parent.pan_fast);
+  }//GEN-LAST:event_fastRightButtonMousePressed
+
+  private void fastRightButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastRightButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_fastRightButtonMouseReleased
+
+  private void fastUpButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastUpButtonMousePressed
+    parent.camera.moveUp(parent.tilt_fast);
+  }//GEN-LAST:event_fastUpButtonMousePressed
+
+  private void fastUpButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastUpButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_fastUpButtonMouseReleased
+
+  private void upButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_upButtonMousePressed
+    parent.camera.moveUp(parent.tilt_slow);
+  }//GEN-LAST:event_upButtonMousePressed
+
+  private void upButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_upButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_upButtonMouseReleased
+
+  private void downButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_downButtonMousePressed
+    parent.camera.moveDown(parent.tilt_slow);
+  }//GEN-LAST:event_downButtonMousePressed
+
+  private void downButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_downButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_downButtonMouseReleased
+
+  private void fastDownButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastDownButtonMousePressed
+    parent.camera.moveDown(parent.tilt_fast);
+  }//GEN-LAST:event_fastDownButtonMousePressed
+
+  private void fastDownButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_fastDownButtonMouseReleased
+    parent.camera.stopMove();
+  }//GEN-LAST:event_fastDownButtonMouseReleased
+
+  private void leftBoundButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_leftBoundButton4ActionPerformed
+    leftBoundText.setText(Integer.toString(parent.camera.getPosition().getX()));
+  }//GEN-LAST:event_leftBoundButton4ActionPerformed
+
+  private void rightBoundButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rightBoundButton4ActionPerformed
+    rightBoundText.setText(Integer.toString(parent.camera.getPosition().getX()));
+  }//GEN-LAST:event_rightBoundButton4ActionPerformed
+
+  private void upperBoundButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upperBoundButton4ActionPerformed
+    upperBoundText.setText(Integer.toString(parent.camera.getPosition().getY()));
+  }//GEN-LAST:event_upperBoundButton4ActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton bottomBoundButton;
-  private javax.swing.JButton bottomBoundButton1;
-  private javax.swing.JButton bottomBoundButton2;
-  private javax.swing.JButton bottomBoundButton3;
   private javax.swing.JButton bottomBoundButton4;
   private javax.swing.JTextField bottomBoundText;
-  private javax.swing.JTextField bottomBoundText1;
-  private javax.swing.JTextField bottomBoundText2;
-  private javax.swing.JTextField bottomBoundText3;
-  private javax.swing.JTextField bottomBoundText4;
-  private javax.swing.JPanel boundsPanel;
-  private javax.swing.JPanel boundsPanel1;
-  private javax.swing.JPanel boundsPanel2;
-  private javax.swing.JPanel boundsPanel3;
   private javax.swing.JPanel boundsPanel4;
   private javax.swing.JPanel cameraControlPanel;
-  private javax.swing.JButton cancelButton;
+  private javax.swing.JPanel cameraDisplayHolder;
   private javax.swing.JPanel dialogControlsPanel;
   private javax.swing.JButton downButton;
   private javax.swing.JButton fastDownButton;
@@ -353,42 +546,26 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
   private javax.swing.JButton homeButton;
   private javax.swing.JPanel homeButtonPanel;
   private javax.swing.JPanel horizontalControlsPanel;
-  private javax.swing.JButton leftBoundButton;
-  private javax.swing.JButton leftBoundButton1;
-  private javax.swing.JButton leftBoundButton2;
-  private javax.swing.JButton leftBoundButton3;
   private javax.swing.JButton leftBoundButton4;
   private javax.swing.JTextField leftBoundText;
-  private javax.swing.JTextField leftBoundText1;
-  private javax.swing.JTextField leftBoundText2;
-  private javax.swing.JTextField leftBoundText3;
-  private javax.swing.JTextField leftBoundText4;
   private javax.swing.JButton leftButton;
-  private javax.swing.JButton rightBoundButton;
-  private javax.swing.JButton rightBoundButton1;
-  private javax.swing.JButton rightBoundButton2;
-  private javax.swing.JButton rightBoundButton3;
   private javax.swing.JButton rightBoundButton4;
   private javax.swing.JTextField rightBoundText;
-  private javax.swing.JTextField rightBoundText1;
-  private javax.swing.JTextField rightBoundText2;
-  private javax.swing.JTextField rightBoundText3;
-  private javax.swing.JTextField rightBoundText4;
   private javax.swing.JButton rightButton;
   private javax.swing.JButton saveButton;
   private javax.swing.JButton upButton;
-  private javax.swing.JButton upperBoundButton;
-  private javax.swing.JButton upperBoundButton1;
-  private javax.swing.JButton upperBoundButton2;
-  private javax.swing.JButton upperBoundButton3;
   private javax.swing.JButton upperBoundButton4;
   private javax.swing.JTextField upperBoundText;
-  private javax.swing.JTextField upperBoundText1;
-  private javax.swing.JTextField upperBoundText2;
-  private javax.swing.JTextField upperBoundText3;
-  private javax.swing.JTextField upperBoundText4;
   private javax.swing.JPanel verticalControlsPanel;
-  private javax.swing.JPanel videoFrameHolder;
   // End of variables declaration//GEN-END:variables
 
+  @Override
+  public void render(Graphics g) {
+    Dimension size = cameraDisplay.getSize();
+    int x = size.width / 2;
+    int y = size.height / 2;
+    g.setColor(Color.white);
+    g.drawLine(x-5, y, x+5, y);
+    g.drawLine(x, y-5, x, y+5);
+  }
 }

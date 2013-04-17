@@ -84,4 +84,13 @@ public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
       throw new FrameSourceException("Error while creating FrameGrabber: " + e.getMessage());
     }
   }
+
+  @Override
+  public void destroyFrameGrabber(FrameGrabber fg) throws FrameSourceException {
+   try {
+      ((VideoFilePipeline)fg).stop();
+    } catch (Exception e) {
+      throw new FrameSourceException("Failed to shut down VideoFilePipeline. ", e);
+    }
+  }
 }

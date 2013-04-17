@@ -50,7 +50,7 @@
               <Group type="102" alignment="1" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="horizontalControlsPanel" alignment="0" max="32767" attributes="0"/>
-                      <Component id="videoFrameHolder" alignment="0" max="32767" attributes="0"/>
+                      <Component id="cameraDisplayHolder" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -65,7 +65,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="2" pref="2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="videoFrameHolder" alignment="0" max="32767" attributes="0"/>
+                      <Component id="cameraDisplayHolder" alignment="0" max="32767" attributes="0"/>
                       <Component id="verticalControlsPanel" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -78,7 +78,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JPanel" name="videoFrameHolder">
+        <Container class="javax.swing.JPanel" name="cameraDisplayHolder">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
               <Color blue="1" green="1" red="1" type="rgb"/>
@@ -124,7 +124,7 @@
                       <Component id="downButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="fastDownButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="96" max="32767" attributes="0"/>
+                      <EmptySpace pref="108" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -137,6 +137,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera up"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="upButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="upButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="downButton">
               <Properties>
@@ -145,6 +149,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera down"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="downButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="downButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="fastDownButton">
               <Properties>
@@ -153,6 +161,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera down fast"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastDownButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastDownButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="fastUpButton">
               <Properties>
@@ -161,6 +173,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera up fast"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastUpButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastUpButtonMouseReleased"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -203,6 +219,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera left fast"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastLeftButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastLeftButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="leftButton">
               <Properties>
@@ -211,6 +231,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera left"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="leftButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="leftButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="rightButton">
               <Properties>
@@ -219,6 +243,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera right"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="rightButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="rightButtonMouseReleased"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="fastRightButton">
               <Properties>
@@ -227,6 +255,10 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera right fast"/>
               </Properties>
+              <Events>
+                <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastRightButtonMousePressed"/>
+                <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="fastRightButtonMouseReleased"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -258,6 +290,9 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="turn camera to home position"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="homeButtonActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -281,12 +316,12 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="rightBoundButton4" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="rightBoundText4" pref="239" max="32767" attributes="0"/>
+                          <Component id="rightBoundText" pref="239" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="leftBoundButton4" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="leftBoundText4" max="32767" attributes="0"/>
+                          <Component id="leftBoundText" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
@@ -296,8 +331,8 @@
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="upperBoundText4" alignment="0" pref="239" max="32767" attributes="0"/>
-                      <Component id="bottomBoundText4" alignment="0" max="32767" attributes="0"/>
+                      <Component id="upperBoundText" alignment="0" pref="239" max="32767" attributes="0"/>
+                      <Component id="bottomBoundText" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
@@ -309,16 +344,16 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="leftBoundButton4" alignment="0" max="32767" attributes="0"/>
-                      <Component id="leftBoundText4" alignment="0" max="32767" attributes="0"/>
+                      <Component id="leftBoundText" alignment="0" max="32767" attributes="0"/>
                       <Component id="upperBoundButton4" alignment="1" max="32767" attributes="0"/>
-                      <Component id="upperBoundText4" alignment="0" max="32767" attributes="0"/>
+                      <Component id="upperBoundText" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="rightBoundText4" min="-2" pref="28" max="-2" attributes="0"/>
+                      <Component id="rightBoundText" min="-2" pref="28" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="bottomBoundButton4" max="32767" attributes="0"/>
-                          <Component id="bottomBoundText4" max="32767" attributes="0"/>
+                          <Component id="bottomBoundText" max="32767" attributes="0"/>
                       </Group>
                       <Component id="rightBoundButton4" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -335,6 +370,9 @@
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="set left bound"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="leftBoundButton4ActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="rightBoundButton4">
           <Properties>
@@ -343,13 +381,16 @@
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="set right bound"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="leftBoundText4">
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="leftBoundText4ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rightBoundButton4ActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JTextField" name="rightBoundText4">
+        <Component class="javax.swing.JTextField" name="leftBoundText">
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="leftBoundTextActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JTextField" name="rightBoundText">
         </Component>
         <Component class="javax.swing.JButton" name="upperBoundButton4">
           <Properties>
@@ -358,8 +399,11 @@
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="set top bound"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="upperBoundButton4ActionPerformed"/>
+          </Events>
         </Component>
-        <Component class="javax.swing.JTextField" name="upperBoundText4">
+        <Component class="javax.swing.JTextField" name="upperBoundText">
         </Component>
         <Component class="javax.swing.JButton" name="bottomBoundButton4">
           <Properties>
@@ -372,7 +416,7 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bottomBoundButton4ActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JTextField" name="bottomBoundText4">
+        <Component class="javax.swing.JTextField" name="bottomBoundText">
         </Component>
       </SubComponents>
     </Container>
@@ -382,9 +426,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="492" max="32767" attributes="0"/>
-                  <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Component id="saveButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -394,10 +436,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="saveButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="cancelButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="saveButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -408,11 +447,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Save"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="cancelButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Cancel"/>
-          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveButtonActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

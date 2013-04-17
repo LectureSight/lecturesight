@@ -50,6 +50,7 @@ public class RGB24FrameUploader implements FrameUploader {
   private final OCLSignal sig_done;
   private final OCLSignal sig_newframe;
   private BufferedImage maskImage = null;
+  private ComputationRun uploadRun;
 
   public RGB24FrameUploader(OpenCLService clService, FrameGrabber grabber) {
     this.ocl = clService;
@@ -60,7 +61,7 @@ public class RGB24FrameUploader implements FrameUploader {
     sig_done = ocl.getSignal(UID + "_DONE");
     sig_newframe = ocl.getSignal(FrameUploader.SIG_NEWFRAME);
 
-    // set up gpu buffgers
+    // set up gpu buffers
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
     gpuRawBuffer = ocl.context().createByteBuffer(Usage.InputOutput, bufferSize);
     gpuBuffer = ocl.context().createImage2D(Usage.InputOutput,
@@ -81,7 +82,7 @@ public class RGB24FrameUploader implements FrameUploader {
     // System.out.println("Computed buffer size: " + bufferSize);
 
     // set up conversion run
-    ocl.registerLaunch(sig_start, new ComputationRun() {
+    uploadRun = new ComputationRun() {
 
       @Override
       public void launch(CLQueue queue) {
@@ -103,8 +104,14 @@ public class RGB24FrameUploader implements FrameUploader {
         ocl.castSignal(sig_done);
         ocl.castSignal(sig_newframe);
       }
-
-    });
+    };     
+    ocl.registerLaunch(sig_start, uploadRun);
+  }
+  
+  @Override
+  public void destroy() {
+    // deregister this uploaders computationRun
+    ocl.unregisterLaunch(sig_start, uploadRun);
   }
 
   @Override

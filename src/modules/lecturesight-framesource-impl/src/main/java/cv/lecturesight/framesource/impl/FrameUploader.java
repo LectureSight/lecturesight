@@ -37,4 +37,6 @@ public interface FrameUploader {
   void upload(Buffer frame);
 
   void setMask(BufferedImage mask);
+  
+  void destroy();
 }

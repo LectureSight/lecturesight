@@ -27,13 +27,20 @@ import java.nio.Buffer;
 
 class FrameSourceImpl implements FrameSource {
 
-  private FrameGrabber frameGrabber;
-  private FrameUploader uploader;
-  private long frameNumber = 0L;
+  String type;
+  FrameGrabber frameGrabber;
+  FrameUploader uploader;
+  long frameNumber = 0L;
 
-  public FrameSourceImpl(FrameGrabber frameGrabber, FrameUploader loader) {
+  public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader) {
+    this.type = type;
     this.frameGrabber = frameGrabber;
     this.uploader = loader;
+  }
+  
+  @Override
+  public String getType() {
+    return type;
   }
 
   @Override

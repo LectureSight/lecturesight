@@ -99,4 +99,13 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
       throw new FrameSourceException("Could not get device information: " + ex.getMessage());
     }
   }
+
+  @Override
+  public void destroyFrameGrabber(FrameGrabber fg) throws FrameSourceException {
+    try {
+      ((V4LFrameGrabber)fg).shutdown();
+    } catch (Exception e) {
+      throw new FrameSourceException("Failed to shut down V4LFrameSource. ", e);
+    }
+  }
 }

@@ -129,7 +129,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
             }
           }
         }
-        newSource = new FrameSourceImpl(grabber, uploader);
+        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
       }
@@ -138,6 +138,21 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     }
 
     return newSource;
+  }
+  
+  @Override
+  public void destroyFrameSource(FrameSource frameSource) throws FrameSourceException {
+    FrameSourceImpl fsrc = (FrameSourceImpl)frameSource;
+    if (sourceTypes.containsKey(fsrc.getType())) {
+      FrameGrabberFactory factory = sourceTypes.get(fsrc.getType());
+      factory.destroyFrameGrabber(fsrc.frameGrabber);
+      fsrc.uploader.destroy();
+      
+      // FIXME also destroy host- and GPU-buffer !!!
+    
+    } else {
+      throw new FrameSourceException("No factory registered for type " + fsrc.getType());
+    }
   }
 
   private FrameUploader createFrameUploader(FrameGrabber grabber) {
