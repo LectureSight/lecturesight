@@ -294,4 +294,71 @@ __kernel void erode_fg_bg_rl
     }
 }
 
+__kernel void erode_fg_bg_tb
+(
+  __read_only image2d_t input,
+  __read_only image2d_t fg_map_in,
+  __write_only image2d_t fg_map_out,
+  int thresh, int height
+)
+{
+    int x = get_global_id(1);
+    //uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    uint4 last_val = (uint4)(0, 0, 0, 255);
+
+    for (int y=height-1; y < height; y++)
+    {
+        int2 pos = (int2)(x, y);
+        uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
+        if (pxl_val.s0 > 0)
+        {
+            uint4 val = read_imageui(input, sampler, pos);
+            uint4 diff4 = abs_diff(val, last_val);
+            int diff = diff4.s0 + diff4.s1 + diff4.s2;
+            if (diff < thresh) {
+                pxl_val = BLACK;
+            }           
+        }
+        else
+        {
+            last_val = read_imageui(input, sampler, pos);
+        }
+        barrier( CLK_GLOBAL_MEM_FENCE );    
+        write_imageui(fg_map_out, pos, pxl_val);
+    }
+}
+
+__kernel void erode_fg_bg_bt
+(
+  __read_only image2d_t input,
+  __read_only image2d_t fg_map_in,
+  __write_only image2d_t fg_map_out,
+  int thresh, int height
+)
+{
+    int x = get_global_id(0);
+    //uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
+    uint4 last_val = (uint4)(0, 0, 0, 255);
+
+    for (int y=height-1; y >= 0; y--)
+    {
+        int2 pos = (int2)(x, y);
+        uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
+        if (pxl_val.s0 > 0)
+        {
+            uint4 val = read_imageui(input, sampler, pos);
+            uint4 diff4 = abs_diff(val, last_val);
+            int diff = diff4.s0 + diff4.s1 + diff4.s2;
+            if (diff < thresh) {
+                pxl_val = BLACK;
+            }           
+        }
+        else
+        {
+            last_val = read_imageui(input, sampler, pos);
+        }
+        barrier( CLK_GLOBAL_MEM_FENCE );    
+        write_imageui(fg_map_out, pos, pxl_val);
+    }
+}
 

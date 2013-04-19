@@ -232,21 +232,40 @@ public class ForegroundServiceImpl implements ForegroundService {
     CLKernel updateForegroundK = ocl.programs().getKernel("fg", "update_foreground");       // kernel that performs for foreground update
     CLKernel erode_FGBG_lr = ocl.programs().getKernel("fg", "erode_fg_bg_lr");
     CLKernel erode_FGBG_rl = ocl.programs().getKernel("fg", "erode_fg_bg_rl");
-    int[] erodeDim = new int[] {workDim[1]};
+    CLKernel erode_FGBG_tb = ocl.programs().getKernel("fg", "erode_fg_bg_tb");
+    CLKernel erode_FGBG_bt = ocl.programs().getKernel("fg", "erode_fg_bg_bt");
+    int[] erodeDimVertical = new int[] {workDim[0]};
+    int[] erodeDimHorizontal = new int[] {workDim[1]};
 
     @Override
     public void launch(CLQueue queue) {
       fgBuffer.swap();                                          // swap working buffer pointers
+      
       computeAddSubMaskK.setArgs(change, bgdiff, updateMap);    // compute update map
       computeAddSubMaskK.enqueueNDRange(queue, workDim);
+      
       updateForegroundK.setArgs(updateMap, fgBuffer.last());    // perform foreground mask update
       updateForegroundK.enqueueNDRange(queue, workDim);
+      
+      // horizontal phantom erosion left -> right
       erode_FGBG_lr.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
-      erode_FGBG_lr.enqueueNDRange(queue, erodeDim);
+      erode_FGBG_lr.enqueueNDRange(queue, erodeDimHorizontal);
+      
+      // horizontal phantom erosion right -> left
       erode_FGBG_rl.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
-      erode_FGBG_rl.enqueueNDRange(queue, erodeDim);
+      erode_FGBG_rl.enqueueNDRange(queue, erodeDimHorizontal);
+      
+      // horizontal phantom erosion top -> bottom
+      erode_FGBG_tb.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
+              config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
+      erode_FGBG_tb.enqueueNDRange(queue, erodeDimVertical);
+      
+      // horizontal phantom erosion bottom -> top
+      erode_FGBG_bt.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
+              config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
+      erode_FGBG_bt.enqueueNDRange(queue, erodeDimVertical);
     }
 
     @Override
