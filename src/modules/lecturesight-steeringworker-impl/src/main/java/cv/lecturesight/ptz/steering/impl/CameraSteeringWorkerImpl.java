@@ -38,14 +38,6 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
-  final static String PROPKEY_AUTOSTART = "autostart";
-  final static String PROPKEY_INTERVAL = "interval";
-  final static String PROPKEY_ALPHAX = "move.alpha.x";
-  final static String PROPKEY_ALPHAY = "move.alpha.y";
-  final static String PROPKEY_STOPX = "move.stop.x";
-  final static String PROPKEY_STOPY = "move.stop.y";
-  final static String PROPKEY_DAMP_PAN = "move.damp.pan";
-  final static String PROPKEY_DAMP_TILT = "move.damp.tilt";
   private Log log = new Log("Camera Steering Worker");
   @Reference
   Configuration config;
@@ -60,11 +52,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   boolean steering = false;
 
   protected void activate(ComponentContext cc) throws Exception {
-    model = new CameraPositionModel(camera);
+    model = new CameraPositionModel(camera, config);
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = (int)(camera.getProfile().getTiltMaxSpeed());
     controlPanel = new CameraControlPanel(model);
-    if (config.getBoolean(PROPKEY_AUTOSTART)) {
+    if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
       start();
       setSteering(true);
     }
@@ -112,7 +104,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new SteeringWorker();
-      executor.scheduleAtFixedRate(worker, 0, config.getInt(PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
+      executor.scheduleAtFixedRate(worker, 0, config.getInt(Constants.PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
       log.info("Started");
     } else {
       log.warn("Already running!");
@@ -155,6 +147,10 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   public void setZoom(int factor) {
     camera.zoom(factor);
   }
+  
+  public int getZoom() {
+    return camera.getZoom();
+  }
 
   private class SteeringWorker implements Runnable {
 
@@ -165,10 +161,10 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
     @Override
     public void run() {
-      int stop_x = config.getInt(PROPKEY_STOPX);
-      int alpha_x = config.getInt(PROPKEY_ALPHAX);
-      int stop_y = config.getInt(PROPKEY_STOPY);
-      int alpha_y = config.getInt(PROPKEY_ALPHAY);
+      int stop_x = config.getInt(Constants.PROPKEY_STOPX);
+      int alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
+      int stop_y = config.getInt(Constants.PROPKEY_STOPY);
+      int alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
       
       // get current position of camera
       try {

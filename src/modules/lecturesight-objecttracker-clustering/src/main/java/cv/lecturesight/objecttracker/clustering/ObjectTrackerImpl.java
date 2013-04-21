@@ -70,6 +70,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
   private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
   private int template_width, width_max, template_height, height_max, weight_min;
   private double dist_max;
+  //private CoordinateNormalization normalizer = 
 
   protected void activate(ComponentContext cc) throws Exception {
     updateConfiguration();
@@ -221,8 +222,6 @@ public class ObjectTrackerImpl implements ObjectTracker {
               } 
             }
           }
-          
-          
           
         } else {
           updateTrackerObject(object, region, time);

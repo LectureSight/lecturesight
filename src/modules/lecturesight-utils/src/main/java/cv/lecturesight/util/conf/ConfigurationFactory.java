@@ -34,10 +34,12 @@ public class ConfigurationFactory implements ServiceFactory {
   private static Log log = new Log("ConfigurationFactory");     // Logger
   static Properties configProps;                                // systems config properties
   static Properties defaultProps;                               // systems default properties
+  ConfigurationServiceImpl configService;
 
-  public ConfigurationFactory(Properties props, Properties defaults) {
+  public ConfigurationFactory(Properties props, Properties defaults, ConfigurationServiceImpl cs) {
     configProps = props;
     defaultProps = defaults;
+    configService = cs;
   }
 
   @Override
@@ -58,6 +60,7 @@ public class ConfigurationFactory implements ServiceFactory {
           String key = keys.next();
           defaultProps.setProperty(key, bundleDefaults.getProperty(key));
         }
+        configService.notifyListeners();
 
       } catch (IOException e) {
         log.warn("Failed to load bundles default configuration: " + e.getMessage());
@@ -78,5 +81,6 @@ public class ConfigurationFactory implements ServiceFactory {
         defaultProps.remove(key);
       }
     }
+    configService.notifyListeners();
   }
 }

@@ -19,12 +19,14 @@ package cv.lecturesight.ptz.steering.impl;
 
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
+import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 
 public class CameraPositionModel {
 
   private PTZCamera camera;
+  Configuration config;
   PTZCameraProfile camProfile;
   private Position camPosition = new Position(0, 0);
   private NormalizedPosition targetPosition = new NormalizedPosition(0.0f, 0.0f);
@@ -36,13 +38,40 @@ public class CameraPositionModel {
   boolean moving = false;
   private String status = "N/A";
 
-  public CameraPositionModel(PTZCamera camera) {
+  public CameraPositionModel(PTZCamera camera, Configuration config) {
     this.camera = camera;
+    this.config = config;
     camProfile = camera.getProfile();
-    pan_min = camProfile.getPanMin();
-    pan_max = camProfile.getPanMax();
-    tilt_min = camProfile.getTiltMin();
-    tilt_max = camProfile.getTiltMax();
+    
+    // initialize limits for pan and tilt, if not configured by camera calibration
+    // the limits from the camera profile are taken
+    String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      pan_min = camProfile.getPanMin();
+    } else {
+      pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
+    }
+    
+    val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      pan_max = camProfile.getPanMax();
+    } else {
+      pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
+    }
+    
+    val = config.get(Constants.PROPKEY_LIMIT_TOP);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      tilt_max = camProfile.getTiltMax();
+    } else {
+      tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
+    }
+    
+    val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      tilt_min = camProfile.getTiltMin();
+    } else {
+      tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
+    }
   }
 
   public NormalizedPosition getTargetPosition() {

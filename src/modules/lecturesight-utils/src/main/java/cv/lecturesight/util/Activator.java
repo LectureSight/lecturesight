@@ -77,15 +77,15 @@ public final class Activator implements BundleActivator {
     } catch (IOException e) {
       log.warn("Failed to load config from " + configFile.getAbsolutePath());
     }
-
-    // register config factory
-    ConfigurationFactory confFactory = new ConfigurationFactory(systemProperties, defaultProperties);
-    confFactoryReg = context.registerService(Configuration.class.getName(), confFactory, null);
     
     // register config service
     ConfigurationService confService = new ConfigurationServiceImpl(systemProperties, defaultProperties);
     context.registerService(ConfigurationService.class.getName(), confService, null);
 
+    // register config factory
+    ConfigurationFactory confFactory = new ConfigurationFactory(systemProperties, defaultProperties, (ConfigurationServiceImpl)confService);
+    confFactoryReg = context.registerService(Configuration.class.getName(), confFactory, null);
+    
     // register config commands
     ConfigCommands commandImpl = new ConfigCommands((ConfigurationServiceImpl)confService);
     Dictionary<String, Object> commands = new Hashtable<String, Object>();

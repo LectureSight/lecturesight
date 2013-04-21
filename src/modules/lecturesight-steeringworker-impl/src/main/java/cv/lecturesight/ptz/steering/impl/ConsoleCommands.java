@@ -31,36 +31,35 @@ import org.apache.felix.scr.annotations.Service;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "cs"),
-  @Property(name = "osgi.command.function", value = {"on", "off", "start", "stop", "restart", "move", "stopmove", "home", "ui", "update"})
+  @Property(name = "osgi.command.function", value = {"on", "off", "start", "stop", "restart", "move", "stopmove", "home", "ui", "update", "zoom"})
 })
 public class ConsoleCommands implements DummyInterface {
-  
+
   Log log = new Log("Camera Steering Commands");
-  
   @Reference
   CameraSteeringWorker steerer;
-  
+
   public void on(String[] args) {
     steerer.setSteering(true);
   }
-  
+
   public void off(String[] args) {
     steerer.setSteering(false);
   }
-  
+
   public void start(String[] args) {
     steerer.start();
   }
-  
+
   public void stop(String[] args) {
     steerer.stop();
   }
-  
+
   public void restart(String[] args) {
     steerer.stop();
     steerer.start();
   }
-  
+
   public void move(String[] args) {
     try {
       steerer.setTargetPosition(getPosition(args));
@@ -69,7 +68,7 @@ public class ConsoleCommands implements DummyInterface {
       System.out.println("Usage: cs:move (float)x (float)y");
     }
   }
-  
+
   private NormalizedPosition getPosition(String[] args) throws IllegalArgumentException {
     if (args.length < 2) {
       throw new IllegalArgumentException("Not enough arguments!");
@@ -82,12 +81,25 @@ public class ConsoleCommands implements DummyInterface {
       throw new IllegalArgumentException("Failed to parse arguments: " + e.getMessage());
     }
   }
-  
+
   public void stopmove(String[] args) {
     steerer.stopMoving();
   }
-  
+
   public void home(String[] args) {
     steerer.setTargetPosition(new NormalizedPosition(0.0f, 0.0f));
+  }
+
+  public void zoom(String[] args) {
+    if (args.length == 0) {
+      System.out.println("Zoom: " + steerer.getZoom());
+    } else {
+      try {
+        int zoom = Integer.parseInt(args[0]);
+        steerer.setZoom(zoom);
+      } catch (NumberFormatException e) {
+        System.out.println("Could not parse zoom factor.");
+      }
+    }
   }
 }

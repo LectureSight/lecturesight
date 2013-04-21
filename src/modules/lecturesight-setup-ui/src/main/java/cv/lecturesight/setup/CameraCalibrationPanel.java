@@ -21,6 +21,7 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
    * Creates new form CameraCalibrationPanel
    */
   public CameraCalibrationPanel(CameraCalibrationUI parent) {
+    this.parent = parent;
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

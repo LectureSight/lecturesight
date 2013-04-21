@@ -23,8 +23,10 @@ import java.util.Properties;
 
 public interface ConfigurationService {
 
-  public Properties getSystemConfiguration();
-  public Properties getSystemDefaults();
-  public void loadSystemConfiguration(InputStream is);
-  public void saveSystemConfiguration(OutputStream os);
+  Properties getSystemConfiguration();
+  Properties getSystemDefaults();
+  void loadSystemConfiguration(InputStream is);
+  void saveSystemConfiguration(OutputStream os);
+  void addConfigurationListener(ConfigurationListener l);
+  void removeConfigurationListener(ConfigurationListener l);
 }

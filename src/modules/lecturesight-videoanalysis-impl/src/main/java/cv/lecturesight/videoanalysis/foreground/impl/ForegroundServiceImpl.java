@@ -257,12 +257,12 @@ public class ForegroundServiceImpl implements ForegroundService {
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
       erode_FGBG_rl.enqueueNDRange(queue, erodeDimHorizontal);
       
-      // horizontal phantom erosion top -> bottom
+      // vertical phantom erosion top -> bottom
       erode_FGBG_tb.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
       erode_FGBG_tb.enqueueNDRange(queue, erodeDimVertical);
       
-      // horizontal phantom erosion bottom -> top
+      // vertical phantom erosion bottom -> top
       erode_FGBG_bt.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
       erode_FGBG_bt.enqueueNDRange(queue, erodeDimVertical);
