@@ -18,29 +18,18 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
-import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.gui.api.UserInterface;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.JPanel;
 
 public class DisplayUI implements UserInterface {
 
   String title;
-  DisplayPanel displayPanel;
-  JPanel ui;
+  DisplayUIPanel ui;
   
   public DisplayUI(Display display, String title) {
     this.title = title;
-    displayPanel = display.getDisplayPanel();
-    ui = new JPanel();
-    ui.setLayout(new BorderLayout());
-    ui.setBackground(Color.black);
-    Dimension size = display.getSize();
-    ui.setSize(size);
-    ui.setPreferredSize(size);
-    ui.add(displayPanel, BorderLayout.CENTER);
+    ui = new DisplayUIPanel();
+    ui.setDisplay(display);
   }
   
   @Override
@@ -57,5 +46,4 @@ public class DisplayUI implements UserInterface {
   public boolean isResizeable() {
     return true;
   }
-  
 }
