@@ -48,6 +48,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   ScheduledExecutorService executor;
   ScriptEngineManager engineManager;
   
+  private String operatorScriptAbsolutePath;
   private File scriptFile = null;
   private File configFile = null;
   
@@ -56,9 +57,10 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     engineManager = new ScriptEngineManager();
     
     // look for operator script and start it if existing
-    File scriptFile = new File(Constants.SCRIPTS_DIRNAME + File.separator + config.get(Constants.PROPKEY_SCRIPTFILE));
-    if (scriptFile.exists()) {
-      this.scriptFile = scriptFile;
+    makeOperatorScriptAbsolutePath();
+    File file = new File(operatorScriptAbsolutePath);
+    if (file.exists()) {
+      this.scriptFile = file;
       start();
     }
     
@@ -83,7 +85,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
         scriptWorker.injectPackage("cv.lecturesight.cameraoperator.scripted.bridge.classes");
         Log scriptLogger = new Log(scriptFile.getName());
         scriptWorker.injectObject("System", new SystemBridge(scriptLogger));
-        scriptWorker.injectObject("Scene", new SceneBridge());
+        //scriptWorker.injectObject("Scene", new SceneBridge());
         scriptWorker.injectObject("Tracker", new ObjectTrackerBridge(tracker));
         scriptWorker.injectObject("Camera", new SteeringWorkerBridge(camera));
         if ((configFile = findConfigFile(scriptFile)) != null) {
@@ -177,7 +179,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
     
     public void injectPackage(String packageName) {
-      StringBuffer code = new StringBuffer();
+      StringBuilder code = new StringBuilder();
       code.append("importPackage(Packages.").append(packageName).append(");");
       execute(code.toString());
     }
@@ -215,11 +217,17 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
 
   @Override
   public boolean canHandle(File file) {
-    return file.getName().endsWith(".js") && file.getParent().equals(Constants.SCRIPTS_DIRNAME);  
+    makeOperatorScriptAbsolutePath();
+    return file.getAbsolutePath().equals(operatorScriptAbsolutePath);
+  }
+  
+  private void makeOperatorScriptAbsolutePath() {
+    File parent = new File(Constants.SCRIPTS_DIRNAME);
+    operatorScriptAbsolutePath = parent.getAbsolutePath() + File.separator + config.get(Constants.PROPKEY_SCRIPTFILE);
   }
   
   private boolean isOperatorScript(File file) {
-    return file.getName().equals(config.get(Constants.PROPKEY_SCRIPTFILE));
+    return file.getAbsolutePath().equals(operatorScriptAbsolutePath);
   }
   
   private File findConfigFile(File scriptFile) {

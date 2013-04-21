@@ -58,7 +58,7 @@ public class CameraControlPanel extends JPanel implements MouseListener {
     
     // status string at bottom of viewport
     g.setColor(Color.green);
-    int y = getHeight() - 33;
+    int y = getHeight() - 38;
     for (String ln : model.getStatus().split("\\n")) {
       g.drawString(ln, 2, y);
       y += 10;

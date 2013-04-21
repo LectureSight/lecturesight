@@ -17,15 +17,12 @@
  */
 package cv.lecturesight.cameraoperator.simple;
 
-import cv.lecturesight.framesource.FrameSource;
-import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import java.util.List;
@@ -42,39 +39,21 @@ import org.osgi.service.component.ComponentContext;
 public class SimpleCameraOperator implements CameraOperator {
 
   Log log = new Log("Simple Camera Operator");
-  
   @Reference
   Configuration config;
-  
   @Reference
   ObjectTracker tracker;
-  
   @Reference
   CameraSteeringWorker camera;
-  
-  @Reference
-  FrameSourceProvider fsp;
-  FrameSource fsrc;
-  
   int interval = 200;
-  float limit_left = -0.33f;
-  float limit_right = 0.33f;
-  float limit_top = 0.23f;
-  float limit_down = -0.58f;
-  float rx_pos, rx_neg;
-  
+  int timeout;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
-  CoordinatesNormalization normalizer;
-  
+
   protected void activate(ComponentContext cc) throws Exception {
-    fsrc = fsp.getFrameSource();
-    normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
-    rx_pos = 1.0f / limit_right;
-    rx_neg = -1.0f / limit_left;
-    start();
-    log.info("Timeout is " + config.getInt("timeout") + " ms");
-    log.info("Activated");
+    timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
+    start();    
+    log.info("Activated. Timeout is " + timeout + " ms");
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -86,10 +65,9 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
+      camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
-    } else {
-      log.warn("Already running!");
     }
   }
 
@@ -108,52 +86,34 @@ public class SimpleCameraOperator implements CameraOperator {
   public void reset() {
     NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
     camera.setTargetPosition(neutral);
-    
+    camera.setZoom(0);
   }
-  
-  
+
   private class CameraOperatorWorker implements Runnable {
-    
-    NormalizedPosition pos_home = new NormalizedPosition(0.0f, 0.0f);
-    long last_seen = 0;
-    
+
+    TrackerObject target = null;
+
     @Override
     public void run() {
-      TrackerObject biggest = findBiggestTrackedObject(tracker.getCurrentlyTracked());
-      if (biggest == null) {
-        camera.setTargetPosition(pos_home);
+      if (target == null) {
+        target = findBiggestTrackedObject(tracker.getCurrentlyTracked());
       } else {
-        Position pos_obj = (Position)biggest.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-        NormalizedPosition npos_obj = normalizer.toNormalized(pos_obj);
-        NormalizedPosition npos_target = pos_home.clone();
-        if (npos_obj.getX() < 0) {
-          npos_target.setX(npos_obj.getX() / rx_neg);
-        } else if (npos_obj.getX() > 0) {
-          npos_target.setX(npos_obj.getX() / rx_pos);
+        if (System.currentTimeMillis() - target.lastSeen() < timeout) {
+          Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+          NormalizedPosition target_pos = new NormalizedPosition(obj_pos.getX(), config.getFloat(Constants.PROPKEY_TILT));
+          camera.setTargetPosition(target_pos);
+        } else {
+          target = null;
         }
-        camera.setTargetPosition(npos_target);
       }
     }
-    
+
     private TrackerObject findBiggestTrackedObject(List<TrackerObject> objects) {
       TrackerObject out = null;
       int maxWeight = 0;
       for (TrackerObject obj : objects) {
-        Integer weight = (Integer)obj.getProperty(ObjectTracker.OBJ_PROPKEY_WEIGHT);
+        Integer weight = (Integer) obj.getProperty(ObjectTracker.OBJ_PROPKEY_WEIGHT);
         if (weight > maxWeight) {
-          maxWeight = weight;
-          out = obj;
-        }
-      }
-      return out;
-    }
-    
-    private TrackerObject findeHeaviestTrackedObject(List<TrackerObject> objects) {
-      TrackerObject out = null;
-      int maxWeight = 0;
-      for(TrackerObject obj : objects) {
-        Integer weight = (Integer) obj.getProperty("obj.movement");
-        if(weight > maxWeight) {
           maxWeight = weight;
           out = obj;
         }

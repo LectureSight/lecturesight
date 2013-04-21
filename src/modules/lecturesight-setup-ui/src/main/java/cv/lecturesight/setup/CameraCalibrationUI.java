@@ -19,7 +19,6 @@ import java.util.Properties;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
@@ -32,14 +31,14 @@ public class CameraCalibrationUI implements UserInterface {
   ConfigurationService configService;
   @Reference
   Configuration config;
-  @Reference(policy=ReferencePolicy.DYNAMIC)
+  @Reference
   CameraSteeringWorker steeringWorker;
   @Reference
   PTZCamera camera;
   @Reference
   FrameSourceManager fsm;
   FrameSource productionCamera;
-  @Reference 
+  @Reference
   DisplayService dsps;
   DisplayRegistration cameraDisplayRegistration;
   Display cameraDisplay;
@@ -81,28 +80,29 @@ public class CameraCalibrationUI implements UserInterface {
       wasSteeringBefore = steeringWorker.isSteering();
       steeringWorker.setSteering(false);
     }
-    
-    // activate production camera frame source, set ui class as custom renderer
-    try {
-      productionCamera = fsm.createFrameSource(config.get(Constants.PROPKEY_CALIB_FRAMESOURCE));
-      cameraDisplayRegistration = dsps.registerDisplay("Production Camera", 
-              productionCamera.getImage(), productionCamera.getSignal());
-      panel.setCameraDisplay(dsps.getDisplayByRegistration(cameraDisplayRegistration));
-      cameraHeartbeat = new Triggerable() {
 
-        @Override
-        public void triggered(OCLSignal signal) {
-          try {
-            Thread.sleep(100);
-            productionCamera.captureFrame();
-          } catch (Exception e) {
-            log.warn("Unable to capture frame. " + e.getMessage());
+    // activate production camera frame source, set ui class as custom renderer if configured
+    if (!config.get(Constants.PROPKEY_CALIB_FRAMESOURCE).isEmpty()) {
+      try {
+        productionCamera = fsm.createFrameSource(config.get(Constants.PROPKEY_CALIB_FRAMESOURCE));
+        cameraDisplayRegistration = dsps.registerDisplay("Production Camera",
+                productionCamera.getImage(), productionCamera.getSignal());
+        panel.setCameraDisplay(dsps.getDisplayByRegistration(cameraDisplayRegistration));
+        cameraHeartbeat = new Triggerable() {
+          @Override
+          public void triggered(OCLSignal signal) {
+            try {
+              Thread.sleep(100);
+              productionCamera.captureFrame();
+            } catch (Exception e) {
+              log.warn("Unable to capture frame. " + e.getMessage());
+            }
           }
-        }
-      };
-      ocl.registerTriggerable(productionCamera.getSignal(), cameraHeartbeat);
-    } catch (FrameSourceException e) {
-      throw new IllegalStateException("Failed to open frame source: " + config.get(Constants.PROPKEY_CALIB_FRAMESOURCE));
+        };
+        ocl.registerTriggerable(productionCamera.getSignal(), cameraHeartbeat);
+      } catch (FrameSourceException e) {
+        throw new IllegalStateException("Failed to open frame source: " + config.get(Constants.PROPKEY_CALIB_FRAMESOURCE));
+      }
     }
   }
 
@@ -111,22 +111,24 @@ public class CameraCalibrationUI implements UserInterface {
     if (steeringWorker != null) {
       steeringWorker.setSteering(wasSteeringBefore);
     }
-    
+
     // destroy production camera frame source and remove video display
-    panel.removeCameraDisplay();
-    ocl.unregisterTriggerable(productionCamera.getSignal(), cameraHeartbeat);
-    try {
-      fsm.destroyFrameSource(productionCamera);
-    } catch (FrameSourceException e) {
-      log.warn("Unable to destroy FrameSource for production camera. " + e.getMessage());
+    if (!config.get(Constants.PROPKEY_CALIB_FRAMESOURCE).isEmpty()) {
+      panel.removeCameraDisplay();
+      ocl.unregisterTriggerable(productionCamera.getSignal(), cameraHeartbeat);
+      try {
+        fsm.destroyFrameSource(productionCamera);
+      } catch (FrameSourceException e) {
+        log.warn("Unable to destroy FrameSource for production camera. " + e.getMessage());
+      }
     }
   }
 
   void saveParameters(int left, int right, int top, int bottom) {
     Properties sysConfig = configService.getSystemConfiguration();
-    sysConfig.setProperty(Constants.PROPKEY_CO_LEFT, Integer.toString(left));
-    sysConfig.setProperty(Constants.PROPKEY_CO_RIGHT, Integer.toString(right));
-    sysConfig.setProperty(Constants.PROPKEY_CO_TOP, Integer.toString(top));
-    sysConfig.setProperty(Constants.PROPKEY_CO_BOTTOM, Integer.toString(bottom));
+    sysConfig.setProperty(Constants.PROPKEY_LIMIT_LEFT, Integer.toString(left));
+    sysConfig.setProperty(Constants.PROPKEY_LIMIT_RIGHT, Integer.toString(right));
+    sysConfig.setProperty(Constants.PROPKEY_LIMIT_TOP, Integer.toString(top));
+    sysConfig.setProperty(Constants.PROPKEY_LIMIT_BOTTOM, Integer.toString(bottom));
   }
 }

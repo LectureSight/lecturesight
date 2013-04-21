@@ -23,7 +23,7 @@ import org.osgi.service.component.ComponentContext;
 
 /**
  * A service that loads a schedule from a iCal file and starts/stops object
- * tracking and camera control accordingsly.
+ * tracking and camera control accordingly.
  */
 @Component(name = "lecturesight.dutyscheduler", immediate = true)
 @Service

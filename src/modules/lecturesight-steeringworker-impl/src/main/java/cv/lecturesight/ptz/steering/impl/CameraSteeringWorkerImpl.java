@@ -211,7 +211,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
           }
         }
 
-        String status = "dx = " + dx + "  dy = " + dy + "\nv_pan = " + ps + "  v_tilt = " + ts +  "\ncmd:";
+        String status = "zoom = " + camera.getZoom() + "\ndx = " + dx + "  dy = " + dy + "\nv_pan = " + ps + "  v_tilt = " + ts +  "\ncmd:";
         
         // set speed on camera
         if (ps == 0 && ts == 0) {
