@@ -18,6 +18,7 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.util.Log;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.conf.ConfigurationService;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +33,7 @@ import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-public class ConfigEditorPanel extends javax.swing.JPanel {
+public class ConfigEditorPanel extends javax.swing.JPanel implements ConfigurationListener {
 
   private Log log;
   private ConfigurationService config;
@@ -46,6 +47,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
   public ConfigEditorPanel(ConfigurationService cs, Log log) {
     this.log = log;
     this.config = cs;
+    config.addConfigurationListener(this);
     this.systemConfiguration = config.getSystemConfiguration();
     this.systemDefaults = config.getSystemDefaults();
     
@@ -103,6 +105,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
       }
     
     });
+    
+    log.debug("Configuration UI updated");
   }
 
   @SuppressWarnings("unchecked")
@@ -218,4 +222,9 @@ public class ConfigEditorPanel extends javax.swing.JPanel {
   private javax.swing.JButton saveButton;
   private javax.swing.JScrollPane scrollPane;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void configurationChanged() {
+    update();
+  }
 }
