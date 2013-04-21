@@ -38,6 +38,7 @@ public class Event implements Comparable {
 
   @Override
   public int compareTo(Object other) {
-    return time.compareTo( ((Event)other).time );
+    //return ((Event)other).time.compareTo(time);
+    return time.compareTo(((Event)other).time);
   }
 }
