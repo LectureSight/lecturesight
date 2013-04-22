@@ -17,12 +17,15 @@
  */
 package cv.lecturesight.cameraoperator.simple;
 
+import cv.lecturesight.framesource.FrameSource;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import java.util.List;
@@ -45,13 +48,19 @@ public class SimpleCameraOperator implements CameraOperator {
   ObjectTracker tracker;
   @Reference
   CameraSteeringWorker camera;
+  @Reference
+  FrameSourceProvider fsp;
+  FrameSource fsrc;
   int interval = 200;
   int timeout;
+  CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
 
   protected void activate(ComponentContext cc) throws Exception {
     timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
+    fsrc = fsp.getFrameSource();
+    normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
     start();    
     log.info("Activated. Timeout is " + timeout + " ms");
   }
@@ -65,7 +74,7 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
-      camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));
+      // camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));  // FIXME causes problems
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
     }
@@ -86,7 +95,7 @@ public class SimpleCameraOperator implements CameraOperator {
   public void reset() {
     NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
     camera.setTargetPosition(neutral);
-    camera.setZoom(0);
+    //camera.setZoom(0);  // FIXME causes problems
   }
 
   private class CameraOperatorWorker implements Runnable {
@@ -100,7 +109,8 @@ public class SimpleCameraOperator implements CameraOperator {
       } else {
         if (System.currentTimeMillis() - target.lastSeen() < timeout) {
           Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-          NormalizedPosition target_pos = new NormalizedPosition(obj_pos.getX(), config.getFloat(Constants.PROPKEY_TILT));
+          NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
+          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
           camera.setTargetPosition(target_pos);
         } else {
           target = null;
