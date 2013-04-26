@@ -98,8 +98,7 @@
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.ptz.visca</Bundle-SymbolicName>
             <Bundle-NativeCode>
-              lib/Linux/i686/libptzcamvisca.so; osname=Linux; processor=x86,
-              lib/Linux/x86_64/libptzcamvisca.so; osname=Linux; processor=x86-64
+              lib/Linux/x86_64/libptzcamvisca.so;osname=Linux;processor=x86-64
             </Bundle-NativeCode>
           </instructions>
         </configuration>

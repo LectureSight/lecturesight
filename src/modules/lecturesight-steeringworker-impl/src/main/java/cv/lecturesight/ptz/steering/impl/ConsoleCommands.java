@@ -31,7 +31,7 @@ import org.apache.felix.scr.annotations.Service;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "cs"),
-  @Property(name = "osgi.command.function", value = {"on", "off", "start", "stop", "restart", "move", "stopmove", "home", "ui", "update", "zoom"})
+  @Property(name = "osgi.command.function", value = {"on", "off", "start", "stop", "restart", "move", "stopmove", "home", "zoom"})
 })
 public class ConsoleCommands implements DummyInterface {
 
