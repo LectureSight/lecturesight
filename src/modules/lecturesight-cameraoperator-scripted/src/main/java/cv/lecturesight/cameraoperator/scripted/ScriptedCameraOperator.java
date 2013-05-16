@@ -2,7 +2,6 @@ package cv.lecturesight.cameraoperator.scripted;
 
 import cv.lecturesight.cameraoperator.scripted.bridge.ConfigurationBridge;
 import cv.lecturesight.cameraoperator.scripted.bridge.ObjectTrackerBridge;
-import cv.lecturesight.cameraoperator.scripted.bridge.SceneBridge;
 import cv.lecturesight.cameraoperator.scripted.bridge.ScriptBridgeException;
 import cv.lecturesight.cameraoperator.scripted.bridge.SteeringWorkerBridge;
 import cv.lecturesight.cameraoperator.scripted.bridge.SystemBridge;
@@ -17,6 +16,7 @@ import java.io.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -131,6 +131,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   private class ScriptWorker implements Runnable {
     
     ScriptEngine engine;
+    Invocable engineI;
     
     public ScriptWorker(File script) throws Exception {
       engine = engineManager.getEngineByName("javascript");    
@@ -139,6 +140,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
         log.error(msg);
         throw new IllegalStateException(msg);
       }
+      engineI = (Invocable)engine;
       try {
         if (script != null) {
           engine.eval(new FileReader(script));
@@ -157,20 +159,20 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
     
     public void init() {
-      execute("init();");
+      invoke("init");
     }
     
     @Override
     public void run() {
-      execute("step();");
+      invoke("step");
     }
     
-    private void execute(String line) {
+    private void invoke(String functionName) {
       try {
-        engine.eval(line);
-      } catch (ScriptException e) {
+        engineI.invokeFunction(functionName);
+      } catch (Exception e) {
         stop();
-        log.error("Error in operator script. Script was stopped.", e);
+        log.error("Error in operator script. Script was stopped. ", e);
       }
     }
     
@@ -179,9 +181,14 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
     
     public void injectPackage(String packageName) {
-      StringBuilder code = new StringBuilder();
-      code.append("importPackage(Packages.").append(packageName).append(");");
-      execute(code.toString());
+      try {
+        StringBuilder code = new StringBuilder();
+        code.append("importPackage(Packages.").append(packageName).append(");");
+        engine.eval(code.toString());
+      } catch (ScriptException e) {
+        stop();
+        log.error("Unable to import package " + packageName + " in script. ", e);
+      }
     }
   }
 
