@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,9 +143,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
         
         // find all availabel devices of configured type
         for (CLPlatform platform : platforms) {
-          for (CLDevice device : platform.listDevices(type, true)) {
-            devices.add(device);
-          }
+          devices.addAll(Arrays.asList(platform.listDevices(type, true)));
         }
         
         // find best device
