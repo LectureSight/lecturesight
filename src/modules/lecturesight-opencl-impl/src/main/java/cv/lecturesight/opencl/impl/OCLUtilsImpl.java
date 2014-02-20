@@ -17,13 +17,13 @@
  */
 package cv.lecturesight.opencl.impl;
 
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
-import com.nativelibs4java.opencl.CLIntBuffer;
 import cv.lecturesight.opencl.OCLUtils;
 
 public class OCLUtilsImpl implements OCLUtils {
@@ -56,7 +56,7 @@ public class OCLUtilsImpl implements OCLUtils {
   }
 
   @Override
-  public synchronized CLEvent setValues(int start, int end, CLIntBuffer buffer, int val) {
+  public synchronized CLEvent setValues(int start, int end, CLBuffer<Integer> buffer, int val) {
     int[] workDim = new int[]{end-start};
     set_valuesInt.setArgs(start, buffer, val);
     return set_valuesInt.enqueueNDRange(queue, workDim);
