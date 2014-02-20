@@ -1,6 +1,6 @@
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLByteBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImageFormat;
@@ -25,7 +25,7 @@ public class IntensityFrameUploader implements FrameUploader {
   private final int[] workDim;
   private final long bufferSize;
   private ByteBuffer hostBuffer;
-  private CLByteBuffer gpuRawBuffer;
+  private CLBuffer<Byte> gpuRawBuffer;
   private final CLImage2D gpuBuffer, temp;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
