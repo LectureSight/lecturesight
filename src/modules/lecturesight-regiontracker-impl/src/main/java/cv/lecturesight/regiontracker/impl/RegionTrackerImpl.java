@@ -17,9 +17,9 @@
  */
 package cv.lecturesight.regiontracker.impl;
 
+import com.nativelibs4java.opencl.CLBuffer;
 import cv.lecturesight.regiontracker.Region;
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -83,8 +83,8 @@ public class RegionTrackerImpl implements RegionTracker {
   BoundingBoxFinder boxFinder;
   CentroidFinder centroidFinder;
   OCLSignalBarrier analysisBarrier;
-  CLIntBuffer labels_current, labels_last;
-  CLIntBuffer label_pairs;
+  CLBuffer<Integer> labels_current, labels_last;
+  CLBuffer<Integer> label_pairs;
   int num_corrs;
   int[] pairs = new int[Constants.pairsBufferLength];
   CLImage2D overlap, current_fg, last_fg;
@@ -469,7 +469,7 @@ public class RegionTrackerImpl implements RegionTracker {
 
     OCLSignal SIG_done = signals.get(Signal.DONE_CORRELATION);
     CLKernel gatherLabelPairsK = ocl.programs().getKernel("objects", "gather_label_pairs");
-    CLIntBuffer addresses = overlapLabeler.getIdBuffer();
+    CLBuffer<Integer> addresses = overlapLabeler.getIdBuffer();
     IntBuffer pairsH;
     int[] pairsWorkDim = new int[1];
 

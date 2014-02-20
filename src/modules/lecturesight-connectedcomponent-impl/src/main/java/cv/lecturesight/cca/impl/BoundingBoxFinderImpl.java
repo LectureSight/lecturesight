@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -40,7 +40,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
           new EnumMap<BoundingBoxFinder.Signal, OCLSignal>(Signal.class);
   OpenCLService ocl;
   ConnectedComponentLabelerImpl ccli;
-  CLIntBuffer boxes;
+  CLBuffer<Integer> boxes;
   int[] bboxBufferDim;
   int[] boxes_out;
 
@@ -60,7 +60,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
   }
   
   @Override
-  public CLIntBuffer getBoxBuffer() {
+  public CLBuffer<Integer> getBoxBuffer() {
     return boxes;
   }
 
