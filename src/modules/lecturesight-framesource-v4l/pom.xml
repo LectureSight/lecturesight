@@ -38,7 +38,7 @@
     <dependency>
       <groupId>au.edu.jcu</groupId>
       <artifactId>v4l4j</artifactId>
-      <version>0.9.1</version>
+      <version>0.8.7</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
