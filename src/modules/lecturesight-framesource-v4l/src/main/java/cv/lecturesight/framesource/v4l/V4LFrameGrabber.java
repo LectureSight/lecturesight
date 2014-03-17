@@ -54,7 +54,8 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     try {
       log = new Log(device.getDeviceInfo().getName());
       grabber = device.getRGBFrameGrabber(width, height, channel, standard);
-      frameBuffer = null;
+      byte[] barr = new byte[grabber.getWidth() * grabber.getHeight() * 3];
+      frameBuffer = ByteBuffer.wrap(barr);
       grabber.setCaptureCallback(this);
       grabber.startCapture();
     } catch (V4L4JException e) {
