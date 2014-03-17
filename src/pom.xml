@@ -262,6 +262,19 @@
       </releases>
     </repository>
     
+    <!-- Our own local Repo -->
+    <repository>
+      <id>man-mtt</id>
+      <name>manchester-mtt</name>
+      <url>http://garnier.rcs.manchester.ac.uk:9090/nexus/content/repositories/man-mtt</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    
     <!-- blackpad often breaks build -->
     <repository>
       <id>blackpad-nexus</id>
