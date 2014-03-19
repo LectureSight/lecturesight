@@ -19,6 +19,9 @@ package cv.lecturesight.framesource.v4l;
 
 import au.edu.jcu.v4l4j.CaptureCallback;
 import au.edu.jcu.v4l4j.FrameGrabber;
+import au.edu.jcu.v4l4j.ImageFormat;
+import au.edu.jcu.v4l4j.ImageFormatList;
+import au.edu.jcu.v4l4j.V4L4JConstants;
 import au.edu.jcu.v4l4j.VideoDevice;
 import au.edu.jcu.v4l4j.VideoFrame;
 import au.edu.jcu.v4l4j.exceptions.V4L4JException;
@@ -27,6 +30,7 @@ import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.util.Log;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber, CaptureCallback {
 
@@ -53,7 +57,12 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
 
     try {
       log = new Log(device.getDeviceInfo().getName());
-      grabber = device.getRGBFrameGrabber(width, height, channel, standard);
+      List<ImageFormat>   imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
+      ImageFormat format = null;
+      for (ImageFormat imageFormat: imageFormats){
+          log.info("supported Format: "+ imageFormat.toNiceString());
+      }
+      grabber = device.getRGBFrameGrabber(width, height, channel, standard, format);
       byte[] barr = new byte[grabber.getWidth() * grabber.getHeight() * 3];
       frameBuffer = ByteBuffer.wrap(barr);
       grabber.setCaptureCallback(this);
