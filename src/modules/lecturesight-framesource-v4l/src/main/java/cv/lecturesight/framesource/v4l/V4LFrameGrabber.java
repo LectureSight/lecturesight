@@ -20,8 +20,7 @@ package cv.lecturesight.framesource.v4l;
 import au.edu.jcu.v4l4j.CaptureCallback;
 import au.edu.jcu.v4l4j.FrameGrabber;
 import au.edu.jcu.v4l4j.ImageFormat;
-import au.edu.jcu.v4l4j.ImageFormatList;
-import au.edu.jcu.v4l4j.V4L4JConstants;
+import au.edu.jcu.v4l4j.ResolutionInfo;
 import au.edu.jcu.v4l4j.VideoDevice;
 import au.edu.jcu.v4l4j.VideoFrame;
 import au.edu.jcu.v4l4j.exceptions.V4L4JException;
@@ -31,16 +30,31 @@ import cv.lecturesight.util.Log;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Vector;
 
 public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber, CaptureCallback {
 
   @Override
   public void exceptionReceived(V4L4JException vlje) {
-    throw new UnsupportedOperationException(
-      new FrameSourceException("Could not capture frame from " + device.getDevicefile() + ": " + vlje.getMessage())); 
+      exceptionCount++;
+      log.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
+      if (exceptionCount < 5){
+        log.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
+        try {
+            grabber.startCapture();
+        } catch (V4L4JException ex) {
+            log.error("Could restart not frame grabber on"  + device.getDevicefile() + ": ", ex);
+        }
+      } else {
+          // Hopeless
+          log.info("Frame grabber failed on " + device.getDevicefile() + " five times ... giving up.");
+      }
+//      throw new UnsupportedOperationException(
+//      new FrameSourceException("Could not capture frame from " + device.getDevicefile() + ": " + vlje.getMessage())); 
   }
 
   private Log log;
+  private int exceptionCount = 0;
   VideoDevice device;
   int width, height, standard, channel, quality;
   private FrameGrabber grabber;
@@ -54,17 +68,23 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     this.standard = videoStandard;
     this.channel = videoChannel;
     this.quality = videoQuality;
-
+    Vector<ImageFormat> useFormat = new Vector<ImageFormat>();
     try {
       log = new Log(device.getDeviceInfo().getName());
-      List<ImageFormat>   imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
+      List<ImageFormat> imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
       ImageFormat format = null;
       for (ImageFormat imageFormat: imageFormats){
-          log.info("supported Format: "+ imageFormat.toNiceString());
+          log.info("supported Format: "+ imageFormat.getName());
+          ResolutionInfo resolutions = imageFormat.getResolutionInfo();
+          for (ResolutionInfo.DiscreteResolution disRes : resolutions.getDiscreteResolutions()){
+              if (disRes.getHeight() == frameHeight && disRes.getWidth() == frameWidth){
+                  useFormat.add(imageFormat);
       }
-      grabber = device.getRGBFrameGrabber(width, height, channel, standard, format);
-      byte[] barr = new byte[grabber.getWidth() * grabber.getHeight() * 3];
-      frameBuffer = ByteBuffer.wrap(barr);
+          }
+      }
+      log.info("using : " + useFormat.firstElement().getName());
+      grabber = device.getRGBFrameGrabber(width, height, channel, standard, useFormat.firstElement());
+      frameBuffer = ByteBuffer.allocate(grabber.getWidth() * grabber.getHeight() * 3);
       grabber.setCaptureCallback(this);
       grabber.startCapture();
     } catch (V4L4JException e) {
@@ -89,6 +109,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
 
   @Override
   public void nextFrame(VideoFrame frame) {
+      exceptionCount = 0;
     frameBuffer = ByteBuffer.wrap(frame.getBytes());
     frame.recycle();
   }
