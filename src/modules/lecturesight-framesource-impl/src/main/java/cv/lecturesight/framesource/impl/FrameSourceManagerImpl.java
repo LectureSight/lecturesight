@@ -107,10 +107,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   @Override
   public FrameSource createFrameSource(String input) throws FrameSourceException {
     FrameSource newSource = null;
-
     try {
       FrameSourceDescriptor fsd = new FrameSourceDescriptor(input);
-
       if (sourceTypes.containsKey(fsd.getType())) {
         FrameGrabberFactory factory = sourceTypes.get(fsd.getType());
         FrameGrabber grabber = factory.createFrameGrabber(fsd.getLocator(), fsd.getConfiguration());
@@ -177,10 +175,12 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       if (event.getTopic().equals(OSGI_EVENT_REGISTERED)) {
         installFrameGrabberFactory(ref);
       } else if (event.getTopic().equals(OSGI_EVENT_UNREGISTERED)) {
-        String type = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
+        String types = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
         String name = (String) ref.getProperty(FRAMESOURCE_NAME_PROPERTY);
-        sourceTypes.remove(type);
-        log.info("Unregistered " + name);
+        for (String type: types.split(",")){
+          sourceTypes.remove(type.trim());
+          log.info("Unregistered " + name);
+        }
       }
     }
   }
@@ -197,18 +197,19 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   private void installFrameGrabberFactory(ServiceReference ref) {
     String name = (String) ref.getProperty(FRAMESOURCE_NAME_PROPERTY);
-    String type = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
-    FrameGrabberFactory factory = (FrameGrabberFactory) componentContext.getBundleContext().getService(ref);
-    sourceTypes.put(type, factory);
-    log.info("Registered FrameGrabberFactory " + name + " (type: " + type + ")");
-
-    try {
-      FrameSourceDescriptor fsd = new FrameSourceDescriptor(config.get(PROPKEY_MRL));
-      if (fsd.getType().equals(type)) {
-        activateProvider(config.get(PROPKEY_MRL));
+    String types = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
+    for (String type: types.split(",")){
+      FrameGrabberFactory factory = (FrameGrabberFactory) componentContext.getBundleContext().getService(ref);
+      sourceTypes.put(type.trim(), factory);
+      log.info("Registered FrameGrabberFactory " + name + " (type: " + type.trim() + ")");
+      try {
+        FrameSourceDescriptor fsd = new FrameSourceDescriptor(config.get(PROPKEY_MRL));
+        if (fsd.getType().equals(type.trim())) {
+          activateProvider(config.get(PROPKEY_MRL));
+        }
+      } catch (Exception e) {
+        log.warn("Unable to check if newly installed FrameGrabberFactory fits FrameSourceProvider configuration");
       }
-    } catch (Exception e) {
-      log.warn("Unable to check if newly installed FrameGrabberFactory fits FrameSourceProvider configuration");
     }
   }
 

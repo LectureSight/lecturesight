@@ -41,7 +41,7 @@ import org.osgi.service.component.ComponentContext;
 @Service()
 @Properties({
 @Property(name="cv.lecturesight.framesource.name", value="Video4Linux"),
-@Property(name="cv.lecturesight.framesource.type", value="v4l")  
+@Property(name="cv.lecturesight.framesource.type", value="v4l, v4l2")  
 })
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
