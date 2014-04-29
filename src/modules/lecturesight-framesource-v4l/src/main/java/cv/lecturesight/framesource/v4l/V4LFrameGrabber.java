@@ -34,25 +34,6 @@ import java.util.Vector;
 
 public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber, CaptureCallback {
 
-  @Override
-  public void exceptionReceived(V4L4JException vlje) {
-      exceptionCount++;
-      log.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
-      if (exceptionCount < 5){
-        log.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
-        try {
-            grabber.startCapture();
-        } catch (V4L4JException ex) {
-            log.error("Could restart not frame grabber on"  + device.getDevicefile() + ": ", ex);
-        }
-      } else {
-          // Hopeless
-          log.info("Frame grabber failed on " + device.getDevicefile() + " five times ... giving up.");
-      }
-//      throw new UnsupportedOperationException(
-//      new FrameSourceException("Could not capture frame from " + device.getDevicefile() + ": " + vlje.getMessage())); 
-  }
-
   private Log log;
   private int exceptionCount = 0;
   VideoDevice device;
@@ -123,6 +104,23 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
       }
   }
 
+  @Override
+  public void exceptionReceived(V4L4JException vlje) {
+      exceptionCount++;
+      log.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
+      if (exceptionCount < 5){
+        log.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
+        try {
+            grabber.startCapture();
+        } catch (V4L4JException ex) {
+            log.error("Could restart not frame grabber on"  + device.getDevicefile() + ": ", ex);
+        }
+      } else {
+          // Hopeless
+          log.info("Frame grabber failed on " + device.getDevicefile() + " five times ... giving up.");
+      }
+  }
+  
   void shutdown() {
     log.info("Shutting down");
     grabber.stopCapture();
