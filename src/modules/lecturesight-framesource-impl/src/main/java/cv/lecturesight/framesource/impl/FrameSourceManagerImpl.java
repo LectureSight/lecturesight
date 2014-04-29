@@ -143,11 +143,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     FrameSourceImpl fsrc = (FrameSourceImpl)frameSource;
     if (sourceTypes.containsKey(fsrc.getType())) {
       FrameGrabberFactory factory = sourceTypes.get(fsrc.getType());
-      factory.destroyFrameGrabber(fsrc.frameGrabber);
-      fsrc.uploader.destroy();
-      
-      // FIXME also destroy host- and GPU-buffer !!!
-    
+      factory.destroyFrameGrabber(fsrc.frameGrabber);    // de-init the stuff that gets the frames (native libs etc.)
+      fsrc.uploader.destroy();                           // free GPU buffers created by uploader               
     } else {
       throw new FrameSourceException("No factory registered for type " + fsrc.getType());
     }
