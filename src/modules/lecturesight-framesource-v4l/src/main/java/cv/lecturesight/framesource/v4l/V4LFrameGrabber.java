@@ -36,6 +36,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
 
   private Log log;
   private int exceptionCount = 0;
+  private final int MAX_EXCEPTIONS = 5;
   VideoDevice device;
   int width, height, standard, channel, quality;
   private FrameGrabber grabber;
@@ -108,7 +109,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
   public void exceptionReceived(V4L4JException vlje) {
     exceptionCount++;
     log.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
-    if (exceptionCount < 5) {
+    if (exceptionCount < MAX_EXCEPTIONS) {
       log.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
       try {
         grabber.startCapture();
@@ -117,7 +118,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
       }
     } else {
       // Hopeless
-      log.info("Frame grabber failed on " + device.getDevicefile() + " five times ... giving up.");
+      log.info("Frame grabber failed on " + device.getDevicefile() + Integer.toString(MAX_EXCEPTIONS) + " times ... giving up.");
       shutdown();
     }
   }
@@ -127,6 +128,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     grabber.stopCapture();
     device.releaseFrameGrabber();
     device.release();
+    
   }
 
   @Override
