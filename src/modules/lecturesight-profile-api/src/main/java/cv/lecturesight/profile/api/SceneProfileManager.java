@@ -17,8 +17,6 @@
  */
 package cv.lecturesight.profile.api;
 
-import java.util.List;
-
 public interface SceneProfileManager {
 
   /** Sets the active profile. The active profile is the profile the system uses
