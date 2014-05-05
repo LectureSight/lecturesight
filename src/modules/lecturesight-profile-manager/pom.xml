@@ -17,21 +17,11 @@
   </parent>
   
   <dependencies>
-    <!-- dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-opencl-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-objecttracker-api</artifactId>
+      <artifactId>lecturesight-profile-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
-      <version>${project.version}</version>
-    </dependency -->
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-util</artifactId>
@@ -99,7 +89,6 @@
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.profile.manager</Bundle-SymbolicName>
             <Export-Package>
-              cv.lecturesight.profile.api;version=${project.version},
               cv.lecturesight.profile.manager;version=${project.version}
             </Export-Package>
           </instructions>

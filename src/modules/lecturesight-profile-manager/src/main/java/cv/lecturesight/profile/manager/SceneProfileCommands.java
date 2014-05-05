@@ -15,9 +15,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.profile.api;
+package cv.lecturesight.profile.manager;
 
-public interface SceneProfileListener {
-
-  void profileUpdated(SceneProfile profile);
+/**
+ *
+ * @author wulff
+ */
+public class SceneProfileCommands {
+  
 }
