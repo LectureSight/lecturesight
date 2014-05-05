@@ -41,11 +41,11 @@ public interface SceneProfileManager {
    */
   SceneProfile[] getProfiles();
   
-  /** Installs a profile.
+  /** Stores a profile.
    * 
    * @param profile to install
    */
-  void addProfile(SceneProfile profile);
+  void putProfile(SceneProfile profile);
   
   /** Removes a profile from system.
    * 
