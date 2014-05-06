@@ -30,6 +30,15 @@ public class ProfileStore {
   private HashMap<String, SceneProfile> fileMap = new HashMap<String, SceneProfile>();
   private LinkedList<SceneProfile> profiles = new LinkedList<SceneProfile>();
   
+  boolean hasProfile(String name) {
+    for (SceneProfile p : profiles) {
+      if (p.name.equals(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   boolean hasProfile(SceneProfile profile)  {
     return profiles.contains(profile);
   }
@@ -43,6 +52,15 @@ public class ProfileStore {
       SceneProfile p = fileMap.get(path);
       if (profile.name.equals(p.name)) {
         return path;
+      }
+    }
+    return null;
+  }
+  
+  SceneProfile getByName(String name) {
+    for (SceneProfile p : profiles) {
+      if (p.name.equals(name)) {
+        return p;
       }
     }
     return null;

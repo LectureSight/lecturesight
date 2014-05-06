@@ -22,26 +22,32 @@ import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
 import cv.lecturesight.util.Log;
-import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
+import cv.lecturesight.util.conf.ConfigurationService;
 import java.io.*;
 import java.util.*;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.service.component.ComponentContext;
 
-public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactInstaller {
+public class SceneProfileManagerImpl implements SceneProfileManager, ConfigurationListener, ArtifactInstaller {
 
+  static final String PROPKEY_PROFILE = "cv.lecturesight.profile.active";
   static final String FILEEXT_PROFILE = ".scn";
   private Log log = new Log("Scene Profile Manager");
   @Reference
-  private Configuration config;
+  private ConfigurationService configS;
+  private Properties config;
   private ProfileStore profiles = new ProfileStore();
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
   private SceneProfile defaultProfile = new SceneProfile();
   private SceneProfile activeProfile = defaultProfile;
   private String activeProfilePath = null;
+  private String configuredActiveProfile = "";
 
   protected void activate(ComponentContext cc) throws Exception {
+    config = configS.getSystemDefaults();
+    configuredActiveProfile = config.getProperty(PROPKEY_PROFILE);
     log.info("Activated");
   }
 
@@ -150,6 +156,17 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   @Override
   public boolean canHandle(File file) {
     return file.isFile() && file.getName().toLowerCase().endsWith(FILEEXT_PROFILE);
+  }
+
+  @Override
+  public void configurationChanged() {
+    String s = configS.getSystemConfiguration().getProperty(PROPKEY_PROFILE);
+    if (!configuredActiveProfile.equals(s)) {
+      configuredActiveProfile = s;
+      if (profiles.hasProfile(configuredActiveProfile)) {
+        this.setActiveProfile(profiles.getByName(configuredActiveProfile));
+      }
+    }
   }
 
 }
