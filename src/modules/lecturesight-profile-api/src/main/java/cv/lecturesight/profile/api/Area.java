@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name="area")
-public class Area {
+public class Area implements Cloneable {
   
   @XmlAttribute(name="name")
   String name;
@@ -52,5 +52,9 @@ public class Area {
     this.y = y;
     this.width = width;
     this.height = height;
+  }
+  
+  public Area clone() {
+    return new Area(name, x, y, width, height);
   }
 }
