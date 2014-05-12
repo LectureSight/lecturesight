@@ -33,15 +33,15 @@ public class SceneProfile {
   
   @XmlElementWrapper(name = "ignoreAreas")
   @XmlElement(name = "area")
-  public ArrayList<Area> ignoreAreas;
+  public ArrayList<Area> ignoreAreas = new ArrayList<Area>();
   
   @XmlElementWrapper(name = "importantAreas")
   @XmlElement(name = "area")
-  public ArrayList<Area> importantAreas;
+  public ArrayList<Area> importantAreas = new ArrayList<Area>();
   
   @XmlElementWrapper(name = "triggerAreas")
   @XmlElement(name = "area")
-  public ArrayList<Area> triggerAreas;
+  public ArrayList<Area> triggerAreas = new ArrayList<Area>();
   
   public SceneProfile() {
     this.name = "default";

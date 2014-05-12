@@ -21,7 +21,7 @@ package cv.lecturesight.profile.api;
  *
  * @author wulff
  */
-class ProfileSerializerException extends Exception {
+public class ProfileSerializerException extends Exception {
   
   public ProfileSerializerException(String msg) {
     super(msg);
