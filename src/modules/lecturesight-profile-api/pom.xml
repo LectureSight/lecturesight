@@ -49,7 +49,6 @@
             <Export-Package>
               cv.lecturesight.profile.api;version=${project.version}
             </Export-Package>
-            <Bundle-Activator>cv.lecturesight.profile.api.SceneProfileSerializer</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

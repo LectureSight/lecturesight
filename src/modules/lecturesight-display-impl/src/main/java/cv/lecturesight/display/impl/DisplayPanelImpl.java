@@ -38,6 +38,11 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
   }
 
   @Override
+  public Dimension getImageDimension() {
+    return new Dimension((int) size.getWidth(), (int) size.getHeight());
+  }
+  
+  @Override
   public void paint(Graphics g) {
     //System.out.println("PAINT");
     display.addListener(this);

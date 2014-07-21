@@ -53,7 +53,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_MASK = "input.mask";
-  final static String WINDOWNAME_INPUT = "Video Input";
+  final static String DISPLAYNAME_INPUT = "display:input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
@@ -214,7 +214,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private void activateProvider(String mrl) {
     try {
       FrameSource fs = createFrameSource(mrl);
-      dsps.registerDisplay(WINDOWNAME_INPUT, fs.getImage(), fs.getSignal());
+      dsps.registerDisplay(DISPLAYNAME_INPUT, fs.getImage(), fs.getSignal());
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {

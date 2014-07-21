@@ -17,44 +17,29 @@
  */
 package cv.lecturesight.profile.api;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+/**
+ *
+ * @author wulff
+ */
+public class SceneProfileEventAdapter implements SceneProfileListener {
 
-@XmlRootElement(name="area")
-public class Area implements Cloneable {
-  
-  @XmlAttribute(name="name")
-  String name;
-  
-  @XmlAttribute(name="pos-x")
-  public int x;
-  
-  @XmlAttribute(name="pos-y")
-  public int y;
-  
-  @XmlAttribute(name="width")
-  public int width;
-  
-  @XmlAttribute(name="height")
-  public int height;
-  
-  public Area() {
-    this.name="unnamed";
-    this.x = 0;
-    this.y = 0;
-    this.width = 1;
-    this.height = 1;
+  @Override
+  public void profileActivated(SceneProfile profile) {
+    // NOP
   }
-  
-  public Area(String name, int x, int y, int width, int height) {
-    this.name = name;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+
+  @Override
+  public void profileInstalled(SceneProfile profile) {
+    // NOP
   }
-  
-  public Area clone() {
-    return new Area(name, x, y, width, height);
+
+  @Override
+  public void profileUpdated(SceneProfile profile) {
+    // NOP
+  }
+
+  @Override
+  public void profileRemoved(SceneProfile profile) {
+    // NOP
   }
 }

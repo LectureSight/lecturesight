@@ -18,18 +18,28 @@
 package cv.lecturesight.profile.manager;
 
 import cv.lecturesight.profile.api.SceneProfile;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 /** Utility class that stores SceneProfiles.
  *
  * @author wulff
  */
 public class ProfileStore {
-
+  
+  // mapping filename --> SceneProfile
   private HashMap<String, SceneProfile> fileMap = new HashMap<String, SceneProfile>();
+  
+  // or List of SceneProfiles
   private LinkedList<SceneProfile> profiles = new LinkedList<SceneProfile>();
   
+  /** Returns true if this store has a contains a profile with the given name.
+   * 
+   * @param name of the profile in question
+   * @return true if profile was found
+   */
   boolean hasProfile(String name) {
     for (SceneProfile p : profiles) {
       if (p.name.equals(name)) {
@@ -40,7 +50,7 @@ public class ProfileStore {
   }
   
   boolean hasProfile(SceneProfile profile)  {
-    return profiles.contains(profile);
+    return hasProfile(profile.name);
   }
   
   boolean hasFilename(String filename) {
@@ -60,7 +70,7 @@ public class ProfileStore {
   SceneProfile getByName(String name) {
     for (SceneProfile p : profiles) {
       if (p.name.equals(name)) {
-        return p;
+        return p.clone();
       }
     }
     return null;
@@ -68,23 +78,38 @@ public class ProfileStore {
   
   SceneProfile getByFilename(String filename) {  
     if (fileMap.containsKey(filename)) {
-      return fileMap.get(filename);
+      return fileMap.get(filename).clone();
     } else {
       return null;
     }
   }
   
   void put(SceneProfile profile) {
-    profiles.add(profile);
+    if (this.hasProfile(profile)) {
+      this.remove(profile);
+    }
+    for (String filename : fileMap.keySet()) {
+      if (profile.equals(fileMap.get(filename))) {
+        removeByFilename(filename);
+        putWithFilename(filename, profile);
+      }
+    }
   }
 
   void putWithFilename(String filename, SceneProfile profile) {
-    profiles.add(profile);
+    if (this.hasProfile(profile)) {
+      this.remove(profile);
+    }
     fileMap.put(filename, profile);
   }
   
   void remove(SceneProfile profile) {
     profiles.remove(profile);
+    for (String filename : fileMap.keySet()) {
+      if (profile.equals(fileMap.get(filename))) {
+        removeByFilename(filename);
+      }
+    }
   }
     
   void removeByFilename(String filename) {
@@ -95,12 +120,11 @@ public class ProfileStore {
     }
   }
   
-  SceneProfile[] getAll() {
-    return (SceneProfile[])profiles.toArray();
+  List<SceneProfile> getAll() {
+    ArrayList<SceneProfile> list = new ArrayList<SceneProfile>();
+    for (SceneProfile p : profiles) {
+      list.add(p.clone());
+    }
+    return list;
   }
-
-  /**
-  private SceneProfile deepCopy(SceneProfile in) {
-    
-  }**/
 }

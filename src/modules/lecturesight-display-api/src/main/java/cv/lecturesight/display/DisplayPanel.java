@@ -17,11 +17,15 @@
  */
 package cv.lecturesight.display;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import javax.swing.JLabel;
 
 public abstract class DisplayPanel extends JLabel {
   
   private CustomRenderer renderer = null;
+  
+  public abstract Dimension getImageDimension();
   
   public boolean hasCustomRenderer() {
     return renderer != null;
@@ -33,5 +37,15 @@ public abstract class DisplayPanel extends JLabel {
   
   public void setCustomRenderer(CustomRenderer renderer) {
     this.renderer = renderer;
+  }
+  
+  public Point getPositionInImage(Point p) {
+    Dimension iDim = getImageDimension();
+    Dimension cDim = this.getSize();
+    
+    int x = p.x - ((cDim.width - iDim.width) / 2);
+    int y = p.y - ((cDim.height - iDim.height) / 2);
+    
+    return new Point(x, y);
   }
 }

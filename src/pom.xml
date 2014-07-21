@@ -51,7 +51,9 @@
         <module>modules/lecturesight-ptzcontrol-visca</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-profile-api</module>
         <module>modules/lecturesight-profile-manager</module>
+        <module>modules/lecturesight-profile-ui</module>
         <module>modules/lecturesight-cameraoperator-api</module>
         <module>modules/lecturesight-cameraoperator-simple</module>
         <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
@@ -89,7 +91,9 @@
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-decorator-head</module>
         <module>modules/lecturesight-decorator-color</module>
+        <module>modules/lecturesight-profile-api</module>
         <module>modules/lecturesight-profile-manager</module>
+        <module>modules/lecturesight-profile-ui</module>
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
         <module>modules/lecturesight-heartbeat</module>
@@ -246,6 +250,10 @@
     <repository>
       <id>nativelibs4java-repo</id>
       <url>http://nativelibs4java.sourceforge.net/maven</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </releases>
     </repository>
     
     <!-- We want to use the iCal4J version that is used in Matterhorn -->

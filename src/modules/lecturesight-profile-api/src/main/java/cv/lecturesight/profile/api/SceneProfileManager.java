@@ -17,6 +17,8 @@
  */
 package cv.lecturesight.profile.api;
 
+import java.util.List;
+
 public interface SceneProfileManager {
 
   /** Sets the active profile. The active profile is the profile the system uses
@@ -37,7 +39,7 @@ public interface SceneProfileManager {
    * 
    * @return list of installed profiles 
    */
-  SceneProfile[] getProfiles();
+  List<SceneProfile> getProfiles();
   
   /** Stores a profile.
    * 
@@ -50,6 +52,12 @@ public interface SceneProfileManager {
    * @param profile to remove
    */
   void removeProfile(SceneProfile profile);
+  
+  /** Save a profile to the file it was loaded from.
+   * 
+   * @param profile to save
+   */
+  void saveProfile(SceneProfile profile);
   
   /** Register a <code>SceneProfileListener</code> that is notified when the 
    * active profile changes.

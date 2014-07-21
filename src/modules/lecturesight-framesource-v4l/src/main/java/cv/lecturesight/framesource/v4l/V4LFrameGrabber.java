@@ -54,7 +54,6 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     try {
       log = new Log(device.getDeviceInfo().getName());
       List<ImageFormat> imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
-      ImageFormat format = null;
       for (ImageFormat imageFormat : imageFormats) {
         log.info("supported Format: " + imageFormat.getName());
         ResolutionInfo resolutions = imageFormat.getResolutionInfo();
@@ -125,10 +124,15 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
 
   void shutdown() {
     log.info("Shutting down");
-    grabber.stopCapture();
-    device.releaseFrameGrabber();
-    device.release();
-    
+    try {
+      grabber.stopCapture();
+      device.releaseFrameGrabber();
+      device.release();
+    } catch (Exception e) {
+      log.error("Error during shutdown. ", e);
+    } finally {
+      // TODO tell consuming FrameSource to deactivate
+    }
   }
 
   @Override
