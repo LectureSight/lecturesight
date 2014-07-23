@@ -17,9 +17,9 @@
  */
 package cv.lecturesight.opencl;
 
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
 
 /** A collection of utility functions. All functions return a CLEvent so they
  * can be synchronized with other CL commands.
@@ -63,7 +63,7 @@ public interface OCLUtils {
    * @param val value to be set
    * @return CLEvent indicating completion
    */
-  CLEvent setValues(int start, int end, CLIntBuffer buffer, int val);
+  CLEvent setValues(int start, int end, CLBuffer<Integer> buffer, int val);
   
   /** Copy a defined rectangle from one image into another image. The two images
    * must be of same type an channel count.

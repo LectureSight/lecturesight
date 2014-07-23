@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLIntBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -38,7 +38,7 @@ public class CentroidFinderImpl implements CentroidFinder {
           new EnumMap<CentroidFinder.Signal, OCLSignal>(Signal.class);
   OpenCLService ocl;
   ConnectedComponentLabelerImpl ccli;
-  CLIntBuffer centroids;
+  CLBuffer<Integer> centroids;
   int maxCount, numBlobs;
   int[] centroids_out;
   int[] workDim;
@@ -60,7 +60,7 @@ public class CentroidFinderImpl implements CentroidFinder {
   }
 
   @Override
-  public CLIntBuffer getCentroidBuffer() {
+  public CLBuffer<Integer> getCentroidBuffer() {
     return centroids;
   }
   

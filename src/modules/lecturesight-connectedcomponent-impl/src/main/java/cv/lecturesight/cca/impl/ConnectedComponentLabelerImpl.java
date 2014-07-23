@@ -17,8 +17,8 @@
  */
 package cv.lecturesight.cca.impl;
 
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLIntBuffer;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
@@ -41,7 +41,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
           new EnumMap<ConnectedComponentLabeler.Signal, OCLSignal>(ConnectedComponentLabeler.Signal.class);
   private OpenCLService ocl;
   private CLImage2D input;
-  CLIntBuffer labels_work, sizes_work, ids, sizes, changed;
+  CLBuffer<Integer> labels_work, sizes_work, ids, sizes, changed;
   int[] imageDim, bufferDim;
   int[] ids_out, sizes_out;
   long bufferSize;
@@ -99,7 +99,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   }
 
   @Override
-  public CLIntBuffer getLabelBuffer() {
+  public CLBuffer<Integer> getLabelBuffer() {
     return labels_work;
   }
 
@@ -145,12 +145,12 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   }
   
   @Override
-  public CLIntBuffer getIdBuffer() {
+  public CLBuffer<Integer> getIdBuffer() {
     return ids;
   }
   
   @Override
-  public CLIntBuffer getSizeBuffer() {
+  public CLBuffer<Integer> getSizeBuffer() {
     return sizes;
   }
   //</editor-fold>
