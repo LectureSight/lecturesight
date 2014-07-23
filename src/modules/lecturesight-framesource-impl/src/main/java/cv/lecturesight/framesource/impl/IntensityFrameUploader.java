@@ -26,7 +26,7 @@ public class IntensityFrameUploader implements FrameUploader {
   private final long bufferSize;
   private ByteBuffer hostBuffer;
   private CLBuffer<Byte> gpuRawBuffer;
-  private final CLImage2D gpuBuffer, temp;
+  private final CLImage2D gpuBuffer, tempBuffer;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
