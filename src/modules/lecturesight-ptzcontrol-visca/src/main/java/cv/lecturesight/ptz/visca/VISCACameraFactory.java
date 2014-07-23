@@ -139,7 +139,7 @@ public class VISCACameraFactory implements DummyInterface {
       throw new IllegalArgumentException("Device not found: " + device);
     }
     if (!(deviceFile.canRead() && deviceFile.canWrite())) {
-      throw new IllegalArgumentException("Device " + device + "is not accessable. Try adujusting file system rights on device.");
+      throw new IllegalArgumentException("Device " + device + " is not accessable. Try adujusting file system rights on device.");
     }
 
     // init VISAC devices
