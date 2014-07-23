@@ -163,7 +163,9 @@ public final class Activator implements BundleActivator, ServiceFactory {
         ctx = JavaCL.createContext(null, best);
         
       } catch (Exception e) {
-        throw new IllegalStateException("No suitable compute device found: " + type.name());
+        Exception ex = new IllegalStateException("No suitable compute device found: " + type.name());
+        log.error("!! OPENCL INITIALIZATION FAILED !! ", ex);
+        throw ex;
       }
 
     }
