@@ -18,6 +18,7 @@
 package cv.lecturesight.profile.ui;
 
 import cv.lecturesight.display.DisplayService;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
@@ -29,7 +30,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-/** UserInterface adapter for the Scene Profile Editor UI. In addition, this
+/**
+ * UserInterface adapter for the Scene Profile Editor UI. In addition, this
  * implements the <code>SceneProfileListener</code> necessary to act on profiles
  * being added or removed.
  *
@@ -43,19 +45,23 @@ public class SceneProfileUI implements UserInterface, SceneProfileListener {
   @Reference
   DisplayService dsps;                        // we need the display service
   @Reference
+  FrameSourceProvider fsp;                    // reference the FrameSourceProvider so
+  // this gets only activated if there is video input
+  @Reference
   SceneProfileManager spm;                    // ..and the scene profile manager
   private SceneProfileEditorPanel editor;     // our editor UI panel
-  
+
   protected void activate(ComponentContext cc) throws Exception {
     editor = new SceneProfileEditorPanel(this); // create new UI panel
+    editor.setProfileList(spm.getProfiles());   // load list of profiles
     editor.reset(spm.getActiveProfile());       // make UI load current profile
     spm.registerProfileListener(this);          // register at SPM
   }
-  
+
   protected void deactivate(ComponentContext cc) throws Exception {
     spm.unregisterProfileListener(this);        // unregister from SPM
   }
-  
+
   @Override
   public String getTitle() {
     return UI_TITLE;
@@ -70,12 +76,12 @@ public class SceneProfileUI implements UserInterface, SceneProfileListener {
   public boolean isResizeable() {
     return true;
   }
-  
+
   @Override
   public void profileActivated(SceneProfile profile) {
     /*if (editor.profile == profile) {
-      editor.reset(profile);
-    }*/
+     editor.reset(profile);
+     }*/
   }
 
   @Override

@@ -53,18 +53,10 @@ public class SceneProfile {
     return false;
   }
 
-  /** Puts <code>zone</code> into this profile. If a zone with the same name
-   * already exists it is replaced with the provided object reference. 
+  /** Puts <code>zone</code> into this profile.
    * @param zone 
    */
   public synchronized void putZone(Zone zone) {
-    /* make sure we remove zone with same name, 
-     so we do an update in this case */
-    for (Zone z : zones) {
-      if (z.name.equals(zone.name)) {
-        zones.remove(z);
-      }
-    }
     zones.add(zone);
   }
 
@@ -78,8 +70,8 @@ public class SceneProfile {
     }
   }
   
-  /** Returns a deep copy of the zone having the specified name or null if such 
-   * a zone can not be found.
+  /** Returns a deep copy of the first zone found having the specified name or 
+   * null if such a zone can not be found.
    * 
    * @param name of the Zone to be retrieved
    * @return Zone or null, if Zone with specified name is not found 

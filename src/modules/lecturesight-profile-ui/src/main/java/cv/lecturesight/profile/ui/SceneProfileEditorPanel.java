@@ -38,7 +38,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
@@ -46,7 +45,7 @@ import javax.swing.JOptionPane;
  * @author wulff
  */
 public class SceneProfileEditorPanel extends javax.swing.JPanel implements CustomRenderer {
-  
+
   final static int NEW_AREA_SIZE = 5;
   private SceneProfileUI parent;
   private Display cameraDisplay;
@@ -57,6 +56,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   private Dimension imageDim;
 
   enum DraggingType {
+
     NONE, WHOLE, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT
   }
 
@@ -99,7 +99,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   boolean currentProfileIsDefault() {
     return profile.name.equals("default");
   }
-  
+
   /**
    * Resets the editor and loads what is in <code>profile</code>.
    *
@@ -110,8 +110,10 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     selection = null;
     if (currentProfileIsDefault()) {
       defaultProfileNotification.setVisible(true);
+      saveButton.setEnabled(false);
     } else {
       defaultProfileNotification.setVisible(false);
+      saveButton.setEnabled(true);
     }
   }
 
@@ -126,11 +128,14 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   void setProfileList(List<SceneProfile> profiles) {
     // create new model for combo box and set it
     DefaultComboBoxModel model = new DefaultComboBoxModel();
+    int num = 0;
     for (SceneProfile p : profiles) {
       model.addElement(new SceneProfileListItem(p));
+      num++;
     }
+    parent.log.debug(num + " profiles available");
     profileChooser.setModel(model);
-    
+
     // make sure that currently edited profile is still in list, load currently
     // active profile if it was deleted
     SceneProfile next_profile = parent.spm.getActiveProfile();
@@ -151,7 +156,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   void showErrorDialog(String msg) {
     JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
   }
-  
+
   /**
    * Augments the image from the DisplayService with rendering of the areas from
    * the scene profile.
@@ -161,7 +166,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   @Override
   public void render(Graphics g) {
     for (Zone z : profile.zones) {
-      switch (z.getType()) { 
+      switch (z.getType()) {
         case IGNORE:
           drawZone(g, z, red_solid, red_transparent, (selection != null && z == selection.zone));
           break;
@@ -264,26 +269,26 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
       // do we have to create a new area?
       if (toolButtonIgnore.isSelected()) {
         selection = new ObjectSelection(
-                addZone("ignore", Zone.Type.IGNORE, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE), 
+                addZone("ignore", Zone.Type.IGNORE, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE),
                 DraggingType.DOWN_RIGHT);
         resetToolSelection();
         return;
       } else if (toolButtonTracking.isSelected()) {
         selection = new ObjectSelection(
-                addZone("track", Zone.Type.TRACK, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE), 
+                addZone("track", Zone.Type.TRACK, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE),
                 DraggingType.DOWN_RIGHT);
         resetToolSelection();
         return;
       } else if (toolButtonTrigger.isSelected()) {
         selection = new ObjectSelection(
-                addZone("trigger", Zone.Type.TRIGGER, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE), 
+                addZone("trigger", Zone.Type.TRIGGER, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE),
                 DraggingType.DOWN_RIGHT);
         resetToolSelection();
         return;
       }
 
       // or are we dragging area or handle?
-      if (selection != null) {
+      if (toolButtonPointer.isSelected() && selection != null) {
         int ax = selection.zone.x;
         int ay = selection.zone.y;
         int aw = selection.zone.width;
@@ -312,10 +317,10 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         }
       }
 
-      // or was an zone selected?
+      // or was a zone selected?
       // test for trigger zones first since they are most likely inside tacking zones
       for (Zone z : profile.zones) {
-        if (z.getType().equals(Zone.Type.TRIGGER) 
+        if (z.getType().equals(Zone.Type.TRIGGER)
                 && isInside(pos, z.x, z.y, z.width, z.height)) {
           if (selection == null || selection.zone != z) {
             selection = new ObjectSelection(z, DraggingType.WHOLE);
@@ -325,7 +330,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         }
       }
       for (Zone z : profile.zones) {
-        if (!z.getType().equals(Zone.Type.TRIGGER) 
+        if (!z.getType().equals(Zone.Type.TRIGGER)
                 && isInside(pos, z.x, z.y, z.width, z.height)) {
           if (selection == null || selection.zone != z) {
             selection = new ObjectSelection(z, DraggingType.WHOLE);
@@ -334,7 +339,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
           return;
         }
       }
-      
+
       // nothing was hit, so we reset the selection
       resetSelection();
     }
@@ -496,7 +501,6 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     ProfileChooserLabel.setText("Profile:");
     toolBar.add(ProfileChooserLabel);
 
-    profileChooser.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "default" }));
     profileChooser.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         profileChooserActionPerformed(evt);
@@ -529,6 +533,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     toolBar.add(jSeparator1);
 
     propertiesButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/property.png"))); // NOI18N
+    propertiesButton.setToolTipText("Edit profile properties (disbaled, not stale yet)");
+    propertiesButton.setEnabled(false);
     propertiesButton.setFocusable(false);
     propertiesButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
     propertiesButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
@@ -727,29 +733,48 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     dialog.setVisible(true);
   }//GEN-LAST:event_propertiesButtonActionPerformed
 
+  private String sanitizeFilename(String in) {
+    return in.toLowerCase()
+            .trim()
+            .replaceAll("\\s", "_")
+            .replaceAll("\\.scn$", "") + ".scn";
+  }
+
   private void newProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProfileButtonActionPerformed
-    String name = JOptionPane.showInputDialog(this, "Enter name for new profile: ", "Create Profile", 1);
-    if (name != null) {
-      name = name.trim();
-      if (!name.isEmpty() && !name.equalsIgnoreCase("default")) {
-        JFileChooser fc = new JFileChooser();
-        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-          try {
-            File file = fc.getSelectedFile();
-            FileOutputStream os = new FileOutputStream(file);
-            parent.log.info(SceneProfileSerializer.serialize(profile));
-            os.close();
-          } catch (IOException e) {
-            String msg = "Error while writing profile. " + e.getMessage();
-            parent.log.error(msg, e);
-            showErrorDialog(msg);
-          } catch (ProfileSerializerException e) {
-            String msg = "Error while serializing profile. " + e.getMessage();
-            parent.log.error(msg, e);
-            showErrorDialog(msg);
-          }
-        }
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   // TODO find out where artifact installer is looking at
+
+    String name = JOptionPane.showInputDialog(this, "Enter a display name for new profile: ", "Create Profile", 1);
+    String filename = sanitizeFilename(JOptionPane.showInputDialog(this, "Enter a file name for new profile: ", "Create Profile", 1));
+
+    if (filename.equals(".scn")) {
+      return;
+    }
+
+    File file = new File(profileDir.getAbsolutePath() + File.separator + filename);
+    if (file.exists()) {
+      if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(null,
+              "A file with the name " + filename + " already exists. Do you want to replace it?",
+              "Overwrite existing file?", JOptionPane.YES_NO_OPTION)) {
+        return;
       }
+    }
+
+    try {
+      FileOutputStream os = new FileOutputStream(file);
+      parent.log.info("Writing new scene profile to " + file.getAbsolutePath());
+      SceneProfile newProfile = new SceneProfile(name, "");
+      SceneProfileSerializer.serialize(newProfile, os);
+      os.close();
+      
+    } catch (IOException e) {
+      String msg = "Error while writing profile. " + e.getMessage();
+      parent.log.error(msg, e);
+      showErrorDialog(msg);
+      
+    } catch (ProfileSerializerException e) {
+      String msg = "Error while serializing profile. " + e.getMessage();
+      parent.log.error(msg, e);
+      showErrorDialog(msg);
     }
   }//GEN-LAST:event_newProfileButtonActionPerformed
 

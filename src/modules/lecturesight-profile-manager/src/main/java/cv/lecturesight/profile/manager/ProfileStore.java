@@ -32,10 +32,10 @@ public class ProfileStore {
   // mapping filename --> SceneProfile
   private HashMap<String, SceneProfile> fileMap = new HashMap<String, SceneProfile>();
   
-  // or List of SceneProfiles
+  // List of SceneProfiles
   private LinkedList<SceneProfile> profiles = new LinkedList<SceneProfile>();
   
-  /** Returns true if this store has a contains a profile with the given name.
+  /** Returns true if this store contains a profile with the given name.
    * 
    * @param name of the profile in question
    * @return true if profile was found
@@ -88,6 +88,7 @@ public class ProfileStore {
     if (this.hasProfile(profile)) {
       this.remove(profile);
     }
+    profiles.add(profile);
     for (String filename : fileMap.keySet()) {
       if (profile.equals(fileMap.get(filename))) {
         removeByFilename(filename);
@@ -101,12 +102,13 @@ public class ProfileStore {
       this.remove(profile);
     }
     fileMap.put(filename, profile);
+    profiles.add(profile);
   }
   
   void remove(SceneProfile profile) {
     profiles.remove(profile);
     for (String filename : fileMap.keySet()) {
-      if (profile.equals(fileMap.get(filename))) {
+      if (profile.name.equals(fileMap.get(filename).name)) {
         removeByFilename(filename);
       }
     }

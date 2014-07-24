@@ -35,7 +35,7 @@ import org.osgi.service.component.ComponentContext;
 @Service()
 public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactInstaller {
 
-  static final String PROPKEY_PROFILE = "cv.lecturesight.scene.profile";
+  static final String PROPKEY_PROFILE = "active.profile";
   static final String FILEEXT_PROFILE = ".scn";
   private Log log = new Log("Scene Profile Manager");
   @Reference
@@ -120,11 +120,13 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     String filename = profiles.getFilename(profile);
     if (filename != null) {
       try {
-        OutputStream out = new FileOutputStream(new File(filename));
+        File outfile = new File(filename);
+        log.info("Writing scene profile " + profile.name + " to " + outfile.getAbsolutePath());
+        OutputStream out = new FileOutputStream(outfile);
         SceneProfileSerializer.serialize(profile, out);
         out.close();
       } catch (Exception e) {
-        throw new RuntimeException("Unable to save profile.", e);
+        throw new RuntimeException("Failed to save profile! ", e);
       }
     } else {
       throw new IllegalArgumentException("The profile cannot be saved since it has no artifact origin.");
