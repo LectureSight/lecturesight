@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
@@ -141,10 +142,25 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     SceneProfile next_profile = parent.spm.getActiveProfile();
     for (SceneProfile p : profiles) {
       if (profile == p) {
+        setProfileSelection(profile);
         return;
       }
     }
     profile = next_profile;
+    setProfileSelection(profile);  
+  }
+  
+  /** make sure profile selector is in correct state
+   * 
+   * @param profile 
+   */
+  void setProfileSelection(SceneProfile profile) {
+    ComboBoxModel model = profileChooser.getModel();
+    for (int i = 0; i < model.getSize(); i++) {
+      if (((SceneProfileListItem)model.getElementAt(i)).profile.name.equals(profile.name)) {
+        profileChooser.setSelectedIndex(i);
+      }
+    }
   }
 
   Zone addZone(String name, Zone.Type type, int x, int y, int w, int h) {
@@ -640,7 +656,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         .addComponent(toolButtonTrigger)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(toolButtonMeasure)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 195, Short.MAX_VALUE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 300, Short.MAX_VALUE)
         .addComponent(editButton))
     );
 
@@ -656,7 +672,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 803, Short.MAX_VALUE)
+      .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 880, Short.MAX_VALUE)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -744,6 +760,9 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   // TODO find out where artifact installer is looking at
 
     String name = JOptionPane.showInputDialog(this, "Enter a display name for new profile: ", "Create Profile", 1);
+    if (name.trim().isEmpty()) {
+      return;
+    }
     String filename = sanitizeFilename(JOptionPane.showInputDialog(this, "Enter a file name for new profile: ", "Create Profile", 1));
 
     if (filename.equals(".scn")) {

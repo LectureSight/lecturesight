@@ -121,7 +121,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (filename != null) {
       try {
         File outfile = new File(filename);
-        log.info("Writing scene profile " + profile.name + " to " + outfile.getAbsolutePath());
+        log.info("Writing scene profile \"" + profile.name + "\" to " + outfile.getAbsolutePath());
         OutputStream out = new FileOutputStream(outfile);
         SceneProfileSerializer.serialize(profile, out);
         out.close();
@@ -179,9 +179,10 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   
   @Override
   public void install(File file) throws Exception {
+    String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-    profiles.putWithFilename(file.getAbsolutePath(), profile);
-    log.info("Installed scene profile " + profile.name + " from " + file.getName());
+    profiles.putWithFilename(filename, profile);
+    log.info("Installed scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersInstalled(profile);
     
     // test if the installed artifact contains the active profile, activate it if so
@@ -192,9 +193,10 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
 
   @Override
   public void update(File file) throws Exception {
+    String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-    profiles.putWithFilename(file.getAbsolutePath(), profile);
-    log.info("Updated scene profile " + profile.name);
+    profiles.putWithFilename(filename, profile);
+    log.info("Updated scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersUpdated(profile);
     
     // test if active profile was updated

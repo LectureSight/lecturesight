@@ -153,33 +153,31 @@ public class SceneProfile {
     SceneProfile otherProfile;
 
     // test if other is even a SceneProfile, cast to if so
-    if (other instanceof SceneProfile) {
-      otherProfile = (SceneProfile) other;
-    } else {
-      return false;
-    }
+//    if (other instanceof SceneProfile) {
+//      otherProfile = (SceneProfile) other;
+//    } else {
+//      return false;
+//    }
 
     // test if both have same number of zones
-    if (this.zones.size() != otherProfile.zones.size()) {
-      return false;
-    }
+//    if (this.zones.size() != otherProfile.zones.size()) {
+//      return false;
+//    }
 
     // test if zones in both profiles are the same
-    for (Zone zone : otherProfile.zones) {
-      if (!this.containsZone(zone)) {
-        return false;
-      }
-    }
+//    for (Zone zone : otherProfile.zones) {
+//      if (!this.containsZone(zone)) {
+//        return false;
+//      }
+//    }
 
-    return this.name.equals(otherProfile.name);
+    return this.name.equals(((SceneProfile)other).name);
   }
 
   @Override
   public int hashCode() {
     int hash = 3;
     hash = 89 * hash + (this.name != null ? this.name.hashCode() : 0);
-    hash = 89 * hash + (this.description != null ? this.description.hashCode() : 0);
-    hash = 89 * hash + (this.zones != null ? this.zones.hashCode() : 0);
     return hash;
   }
 }

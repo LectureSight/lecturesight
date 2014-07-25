@@ -20,7 +20,6 @@ package cv.lecturesight.profile.manager;
 import cv.lecturesight.profile.api.SceneProfile;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 /** Utility class that stores SceneProfiles.
@@ -29,19 +28,16 @@ import java.util.List;
  */
 public class ProfileStore {
   
-  // mapping filename --> SceneProfile
-  private HashMap<String, SceneProfile> fileMap = new HashMap<String, SceneProfile>();
-  
-  // List of SceneProfiles
-  private LinkedList<SceneProfile> profiles = new LinkedList<SceneProfile>();
+  // List of SceneProfiles and (optionally) a path to an artifact origin
+  private HashMap<SceneProfile, String> pl = new HashMap<SceneProfile, String>();
   
   /** Returns true if this store contains a profile with the given name.
    * 
    * @param name of the profile in question
    * @return true if profile was found
    */
-  boolean hasProfile(String name) {
-    for (SceneProfile p : profiles) {
+  synchronized boolean hasProfile(String name) {
+    for (SceneProfile p : pl.keySet()) {
       if (p.name.equals(name)) {
         return true;
       }
@@ -49,83 +45,65 @@ public class ProfileStore {
     return false;
   }
   
-  boolean hasProfile(SceneProfile profile)  {
-    return hasProfile(profile.name);
-  }
-  
-  boolean hasFilename(String filename) {
-    return fileMap.containsKey(filename);
-  }
-
-  String getFilename(SceneProfile profile) {
-    for (String path : fileMap.keySet()) {
-      SceneProfile p = fileMap.get(path);
-      if (profile.name.equals(p.name)) {
-        return path;
+  synchronized boolean hasProfile(SceneProfile profile)  {
+    for (SceneProfile p : pl.keySet()) {
+      if (p.equals(profile)) {
+        return true;
       }
     }
-    return null;
+    return false;
   }
   
-  SceneProfile getByName(String name) {
-    for (SceneProfile p : profiles) {
+  synchronized boolean hasFilename(String filename) {
+    return pl.values().contains(filename);
+  }
+
+  synchronized String getFilename(SceneProfile profile) {
+    return pl.get(profile);
+  }
+  
+  synchronized SceneProfile getByName(String name) {
+    for (SceneProfile p : pl.keySet()) {
       if (p.name.equals(name)) {
-        return p.clone();
+        return p;
       }
     }
     return null;
   }
   
-  SceneProfile getByFilename(String filename) {  
-    if (fileMap.containsKey(filename)) {
-      return fileMap.get(filename).clone();
-    } else {
-      return null;
-    }
-  }
-  
-  void put(SceneProfile profile) {
-    if (this.hasProfile(profile)) {
-      this.remove(profile);
-    }
-    profiles.add(profile);
-    for (String filename : fileMap.keySet()) {
-      if (profile.equals(fileMap.get(filename))) {
-        removeByFilename(filename);
-        putWithFilename(filename, profile);
+  synchronized SceneProfile getByFilename(String filename) {  
+    for (SceneProfile p : pl.keySet()) {
+      if (pl.get(p).equals(filename)) {
+        return p;
       }
     }
+    return null;
+  }
+  
+  synchronized void put(SceneProfile profile) {
+    pl.put(profile, null);
   }
 
-  void putWithFilename(String filename, SceneProfile profile) {
-    if (this.hasProfile(profile)) {
-      this.remove(profile);
-    }
-    fileMap.put(filename, profile);
-    profiles.add(profile);
+  synchronized void putWithFilename(String filename, SceneProfile profile) {
+    pl.put(profile, filename);
   }
   
-  void remove(SceneProfile profile) {
-    profiles.remove(profile);
-    for (String filename : fileMap.keySet()) {
-      if (profile.name.equals(fileMap.get(filename).name)) {
-        removeByFilename(filename);
-      }
-    }
+  synchronized void remove(SceneProfile profile) {
+    pl.remove(profile);
   }
     
-  void removeByFilename(String filename) {
-    if (fileMap.containsKey(filename)) {
-      SceneProfile p = fileMap.get(filename);
-      profiles.remove(p);
-      fileMap.remove(filename);
+  synchronized void removeByFilename(String filename) {
+    for (SceneProfile p : pl.keySet()) {
+      if (pl.get(p).equals(filename)) {
+        pl.remove(p);
+      }
     }
   }
   
-  List<SceneProfile> getAll() {
+  synchronized List<SceneProfile> getAll() {
     ArrayList<SceneProfile> list = new ArrayList<SceneProfile>();
-    for (SceneProfile p : profiles) {
-      list.add(p.clone());
+    for (SceneProfile p : pl.keySet()) {
+      list.add(p);
     }
     return list;
   }
