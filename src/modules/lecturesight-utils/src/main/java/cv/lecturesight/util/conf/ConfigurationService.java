@@ -27,6 +27,7 @@ public interface ConfigurationService {
   Properties getSystemDefaults();
   void loadSystemConfiguration(InputStream is);
   void saveSystemConfiguration(OutputStream os);
+  void notifyListeners();
   void addConfigurationListener(ConfigurationListener l);
   void removeConfigurationListener(ConfigurationListener l);
 }

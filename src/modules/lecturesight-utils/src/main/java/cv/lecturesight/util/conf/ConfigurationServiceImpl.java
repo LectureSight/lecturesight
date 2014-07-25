@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class ConfigurationServiceImpl implements ConfigurationService {
@@ -71,7 +70,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
   }
 
-  void notifyListeners() {
+  @Override
+  public void notifyListeners() {
     for (Iterator<ConfigurationListener> it = listeners.iterator(); it.hasNext(); ) {
       it.next().configurationChanged();
     }
