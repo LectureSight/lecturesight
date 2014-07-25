@@ -33,7 +33,7 @@
         <module>modules/lecturesight-framesource-api</module>
         <module>modules/lecturesight-framesource-impl</module>
         <module>modules/lecturesight-framesource-v4l</module>
-        <module>modules/lecturesight-framesource-videofile</module>
+        <!-- module>modules/lecturesight-framesource-videofile</module -->
         <module>modules/lecturesight-connectedcomponent-api</module>
         <module>modules/lecturesight-connectedcomponent-impl</module>
         <module>modules/lecturesight-videoanalysis-api</module>
@@ -46,7 +46,7 @@
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-heartbeat</module>
         <module>modules/lecturesight-visualization</module>
-        <module>modules/lecturesight-decorator-head</module>
+        <!-- module>modules/lecturesight-decorator-head</module -->
         <module>modules/lecturesight-ptzcontrol-api</module>
         <module>modules/lecturesight-ptzcontrol-visca</module>
         <module>modules/lecturesight-steeringworker-api</module>
@@ -57,7 +57,7 @@
         <module>modules/lecturesight-cameraoperator-api</module>
         <module>modules/lecturesight-cameraoperator-simple</module>
         <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
-        <module>modules/lecturesight-decorator-color</module>
+        <!-- module>modules/lecturesight-decorator-color</module -->
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
         <!-- module>modules/lecturesight-decorator-person</module -->

@@ -24,8 +24,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name="lecturesight.gui.systemstatus", immediate=true)
-@Service
+//@Component(name="lecturesight.gui.systemstatus", immediate=true)
+//@Service
 public class SystemStatusUI implements UserInterface {
 
     Log log = new Log("System Status");

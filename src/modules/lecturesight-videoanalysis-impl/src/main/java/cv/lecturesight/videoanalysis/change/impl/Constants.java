@@ -22,7 +22,7 @@ public class Constants {
   final static String SIGNAME_DONE_DETECTION = "cv.lecturesight.change.detect.DONE";
   final static String SIGNAME_DONE_CLEANING = "cv.lecturesight.change.clean.DONE";
   final static String PROPKEY_THRESH = "changedetect.threshold";
-  final static String WINDOWNAME_CHANGE_RAW = "Interframe Change";
-  final static String WINDOWNAME_CHANGE_DILATED = "Interframe Change Dilated";
+  final static String WINDOWNAME_CHANGE_RAW = "map.interframe.change";
+  final static String WINDOWNAME_CHANGE_DILATED = "map.interframe.dilated";
   
 }
