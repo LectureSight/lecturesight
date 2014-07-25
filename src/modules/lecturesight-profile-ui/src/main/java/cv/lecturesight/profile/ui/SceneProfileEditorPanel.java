@@ -69,6 +69,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   private Color green_transparent = new Color(0, 255, 0, 100);
   private Color yellow_solid = new Color(255, 255, 0, 255);
   private Color yellow_transparent = new Color(255, 255, 0, 180);
+  private Color blue_solid = new Color(0, 0, 255, 255);
+  private Color blue_transparent = new Color(0, 0, 255, 180);
 
   /**
    * Creates new form SceneProfileEditorPanel
@@ -80,7 +82,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   public SceneProfileEditorPanel(SceneProfileUI parent) {
     this.parent = parent;
     initComponents();
-    cameraDisplay = parent.dsps.getDisplayBySID("display:input");
+    cameraDisplay = parent.dsps.getDisplayBySID("cam.overview.input");
     imageDim = cameraDisplay.getSize();
     cameraDisplayPanel = cameraDisplay.getDisplayPanel();
     cameraDisplayPanel.setCustomRenderer(this);
@@ -192,6 +194,9 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         case TRIGGER:
           drawTriggerZone(g, z, yellow_transparent, (selection != null && z == selection.zone));
           break;
+        case PERSON:
+          drawTriggerZone(g, z, blue_transparent, (selection != null && z == selection.zone));
+          break;
       }
     }
   }
@@ -298,6 +303,12 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
       } else if (toolButtonTrigger.isSelected()) {
         selection = new ObjectSelection(
                 addZone("trigger", Zone.Type.TRIGGER, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE),
+                DraggingType.DOWN_RIGHT);
+        resetToolSelection();
+        return;
+      } else if (toolButtonMeasure.isSelected()) {
+        selection = new ObjectSelection(
+                addZone("person", Zone.Type.PERSON, pos.x, pos.y, NEW_AREA_SIZE, NEW_AREA_SIZE),
                 DraggingType.DOWN_RIGHT);
         resetToolSelection();
         return;
