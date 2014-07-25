@@ -27,6 +27,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
@@ -39,6 +40,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     } catch (Exception e) {
     }
     initComponents();
@@ -52,7 +54,12 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   }
 
   public void removeServiceUI(UserInterface ui) {
-    // TODO implement !!
+    for (JMenuItem item : servicesMenuItems.keySet()) {
+      if (servicesMenuItems.get(item) == ui) {
+        servicesMenu.remove(item);
+        servicesMenuItems.remove(item);
+      }
+    }
   }
   
   @Override
@@ -75,6 +82,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
       iframe.setVisible(true);
       desktop.add(iframe);
       content.repaint();
+      iframe.moveToFront();
       visibleUIs.put(ui, iframe);
     }
   }
