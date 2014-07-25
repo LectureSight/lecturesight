@@ -2,10 +2,9 @@ package cv.lecturesight.objecttracker.impl;
 
 import cv.lecturesight.decorator.api.DecoratorManager;
 import cv.lecturesight.decorator.api.DecoratorManager.CallType;
-import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.decorator.color.ColorHistogram;
 import cv.lecturesight.framesource.FrameSource;
+import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.opencl.OpenCLService;
@@ -15,8 +14,10 @@ import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
@@ -37,7 +38,7 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(name = "lecturesight.objecttracker.simpel", immediate = true)
 @Service
-public class ObjectTrackerImpl implements ObjectTracker {
+public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
   private Log log = new Log("Object Tracker");
   
@@ -147,6 +148,11 @@ public class ObjectTrackerImpl implements ObjectTracker {
     return trackedObjects;
   }
   //</editor-fold>
+
+  @Override
+  public void configurationChanged() {
+    updateConfiguration();
+  }
 
   /** This Triggerable is fired every time the RegionTracker signals that it
    *  has finished its work.

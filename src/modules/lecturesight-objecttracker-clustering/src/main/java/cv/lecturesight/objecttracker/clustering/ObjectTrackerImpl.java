@@ -19,7 +19,6 @@ package cv.lecturesight.objecttracker.clustering;
 
 import cv.lecturesight.decorator.api.DecoratorManager;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.opencl.OpenCLService;
@@ -29,8 +28,10 @@ import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +48,7 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(name = "lecturesight.objecttracker.simpel", immediate = true)
 @Service
-public class ObjectTrackerImpl implements ObjectTracker {
+public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
   private Log log = new Log("Object Tracker");
   @Reference
@@ -167,10 +168,10 @@ public class ObjectTrackerImpl implements ObjectTracker {
     // update bounding box
     BoundingBox rBox = region.getBoundingBox();
     Position rPos = region.getCentroid();
-    BoundingBox oBox = new BoundingBox(
-            new Position(rPos.getX() - (template_width/2), rBox.getMin().getY()), 
-            new Position(rPos.getX() + (template_width/2), rBox.getMin().getY() + template_height));
-    object.setProperty(OBJ_PROPKEY_BBOX, oBox);
+//    BoundingBox oBox = new BoundingBox(
+//            new Position(rPos.getX() - (template_width/2), rBox.getMin().getY()), 
+//            new Position(rPos.getX() + (template_width/2), rBox.getMin().getY() + template_height));
+    object.setProperty(OBJ_PROPKEY_BBOX, rBox);
 
     double distance = lastPos.distance(region.getCentroid());
     if (distance < width_max / 5 && distance > 0) {
@@ -178,6 +179,11 @@ public class ObjectTrackerImpl implements ObjectTracker {
       int movement = (Integer) object.getProperty(OBJ_PROPKEY_MOVEMENT);
       object.setProperty(OBJ_PROPKEY_MOVEMENT, ++movement);
     }
+  }
+
+  @Override
+  public void configurationChanged() {
+    updateConfiguration();
   }
 
   /**
