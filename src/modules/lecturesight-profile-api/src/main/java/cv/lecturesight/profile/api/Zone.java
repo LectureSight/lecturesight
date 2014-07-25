@@ -20,7 +20,7 @@ package cv.lecturesight.profile.api;
 public class Zone implements Cloneable {
   
   public enum Type {
-    TRACK, IGNORE, TRIGGER;
+    TRACK, IGNORE, TRIGGER, PERSON;
   }
   
   public String name;
