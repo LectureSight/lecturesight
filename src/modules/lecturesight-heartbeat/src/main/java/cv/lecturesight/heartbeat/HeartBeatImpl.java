@@ -58,11 +58,25 @@ public class HeartBeatImpl implements HeartBeat {
   protected void activate(ComponentContext cc) throws Exception {
     sig_BEGINFRAME = ocl.getSignal("BEGIN-FRAME");
     log.info("Activated.");
-    if (config.getBoolean(PROPKEY_AUTOSTART)) {
+    final int autostart = config.getInt(PROPKEY_AUTOSTART);
+    if (autostart > 0) {
       init();
-      log.info("Autostart");
-      iterationsToRun = -1;
-      nextFrame();    // start system by getting first frame
+      log.info("Autostart in " + autostart + "ms...");
+      
+      new Thread(new Runnable() {
+
+        @Override
+        public void run() {
+          try {
+            Thread.sleep(autostart);
+          } catch (InterruptedException e) {
+            // interrupted
+          }
+          iterationsToRun = -1;
+          nextFrame();
+        }
+        
+      }).start();
     }
   }
   
