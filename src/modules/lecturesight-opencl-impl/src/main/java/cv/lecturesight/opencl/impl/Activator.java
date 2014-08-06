@@ -21,6 +21,7 @@ import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
 import com.nativelibs4java.opencl.CLPlatform;
+import com.nativelibs4java.opencl.CLPlatform.DeviceComparator;
 import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
 import com.nativelibs4java.opencl.JavaCL;
@@ -34,8 +35,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -46,7 +51,9 @@ import org.osgi.framework.ServiceRegistration;
 
 public final class Activator implements BundleActivator, ServiceFactory {
 
-  private final static String PROPKEY_DOPROFILING = "cv.lecturesight.profiling";
+  private final static String PROPKEY_DOPROFILING = "ocl.profiling";
+  private final static String PROPKEY_DEVICE_TYPE = "ocl.device.type";
+  private final static String PROPKEY_USE_GL = "ocl.use.gl";
   private Log log = new Log("OpenCL Service");
   private BundleContext bundleContext;
   private CLContext oclContext;
@@ -64,16 +71,16 @@ public final class Activator implements BundleActivator, ServiceFactory {
     log.info(generateDeviceReport(oclContext.getPlatform().getBestDevice()));
 
     // set up CL Command Queue
-    oclQueue = oclContext.createDefaultQueue();  
-    
+    oclQueue = oclContext.createDefaultQueue();
+
     // set up Execution
     dispatcher = new OCLSignalDispatcher();
-    executor = new OCLExecutor(oclQueue); 
+    executor = new OCLExecutor(oclQueue);
     executor.start();
     dispatcher.start();
-    
+
     // set up profiler if configured
-    if (profilingOn()) {
+    if (configured(PROPKEY_DOPROFILING)) {
       log.info("Profiling is enabled!");
       profiler = new ProfilingServer();
       OCLSignal SIG_nextFrame = dispatcher.signalManager.createSignal("BEGIN-FRAME");
@@ -90,7 +97,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
     Map<String, CLProgram> progs = buildPrograms(context.getBundle().findEntries("opencl", "*.cl", false));
     OCLUtilsImpl utils = new OCLUtilsImpl(oclQueue, progs.get("imageutils"));
     OpenCLServiceImpl.utils = utils;
-    
+
     // set up service factory
     bundleContext.registerService(OpenCLService.class.getName(), this, null);
     log.info("Activated");
@@ -99,7 +106,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
   @Override
   public void stop(BundleContext context) throws Exception {
     log.info("Shutting down");
-    if (profilingOn()) {
+    if (configured(PROPKEY_DOPROFILING)) {
       profiler.shutdown();
     }
     dispatcher.shutdown();
@@ -107,39 +114,67 @@ public final class Activator implements BundleActivator, ServiceFactory {
     oclContext.release();
   }
 
-  /** Initialize the OpenCL Context
-   * 
+  /**
+   * Initialize the OpenCL Context
+   *
    * @return
    * @throws Exception
    */
   private CLContext initOpenCL() throws Exception {
-//    Class.forName("com.nativelibs4java.opencl.JavaCL");
     CLContext ctx = null;
 
-    // Try to create OpenGL shared context if demanded
-//    if ( config.getBoolean(...) ) {
-//      try {
-//        ctx = JavaCL.createContextFromCurrentGL();
-//        log.info("Successfully created OpenCL context from current OpenGL context.");
-//      } catch (RuntimeException e) {
-//        log.warn("Unable to create OpenCL context from current OpenGL context.");
-//        ctx = null;
-//      }
-//    }
+    // create OpenGL shared context if configured...
+    if (configured(PROPKEY_USE_GL)) {
 
-    // Try to create standard context if creation of OpenGL shared context failed or was not demanded
-    if (ctx == null) {
       try {
-        ctx = JavaCL.createBestContext();
-      } catch (Exception e) {
-        throw new IllegalStateException("Unable to create valid OpenCL context!");
+        ctx = JavaCL.createContextFromCurrentGL();
+        log.info("Successfully created OpenCL context from current OpenGL context.");
+      } catch (RuntimeException e) {
+        log.warn("Unable to create OpenCL context from current OpenGL context.");
+        ctx = null;
       }
+
+    } else {    // ...create configured/default compute device otherwise
+
+      CLDevice.Type type = configuredDeviceType();
+      try {
+        CLPlatform[] platforms = JavaCL.listPlatforms();
+        List<CLDevice> devices = new LinkedList();
+        
+        // find all availabel devices of configured type
+        for (CLPlatform platform : platforms) {
+          devices.addAll(Arrays.asList(platform.listDevices(type, true)));
+        }
+        
+        // find best device
+        Iterator<CLDevice> it = devices.iterator();
+        CLDevice best = it.next();
+        if (it.hasNext()) {
+          List<CLPlatform.DeviceFeature> features = new LinkedList();
+          features.add(CLPlatform.DeviceFeature.MaxComputeUnits);
+          DeviceComparator comp = new DeviceComparator(features);
+          while (it.hasNext()) {
+            CLDevice device = it.next();
+            best = comp.compare(device, best) > 0 ? device : best;
+          }
+        }
+      
+        // FIXME provide ContextProperties?
+        ctx = JavaCL.createContext(null, best);
+        
+      } catch (Exception e) {
+        Exception ex = new IllegalStateException("No suitable compute device found: " + type.name());
+        log.error("!! OPENCL INITIALIZATION FAILED !! ", ex);
+        throw ex;
+      }
+
     }
 
+    // testing if context is working by getting platform information 
     try {
       CLPlatform platform = ctx.getPlatform();
       log.info("OpenCL platform: " + platform.getName() + " " + platform.getVersion() + " " + platform.getProfile());
-    } catch (Exception e) {   // this will also catch the case where ctx == null
+    } catch (Exception e) {   
       throw new IllegalStateException("Unable to query context for OpenCL platform!", e);
     }
 
@@ -170,8 +205,8 @@ public final class Activator implements BundleActivator, ServiceFactory {
     serviceInstance.programs = new SimpleOCLProgramStore(programs);
     serviceInstance.executor = executor;
     serviceInstance.dispatcher = dispatcher;
-    
-    if (profilingOn()) {
+
+    if (configured(PROPKEY_DOPROFILING)) {
       serviceInstance.profiler = profiler;
       serviceInstance.doProfiling = true;
     }
@@ -213,13 +248,28 @@ public final class Activator implements BundleActivator, ServiceFactory {
     }
     return out;
   }
-  
-  public static boolean profilingOn() {
+
+  /**
+   * Returns <code>true</code> if system property <code>propkey</code> is "true"|"yes"|"on".
+   *
+   * @param propkey name of system property
+   * @return true if configured, false otherwise
+   */
+  public static boolean configured(String propkey) {
     try {
-      String pvalue = System.getProperty(PROPKEY_DOPROFILING);
+      String pvalue = System.getProperty(propkey);
       return (pvalue.equalsIgnoreCase("true") || pvalue.equalsIgnoreCase("yes") || pvalue.equalsIgnoreCase("on"));
     } catch (Exception e) {
       return false;
+    }
+  }
+
+  public static CLDevice.Type configuredDeviceType() {
+    try {
+      String strval = System.getProperty(PROPKEY_DEVICE_TYPE);
+      return CLDevice.Type.valueOf(strval);
+    } catch (Exception e) {
+      return CLDevice.Type.GPU;   // defaults is GPU 
     }
   }
 }

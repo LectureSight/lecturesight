@@ -53,7 +53,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_MASK = "input.mask";
-  final static String WINDOWNAME_INPUT = "Video Input";
+  final static String DISPLAYNAME_INPUT = "display:input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
@@ -143,11 +143,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     FrameSourceImpl fsrc = (FrameSourceImpl)frameSource;
     if (sourceTypes.containsKey(fsrc.getType())) {
       FrameGrabberFactory factory = sourceTypes.get(fsrc.getType());
-      factory.destroyFrameGrabber(fsrc.frameGrabber);
-      fsrc.uploader.destroy();
-      
-      // FIXME also destroy host- and GPU-buffer !!!
-    
+      factory.destroyFrameGrabber(fsrc.frameGrabber);    // de-init the stuff that gets the frames (native libs etc.)
+      fsrc.uploader.destroy();                           // free GPU buffers created by uploader               
     } else {
       throw new FrameSourceException("No factory registered for type " + fsrc.getType());
     }
@@ -217,7 +214,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private void activateProvider(String mrl) {
     try {
       FrameSource fs = createFrameSource(mrl);
-      dsps.registerDisplay(WINDOWNAME_INPUT, fs.getImage(), fs.getSignal());
+      dsps.registerDisplay(DISPLAYNAME_INPUT, fs.getImage(), fs.getSignal());
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {

@@ -1,0 +1,25 @@
+
+# ignore maven2 build directories
+target/
+
+# ignore Eclipse project data
+.project
+.classpath
+.metadata/
+.settings/
+
+# ignore NetBeans project data
+*/nbproject/*
+nbactions.xml
+nbactions*.xml
+nb-configuration.xml
+
+# Class Files #
+*.class
+
+# Package Files #
+*.jar
+
+# Ignore all temporary editor files
+.*.swp
+

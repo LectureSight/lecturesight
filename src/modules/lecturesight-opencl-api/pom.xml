@@ -19,8 +19,8 @@
   <dependencies>
     <dependency>
       <groupId>com.nativelibs4java</groupId>
-      <artifactId>javacl</artifactId>
-      <version>1.0-beta-6</version>
+      <artifactId>javacl-jna</artifactId>
+      <version>1.0.0-RC3</version>
     </dependency>
   </dependencies>
 

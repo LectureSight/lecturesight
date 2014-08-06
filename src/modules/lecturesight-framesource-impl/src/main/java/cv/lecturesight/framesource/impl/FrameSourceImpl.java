@@ -63,13 +63,14 @@ class FrameSourceImpl implements FrameSource {
     try {
       Buffer buf = frameGrabber.captureFrame();
       if (buf != null) {
-          uploader.upload(buf);
-          frameNumber++;
+        uploader.upload(buf);
+        frameNumber++;
+      } else {
+        throw new IllegalStateException("Underlying frame grabber did not provide data.");
       }
     } catch (Exception e) {
       throw new FrameSourceException("Unable to capture frame.", e);
     }
-//    frameNumber++;
   }
 
   @Override

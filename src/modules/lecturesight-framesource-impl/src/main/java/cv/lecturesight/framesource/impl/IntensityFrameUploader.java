@@ -1,6 +1,6 @@
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLByteBuffer;
+import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLImageFormat;
@@ -25,8 +25,8 @@ public class IntensityFrameUploader implements FrameUploader {
   private final int[] workDim;
   private final long bufferSize;
   private ByteBuffer hostBuffer;
-  private CLByteBuffer gpuRawBuffer;
-  private final CLImage2D gpuBuffer, temp;
+  private CLBuffer<Byte> gpuRawBuffer;
+  private final CLImage2D gpuBuffer, tempBuffer;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
@@ -50,7 +50,7 @@ public class IntensityFrameUploader implements FrameUploader {
     gpuBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
-    temp = ocl.context().createImage2D(CLMem.Usage.InputOutput,
+    tempBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
 
@@ -70,9 +70,9 @@ public class IntensityFrameUploader implements FrameUploader {
       public void launch(CLQueue queue) {
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
         if (mask != null) {
-          conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, temp);
+          conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, tempBuffer);
           conversionK.enqueueNDRange(queue, workDim, uploadDone);
-          maskK.setArgs(temp, mask, gpuBuffer);
+          maskK.setArgs(tempBuffer, mask, gpuBuffer);
           maskK.enqueueNDRange(queue, workDim);
         } else {
           conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, gpuBuffer);
@@ -94,6 +94,11 @@ public class IntensityFrameUploader implements FrameUploader {
   public void destroy() {
     // deregister this uploaders computationRun
     ocl.unregisterLaunch(sig_start, uploadRun);
+    
+    // free GPU buffers
+    gpuRawBuffer.release();
+    gpuBuffer.release();
+    tempBuffer.release();
   }
 
   @Override
@@ -109,7 +114,7 @@ public class IntensityFrameUploader implements FrameUploader {
   @Override
   public CLImage2D getRawOutputImage() {
     if (mask != null) {
-      return temp;
+      return tempBuffer;
     } else {
       return gpuBuffer;
     }

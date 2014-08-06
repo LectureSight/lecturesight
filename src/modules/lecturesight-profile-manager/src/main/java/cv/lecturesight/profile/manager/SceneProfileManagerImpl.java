@@ -17,177 +17,206 @@
  */
 package cv.lecturesight.profile.manager;
 
-import cv.lecturesight.profile.api.ConfigParameter;
-import cv.lecturesight.profile.api.ProfileChangeListener;
 import cv.lecturesight.profile.api.SceneProfile;
+import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
+import cv.lecturesight.profile.api.SceneProfileSerializer;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
 import java.util.*;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import org.osgi.service.component.ComponentContext;
 import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 
+@Component(name="lecturesight.profile.manager", immediate=true)
+@Service()
 public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactInstaller {
 
-  static final String FILEEXT_PROFILE = ".spf";
+  static final String PROPKEY_PROFILE = "cv.lecturesight.scene.profile";
+  static final String FILEEXT_PROFILE = ".scn";
   private Log log = new Log("Scene Profile Manager");
   @Reference
   private Configuration config;
-  private Map<String, SceneProfile> profiles = new HashMap<String, SceneProfile>();
-  private Map<String, String> installed = new HashMap<String, String>();
-  private Set<ProfileChangeListener> subscribers = new HashSet<ProfileChangeListener>();
-  private SceneProfile activeProfile = new SceneProfile("default", "default");
-  private Marshaller serializer;
-  private Unmarshaller deserializer;
+  private ProfileStore profiles = new ProfileStore();
+  private SceneProfile defaultProfile, activeProfile;
+  private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
+  private String configuredProfile;
 
   protected void activate(ComponentContext cc) throws Exception {
-    JAXBContext context = JAXBContext.newInstance(SceneProfile.class);
-    serializer = context.createMarshaller();
-    deserializer = context.createUnmarshaller();
-    log.info("Activated");
+    // create system default profile
+    defaultProfile = new SceneProfile("default", "System default profile");
+    defaultProfile.name = "default";
+    profiles.put(defaultProfile);
+    
+    // setting defaultProfile as default profile 
+    // as long as profile artifacts have not been loaded
+    activeProfile = defaultProfile;   
+    
+    // get name of configured profile
+    configuredProfile = config.get(PROPKEY_PROFILE);
+    log.info("Activated. Configured scene profile is: " + configuredProfile);
   }
 
   protected void deactivate(ComponentContext cc) {
-    log.info("Deactivated");
-  }
-
-  @Override
-  public void registerProfileListener(ProfileChangeListener listener) {
-    subscribers.add(listener);
-  }
-  
-  @Override
-  public void unregisterProfileListener(ProfileChangeListener listener) {
-    subscribers.remove(listener);
-  }
-  
-  private void notifySubscribers(SceneProfile profile) {
-    for (ProfileChangeListener listener : subscribers) {
-      listener.profileChanged(profile);
-    }
-  }
-
-  @Override
-  public void setActiveProfile(String id) {
-    if (profiles.containsKey(id)) {
-      activeProfile = profiles.get(id);
-      for (ConfigParameter param : activeProfile.getConfigOverride()) {
-        config.set(param.getKey(), param.getValue());
-      }
-      notifySubscribers(activeProfile);
-    } else {
-      log.warn("Profile " + id + " does not exist.");
-    }
+    log.info("Deactivated.");
   }
 
   @Override
   public SceneProfile getActiveProfile() {
-    return activeProfile;
+    return activeProfile.clone();
+  }
+
+  @Override
+  public void setActiveProfile(SceneProfile profile) {
+    activeProfile = profile.clone();
+    notifySubscribersActivated(profile);
+    log.info("Activated scene profile: " + activeProfile.name);
   }
 
   @Override
   public List<SceneProfile> getProfiles() {
-    List<SceneProfile> out = new LinkedList<SceneProfile>();
-    out.addAll(profiles.values());
-    return out;
+    return profiles.getAll();
   }
-
+  
   @Override
-  public void addProfile(SceneProfile profile) {
-    profiles.put(profile.getId(), profile);
+  public void putProfile(SceneProfile profile) {
+    if (profiles.hasProfile(profile)) {
+      profiles.put(profile);
+      notifySubscribersUpdated(profile);
+    } else {
+      profiles.put(profile);
+      notifySubscribersInstalled(profile);
+    }
+    if (profile.equals(activeProfile)) {
+      setActiveProfile(profile);
+    }
   }
-
+  
   @Override
-  public void removeProfile(String id) {
-    if (profiles.containsKey(id)) {
-      profiles.remove(id);
-      if (activeProfile.getId().equals(id)) {
-        log.warn("Active profile was removed! Changes to profile will not be stored from now on. Profile will stay active until other profile is choosen.");
+  public void removeProfile(SceneProfile profile) {
+    String filename = profiles.getFilename(profile);
+    if (filename == null) {
+      profiles.remove(profile);
+      notifySubscribersRemoved(profile);
+      if (profile.equals(activeProfile)) {
+        setActiveProfile(defaultProfile);
       }
+    } else {
+      throw new RuntimeException("Cannot remove profile " + profile.name + " because it was installed from file. Delete " + filename);
     }
   }
 
   @Override
-  public SceneProfile loadProfile(InputStream is) throws IllegalArgumentException {
-    try {
-      SceneProfile out = (SceneProfile) deserializer.unmarshal(is);
-      is.close();
-      return out;
-    } catch (JAXBException e) {
-      String msg = "Unable to deserialize SceneProfile: " + e;
-      log.error(msg, e);
-      throw new IllegalArgumentException(msg);
-    } catch (IOException e) {
-      log.warn("Unable to close InputStream: " + e.getMessage());
+  public void saveProfile(SceneProfile profile) {
+    // the system default profile cannot be saved to file
+    if (profile.equals(defaultProfile)) {
+      throw new IllegalArgumentException("The profile cannot be saved since it is the default profile.");
     }
-    return null;
+    
+    // save the profile if it was installed from file
+    String filename = profiles.getFilename(profile);
+    if (filename != null) {
+      try {
+        OutputStream out = new FileOutputStream(new File(filename));
+        SceneProfileSerializer.serialize(profile, out);
+        out.close();
+      } catch (Exception e) {
+        throw new RuntimeException("Unable to save profile.", e);
+      }
+    } else {
+      throw new IllegalArgumentException("The profile cannot be saved since it has no artifact origin.");
+    }
+  }
+  
+  
+ // <editor-fold defaultstate="collapsed" desc="Event Notification Stuff">   
+  @Override
+  public void registerProfileListener(SceneProfileListener listener) {
+    subscribers.add(listener);
   }
 
   @Override
-  public String serializeProfile(SceneProfile profile) {
-    try {
-      StringWriter sw = new StringWriter();
-      serializer.marshal(profile, sw);
-      return sw.toString();
-    } catch (JAXBException e) {
-      String msg = "Unable to deserialize SceneProfile: " + e;
-      log.warn(msg);
-      throw new IllegalArgumentException(msg);
-    }
+  public void unregisterProfileListener(SceneProfileListener listener) {
+    subscribers.remove(listener);
   }
 
-  @Override
-  public void serializeProfile(SceneProfile profile, OutputStream os) {
-    try {
-      serializer.marshal(profile, os);
-    } catch (JAXBException e) {
-      String msg = "Unable to deserialize SceneProfile: " + e;
-      log.warn(msg);
-      throw new IllegalArgumentException(msg);
+  private void notifySubscribersActivated(SceneProfile profile) {
+    for (SceneProfileListener listener : subscribers) {
+      listener.profileActivated(profile);
+    }
+  }  
+  
+  private void notifySubscribersInstalled(SceneProfile profile) {
+    for (SceneProfileListener listener : subscribers) {
+      listener.profileInstalled(profile);
     }
   }
-
-  @Override
-  public void install(File file) throws Exception {
-    SceneProfile profile = loadProfile(new FileInputStream(file));
-    if (profile.getId().equals(activeProfile.getId())) {
-      notifySubscribers(profile);
-    }
-    addProfile(profile);
-    installed.put(file.getName(), profile.getId());
-    log.info("Installed scene profile " + profile.getName() + " [" + profile.getId() + "]");
-  }
-
-  @Override
-  public void update(File file) throws Exception {
-    SceneProfile profile = loadProfile(new FileInputStream(file));
-    if (profile.getId().equals(activeProfile.getId())) {
-      notifySubscribers(profile);
-    }
-    profiles.put(profile.getId(), profile);
-    log.info("Updated scene profile " + profile.getName() + " [" + profile.getId() + "]");
-  }
-
-  @Override
-  public void uninstall(File file) throws Exception {
-    String filename = file.getName();
-    if (installed.containsKey(filename)) {
-      String id = installed.get(filename);
-      SceneProfile profile = profiles.get(id);
-      removeProfile(id);
-      log.info("Updated scene profile " + profile.getName() + " [" + id + "]");
+  
+  private void notifySubscribersUpdated(SceneProfile profile) {
+    for (SceneProfileListener listener : subscribers) {
+      listener.profileUpdated(profile);
     }
   }
-
+  
+  private void notifySubscribersRemoved(SceneProfile profile) {
+    for (SceneProfileListener listener : subscribers) {
+      listener.profileRemoved(profile);
+    }
+  }
+ // </editor-fold>
+  
+  
+ // <editor-fold defaultstate="collapsed" desc="ArtifactInstaller Methods"> 
   @Override
   public boolean canHandle(File file) {
     return file.isFile() && file.getName().toLowerCase().endsWith(FILEEXT_PROFILE);
   }
+  
+  @Override
+  public void install(File file) throws Exception {
+    SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
+    profiles.putWithFilename(file.getAbsolutePath(), profile);
+    log.info("Installed scene profile " + profile.name + " from " + file.getName());
+    notifySubscribersInstalled(profile);
+    
+    // test if the installed artifact contains the active profile, activate it if so
+    if (configuredProfile.equals(profile.name)) {
+      setActiveProfile(profile);
+    }
+  }
+
+  @Override
+  public void update(File file) throws Exception {
+    SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
+    profiles.putWithFilename(file.getAbsolutePath(), profile);
+    log.info("Updated scene profile " + profile.name);
+    notifySubscribersUpdated(profile);
+    
+    // test if active profile was updated
+    if (activeProfile.equals(profile)) {
+      setActiveProfile(profile);
+    }
+  }
+
+  @Override
+  public void uninstall(File file) throws Exception {
+    String filename = file.getAbsolutePath();
+    
+    if (profiles.hasFilename(filename)) {
+      SceneProfile profile = profiles.getByFilename(filename);
+      profiles.remove(profile);
+      log.info("Removed scene profile " + filename);
+      notifySubscribersRemoved(profile);
+      
+      // test if active profile was removed, activated default profile if so
+      if (activeProfile.equals(profile)) {
+        setActiveProfile(defaultProfile);
+      }
+    }
+  }
+// </editor-fold>
 
 }
