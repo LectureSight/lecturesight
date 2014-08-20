@@ -4,4 +4,4 @@ DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,
 FELIX_CACHE="./felix-cache"
 
 rm -rf $FELIX_CACHE/*
-java $DEBUG_OPTS -Dlecturesight.basedir=. -jar bin/felix.jar $FELIX_CACHE  
+java $DEBUG_OPTS -Dlecturesight.basedir=. -jar bin/felix.jar $FELIX_CACHE
