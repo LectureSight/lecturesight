@@ -33,6 +33,7 @@
         <module>modules/lecturesight-framesource-api</module>
         <module>modules/lecturesight-framesource-impl</module>
         <module>modules/lecturesight-framesource-v4l</module>
+        <!-- module>modules/lecturesight-framesource-rtph264</module -->
         <!-- module>modules/lecturesight-framesource-videofile</module -->
         <module>modules/lecturesight-connectedcomponent-api</module>
         <module>modules/lecturesight-connectedcomponent-impl</module>
