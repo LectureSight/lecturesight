@@ -51,6 +51,7 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
   private List<RTPH264ClientFrameGrabber> children = new LinkedList<RTPH264ClientFrameGrabber>();
 
   protected void activate(ComponentContext cc) {
+    System.out.println("RTPH264FrameSourceFactory.activate");
     Gst.init();
     log.info("RTP h.264 Streaming FrameSource activated");
   }
@@ -60,7 +61,6 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
       RTPH264ClientFrameGrabber child = it.next();
       child.stop();
     }
-    Gst.deinit();
     log.info("RTP h.264 Streaming FrameSource deactivated");
   }
 
@@ -89,6 +89,7 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
     try {
       RTPH264ClientFrameGrabber grabber = new RTPH264ClientFrameGrabber(host, port);
       children.add(grabber);
+      log.info("Created FrameGrabber " + grabber.toString());
       return grabber;
     } catch (IllegalStateException e) {
       String msg = "Failed to create RTPH264ClientFrameGrabber for " + input;

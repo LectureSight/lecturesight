@@ -19,8 +19,8 @@ package cv.lecturesight.framesource.rtph264;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.net.URL;
 import java.nio.ByteBuffer;
+import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pipeline;
@@ -30,6 +30,8 @@ import org.gstreamer.elements.AppSink;
 
 public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
+  private String host;
+  private int port;
   private final Pipeline pipeline;
   private int width, height;
   private ByteBuffer lastFrame;
@@ -37,13 +39,15 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
 
   public RTPH264ClientFrameGrabber(String host, int port) throws FrameSourceException {
+    this.host = host;
+    this.port = port;
     pipeline = createPipeline(host, port);
     start();
     getVideoFrameSize();
   }
 
   private Pipeline createPipeline(String host, int port) throws IllegalStateException {
-    Pipeline pipeline = new Pipeline();
+    Pipeline pipeline = new Pipeline("RTP h264 Client");
 
     Element tcpclientsrc = createElement("tcpclientsrc", "tcpclientsrc");
     tcpclientsrc.set("host", host);
@@ -62,14 +66,26 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
     addToPipeline(pipeline, ffdec_h264);
     linkElements(rtph264depay, ffdec_h264);
 
-    appsink = (AppSink) ElementFactory.make("appsink", null);
+    Element colorspace = createElement("ffmpegcolorspace", "ffmpegcolorspace");
+    addToPipeline(pipeline, colorspace);
+    linkElements(ffdec_h264, colorspace);
+
+    Caps caps = Caps.fromString("video/x-raw-rgb");
+
+    Element capsfilter = createElement("capsfilter", "capsfilter");
+    capsfilter.set("caps", caps);
+    addToPipeline(pipeline, capsfilter);
+    linkElements(colorspace, capsfilter);
+
+    appsink = (AppSink) createElement("appsink", "appsink");
+    appsink.setCaps(caps);
     appsink.set("async", "true");
     appsink.set("sync", "false");
-    appsink.set("drop", "false");
+    appsink.set("drop", "true");
     appsink.set("max-buffers", "5");
 
     addToPipeline(pipeline, appsink);
-    linkElements(ffdec_h264, appsink);
+    linkElements(capsfilter, appsink);
 
     return pipeline;
   }
@@ -142,5 +158,14 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
   @Override
   public PixelFormat getPixelFormat() {
     return PixelFormat.RGB_8BIT;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("(").append("host=").append(host).append(" port=").append(port)
+            .append(" format=").append(getPixelFormat().name())
+            .append(" size=").append(width).append("x").append(height).append(")");
+    return sb.toString();
   }
 }
