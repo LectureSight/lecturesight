@@ -31,8 +31,8 @@ cv.lecturesight.framesource.input.mrl=gst://v4l2src device=/dev/video0 ! ffmpegc
 
 ## Options
 
-__drop__ (optional)<br>
-__default:__ true<br>
+__drop__ optional, default: _true_
+
 Sets the _drop_ property of the `appsink` that is handing the frames over to 
 the system. 
 
