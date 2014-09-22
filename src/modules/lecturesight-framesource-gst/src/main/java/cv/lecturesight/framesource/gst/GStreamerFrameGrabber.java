@@ -35,13 +35,15 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   private int width, height;
   private ByteBuffer lastFrame;
   private AppSink appsink;
+  private boolean dropFrames;
 
-  public GStreamerFrameGrabber(String pipelineDef) throws FrameSourceException {
-    definition = pipelineDef;
+  public GStreamerFrameGrabber(String definition, boolean dropFrames) throws FrameSourceException {
+    this.definition = definition;
+    this.dropFrames = dropFrames;
     try {
-      pipeline = createPipeline(pipelineDef);
+      pipeline = createPipeline(definition);
     } catch (Exception e) {
-      throw new FrameSourceException("Failed to create pipeline.", e);
+      throw new FrameSourceException("Failed to create pipeline with definition: " + definition, e);
     }
     start();
     getVideoFrameSize();
@@ -55,7 +57,7 @@ public class GStreamerFrameGrabber implements FrameGrabber {
     // find most downstream element in user pipeline
     Element last = pipe.getElementsSorted().get(0);
 
-    // attach color space and caps filter and appsink
+    // attach colorspace, capsfilter and appsink
     Element colorspace = createElement("ffmpegcolorspace", "ffmpegcolorspace");
     addToPipeline(pipe, colorspace);
     linkElements(last, colorspace);
@@ -68,7 +70,7 @@ public class GStreamerFrameGrabber implements FrameGrabber {
     appsink.setCaps(caps);
     appsink.set("async", "true");
     appsink.set("sync", "false");
-    appsink.set("drop", "true");
+    appsink.set("drop", Boolean.toString(dropFrames));
     appsink.set("max-buffers", "5");
     addToPipeline(pipe, appsink);
     linkElements(capsfilter, appsink);
@@ -149,8 +151,11 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("(").append("pipeline=\"").append(definition).append("\"")
-            .append(" size=").append(width).append("x").append(height).append(")");
+    sb.append("(")
+            .append("pipeline=\"").append(definition).append("\"")
+            .append(" drop=").append(Boolean.toString(dropFrames))
+            .append(" size=").append(width).append("x").append(height)
+            .append(")");
     return sb.toString();
   }
 }

@@ -54,11 +54,25 @@ public class GStreamerFrameSourceFactory implements FrameGrabberFactory {
 
   @Override
   public FrameGrabber createFrameGrabber(String input, Map<String, String> conf) throws FrameSourceException {
-    throw new UnsupportedOperationException("todo");
+    
+    // evaluate drop parameter if configured
+    boolean drop = true;
+    if (conf.containsKey("drop")) {
+      try {
+        drop = Boolean.valueOf(conf.get("drop"));
+      } catch (Exception e) {
+        log.warn("Error while parsing value for 'drop' parameter, using default drop=true");
+      }
+    }
+    
+    // create FrameGrabber
+    GStreamerFrameGrabber fg = new GStreamerFrameGrabber(input, drop);
+    log.info("Create new GStreamerFrameGrabber " + fg.toString());
+    return fg;
   }
 
   @Override
   public void destroyFrameGrabber(FrameGrabber fg) throws FrameSourceException {
-
+    ((GStreamerFrameGrabber)fg).stop();
   }
 }
