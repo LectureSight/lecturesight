@@ -17,7 +17,7 @@ MRLs for this Frame Source contain the GStreamer pipeline definition in the
 format used in the gst-launch command. 
 
 ```
-gst://gst://(gst-launch definition)[(options)] 
+gst://(gst-launch definition)[(options)] 
 ```
 
 Example: 
