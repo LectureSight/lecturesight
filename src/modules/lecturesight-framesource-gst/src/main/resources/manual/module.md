@@ -1,6 +1,5 @@
 
 # Configurable GStreamer Frame Source
-
 ---
 
 __Bundle File:__ lecturesight-framesource-gst.jar
@@ -27,13 +26,13 @@ Example:
 cv.lecturesight.framesource.input.mrl=gst://v4l2src device=/dev/video0 ! ffmpegcolorspace [drop=true] 
 ```
 
->> __Notice:__ You must define a pipeline with at least two elements, otherwise the creation of the Frame Source will fail.
->> The problem is already filed as [bug LS-71](https://opencast.jira.com/browse/LS-71)
+> __Notice:__ You must define a pipeline with at least two elements, otherwise the creation of the Frame Source will fail.
+> The problem is already filed as [bug LS-71](https://opencast.jira.com/browse/LS-71)
 
 ## Options
 
-__drop__ (optional)
-__default:__ true
+__drop__ (optional)<br>
+__default:__ true<br>
 Sets the _drop_ property of the `appsink` that is handing the frames over to 
 the system. 
 
