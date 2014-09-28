@@ -147,7 +147,9 @@ public class RegionTrackerImpl implements RegionTracker {
    * 
    */
   private void registerDisplays() {
-    dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
+    if (config.getBoolean(Constants.PROPKEY_DISPLAY_OVERLAP)) {
+      dsps.registerDisplay(Constants.WINDOWNAME_OVERLAP, overlap, signals.get(Signal.DONE_COMPUTE_OVERLAP));
+    }
   }
   //</editor-fold>
 
@@ -222,7 +224,7 @@ public class RegionTrackerImpl implements RegionTracker {
             }
             RegionImpl mregion = trackedRegions.get(mId);
             region.members.add(mregion);
-// TODO: also join members here? faltten memebrs list?
+// TODO: also join members here? faltten members list?
 //            if (mregion.isGroup()) {
 //              for (Iterator<TrackerObject> mbit = mregion.members.iterator(); mbit.hasNext();) {
 //                region.members.add(mbit.next());

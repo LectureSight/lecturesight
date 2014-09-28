@@ -17,24 +17,28 @@
  */
 package cv.lecturesight.framesource.impl;
 
+import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.framesource.FrameGrabber;
+import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
-import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceManager;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.opencl.OpenCLService;
+import cv.lecturesight.profile.api.SceneProfile;
+import cv.lecturesight.profile.api.SceneProfileEventAdapter;
+import cv.lecturesight.profile.api.SceneProfileManager;
+import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import javax.imageio.ImageIO;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -44,16 +48,16 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 
-/** Implementation of Service API
+/**
+ * Implementation of Service API
  *
  */
-@Component(name="lecturesight.framesource.manager",immediate=true)
+@Component(name = "lecturesight.framesource.manager", immediate = true)
 @Service
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
-  final static String PROPKEY_MASK = "input.mask";
-  final static String DISPLAYNAME_INPUT = "display:input";
+  final static String DISPLAYNAME_INPUT = "cam.overview.input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
@@ -64,6 +68,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private OpenCLService ocl;
   @Reference
   private DisplayService dsps;
+  @Reference
+  private SceneProfileManager spm;
   Log log = new Log("Frame Source Manager");
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
@@ -73,7 +79,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     componentContext = cc;
 
     log.info("Starting....");
-    
+
     // scan for plugins already installed
     try {
       ServiceReference[] refs = cc.getBundleContext().getServiceReferences(FrameGrabberFactory.class.getName(), null);
@@ -113,20 +119,17 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
         FrameGrabberFactory factory = sourceTypes.get(fsd.getType());
         FrameGrabber grabber = factory.createFrameGrabber(fsd.getLocator(), fsd.getConfiguration());
         FrameUploader uploader = createFrameUploader(grabber);
-        
+
         if (uploader == null) {
           throw new FrameSourceException("Could not create FrameUploader for pixel format " + grabber.getPixelFormat().name());
+
         } else {
-          String maskFile = config.get(PROPKEY_MASK);
-          if (!maskFile.isEmpty() && !maskFile.equalsIgnoreCase("none")) {
-            try {
-              BufferedImage mask = ImageIO.read(new File(maskFile));
-              uploader.setMask(mask);
-            } catch (IOException e) {
-              log.warn("Could not load scene mask: " + maskFile + ": " + e.getMessage());
-            }
-          }
+          // create and register mask updater from scene profile
+          MaskUpdater updater = new MaskUpdater(uploader);
+          updater.profileActivated(spm.getActiveProfile());
+          spm.registerProfileListener(updater);
         }
+        
         newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
@@ -137,10 +140,10 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
     return newSource;
   }
-  
+
   @Override
   public void destroyFrameSource(FrameSource frameSource) throws FrameSourceException {
-    FrameSourceImpl fsrc = (FrameSourceImpl)frameSource;
+    FrameSourceImpl fsrc = (FrameSourceImpl) frameSource;
     if (sourceTypes.containsKey(fsrc.getType())) {
       FrameGrabberFactory factory = sourceTypes.get(fsrc.getType());
       factory.destroyFrameGrabber(fsrc.frameGrabber);    // de-init the stuff that gets the frames (native libs etc.)
@@ -174,7 +177,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       } else if (event.getTopic().equals(OSGI_EVENT_UNREGISTERED)) {
         String types = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
         String name = (String) ref.getProperty(FRAMESOURCE_NAME_PROPERTY);
-        for (String type: types.split(",")){
+        for (String type : types.split(",")) {
           sourceTypes.remove(type.trim());
           log.info("Unregistered " + name);
         }
@@ -195,7 +198,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private void installFrameGrabberFactory(ServiceReference ref) {
     String name = (String) ref.getProperty(FRAMESOURCE_NAME_PROPERTY);
     String types = (String) ref.getProperty(FRAMESOURCE_TYPE_PROPERTY);
-    for (String type: types.split(",")){
+    for (String type : types.split(",")) {
       FrameGrabberFactory factory = (FrameGrabberFactory) componentContext.getBundleContext().getService(ref);
       sourceTypes.put(type.trim(), factory);
       log.info("Registered FrameGrabberFactory " + name + " (type: " + type.trim() + ")");
@@ -219,6 +222,37 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {
       log.error("Failed to activate FrameSourceProvider with source " + mrl, e);
+    }
+  }
+
+  /**
+   * Class responsible for catching update events on the scene profile and
+   * updating the ignore mask for the framesource accordingly.
+   *
+   */
+  class MaskUpdater extends SceneProfileEventAdapter {
+
+    FrameUploader client;
+    BufferedImage mask;
+
+    public MaskUpdater(FrameUploader uploader) {
+      client = uploader;
+      CLImage2D outimg = uploader.getOutputImage();
+      mask = new BufferedImage((int)outimg.getWidth(), (int)outimg.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    }
+
+    @Override
+    public void profileActivated(SceneProfile profile) {
+      Graphics2D g = mask.createGraphics();
+      g.setColor(Color.WHITE);
+      g.fill3DRect(0, 0, mask.getWidth(), mask.getHeight(), true);
+      
+      g.setColor(Color.BLACK);
+      for (Zone zone : profile.getIgnoreZones()) {
+        g.fillRect(zone.x, zone.y, zone.width, zone.height);
+      }
+      
+      client.setMask(mask);
     }
   }
 }

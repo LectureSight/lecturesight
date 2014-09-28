@@ -3,8 +3,18 @@ package cv.lecturesight.framesource.kinect;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import org.openkinect.freenect.FrameMode;
+import org.openkinect.freenect.VideoHandler;
 
-public class KinectVisualFrameGrabber implements FrameGrabber {
+public class KinectVisualFrameGrabber implements FrameGrabber, VideoHandler {
+
+  int devIndex;
+  ByteBuffer currentFrame;
+
+  public KinectVisualFrameGrabber(int devIndex) {
+    this.devIndex = devIndex;
+  }
 
   @Override
   public int getWidth() {
@@ -23,7 +33,12 @@ public class KinectVisualFrameGrabber implements FrameGrabber {
 
   @Override
   public Buffer captureFrame() throws FrameSourceException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return currentFrame;
   }
-  
+
+  @Override
+  public void onFrameReceived(FrameMode fm, ByteBuffer bb, int i) {
+    currentFrame = bb;
+  }
+
 }

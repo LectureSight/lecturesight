@@ -19,7 +19,6 @@ package cv.lecturesight.objecttracker.clustering;
 
 import cv.lecturesight.decorator.api.DecoratorManager;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.opencl.OpenCLService;
@@ -29,8 +28,10 @@ import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +48,7 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(name = "lecturesight.objecttracker.simpel", immediate = true)
 @Service
-public class ObjectTrackerImpl implements ObjectTracker {
+public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
   private Log log = new Log("Object Tracker");
   @Reference
@@ -70,7 +71,6 @@ public class ObjectTrackerImpl implements ObjectTracker {
   private List<TrackerObject> trackedObjects = new LinkedList<TrackerObject>();
   private int template_width, width_max, template_height, height_max, weight_min;
   private double dist_max;
-  //private CoordinateNormalization normalizer = 
 
   protected void activate(ComponentContext cc) throws Exception {
     updateConfiguration();
@@ -117,23 +117,17 @@ public class ObjectTrackerImpl implements ObjectTracker {
 
   @Override
   public Map<Integer, TrackerObject> getAllObjects() {
-    //   List<TrackerObject> out = new LinkedList<TrackerObject>();
-    //   out.addAll(allObjects.values());
-    //   return out;
     return allObjects;
   }
 
   @Override
   public List<TrackerObject> getCurrentlyTracked() {
-//    List<TrackerObject> out = new LinkedList<TrackerObject>();
-//    for(Iterator<TrackerObject>it = trackedObjects.iterator(); it.hasNext();) {
-//      TrackerObject object = it.next();
-//      if(object.lastSeen() - System.currentTimeMillis() < 6000) {
-//        out.add(object);
-//      }
-//    }
-//    return out;
     return trackedObjects;
+  }
+  
+  @Override
+  public void configurationChanged() {
+    updateConfiguration();
   }
   //</editor-fold>
 
@@ -146,11 +140,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
     
     // make bounding box
     BoundingBox rBox = region.getBoundingBox();
-    Position rPos = region.getCentroid();
-    BoundingBox oBox = new BoundingBox(
-            new Position(rPos.getX() - (template_width/2), rBox.getMin().getY()), 
-            new Position(rPos.getX() + (template_width/2), rBox.getMin().getY() + template_height));
-    object.setProperty(OBJ_PROPKEY_BBOX, oBox);
+    object.setProperty(OBJ_PROPKEY_BBOX, rBox);
     
     allObjects.put(object.getId(), object);
     return object;
@@ -166,15 +156,10 @@ public class ObjectTrackerImpl implements ObjectTracker {
     
     // update bounding box
     BoundingBox rBox = region.getBoundingBox();
-    Position rPos = region.getCentroid();
-    BoundingBox oBox = new BoundingBox(
-            new Position(rPos.getX() - (template_width/2), rBox.getMin().getY()), 
-            new Position(rPos.getX() + (template_width/2), rBox.getMin().getY() + template_height));
-    object.setProperty(OBJ_PROPKEY_BBOX, oBox);
+    object.setProperty(OBJ_PROPKEY_BBOX, rBox);
 
     double distance = lastPos.distance(region.getCentroid());
     if (distance < width_max / 5 && distance > 0) {
-    //if (distance > 0) {
       int movement = (Integer) object.getProperty(OBJ_PROPKEY_MOVEMENT);
       object.setProperty(OBJ_PROPKEY_MOVEMENT, ++movement);
     }
@@ -216,7 +201,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
               updateTrackerObject(object, region, time);
               newAssignments.put(region, object);
             } else {
-              if (!inTrackedObject(region)) {
+              if (!inTrackedObjects(region)) {
                 object = createTrackerObject(region, time);
                 newAssignments.put(region, object);
               } 
@@ -274,7 +259,7 @@ public class ObjectTrackerImpl implements ObjectTracker {
       return winner;
     }
     
-    private boolean inTrackedObject(Region region) {
+    private boolean inTrackedObjects(Region region) {
       Position pos = region.getCentroid();
       for (TrackerObject obj : newAssignments.values()) {
         BoundingBox box = (BoundingBox)obj.getProperty(OBJ_PROPKEY_BBOX);

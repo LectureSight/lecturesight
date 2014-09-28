@@ -27,7 +27,7 @@ public class Constants {
   final static String PROPKEY_PHANTOMDECAY_THRESH = "foreground.decay.phantom.thresh";
   final static String SIGNAME_DONE_UPDATE = "cv.lecturesight.foregorund.update.DONE";
   final static String SIGNAME_DONE_CLEANING = "cv.lecturesight.foreground.cleaning.DONE";
-  final static String WINDOWNAME_UPDATEMAP = "Foreground Update Map";
-  final static String WINDOWNAME_FOREGROUNDMAP = "Foreground Map";
+  final static String WINDOWNAME_UPDATEMAP = "map.fg.update";
+  final static String WINDOWNAME_FOREGROUNDMAP = "map.fg";
   
 }

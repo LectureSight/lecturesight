@@ -21,8 +21,11 @@ import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
+import cv.lecturesight.profile.api.Zone;
+import static cv.lecturesight.profile.api.Zone.Type.PERSON;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationService;
 import java.io.*;
 import java.util.*;
 import org.apache.felix.fileinstall.ArtifactInstaller;
@@ -35,11 +38,13 @@ import org.osgi.service.component.ComponentContext;
 @Service()
 public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactInstaller {
 
-  static final String PROPKEY_PROFILE = "cv.lecturesight.scene.profile";
+  static final String PROPKEY_PROFILE = "active.profile";
   static final String FILEEXT_PROFILE = ".scn";
   private Log log = new Log("Scene Profile Manager");
   @Reference
   private Configuration config;
+  @Reference
+  private ConfigurationService configService;
   private ProfileStore profiles = new ProfileStore();
   private SceneProfile defaultProfile, activeProfile;
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
@@ -74,6 +79,59 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     activeProfile = profile.clone();
     notifySubscribersActivated(profile);
     log.info("Activated scene profile: " + activeProfile.name);
+    
+    // if profile has a person zone then adjust video analysis parameters accordingly
+    Zone person = findPersonZone(activeProfile);
+    if (person != null) {
+      log.info("Adjusting video analysis parameters according to person area from profile.");
+      double width = person.width;
+      double height = person.height;
+      double whole = width * height;
+      double avg_weight = (3.0/4.0) * whole;
+      
+      Properties conf = configService.getSystemConfiguration();
+      
+      double minweight = (1.0/10) * avg_weight;
+      minweight = minweight < 20 ? 20 : minweight;
+      conf.setProperty("cv.lecturesight.videoanalysis.foreground.ccl.blobsize.min", Integer.toString((int)minweight));
+      conf.setProperty("cv.lecturesight.videoanalysis.foreground.ccl.blobsize.max", Integer.toString((int)whole));
+      
+      double minheight = (1.0/10) * height;
+      conf.setProperty("cv.lecturesight.regiontracker.height.min", Integer.toString((int)minheight));
+      conf.setProperty("cv.lecturesight.regiontracker.height.max", Integer.toString((int)(height + 3 * minheight)));
+      
+      double minwidth = (1.0/10) * width;
+      conf.setProperty("cv.lecturesight.regiontracker.width.min", Integer.toString((int)minwidth));
+      conf.setProperty("cv.lecturesight.regiontracker.width.max", Integer.toString((int)(minwidth + 2 * minwidth)));
+      
+      conf.setProperty("cv.lecturesight.regiontracker.size.min", Integer.toString((int)((1.0/10) * whole)));
+      conf.setProperty("cv.lecturesight.regiontracker.size.max", Integer.toString((int)whole));
+      
+      conf.setProperty("cv.lecturesight.objecttracker.simple.width.min", Integer.toString((int)((1.0/4) * width)));
+      conf.setProperty("cv.lecturesight.objecttracker.simple.width.max", Integer.toString((int)(width + 2 * minwidth)));
+      conf.setProperty("cv.lecturesight.objecttracker.simple.height.min", Integer.toString((int)((1.0/4) * height)));
+      conf.setProperty("cv.lecturesight.objecttracker.simple.height.max", Integer.toString((int)(height + 3 * minheight)));
+      
+      conf.setProperty("cv.lecturesight.objecttracker.simple.template.width", Integer.toString((int)((1.0/4) * height)));
+      conf.setProperty("cv.lecturesight.objecttracker.simple.template.height", Integer.toString((int)(height + 3 * minheight)));
+      
+      configService.notifyListeners();
+    }
+  }
+  
+  /** Returns the first occurrence of a Zone of Type PERSON or null if such a
+   * zone is not in the profile.
+   * 
+   * @param profile
+   * @return Person Zone 
+   */  
+  private Zone findPersonZone(SceneProfile profile) {
+    for (Zone z : profile.getAllZones()) {
+      if (z.getType().equals(PERSON)) {
+        return z;
+      }
+    }
+    return null;
   }
 
   @Override
@@ -120,11 +178,13 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     String filename = profiles.getFilename(profile);
     if (filename != null) {
       try {
-        OutputStream out = new FileOutputStream(new File(filename));
+        File outfile = new File(filename);
+        log.info("Writing scene profile \"" + profile.name + "\" to " + outfile.getAbsolutePath());
+        OutputStream out = new FileOutputStream(outfile);
         SceneProfileSerializer.serialize(profile, out);
         out.close();
       } catch (Exception e) {
-        throw new RuntimeException("Unable to save profile.", e);
+        throw new RuntimeException("Failed to save profile! ", e);
       }
     } else {
       throw new IllegalArgumentException("The profile cannot be saved since it has no artifact origin.");
@@ -177,9 +237,10 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   
   @Override
   public void install(File file) throws Exception {
+    String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-    profiles.putWithFilename(file.getAbsolutePath(), profile);
-    log.info("Installed scene profile " + profile.name + " from " + file.getName());
+    profiles.putWithFilename(filename, profile);
+    log.info("Installed scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersInstalled(profile);
     
     // test if the installed artifact contains the active profile, activate it if so
@@ -190,9 +251,10 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
 
   @Override
   public void update(File file) throws Exception {
+    String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-    profiles.putWithFilename(file.getAbsolutePath(), profile);
-    log.info("Updated scene profile " + profile.name);
+    profiles.putWithFilename(filename, profile);
+    log.info("Updated scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersUpdated(profile);
     
     // test if active profile was updated

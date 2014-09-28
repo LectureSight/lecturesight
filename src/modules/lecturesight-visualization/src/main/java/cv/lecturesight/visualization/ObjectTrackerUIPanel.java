@@ -111,8 +111,8 @@ public class ObjectTrackerUIPanel extends JPanel implements CustomRenderer {
     // draw frame information
     g.setColor(Color.white);
     g.setFont(font);
-    g.drawString("objects : " + objects.size(), 2, 12);
-    g.drawString("tracked objects : " + all_o.size(), 2, 22);
+    g.drawString("tracked regions: " + objects.size(), 2, 12);
+    //g.drawString(" : " + all_o.size(), 2, 22);
   }
 
   @SuppressWarnings("unchecked")

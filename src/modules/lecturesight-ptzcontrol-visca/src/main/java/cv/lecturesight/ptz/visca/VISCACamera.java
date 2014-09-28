@@ -22,18 +22,18 @@ import cv.lecturesight.util.geometry.Position;
 import java.util.Properties;
 
 public class VISCACamera extends AbstractPTZCamera {
-  
+
   LibVISCACamera camera;
   Properties props;
   String name;
-  
+
   public VISCACamera(String name, LibVISCACamera cam, Properties profile) {
     this.name = name;
     this.camera = cam;
     this.props = profile;
     this.setCameraProfile(profile);
   }
-  
+
   @Override
   public String getName() {
     return name;
@@ -133,12 +133,12 @@ public class VISCACamera extends AbstractPTZCamera {
   public int getZoom() {
     return camera.getZoomValue();
   }
-  
+
   public void setLimitUpRight(int up, int right) {
-    
+
   }
-  
+
   public void setLimitDownLeft(int down, int left) {
-    
+
   }
 }

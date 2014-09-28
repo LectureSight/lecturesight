@@ -37,11 +37,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name = "lecturesight.cameraoperator.simple", immediate = true)
+@Component(name = "lecturesight.cameraoperator.panonly", immediate = true)
 @Service
 public class SimpleCameraOperator implements CameraOperator {
 
-  Log log = new Log("Simple Camera Operator");
+  Log log = new Log("Pan-Only Camera Operator");
   @Reference
   Configuration config;
   @Reference
@@ -74,7 +74,7 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
-      // camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));  // FIXME causes problems
+      //camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));  // FIXME causes problems with visca cam
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
     }
@@ -95,7 +95,7 @@ public class SimpleCameraOperator implements CameraOperator {
   public void reset() {
     NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
     camera.setTargetPosition(neutral);
-    //camera.setZoom(0);  // FIXME causes problems
+    //camera.setZoom(0);  // FIXME causes problems with visca cam
   }
 
   private class CameraOperatorWorker implements Runnable {
