@@ -306,7 +306,7 @@ __kernel void erode_fg_bg_tb
     //uint4 last_val = (uint4)(MAXINT, MAXINT, MAXINT, MAXINT);
     uint4 last_val = (uint4)(0, 0, 0, 255);
 
-    for (int y=height-1; y < height; y++)
+    for (int y=0; y < height; y++)
     {
         int2 pos = (int2)(x, y);
         uint4 pxl_val = read_imageui(fg_map_in, sampler, pos);
