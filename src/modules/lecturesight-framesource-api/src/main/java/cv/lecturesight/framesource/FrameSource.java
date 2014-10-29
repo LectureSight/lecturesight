@@ -31,6 +31,8 @@ public interface FrameSource {
   
   CLImage2D getImage();
   
+  CLImage2D getLastImage();
+  
   BufferedImage getImageHost();
 
   void captureFrame() throws FrameSourceException;

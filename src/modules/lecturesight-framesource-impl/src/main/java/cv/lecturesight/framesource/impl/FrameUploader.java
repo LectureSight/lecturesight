@@ -32,6 +32,8 @@ public interface FrameUploader {
   
   CLImage2D getOutputImage();
   
+  CLImage2D getLastOutputImage();
+  
   BufferedImage getOutputImageHost();
 
   void upload(Buffer frame);
