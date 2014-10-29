@@ -25,19 +25,24 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 
-public class ConfigurationServiceImpl implements ConfigurationService {
-
+public class ConfigurationServiceImpl implements ConfigurationService, ServiceListener {
+  
   private Log log = new Log("System Configuration");
+  private BundleContext bcontext;
   Properties config;
   Properties defaults;
   List<ConfigurationListener> listeners = new LinkedList<ConfigurationListener>();
-
-  public ConfigurationServiceImpl(Properties config, Properties defaults) {
+  
+  public ConfigurationServiceImpl(BundleContext bcontext, Properties config, Properties defaults) {
+    this.bcontext = bcontext;
     this.config = config;
     this.defaults = defaults;
   }
-
+  
   @Override
   public Properties getSystemConfiguration() {
     return config;
@@ -47,7 +52,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
   public Properties getSystemDefaults() {
     return defaults;
   }
-
+  
   @Override
   public void loadSystemConfiguration(InputStream is) {
     try {
@@ -58,7 +63,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       throw new RuntimeException("Unable to read configuration.", ex);
     }
   }
-
+  
   @Override
   public void saveSystemConfiguration(OutputStream os) {
     try {
@@ -69,21 +74,47 @@ public class ConfigurationServiceImpl implements ConfigurationService {
       throw new RuntimeException("Unable to write configuration", e);
     }
   }
-
+  
   @Override
   public void notifyListeners() {
-    for (Iterator<ConfigurationListener> it = listeners.iterator(); it.hasNext(); ) {
+    for (Iterator<ConfigurationListener> it = listeners.iterator(); it.hasNext();) {
       it.next().configurationChanged();
     }
   }
   
   @Override
   public void addConfigurationListener(ConfigurationListener l) {
+    log.info("Adding ConfigurationListener " + l.getClass().getName());
     listeners.add(l);
   }
-
+  
   @Override
   public void removeConfigurationListener(ConfigurationListener l) {
+    log.info("Removing ConfigurationListener " + l.getClass().getName());
     listeners.remove(l);
+  }
+  
+  @Override
+  public void serviceChanged(ServiceEvent se) {
+    try {
+      // event on service that implements the ConfigurationListener interface
+      Object service = bcontext.getService(se.getServiceReference());
+      if (service instanceof ConfigurationListener) {
+
+        // add/remove ConfigurationListener
+        switch (se.getType()) {
+          case ServiceEvent.REGISTERED:
+            addConfigurationListener((ConfigurationListener) service);
+            break;
+          case ServiceEvent.UNREGISTERING:
+            removeConfigurationListener((ConfigurationListener) service);
+            break;
+          default:
+            break;
+        }
+      }
+    } catch (Exception e) {
+      log.warn(e.getClass().getName() + " in serviceChanged(): " + e.getMessage());
+    }
   }
 }

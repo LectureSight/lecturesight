@@ -100,6 +100,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
         String key = (String)data[row][0];
         String newValue = (String)configTable.getValueAt(row, 1);
         systemConfiguration.setProperty(key, newValue);
+        config.notifyListeners();                                  // TODO ConfigurationService should care for this
         log.info(key + " : " + data[row][1] + " => " + newValue);
         data[row][1] = newValue;
       }
