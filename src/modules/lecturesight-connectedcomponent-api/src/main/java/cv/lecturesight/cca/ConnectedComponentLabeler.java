@@ -29,6 +29,7 @@ public interface ConnectedComponentLabeler {
 
   OCLSignal getSignal(Signal signal);
   void doLabels();
+  void doLabels(OCLSignal trigger);
   CLBuffer<Integer> getLabelBuffer();
   CLBuffer<Integer> getIdBuffer();
   CLBuffer<Integer> getSizeBuffer();
