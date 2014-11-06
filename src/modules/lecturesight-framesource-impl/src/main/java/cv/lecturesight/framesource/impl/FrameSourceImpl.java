@@ -30,6 +30,7 @@ class FrameSourceImpl implements FrameSource {
   String type;
   FrameGrabber frameGrabber;
   FrameUploader uploader;
+  CLImage2D lastImage;
   long frameNumber = 0L;
 
   public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader) {
@@ -53,6 +54,10 @@ class FrameSourceImpl implements FrameSource {
     return uploader.getOutputImage();
   }
   
+  public CLImage2D getLastImage() {
+    return uploader.getLastOutputImage();
+  }
+  
   @Override
   public CLImage2D getRawImage() {
     return uploader.getRawOutputImage();
@@ -63,6 +68,7 @@ class FrameSourceImpl implements FrameSource {
     try {
       Buffer buf = frameGrabber.captureFrame();
       if (buf != null) {
+        lastImage = uploader.getOutputImage();
         uploader.upload(buf);
         frameNumber++;
       } else {
