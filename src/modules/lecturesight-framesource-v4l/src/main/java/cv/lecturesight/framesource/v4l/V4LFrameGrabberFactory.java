@@ -52,36 +52,7 @@ import org.osgi.service.component.ComponentContext;
 @Property(name="cv.lecturesight.framesource.type", value="v4l, v4l2")  
 })
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
-
-  private final static String PROPKEY_FRAME_WIDTH = "resolution.width";
-  private final static String PROPKEY_FRAME_HEIGHT = "resolution.height";
-  private final static String PROPKEY_WIDTH = "width";
-  private final static String PROPKEY_HEIGHT = "height";
-  private final static String PROPKEY_STANDARD = "standard";
-  private final static String PROPKEY_CHANNEL = "channel";
-  private final static String PROPKEY_QUALITY = "quality";
-  private final static Vector<String> PROPKEYS = new Vector<String>();
-  
-  private final static HashMap<Integer, String> CONTROL_TYPE_NAMES = new HashMap<Integer, String>();
-  
-  static {
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_FRAME_WIDTH);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_FRAME_HEIGHT);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_WIDTH);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_HEIGHT);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_STANDARD);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_CHANNEL);
-      PROPKEYS.add(V4LFrameGrabberFactory.PROPKEY_QUALITY);
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_BUTTON, "CTRL_TYPE_BUTTON"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_SLIDER, "CTRL_TYPE_SLIDER"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_SWITCH, "CTRL_TYPE_SWITCH"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_DISCRETE, "CTRL_TYPE_DISCRETE"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_STRING, "CTRL_TYPE_STRING"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_LONG, "CTRL_TYPE_LONG"); 
-      CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_BITMASK,"CTRL_TYPE_BITMASK");
-  };
-  
-          
+            
   private Log log = new Log("Video4Linux FrameSource");
   @Reference
   private Configuration config;
@@ -172,18 +143,19 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                 break;  
            }
         }
-        log.info("Name: " + control.getName() + val + " Type: " + CONTROL_TYPE_NAMES.get(control.getType()) + values);
+        log.info("Name: " + control.getName() + val + " Type: " + V4LFrameGrabberConstants.CONTROL_TYPE_NAMES.get(control.getType()) + values);
     }
     
     // HashMap<String,String> params = new HashMap<String, String>();
 
-    int width = conf.containsKey("width") ? Integer.parseInt(conf.get("width")) : config.getInt(PROPKEY_FRAME_WIDTH);
-    int height = conf.containsKey("height") ? Integer.parseInt(conf.get("height")) : config.getInt(PROPKEY_FRAME_HEIGHT);
-    int videoStandard = conf.containsKey("standard") ? Integer.parseInt(conf.get("standard")) : config.getInt(PROPKEY_STANDARD);
-    int videoChannel = conf.containsKey("channel") ? Integer.parseInt(conf.get("channel")) : config.getInt(PROPKEY_CHANNEL);
-    int videoQuality = conf.containsKey("quality") ? Integer.parseInt(conf.get("quality")) : config.getInt(PROPKEY_QUALITY);
+    int width = conf.containsKey("width") ? Integer.parseInt(conf.get("width")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_FRAME_WIDTH);
+    int height = conf.containsKey("height") ? Integer.parseInt(conf.get("height")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_FRAME_HEIGHT);
+    int videoStandard = conf.containsKey("standard") ? Integer.parseInt(conf.get("standard")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_STANDARD);
+    int videoChannel = conf.containsKey("channel") ? Integer.parseInt(conf.get("channel")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_CHANNEL);
+    int videoQuality = conf.containsKey("quality") ? Integer.parseInt(conf.get("quality")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_QUALITY);
     for (String confItem: conf.keySet()){
-        if (PROPKEYS.contains(confItem)){
+        confItem = confItem.trim();
+        if (V4LFrameGrabberConstants.PROPKEYS.contains(confItem)){
             continue;
         }
         Control cont = controlList.getControl(confItem);
@@ -299,6 +271,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
         }
     }
+    device.releaseControlList();
     return new V4LFrameGrabber(device, width, height, videoStandard, videoChannel, videoQuality);
   }
 
