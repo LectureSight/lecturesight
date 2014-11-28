@@ -34,6 +34,8 @@ public interface ChangeDetector {
 
   OCLSignal getSignal(Signal signal);
 
-  CLImage2D getChangeMapRaw();
+  CLImage2D getChangeMapRaw12();
+  CLImage2D getChangeMapRaw23();
+  CLImage2D getChangeMapRaw13();
   CLImage2D getChangeMapDilated();
 }
