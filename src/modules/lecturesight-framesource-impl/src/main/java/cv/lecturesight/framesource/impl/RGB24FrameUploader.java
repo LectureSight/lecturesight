@@ -44,6 +44,7 @@ public class RGB24FrameUploader implements FrameUploader {
   private ByteBuffer hostBuffer;
   private CLBuffer<Byte> gpuRawBuffer;
   private final CLImage2D gpuBuffer, tempBuffer;
+  private CLImage2D last;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
@@ -67,6 +68,10 @@ public class RGB24FrameUploader implements FrameUploader {
     gpuBuffer = ocl.context().createImage2D(Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
+    last = ocl.context().createImage2D(Usage.InputOutput,
+            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            grabber.getWidth(), grabber.getHeight());
+    ocl.utils().setValues(0, 0, grabber.getWidth(), grabber.getHeight(), last, 0, 0, 0, 0);
     tempBuffer = ocl.context().createImage2D(Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
@@ -86,6 +91,7 @@ public class RGB24FrameUploader implements FrameUploader {
 
       @Override
       public void launch(CLQueue queue) {
+        ocl.utils().copyImage(0, 0, workDim[0], workDim[1], gpuBuffer, 0, 0, last);
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
         if (mask != null) {
           conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, tempBuffer);
@@ -157,5 +163,10 @@ public class RGB24FrameUploader implements FrameUploader {
     if (old_mask != null) {
       old_mask.release();
     }
+  }
+
+  @Override
+  public CLImage2D getLastOutputImage() {
+    return last;
   }
 }

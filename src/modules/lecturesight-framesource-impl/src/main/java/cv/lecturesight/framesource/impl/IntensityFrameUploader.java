@@ -27,6 +27,7 @@ public class IntensityFrameUploader implements FrameUploader {
   private ByteBuffer hostBuffer;
   private CLBuffer<Byte> gpuRawBuffer;
   private final CLImage2D gpuBuffer, tempBuffer;
+  private CLImage2D last;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
   private final OCLSignal sig_start;
@@ -50,6 +51,10 @@ public class IntensityFrameUploader implements FrameUploader {
     gpuBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
+    last = ocl.context().createImage2D(CLMem.Usage.InputOutput,
+            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            grabber.getWidth(), grabber.getHeight());
+    ocl.utils().setValues(0, 0, grabber.getWidth(), grabber.getHeight(), last, 0, 0, 0, 0);
     tempBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
@@ -68,6 +73,7 @@ public class IntensityFrameUploader implements FrameUploader {
     uploadRun = new ComputationRun() {
       @Override
       public void launch(CLQueue queue) {
+        ocl.utils().copyImage(0, 0, workDim[0], workDim[1], gpuBuffer, 0, 0, last);
         CLEvent uploadDone = gpuRawBuffer.writeBytes(queue, 0, bufferSize, hostBuffer, false);
         if (mask != null) {
           conversionK.setArgs(workDim[0], workDim[1], gpuRawBuffer, tempBuffer);
@@ -135,5 +141,10 @@ public class IntensityFrameUploader implements FrameUploader {
   public void setMask(BufferedImage mask) {
     this.maskImage = mask;
     this.mask = ocl.context().createImage2D(CLMem.Usage.InputOutput, maskImage, false);
+  }
+
+  @Override
+  public CLImage2D getLastOutputImage() {
+    return last;
   }
 }
