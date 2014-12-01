@@ -51,6 +51,17 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   private String configuredProfile;
 
   protected void activate(ComponentContext cc) throws Exception {
+    // make sure profile directory existis
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");  
+    if (!profileDir.exists()) {
+      log.info("Profile directory not existing. Attempting to create " + profileDir.getAbsolutePath());
+      try {
+        profileDir.mkdir();
+      } catch (Exception e) {
+        log.error("Failed to create profile directory. ", e);
+      }
+    }
+    
     // create system default profile
     defaultProfile = new SceneProfile("default", "System default profile");
     defaultProfile.name = "default";
