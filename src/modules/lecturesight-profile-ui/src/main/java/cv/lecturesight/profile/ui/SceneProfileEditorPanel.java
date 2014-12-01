@@ -24,6 +24,7 @@ import cv.lecturesight.profile.api.ProfileSerializerException;
 import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
+import cv.lecturesight.util.Log;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -48,6 +49,7 @@ import javax.swing.JOptionPane;
 public class SceneProfileEditorPanel extends javax.swing.JPanel implements CustomRenderer {
 
   final static int NEW_AREA_SIZE = 5;
+  Log log = new Log("Scene Profile Editor");
   private SceneProfileUI parent;
   private Display cameraDisplay;
   private DisplayPanel cameraDisplayPanel;
@@ -768,7 +770,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   }
 
   private void newProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProfileButtonActionPerformed
-    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   // TODO find out where artifact installer is looking at
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   
 
     String name = JOptionPane.showInputDialog(this, "Enter a display name for new profile: ", "Create Profile", 1);
     if (name.trim().isEmpty()) {
@@ -788,7 +790,9 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         return;
       }
     }
-
+    
+    log.info("Attemptig to save scene profile to " + file.getAbsolutePath());
+    
     try {
       FileOutputStream os = new FileOutputStream(file);
       parent.log.info("Writing new scene profile to " + file.getAbsolutePath());
