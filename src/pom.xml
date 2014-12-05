@@ -58,7 +58,7 @@
         <module>modules/lecturesight-cameraoperator-api</module>
         <module>modules/lecturesight-cameraoperator-simple</module>
         <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
-        <!-- module>modules/lecturesight-decorator-color</module -->
+        <module>modules/lecturesight-decorator-color</module>
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
         <!-- module>modules/lecturesight-decorator-person</module -->
