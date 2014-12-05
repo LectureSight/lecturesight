@@ -46,7 +46,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   @Reference
   private ConfigurationService configService;
   private ProfileStore profiles = new ProfileStore();
-  private SceneProfile defaultProfile, activeProfile;
+  private SceneProfile defaultProfile, activeProfile, loadProfile;
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
   private String configuredProfile;
 
@@ -62,7 +62,13 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     
     // get name of configured profile
     configuredProfile = config.get(PROPKEY_PROFILE);
-    log.info("Activated. Configured scene profile is: " + configuredProfile);
+    if (configuredProfile != null){
+        loadProfile = profiles.getByName(configuredProfile);
+        if (loadProfile != null) {
+            activeProfile = loadProfile;
+        }
+    }
+    log.info("Activated. Configured scene profile is: " + activeProfile.name );
   }
 
   protected void deactivate(ComponentContext cc) {

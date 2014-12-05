@@ -91,6 +91,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     cameraDisplayPanel.addMouseMotionListener(mouseHandler);
     cameraDisplayHolder.setLayout(new BorderLayout());
     cameraDisplayHolder.add(cameraDisplayPanel, BorderLayout.CENTER);
+    setProfileSelection(parent.spm.getActiveProfile());
     cameraDisplay.activate();
   }
 
@@ -111,6 +112,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   void reset(SceneProfile profile) {
     this.profile = profile;
     selection = null;
+    setProfileSelection(profile);
     if (currentProfileIsDefault()) {
       defaultProfileNotification.setVisible(true);
       saveButton.setEnabled(false);
@@ -138,7 +140,6 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     }
     parent.log.debug(num + " profiles available");
     profileChooser.setModel(model);
-
     // make sure that currently edited profile is still in list, load currently
     // active profile if it was deleted
     SceneProfile next_profile = parent.spm.getActiveProfile();
@@ -768,8 +769,10 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   }
 
   private void newProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProfileButtonActionPerformed
-    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   // TODO find out where artifact installer is looking at
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   
 
+    // check if profileDir exists
+    
     String name = JOptionPane.showInputDialog(this, "Enter a display name for new profile: ", "Create Profile", 1);
     if (name.trim().isEmpty()) {
       return;
@@ -779,7 +782,11 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     if (filename.equals(".scn")) {
       return;
     }
-
+    
+    if (!profileDir.exists()){
+        profileDir.mkdir();
+    } 
+            
     File file = new File(profileDir.getAbsolutePath() + File.separator + filename);
     if (file.exists()) {
       if (JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog(null,
