@@ -69,7 +69,7 @@ public class ECMA48LogEntryFormater implements LogEntryFormater {
         buildLevelIndicator("i", ECMA48.RESET);
         break;
       case LogService.LOG_WARNING:
-        buildLevelIndicator("W", ECMA48.ORANGE);
+        buildLevelIndicator("W", ECMA48.YELLOW);
         break;
       default:
         buildLevelIndicator("D", ECMA48.RESET);  // should never happen

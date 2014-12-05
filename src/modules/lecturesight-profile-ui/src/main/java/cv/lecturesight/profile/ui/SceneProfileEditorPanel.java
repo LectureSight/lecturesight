@@ -769,7 +769,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   }
 
   private void newProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProfileButtonActionPerformed
-    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   // TODO find out where artifact installer is looking at
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");
     
     // check if profileDir exists
     
