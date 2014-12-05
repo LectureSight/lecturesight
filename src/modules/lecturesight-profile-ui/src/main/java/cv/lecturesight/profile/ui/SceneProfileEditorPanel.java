@@ -769,8 +769,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   }
 
   private void newProfileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newProfileButtonActionPerformed
-    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");
-    
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");   
+ 
     // check if profileDir exists
     
     String name = JOptionPane.showInputDialog(this, "Enter a display name for new profile: ", "Create Profile", 1);
