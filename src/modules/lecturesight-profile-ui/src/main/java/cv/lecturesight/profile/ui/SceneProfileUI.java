@@ -79,9 +79,9 @@ public class SceneProfileUI implements UserInterface, SceneProfileListener {
 
   @Override
   public void profileActivated(SceneProfile profile) {
-    /*if (editor.profile == profile) {
-     editor.reset(profile);
-     }*/
+     if (editor.profile == profile) {
+        editor.reset(profile);
+     }
   }
 
   @Override
