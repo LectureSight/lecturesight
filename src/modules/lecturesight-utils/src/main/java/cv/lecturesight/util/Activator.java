@@ -79,8 +79,9 @@ public final class Activator implements BundleActivator {
     }
     
     // register config service
-    ConfigurationService confService = new ConfigurationServiceImpl(systemProperties, defaultProperties);
+    ConfigurationService confService = new ConfigurationServiceImpl(context, systemProperties, defaultProperties);
     context.registerService(ConfigurationService.class.getName(), confService, null);
+    context.addServiceListener((ConfigurationServiceImpl)confService);
 
     // register config factory
     ConfigurationFactory confFactory = new ConfigurationFactory(systemProperties, defaultProperties, (ConfigurationServiceImpl)confService);

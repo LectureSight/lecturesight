@@ -46,11 +46,22 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   @Reference
   private ConfigurationService configService;
   private ProfileStore profiles = new ProfileStore();
-  private SceneProfile defaultProfile, activeProfile;
+  private SceneProfile defaultProfile, activeProfile, loadProfile;
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
   private String configuredProfile;
 
   protected void activate(ComponentContext cc) throws Exception {
+    // make sure profile directory existis
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");  
+    if (!profileDir.exists()) {
+      log.info("Profile directory not existing. Attempting to create " + profileDir.getAbsolutePath());
+      try {
+        profileDir.mkdir();
+      } catch (Exception e) {
+        log.error("Failed to create profile directory. ", e);
+      }
+    }
+    
     // create system default profile
     defaultProfile = new SceneProfile("default", "System default profile");
     defaultProfile.name = "default";
@@ -62,7 +73,13 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     
     // get name of configured profile
     configuredProfile = config.get(PROPKEY_PROFILE);
-    log.info("Activated. Configured scene profile is: " + configuredProfile);
+    if (configuredProfile != null){
+        loadProfile = profiles.getByName(configuredProfile);
+        if (loadProfile != null) {
+            activeProfile = loadProfile;
+        }
+    }
+    log.info("Activated. Configured scene profile is: " + activeProfile.name );
   }
 
   protected void deactivate(ComponentContext cc) {

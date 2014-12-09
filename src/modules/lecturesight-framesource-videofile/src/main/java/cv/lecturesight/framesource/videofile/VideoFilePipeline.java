@@ -21,8 +21,10 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import org.gstreamer.Buffer;
 import org.gstreamer.Caps;
+import org.gstreamer.ClockTime;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
@@ -46,11 +48,13 @@ public class VideoFilePipeline implements FrameGrabber {
   private Pipeline pipeline;
   private int width, height;    // the video frame size
   private ByteBuffer lastFrame;
+  private boolean playing;
 
   public VideoFilePipeline(File videoFile) throws UnableToLinkElementsException, FrameSourceException {
     createElements();
     setElementProperties(videoFile);
     linkElements();
+    playing = true;
     pipeline.play();
     getVideoFrameSize();
   }
@@ -110,6 +114,7 @@ public class VideoFilePipeline implements FrameGrabber {
    * Called by factory when service is stopped.
    */
   void stop() {
+      playing = false;
       pipeline.setState(State.NULL);
   }
 
@@ -128,6 +133,9 @@ public class VideoFilePipeline implements FrameGrabber {
     } else {
       if (lastFrame == null) {
         throw new FrameSourceException("Stream is EOS and no previously captured frame availabel.");
+      }
+      if (playing) {  // rewind if video has ended
+        pipeline.seek(0, TimeUnit.SECONDS);
       }
     }
     return lastFrame;

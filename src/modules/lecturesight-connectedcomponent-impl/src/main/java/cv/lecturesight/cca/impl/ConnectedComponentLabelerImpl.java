@@ -40,6 +40,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   private EnumMap<ConnectedComponentLabeler.Signal, OCLSignal> signals =
           new EnumMap<ConnectedComponentLabeler.Signal, OCLSignal>(ConnectedComponentLabeler.Signal.class);
   private OpenCLService ocl;
+  private ComputationRun initRun, updateRun, resultRun;
   private CLImage2D input;
   CLBuffer<Integer> labels_work, sizes_work, ids, sizes, changed;
   int[] imageDim, bufferDim;
@@ -49,6 +50,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   int maxSize;
   int maxBlobs;
   int numBlobs = 0;
+  OCLSignal trigger = null;   // custom signal to trigger CCL start
 
   public ConnectedComponentLabelerImpl(CLImage2D input, OpenCLService ocl, int maxBlobs, int minSize, int maxSize) {
     this.ocl = ocl;
@@ -68,9 +70,15 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     ids = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs+1);   // +1 -> [0] = numBlobs
     sizes = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs);
 
-    ocl.registerLaunch(signals.get(Signal.START), new InitRun());
-    ocl.registerLaunch(signals.get(Signal.ITERATE), new UpdateRun());
-    ocl.registerLaunch(signals.get(Signal.FINISH), new ResultRun());
+    // instantiate ComputationRuns
+    initRun = new InitRun();
+    updateRun = new UpdateRun();
+    resultRun = new ResultRun();
+    
+    // register ComputationRuns
+    ocl.registerLaunch(signals.get(Signal.START), initRun);
+    ocl.registerLaunch(signals.get(Signal.ITERATE), updateRun);
+    ocl.registerLaunch(signals.get(Signal.FINISH), resultRun);
   }
 
   private void makeSignals() {
@@ -86,10 +94,27 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     ocl.castSignal(signals.get(Signal.START));
   }
   
+  public void doLabels(OCLSignal trigger) {
+    this.trigger = trigger;
+    ocl.registerLaunch(trigger, initRun);
+  }
+  
   @Override
   public void dispose() {
-    // release buffer object
     // unregister runs
+    if (trigger != null) {
+      ocl.unregisterLaunch(trigger, initRun);
+    }
+    ocl.unregisterLaunch(signals.get(Signal.START), initRun);
+    ocl.unregisterLaunch(signals.get(Signal.ITERATE), updateRun);
+    ocl.unregisterLaunch(signals.get(Signal.FINISH), resultRun);
+    
+    // release buffer object
+    labels_work.release();
+    sizes_work.release();
+    changed.release();
+    ids.release();
+    sizes.release();
   }
   
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
