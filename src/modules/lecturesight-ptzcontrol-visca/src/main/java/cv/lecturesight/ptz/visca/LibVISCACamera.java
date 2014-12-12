@@ -47,7 +47,9 @@ public class LibVISCACamera {
   native boolean deinitialize();
 
   native int getConnectedCams();
-
+ 
+  native boolean cancelCommand(String port);
+    
   native void setPower(boolean power);
 
   native void setIrLed(boolean power);

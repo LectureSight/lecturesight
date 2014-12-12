@@ -27,6 +27,8 @@ public interface PTZCamera {
 
   void reset();
   
+  void cancel();
+  
   void stopMove();
   
   void moveHome();
