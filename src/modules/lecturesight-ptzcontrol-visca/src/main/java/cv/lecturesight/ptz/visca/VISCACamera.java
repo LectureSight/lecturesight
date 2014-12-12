@@ -141,4 +141,10 @@ public class VISCACamera extends AbstractPTZCamera {
   public void setLimitDownLeft(int down, int left) {
 
   }
+
+    @Override
+    public void cancel() {
+        camera.cancelCommand("0");
+        camera.cancelCommand("1");
+    }
 }
