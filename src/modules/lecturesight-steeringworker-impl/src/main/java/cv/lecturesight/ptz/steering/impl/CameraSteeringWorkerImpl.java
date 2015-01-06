@@ -19,10 +19,13 @@ package cv.lecturesight.ptz.steering.impl;
 
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
+import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +34,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-/** Camera Steering SteeringWorker Implementation
+/**
+ * Camera Steering SteeringWorker Implementation
  *
  */
 @Component(name = "lecturesight.ptz.steering.worker", immediate = true)
@@ -39,59 +43,162 @@ import org.osgi.service.component.ComponentContext;
 public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   private Log log = new Log("Camera Steering Worker");
+
   @Reference
-  Configuration config;
+  Configuration config;       // service configuration
+
   @Reference
-  PTZCamera camera;
-  private CameraPositionModel model;
-  private CameraControlPanel controlPanel;
-  SteeringWorker worker;
-  ScheduledExecutorService executor = null;
-  int maxspeed_pan, maxspeed_tilt;
-  boolean move_snap = false;
-  boolean steering = false;
+  PTZCamera camera;           // PTZCamera implementation
+
+  CameraPositionModel model;  // model mapping normalized coords <--> camera coords
+
+  SteeringWorker worker;              // worker updating the pan and tilt speed
+  ScheduledExecutorService executor;  // executor service running the worker
+
+  int pan_min, pan_max;               // pan limits
+  int tilt_min, tilt_max;             // tilt limits
+  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
+  int alpha_x, alpha_y;               // alpha environment size in x and y direction
+  boolean moving = false;             // indicates if the camera if moving
+
+  List<UISlave> slaves;       // list of listeners
+
+  private class SteeringWorker implements Runnable {
+
+    Position camera_pos;
+    boolean steering = false;
+    int last_ps = 0;
+    int last_ts = 0;
+
+    @Override
+    public void run() {
+
+      camera_pos = model.getCameraPosition();
+      
+      // update camera position model
+      try {
+        Position new_pos = camera.getPosition();
+        if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
+          moving = true;
+          model.setCameraPosition(new_pos);
+          camera_pos = new_pos;
+        } else {
+          moving = false;
+          last_ps = 0;
+          last_ts = 0;
+        }
+      } catch (Exception e) {
+        log.warn("Unable to update camera postion: " + e.getMessage());
+        return;
+      }
+
+      if (steering) {
+        Position target_pos = model.getTargetPosition();
+
+        int dx = camera_pos.getX() - target_pos.getX();
+        int dy = camera_pos.getY() - target_pos.getY();
+        int dx_abs = Math.abs(dx);
+        int dy_abs = Math.abs(dy);
+
+        // adjust pan speed
+        int ps;
+        if (dx_abs < alpha_x) {
+          ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
+        } else {
+          ps = maxspeed_pan;
+        }
+
+        // adjust tilt speed
+        int ts;
+        if (dy_abs < alpha_y) {
+          ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
+        } else {
+          ts = maxspeed_tilt;
+        }
+        
+        if (ps != last_ps || ts != last_ts) {
+          System.out.println("Changing pan/tilt speeds:  pan " + last_ps + " > " + ps + "  tilt " + last_ts + " > " + ts);
+          camera.moveAbsolute(ps, ts, target_pos);
+        }
+        
+        last_ps = ps;
+        last_ts = ts;
+      }
+      informUISlaves();
+    }
+  }
 
   protected void activate(ComponentContext cc) throws Exception {
-    model = new CameraPositionModel(camera, config);
+    model = initModel();
+    slaves = new LinkedList<UISlave>();
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
-    maxspeed_tilt = (int)(camera.getProfile().getTiltMaxSpeed());
-    controlPanel = new CameraControlPanel(model);
+    maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
+    alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
+    alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
+    worker = new SteeringWorker();
+    worker.camera_pos = camera.getPosition();
+    startWorker();
+    log.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
-      start();
       setSteering(true);
     }
-    log.info("Activated. Steering " + camera.getName());
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    stop();
+    stopWorker();
     log.info("Deactivated");
   }
-
-  @Override
-  public boolean isSteering() {
-    return steering;
-  }
-
-  @Override
-  public void setSteering(boolean b) {
-    if (b == false) {
-      stopMoving();
-      log.info("Steering OFF");
+  
+  private CameraPositionModel initModel() {
+    // initialize limits for pan and tilt, if not configured by camera calibration
+    // the limits from the camera profile are taken
+    String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      pan_min = camera.getProfile().getPanMin();
     } else {
-      log.info("Steering ON");
+      pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
     }
-    steering = b;
+
+    val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      pan_max = camera.getProfile().getPanMax();
+    } else {
+      pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
+    }
+
+    val = config.get(Constants.PROPKEY_LIMIT_TOP);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      tilt_max = camera.getProfile().getTiltMax();
+    } else {
+      tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
+    }
+
+    val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
+    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+      tilt_min = camera.getProfile().getTiltMin();
+    } else {
+      tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
+    }
+
+    return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
   }
 
-  @Override
-  public boolean isMoving() {
-    return model.isMoving();
+  public void startWorker() {
+    executor = Executors.newScheduledThreadPool(1);
+    executor.scheduleAtFixedRate(worker, 0,
+            config.getInt(Constants.PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
+    log.info("Worker started.");
   }
 
-  @Override
+  public void stopWorker() {
+    setSteering(false);
+    executor.shutdownNow();
+    executor = null;
+    log.info("Worker stopped.");
+  }
+
   public void stopMoving() {
-    setTargetPosition(model.getActualPosition());
+    setTargetPosition(model.getCameraPositionNorm());
     try {
       camera.stopMove();
     } catch (Exception e) {
@@ -100,174 +207,90 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   @Override
-  public void start() {
-    if (executor == null) {
-      executor = Executors.newScheduledThreadPool(1);
-      worker = new SteeringWorker();
-      executor.scheduleAtFixedRate(worker, 0, config.getInt(Constants.PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
-      log.info("Started");
+  public boolean isSteering() {
+    return worker.steering;
+  }
+
+  @Override
+  public void setSteering(boolean b) {
+    worker.steering = b;
+    if (b) {
+      log.info("Steering is now ON");
     } else {
-      log.warn("Already running!");
+      stopMoving();
+      log.info("Steering is now OFF");
     }
   }
 
   @Override
-  public void stop() {
-    if (executor != null) {
-      setSteering(false);
-      executor.shutdownNow();
-      executor = null;
-      log.info("Stopped");
-    } else {
-      log.warn("Nothing to stop");
-    }
+  public boolean isMoving() {
+    return moving;
   }
 
   @Override
   public void setTargetPosition(NormalizedPosition pos) {
-    model.setTargetPosition(pos);
-    controlPanel.repaint();
+    model.setTargetPositionNorm(pos);
+    informUISlaves();
   }
 
   @Override
   public NormalizedPosition getTargetPosition() {
-    return model.getTargetPosition();
+    return model.getTargetPositionNorm();
   }
 
   @Override
   public NormalizedPosition getActualPosition() {
-    return model.getTargetPosition();
-  }
-
-  CameraControlPanel getControlPanel() {
-    return controlPanel;
+    return model.getCameraPositionNorm();
   }
 
   @Override
-  public void setZoom(int factor) {
-    camera.zoom(factor);
-  }
-  
-  public int getZoom() {
-    return camera.getZoom();
+  public void setZoom(float zoom, float speed) {
+    // TODO implement!
   }
 
-  private class SteeringWorker implements Runnable {
+  @Override
+  public float getZoom() {
+    return ((float) camera.getZoom()) / ((float) camera.getProfile().getZoomMax());
+  }
 
-    Position cam_pos;
-    Position target_pos;
-    NormalizedPosition cam_posn;
-    NormalizedPosition last_posn = model.getActualPosition();
+  @Override
+  public int getPanMin() {
+    return pan_min;
+  }
 
-    @Override
-    public void run() {
-      int stop_x = config.getInt(Constants.PROPKEY_STOPX);
-      int alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
-      int stop_y = config.getInt(Constants.PROPKEY_STOPY);
-      int alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
-      
-      // get current position of camera
-      try {
-        cam_pos = camera.getPosition();
-        model.setCamPosition(cam_pos);
-        cam_posn = model.toNormalizedCoordinates(cam_pos);
-        model.setActualPosition(cam_posn);
-        if (!steering) {
-          model.setMoving(last_posn.getX() != cam_posn.getX() || last_posn.getY() != cam_posn.getY());
-        }
-      } catch (Exception e) {
-        log.warn("Unable to update actual postion: " + e.getMessage());
-      }
+  @Override
+  public int getPanMax() {
+    return pan_max;
+  }
 
-      if (steering) {
-        target_pos = model.toCameraCoordinates(model.getTargetPosition());
+  @Override
+  public int getTiltMin() {
+    return tilt_min;
+  }
 
-        int dx = cam_pos.getX() - target_pos.getX();
-        int dx_abs = Math.abs(dx);
-        int dy = cam_pos.getY() - target_pos.getY();
-        int dy_abs = Math.abs(dy);
-        
-        // adjust pan speed
-        int ps;
-        if (model.isMoving() && dx_abs < stop_x) {
-          ps = 0;
-        } else {
-          if (dx_abs < alpha_x) {
-            ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
-          } else {
-            ps = maxspeed_pan;
-          }
-        }
+  @Override
+  public int getTiltMax() {
+    return tilt_max;
+  }
 
-        // adjust tilt speed
-        int ts;
-        if (model.isMoving() && dy_abs < stop_y) {
-          ts = 0;
-        } else {
-          if (dy_abs < alpha_y) {
-            ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
-          } else {
-            ts = maxspeed_tilt;
-          }
-        }
+  @Override
+  public Position toCameraCoordinates(NormalizedPosition posn) {
+    return model.toCameraCoordinates(posn);
+  }
 
-        String status = "zoom = " + camera.getZoom() + "\ndx = " + dx + "  dy = " + dy + "\nv_pan = " + ps + "  v_tilt = " + ts +  "\ncmd:";
-        
-        // set speed on camera
-        if (ps == 0 && ts == 0) {
-          if (model.isMoving()) {
-            camera.stopMove();
-            model.setMoving(false);
-            status += " STOP";
-          } else {
-            status += " STILL";
-          }
-          
-        } else if (dx < 0 && dy < 0 && ps > 0 && ts > 0) {
-          camera.moveUpRight(ps, ts);
-          model.setMoving(true);
-          status += " UP-RIGHT";
+  @Override
+  public void addUISlave(UISlave slave) {
+    slaves.add(slave);
+  }
 
-        } else if (dx < 0 && dy > 0 && ps > 0 && ts > 0) {
-          camera.moveDownRight(ps, ts);
-          model.setMoving(true);
-          status += " DOWN-RIGHT";
+  @Override
+  public void removeUISlave(UISlave slave) {
+    slaves.remove(slave);
+  }
 
-        } else if (dx > 0 && dy < 0 && ps > 0 && ts > 0) {
-          camera.moveUpLeft(ps, ts);
-          model.setMoving(true);
-          status += " UP-LEFT";
-
-        } else if (dx > 0 && dy > 0 && ps > 0 && ts > 0) {
-          camera.moveDownLeft(ps, ts);
-          model.setMoving(true);
-          status += " DOWN_LEFT";
-
-        } else if (dx < 0 && ps > 0 && ts == 0) {
-          camera.moveRight(ps);
-          model.setMoving(true);
-          status += " RIGHT";
-
-        } else if (dx > 0 && ps > 0 && ts == 0) {
-          camera.moveLeft(ps);
-          model.setMoving(true);
-          status += " LEFT";
-
-        } else if (dy < 0 && ps == 0 && ts > 0) {
-          camera.moveUp(ts);
-          model.setMoving(true);
-          status += " UP";
-
-        } else if (dy > 0 && ps == 0 && ts > 0) {
-          camera.moveDown(ts);
-          model.setMoving(true);
-          status += " DOWN";
-        }
-        model.setStatus(status);
-      }
-      
-      controlPanel.repaint();
-      last_posn = cam_posn;
+  private void informUISlaves() {
+    for (UISlave s : slaves) {
+      s.refresh();
     }
   }
 }

@@ -17,160 +17,110 @@
  */
 package cv.lecturesight.ptz.steering.impl;
 
-import cv.lecturesight.ptz.api.PTZCamera;
-import cv.lecturesight.ptz.api.PTZCameraProfile;
-import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 
 public class CameraPositionModel {
 
-  private PTZCamera camera;
-  Configuration config;
-  PTZCameraProfile camProfile;
-  private Position camPosition = new Position(0, 0);
-  private NormalizedPosition targetPosition = new NormalizedPosition(0.0f, 0.0f);
-  private NormalizedPosition actualPosition = new NormalizedPosition(0.0f, 0.0f);
-  private int pan_min;
-  private int pan_max;
-  private int tilt_min;
-  private int tilt_max;
-  boolean moving = false;
-  private String status = "N/A";
-
-  public CameraPositionModel(PTZCamera camera, Configuration config) {
-    this.camera = camera;
-    this.config = config;
-    camProfile = camera.getProfile();
-    
-    // initialize limits for pan and tilt, if not configured by camera calibration
-    // the limits from the camera profile are taken
-    String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
-      pan_min = camProfile.getPanMin();
-    } else {
-      pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
-    }
-    
-    val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
-      pan_max = camProfile.getPanMax();
-    } else {
-      pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
-    }
-    
-    val = config.get(Constants.PROPKEY_LIMIT_TOP);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
-      tilt_max = camProfile.getTiltMax();
-    } else {
-      tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
-    }
-    
-    val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
-      tilt_min = camProfile.getTiltMin();
-    } else {
-      tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
-    }
+  // scene limits for normalization
+  private final int pan_min;
+  private final int pan_max;
+  private final int tilt_min;
+  private final int tilt_max;
+  
+  private Position camera_pos = new Position(0, 0);   // camera position in camera coordinates
+  private Position target_pos = new Position(0, 0);   // target position in camera coordinates
+  private NormalizedPosition target_posn = new NormalizedPosition(0.0f, 0.0f);  // camera position in normalized coordinates
+  private NormalizedPosition camera_posn = new NormalizedPosition(0.0f, 0.0f);  // target position in normalized coordinates
+  
+  public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max) {
+    this.pan_max = pan_max;
+    this.pan_min = pan_min;
+    this.tilt_max = tilt_max;
+    this.tilt_min = tilt_min;
   }
 
-  public NormalizedPosition getTargetPosition() {
-    return targetPosition.clone();
-  }
-
-  public void setTargetPosition(NormalizedPosition targetPosition) {
-    this.targetPosition.setX(targetPosition.getX());
-    this.targetPosition.setY(targetPosition.getY());
-  }
-
-  public NormalizedPosition getActualPosition() {
-    return actualPosition.clone();
-  }
-
-  public void setActualPosition(NormalizedPosition actualPosition) {
-    this.actualPosition.setX(actualPosition.getX());
-    this.actualPosition.setY(actualPosition.getY());
-  }
-
-  public void setMoving(boolean moving) {
-    this.moving = moving;
-  }
-
-  public boolean isMoving() {
-    return moving;
-  }
-
-  public String getCameraName() {
-    return camera.getName();
-  }
-
-  public NormalizedPosition toNormalizedCoordinates(Position camPosition) {
+  /** Translates camera coordinates to normalized coordinates.
+   * 
+   * @param pos camera coordinates
+   * @return normalized coordinates
+   */
+  public NormalizedPosition toNormalizedCoordinates(Position pos) {
     NormalizedPosition out = new NormalizedPosition(0.0f, 0.0f);
-    float x = camPosition.getX();
-    float y = camPosition.getY();
+    float x = pos.getX();
+    float y = pos.getY();
     // x
     if (x < 0) {
-      out.setX(-1 * (x / getPan_min()));
+      out.setX(-1 * (x / pan_min));
     } else if (x > 0) {
-      out.setX(x / getPan_max());
+      out.setX(x / pan_max);
     }
     // y
     if (y < 0) {
-      out.setY(-1 * (y / getTilt_min()));
+      out.setY(-1 * (y / tilt_min));
     } else if (y > 0) {
-      out.setY(y / getTilt_max());
+      out.setY(y / tilt_max);
     }
     return out;
   }
 
+  /** Translates normalized coordinates to camera coordinates.
+   * 
+   * @param pos normalized coordinates
+   * @return camera coordinates
+   */
   public Position toCameraCoordinates(NormalizedPosition pos) {
     Position out = new Position(0, 0);
     float x = pos.getX();
     float y = pos.getY();
     // x
     if (x < 0) {
-      out.setX((int) (-1 * (x * getPan_min())));
+      out.setX((int) (-1 * (x * pan_min)));
     } else if (x > 0) {
-      out.setX((int) (x * getPan_max()));
+      out.setX((int) (x * pan_max));
     }
     // y
     if (y < 0) {
-      out.setY((int) (-1 * (y * getTilt_min())));
+      out.setY((int) (-1 * (y * tilt_min)));
     } else if (y > 0) {
-      out.setY((int) (y * getTilt_max()));
+      out.setY((int) (y * tilt_max));
     }
     return out;
   }
-
-  public int getPan_min() {
-    return pan_min;
-  }
-
-  public int getPan_max() {
-    return pan_max;
-  }
-
-  public int getTilt_min() {
-    return tilt_min;
-  }
-
-  public int getTilt_max() {
-    return tilt_max;
-  }
-
-  public Position getCamPosition() {
-    return camPosition;
-  }
-
-  public void setCamPosition(Position camPosition) {
-    this.camPosition = camPosition;
-  }
-
-  void setStatus(String status) {
-    this.status = status;
+  
+  public synchronized void setCameraPositionNorm(NormalizedPosition posn) {
+    camera_posn = posn;
+    camera_pos = toCameraCoordinates(posn);
   }
   
-  String getStatus() {
-    return status;
+  public synchronized void setCameraPosition(Position pos) {
+    camera_posn = toNormalizedCoordinates(pos);
+    camera_pos = pos;
+  }
+  
+  public synchronized void setTargetPositionNorm(NormalizedPosition posn) {
+    target_posn = posn;
+    target_pos = toCameraCoordinates(posn);
+  }
+
+  public synchronized void setTargetPosition(Position pos) {
+    target_posn = toNormalizedCoordinates(pos);
+    target_pos = pos;
+  }
+  
+  public synchronized Position getCameraPosition() {
+    return camera_pos.clone();
+  }
+  
+  public synchronized NormalizedPosition getCameraPositionNorm() {
+    return camera_posn.clone();
+  }
+  
+  public synchronized Position getTargetPosition() {
+    return target_pos;
+  }
+  
+  public synchronized NormalizedPosition getTargetPositionNorm() {
+    return target_posn.clone();
   }
 }
