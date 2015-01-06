@@ -18,21 +18,40 @@
 package cv.lecturesight.ptz.steering.api;
 
 import cv.lecturesight.util.geometry.NormalizedPosition;
+import cv.lecturesight.util.geometry.Position;
 
 /** Camera Steering Worker API
  * 
  */
 public interface CameraSteeringWorker {
- 
-  void start();
-  void stop();
-  boolean isSteering();
-  void setSteering(boolean on);
-  boolean isMoving();
-  void stopMoving();
-  void setTargetPosition(NormalizedPosition pos);
-  void setZoom(int factor);
-  int getZoom();
-  NormalizedPosition getTargetPosition();
-  NormalizedPosition getActualPosition();
+  
+  public boolean isSteering();
+  
+  public void setSteering(boolean on);
+  
+  public void setTargetPosition(NormalizedPosition pos);
+  
+  public NormalizedPosition getTargetPosition();
+  
+  public NormalizedPosition getActualPosition();
+  
+  public void setZoom(float zoom, float speed);
+  
+  public float getZoom();
+  
+  public boolean isMoving();
+  
+  public int getPanMin();
+  
+  public int getPanMax();
+  
+  public int getTiltMin();
+  
+  public int getTiltMax();
+  
+  public Position toCameraCoordinates(NormalizedPosition posn);
+  
+  public void addUISlave(UISlave slave);
+  
+  public void removeUISlave(UISlave slave);
 }
