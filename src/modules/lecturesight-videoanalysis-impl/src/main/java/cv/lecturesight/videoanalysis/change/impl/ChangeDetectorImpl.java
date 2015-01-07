@@ -54,9 +54,13 @@ public class ChangeDetectorImpl implements ChangeDetector {
   @Reference
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
-  CLImage2D input, last;
-  CLImage2D changeMapRaw;
+  CLImage2D input, last, twoback;
+  CLImage2D changeMapRaw12;
+  CLImage2D changeMapRaw23;
+  CLImage2D changeMapRaw13;
   CLImage2D changeMapDilated;
+  CLImage2D combinedDiffs;
+  
   private int[] workDim;
   private EnumMap<ChangeDetector.Signal, OCLSignal> signals =
           new EnumMap<ChangeDetector.Signal, OCLSignal>(ChangeDetector.Signal.class);
@@ -71,11 +75,16 @@ public class ChangeDetectorImpl implements ChangeDetector {
     workDim = new int[]{fsrc.getWidth(), fsrc.getHeight()};
 
     // allocate gpu buffers
+    twoback = ocl.context().createImage2D(Usage.InputOutput, Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     last = ocl.context().createImage2D(Usage.InputOutput, Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    changeMapRaw = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapRaw12 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapRaw23 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapRaw13 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     changeMapDilated = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-
+    combinedDiffs = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);    
+    
     ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, last);
+    ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, twoback);
 
     registerDisplays();
 
@@ -85,7 +94,9 @@ public class ChangeDetectorImpl implements ChangeDetector {
   }
 
   private void registerDisplays() {
-    dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, changeMapRaw, signals.get(Signal.DONE_DETECTION));
+    dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, changeMapRaw12, signals.get(Signal.DONE_DETECTION));
+    dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, changeMapRaw23, signals.get(Signal.DONE_DETECTION));
+    dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_RAW, changeMapRaw13, signals.get(Signal.DONE_DETECTION));
     dsps.registerDisplay(Constants.WINDOWNAME_CHANGE_DILATED, changeMapDilated, signals.get(Signal.DONE_DETECTION));
   }
 
@@ -95,8 +106,17 @@ public class ChangeDetectorImpl implements ChangeDetector {
   }
 
   @Override
-  public CLImage2D getChangeMapRaw() {
-    return changeMapRaw;
+  public CLImage2D getChangeMapRaw12() {
+    return changeMapRaw12;
+  }
+
+  @Override
+  public CLImage2D getChangeMapRaw23() {
+    return changeMapRaw23;
+  }
+  @Override
+  public CLImage2D getChangeMapRaw13() {
+    return changeMapRaw13;
   }
 
   @Override
@@ -111,13 +131,20 @@ public class ChangeDetectorImpl implements ChangeDetector {
     CLKernel dilateK = ocl.programs().getKernel("change", "image_dilate8");
 
     {
-      dilateK.setArgs(changeMapRaw, changeMapDilated);
+      dilateK.setArgs(combinedDiffs, changeMapDilated);
     }
 
     @Override
     public void launch(CLQueue queue) {
-      absDiffThreshK.setArgs(input, last, changeMapRaw, config.getInt(Constants.PROPKEY_THRESH));
+      absDiffThreshK.setArgs(input, last, changeMapRaw12, config.getInt(Constants.PROPKEY_THRESH));
       absDiffThreshK.enqueueNDRange(queue, workDim);
+      absDiffThreshK.setArgs(input, twoback, changeMapRaw13, config.getInt(Constants.PROPKEY_THRESH));
+      absDiffThreshK.enqueueNDRange(queue, workDim);
+//      absDiffThreshK.setArgs(last, twoback, changeMapRaw23, config.getInt(Constants.PROPKEY_THRESH));
+//      absDiffThreshK.enqueueNDRange(queue, workDim);
+      absDiffThreshK.setArgs(changeMapRaw12, changeMapRaw13, combinedDiffs, config.getInt(Constants.PROPKEY_THRESH));
+      absDiffThreshK.enqueueNDRange(queue, workDim);
+      ocl.utils().copyImage(0, 0, workDim[0], workDim[1], last, 0, 0, twoback);
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, last);
       dilateK.enqueueNDRange(queue, workDim);
     }
