@@ -31,7 +31,7 @@ import org.apache.felix.scr.annotations.Service;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "cs"),
-  @Property(name = "osgi.command.function", value = {"on", "off", "start", "stop", "restart", "move", "stopmove", "home", "zoom"})
+  @Property(name = "osgi.command.function", value = {"on", "off", "move", "home", "zoom"})
 })
 public class ConsoleCommands implements DummyInterface {
 
@@ -45,19 +45,6 @@ public class ConsoleCommands implements DummyInterface {
 
   public void off(String[] args) {
     steerer.setSteering(false);
-  }
-
-  public void start(String[] args) {
-    steerer.start();
-  }
-
-  public void stop(String[] args) {
-    steerer.stop();
-  }
-
-  public void restart(String[] args) {
-    steerer.stop();
-    steerer.start();
   }
 
   public void move(String[] args) {
@@ -82,10 +69,6 @@ public class ConsoleCommands implements DummyInterface {
     }
   }
 
-  public void stopmove(String[] args) {
-    steerer.stopMoving();
-  }
-
   public void home(String[] args) {
     steerer.setTargetPosition(new NormalizedPosition(0.0f, 0.0f));
   }
@@ -95,8 +78,12 @@ public class ConsoleCommands implements DummyInterface {
       System.out.println("Zoom: " + steerer.getZoom());
     } else {
       try {
-        int zoom = Integer.parseInt(args[0]);
-        steerer.setZoom(zoom);
+        float zoom = Float.parseFloat(args[0]);
+        float speed = 1.0f;
+        if (args.length > 1) {
+          speed = Float.parseFloat(args[1]);
+        }
+        steerer.setZoom(zoom, speed);
       } catch (NumberFormatException e) {
         System.out.println("Could not parse zoom factor.");
       }

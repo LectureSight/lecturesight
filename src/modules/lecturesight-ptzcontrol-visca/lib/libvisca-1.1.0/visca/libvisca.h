@@ -39,6 +39,7 @@
 /**********************/
 
 #define VISCA_COMMAND                    0x01
+#define VISCA_CANCEL                     0x20
 #define VISCA_INQUIRY                    0x09
 #define VISCA_TERMINATOR                 0xFF
 
@@ -91,6 +92,8 @@
 
 #define VISCA_MODEL_H10      0x044A	     /* from H10 tech-manual */
 
+#define VISCA_MODEL_H100V    0x050E         /* from H100 tech-manual */
+#define VISCA_MODEL_H100S    0x050F         
 
 /* Commands/inquiries codes */
 #define VISCA_POWER                      0x00
@@ -530,6 +533,9 @@ VISCA_clear(VISCAInterface_t *iface, VISCACamera_t *camera);
 
 VISCA_API uint32_t
 VISCA_get_camera_info(VISCAInterface_t *iface, VISCACamera_t *camera);
+
+VISCA_API uint32_t
+VISCA_command_cancel(VISCAInterface_t *iface, VISCACamera_t *camera);
 
 VISCA_API uint32_t
 _VISCA_write_packet_data(VISCAInterface_t *iface, VISCACamera_t *camera, VISCAPacket_t *packet);

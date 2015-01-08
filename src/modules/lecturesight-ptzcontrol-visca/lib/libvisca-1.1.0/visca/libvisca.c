@@ -199,8 +199,20 @@ VISCA_get_camera_info(VISCAInterface_t *iface, VISCACamera_t *camera)
       camera->rom_version=(iface->ibuf[6]<<8) + iface->ibuf[7];
       camera->socket_num=iface->ibuf[8];
       return VISCA_SUCCESS;
-    }
+    } 
 }
+
+VISCA_API uint32_t
+VISCA_command_cancel(VISCAInterface_t *iface, VISCACamera_t *camera)
+{
+  VISCAPacket_t packet;
+  packet.bytes[0]=0x80 | camera->address;
+  packet.bytes[1]=VISCA_CANCEL | camera->socket_num;
+  packet.bytes[2]=VISCA_TERMINATOR;
+  packet.length=3;
+  return _VISCA_send_packet_with_reply(iface, camera, &packet);
+}
+
 
 /***********************************/
 /*       COMMAND FUNCTIONS         */
