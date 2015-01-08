@@ -53,6 +53,12 @@ public interface PTZCamera {
   
   void moveRelative(int panSpeed, int tiltSpeed, Position target);
   
+  void clearLimits();
+  
+  void setLimitUpRight(int pan, int tilt);
+  
+  void setLimitDownLeft(int pan, int tilt);
+  
   Position getPosition();
   
   void stopZoom();
