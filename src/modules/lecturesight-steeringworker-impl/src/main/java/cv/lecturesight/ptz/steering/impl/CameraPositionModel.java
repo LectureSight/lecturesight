@@ -27,21 +27,24 @@ public class CameraPositionModel {
   private final int pan_max;
   private final int tilt_min;
   private final int tilt_max;
-  
+  private final boolean yflip;
+
   private Position camera_pos = new Position(0, 0);   // camera position in camera coordinates
   private Position target_pos = new Position(0, 0);   // target position in camera coordinates
   private NormalizedPosition target_posn = new NormalizedPosition(0.0f, 0.0f);  // camera position in normalized coordinates
   private NormalizedPosition camera_posn = new NormalizedPosition(0.0f, 0.0f);  // target position in normalized coordinates
-  
-  public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max) {
+
+  public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max, boolean yflip) {
     this.pan_max = pan_max;
     this.pan_min = pan_min;
     this.tilt_max = tilt_max;
     this.tilt_min = tilt_min;
+    this.yflip = yflip;
   }
 
-  /** Translates camera coordinates to normalized coordinates.
-   * 
+  /**
+   * Translates camera coordinates to normalized coordinates.
+   *
    * @param pos camera coordinates
    * @return normalized coordinates
    */
@@ -56,16 +59,25 @@ public class CameraPositionModel {
       out.setX(x / pan_max);
     }
     // y
-    if (y < 0) {
-      out.setY(-1 * (y / tilt_min));
-    } else if (y > 0) {
-      out.setY(y / tilt_max);
+    if (yflip) {
+      if (y < 0) {
+        out.setY(y / tilt_max);
+      } else if (y > 0) {
+        out.setY(-1 * (y / tilt_min));
+      }
+    } else {
+      if (y < 0) {
+        out.setY(-1 * (y / tilt_min));
+      } else if (y > 0) {
+        out.setY(y / tilt_max);
+      }
     }
     return out;
   }
 
-  /** Translates normalized coordinates to camera coordinates.
-   * 
+  /**
+   * Translates normalized coordinates to camera coordinates.
+   *
    * @param pos normalized coordinates
    * @return camera coordinates
    */
@@ -80,24 +92,32 @@ public class CameraPositionModel {
       out.setX((int) (x * pan_max));
     }
     // y
-    if (y < 0) {
-      out.setY((int) (-1 * (y * tilt_min)));
-    } else if (y > 0) {
-      out.setY((int) (y * tilt_max));
+    if (yflip) {
+      if (y < 0) {
+        out.setY((int) (y * tilt_max));
+      } else if (y > 0) {
+        out.setY((int) (-1 * (y * tilt_min)));
+      }
+    } else {
+      if (y < 0) {
+        out.setY((int) (-1 * (y * tilt_min)));
+      } else if (y > 0) {
+        out.setY((int) (y * tilt_max));
+      }
     }
     return out;
   }
-  
+
   public synchronized void setCameraPositionNorm(NormalizedPosition posn) {
     camera_posn = posn;
     camera_pos = toCameraCoordinates(posn);
   }
-  
+
   public synchronized void setCameraPosition(Position pos) {
     camera_posn = toNormalizedCoordinates(pos);
     camera_pos = pos;
   }
-  
+
   public synchronized void setTargetPositionNorm(NormalizedPosition posn) {
     target_posn = posn;
     target_pos = toCameraCoordinates(posn);
@@ -107,19 +127,19 @@ public class CameraPositionModel {
     target_posn = toNormalizedCoordinates(pos);
     target_pos = pos;
   }
-  
+
   public synchronized Position getCameraPosition() {
     return camera_pos.clone();
   }
-  
+
   public synchronized NormalizedPosition getCameraPositionNorm() {
     return camera_posn.clone();
   }
-  
+
   public synchronized Position getTargetPosition() {
     return target_pos;
   }
-  
+
   public synchronized NormalizedPosition getTargetPositionNorm() {
     return target_posn.clone();
   }
