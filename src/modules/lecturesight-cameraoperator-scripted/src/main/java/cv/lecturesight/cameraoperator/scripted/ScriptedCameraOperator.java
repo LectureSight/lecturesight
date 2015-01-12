@@ -1,21 +1,11 @@
 package cv.lecturesight.cameraoperator.scripted;
 
-import cv.lecturesight.cameraoperator.scripted.bridge.ConfigurationBridge;
-import cv.lecturesight.cameraoperator.scripted.bridge.ObjectTrackerBridge;
-import cv.lecturesight.cameraoperator.scripted.bridge.ScriptBridgeException;
-import cv.lecturesight.cameraoperator.scripted.bridge.SteeringWorkerBridge;
-import cv.lecturesight.cameraoperator.scripted.bridge.SystemBridge;
-import cv.lecturesight.framesource.FrameSource;
-import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.operator.CameraOperator;
-import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -35,16 +25,6 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   @Reference
   Configuration config;
   
-  @Reference
-  ObjectTracker tracker;
-  
-  @Reference
-  CameraSteeringWorker camera;
-  
-  @Reference
-  FrameSourceProvider fsp;
-  FrameSource fsrc;
-  
   ScheduledExecutorService executor;
   ScriptEngineManager engineManager;
   
@@ -53,7 +33,6 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   private File configFile = null;
   
   protected void activate(ComponentContext cc) throws Exception {
-    fsrc = fsp.getFrameSource();
     engineManager = new ScriptEngineManager();
     
     // look for operator script and start it if existing
@@ -82,25 +61,19 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
         ScriptWorker scriptWorker = new ScriptWorker(scriptFile);
         
         // inject usefull stuff into the script space
-        scriptWorker.injectPackage("cv.lecturesight.cameraoperator.scripted.bridge.classes");
-        Log scriptLogger = new Log(scriptFile.getName());
-        scriptWorker.injectObject("System", new SystemBridge(scriptLogger));
-        //scriptWorker.injectObject("Scene", new SceneBridge());
-        scriptWorker.injectObject("Tracker", new ObjectTrackerBridge(tracker));
-        scriptWorker.injectObject("Camera", new SteeringWorkerBridge(camera));
         if ((configFile = findConfigFile(scriptFile)) != null) {
-          try {
-            ConfigurationBridge configB = new ConfigurationBridge(configFile);
-            scriptWorker.injectObject("Configuration", configB);
-          } catch (ScriptBridgeException e) {
-            log.warn("Failed to load script configuration. " + e.getMessage());
-          }
+//          try {
+//            ConfigurationBridge configB = new ConfigurationBridge(configFile);
+//            scriptWorker.injectObject("Configuration", configB);
+//          } catch (ScriptBridgeException e) {
+//            log.warn("Failed to load script configuration. " + e.getMessage());
+//          }
         }
         
         // start script execution
         scriptWorker.init();
-        int interval = config.getInt(Constants.PROPKEY_INTERVAL);
-        executor.scheduleAtFixedRate(scriptWorker, interval, interval, TimeUnit.MILLISECONDS);
+//        int interval = config.getInt(Constants.PROPKEY_INTERVAL);
+//        executor.scheduleAtFixedRate(scriptWorker, interval, interval, TimeUnit.MILLISECONDS);
       } catch (Exception e) {
         log.error("Unable to initialize script.", e);
         stop();
