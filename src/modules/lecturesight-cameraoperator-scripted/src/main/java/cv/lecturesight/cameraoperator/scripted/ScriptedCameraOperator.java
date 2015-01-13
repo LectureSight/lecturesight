@@ -4,6 +4,7 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
+import java.util.Properties;
 import javax.script.ScriptEngineManager;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
@@ -46,6 +47,10 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     log.info("Attempting to start script worker.");
     try {
       scrWorker = new ScriptWorker(scriptFile, engineManager.getEngineByName("javascript"));
+      
+      // make config object
+      Properties props = parseConfigFile(configFile);
+      scrWorker.setScriptConfig(props);
       
       // equip engine with bridge objects
       
@@ -97,8 +102,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
       scriptFile = file;
       start();
     } else if (file.getAbsolutePath().equals(getScriptFilePath())) {
-      configFile = file;
-      // create config bridge object
+      configFile = file;      
     }
   }
 
@@ -109,7 +113,8 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
       reset();
     } else if (file.getAbsolutePath().equals(getScriptFilePath())) {
       configFile = file;
-      // update config bridge object
+      
+      // TODO update Config object in script space also for running script??
     }
   }
 
@@ -120,7 +125,6 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
       stop();
     } else if (file.getAbsolutePath().equals(getScriptFilePath())) {
       configFile = null;
-      // empty config bridge object
     }
   }
 
@@ -128,6 +132,16 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   public boolean canHandle(File file) {
     String path = file.getAbsolutePath();
     return getScriptFilePath().equals(path) || getConfigFilePath().equals(path);
+  }
+  
+  private Properties parseConfigFile(File f) {
+    Properties cfg = new Properties();
+    try {
+      cfg.load(new FileReader(f));
+    } catch (Exception e) {
+      log.error("Failed to load configuration file for script. ", e);
+    }
+    return cfg;
   }
   
   public String getScriptDir() {

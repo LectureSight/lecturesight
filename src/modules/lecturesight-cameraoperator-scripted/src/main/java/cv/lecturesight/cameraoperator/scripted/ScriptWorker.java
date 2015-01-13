@@ -4,11 +4,17 @@ import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import org.codehaus.plexus.util.StringUtils;
 
 public class ScriptWorker implements Runnable {
 
@@ -106,6 +112,24 @@ public class ScriptWorker implements Runnable {
       engine.eval(code.toString());
     } catch (ScriptException e) {
       log.error("Unable to import package " + packageName + " in script. ", e);
+    }
+  }
+  
+  void setScriptConfig(Properties props) {
+    // make JS code of config object
+    List<String> params = new ArrayList<String>();
+    for (Entry<Object,Object> entry : props.entrySet()) {
+      String key = (String)entry.getKey();         // TODO sanitize key string
+      String val = (String)entry.getValue();       // TODO sanitize value string
+      params.add("\"" + key + "\":\"" + val + "\"");
+    }
+    String code = "var Config = {" + StringUtils.join(params.iterator(), ",") + "};";
+    
+    // inject Config object 
+    try {
+      engine.eval(code);
+    } catch (ScriptException e) {
+      log.error("Failed to inject configuration object into script. ", e);
     }
   }
 
