@@ -53,6 +53,11 @@
       <artifactId>org.apache.felix.fileinstall</artifactId>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>rhino</groupId>
+      <artifactId>js</artifactId>
+      <version>1.7R2</version>
+    </dependency>
   </dependencies>
   
   <version>0.3-SNAPSHOT</version>

@@ -5,7 +5,6 @@ import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
 import java.util.Properties;
-import javax.script.ScriptEngineManager;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,16 +20,13 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   @Reference
   Configuration config;               // service configuration
   
-  ScriptEngineManager engineManager;  // script engine manager
-  
   File scriptFile = null;             // script file when loaded
   File configFile = null;             // config file for script
   
   ScriptWorker scrWorker = null;      // worker executing the script
   Thread scrWorkerThread = null;      // thread handle for worker's execution
-  
+    
   protected void activate(ComponentContext cc) throws Exception {
-    engineManager = new ScriptEngineManager();
     log.info("Activated");
   }
 
@@ -49,7 +45,7 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
     log.info("Attempting to start script worker.");
     try {
-      scrWorker = new ScriptWorker(scriptFile, engineManager.getEngineByName("javascript"));
+      scrWorker = new ScriptWorker(scriptFile);
       
       // make config object
       Properties props = parseConfigFile(configFile);
@@ -90,9 +86,9 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
       // if worker was not stopped, hard kill it. using deprecated stop() here as
       // there isn't really any other way.
       if (!scrWorker.isStopped()) {
-        log.warn("Interpreter did not stop while grace period, hard killing interpreter thread.");
+        log.warn("Script worker did not stop, hard killing thread.");
         scrWorkerThread.stop();
-      }
+      }      
     } else {
       log.warn("stop() called but nothing to stop.");
     }

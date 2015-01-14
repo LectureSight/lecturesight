@@ -4,25 +4,27 @@ import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import org.codehaus.plexus.util.StringUtils;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 
 public class ScriptWorker implements Runnable {
 
   Log log = new Log("Script");  // our logger
 
-  ScriptEngine engine;    // scripting engine
-  Invocable script;       // scripting engine as Invocable
-
+  String filename;     // name of the js file that this worker executes
+  
+  Scriptable scope;
+  
   // queue that stores function calls to be made
   BlockingQueue<Invocation> invokeQueue = new LinkedBlockingQueue<Invocation>();
 
@@ -31,21 +33,23 @@ public class ScriptWorker implements Runnable {
 
   /** Constructor, prepares the script for function invocation.
    * 
-   * @param source
-   * @param engine
+   * @param source File holding the script's source code
    * @throws Exception 
    */
-  public ScriptWorker(File source, ScriptEngine engine) throws Exception {
-    this.engine = engine;
-    script = (Invocable) engine;
+  public ScriptWorker(File source) throws Exception {
+    Context ctx = Context.enter();                                // TODO refine this
+    scope = ctx.initStandardObjects(null, true);
+    filename = source.getName();
     try {
-        engine.eval(new FileReader(source));    // evaluate script so that all definitions are loaded
+      ctx.evaluateReader(scope, new FileReader(source), filename, 1, null); // why doesn't this throw anything in case of compilation error?
     } catch (FileNotFoundException e) {
-      log.error("Unable to read script source.", e);
+      log.error("Source file not found.", e);
       throw e;
-    } catch (ScriptException e) {
-      log.error("Error while evaluating script.", e);
+    } catch (IOException e) {
+      log.error("Failed reading source file.", e);
       throw e;
+    } finally {
+      Context.exit();
     }
   }
 
@@ -60,22 +64,29 @@ public class ScriptWorker implements Runnable {
    */
   @Override
   public void run() {
+    Context ctx = Context.enter();
     try {
       while (running) {
         Invocation inv = invokeQueue.take();
         try {
-          script.invokeFunction(inv.function, inv.args);
-        } catch (NoSuchMethodException e) {
-          log.warn("Invocation error: " + e.getMessage());
-        } catch (ScriptException e) {
-          log.warn("Script error: " + e.getMessage());
+          Object o = scope.get(inv.function, scope);
+          if (!(o instanceof Function)) {
+            log.error("Invocation error: function " + inv.function + " not found.");
+          } else {
+            Function func = (Function)o;
+            func.call(ctx, scope, scope, inv.args);
+          }
+        } catch (Exception e) {
+          log.error("Error: " + e.getMessage(), e);
         }
       }
-      log.warn("Interpreter exiting.");
+      log.info("Interpreter exiting.");
     } catch (InterruptedException ie) {
-      log.warn("Interrupted while waiting for invocations. Interpreter exiting.");
+      log.info("Interrupted while waiting for invocations. Interpreter exiting.");
+    } finally {
+      Context.exit();
+      stopped = true;
     }
-    stopped = true;
   }
 
   /** Enqueues a new <code>Invocation</code> that will execute the specified 
@@ -85,7 +96,7 @@ public class ScriptWorker implements Runnable {
    * @param args 
    */ 
   public void invoke(String function, Object... args) {
-    log.info("Invoking " + function + " with " + args.length + " parameters.");
+    log.debug("Submitting invoking of function " + function + " with " + args.length + " parameters.");
     Invocation inv = new Invocation(function, args);
     invokeQueue.add(inv);
   }
@@ -97,7 +108,8 @@ public class ScriptWorker implements Runnable {
    * @param obj 
    */
   public void injectObject(String name, Object obj) {
-    engine.put(name, obj);
+    Object wrapped = Context.javaToJS(obj, scope);
+    ScriptableObject.putProperty(scope, name, wrapped);
   }
 
   /** Makes the interpreter import the Java package specified by 
@@ -106,12 +118,15 @@ public class ScriptWorker implements Runnable {
    * @param packageName 
    */
   public void injectPackage(String packageName) {
+    Context ctx = Context.enter();
     try {
       StringBuilder code = new StringBuilder();
       code.append("importPackage(Packages.").append(packageName).append(");");
-      engine.eval(code.toString());
-    } catch (ScriptException e) {
+      ctx.evaluateString(scope, code.toString(), "<scriptWorker>", 1, null);
+    } catch (Exception e) {
       log.error("Unable to import package " + packageName + " in script. ", e);
+    } finally {
+      Context.exit();
     }
   }
   
@@ -126,10 +141,13 @@ public class ScriptWorker implements Runnable {
     String code = "var Config = {" + StringUtils.join(params.iterator(), ",") + "};";
     
     // inject Config object 
+    Context ctx = Context.enter();
     try {
-      engine.eval(code);
-    } catch (ScriptException e) {
+      ctx.evaluateString(scope, code, "<scriptWorker>", 1, null);
+    } catch (Exception e) {
       log.error("Failed to inject configuration object into script. ", e);
+    } finally {
+      Context.exit();
     }
   }
 
