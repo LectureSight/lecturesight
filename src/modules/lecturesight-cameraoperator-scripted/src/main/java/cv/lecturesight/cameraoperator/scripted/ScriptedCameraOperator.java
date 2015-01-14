@@ -19,15 +19,15 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   Log log = new Log("Scripted Camera Operator");
   
   @Reference
-  Configuration config;
+  Configuration config;               // service configuration
   
-  ScriptEngineManager engineManager;
+  ScriptEngineManager engineManager;  // script engine manager
   
-  File scriptFile = null;
-  File configFile = null;
+  File scriptFile = null;             // script file when loaded
+  File configFile = null;             // config file for script
   
-  ScriptWorker scrWorker = null;
-  Thread scrWorkerThread = null;
+  ScriptWorker scrWorker = null;      // worker executing the script
+  Thread scrWorkerThread = null;      // thread handle for worker's execution
   
   protected void activate(ComponentContext cc) throws Exception {
     engineManager = new ScriptEngineManager();
@@ -39,6 +39,9 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     log.info("Deactivated");
   }
 
+  /** Readies the script for execution if a script file is loaded.
+   * 
+   */
   @Override
   public void start() {
     if (scriptFile == null) {
@@ -63,6 +66,11 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
   }
 
+  /** Stops script execution. The method tries first to stop the script worker 
+   * gracefully requesting it to exit / interrupting it in a wait state, if it
+   * is still running after a configurable amount of time the thread is killed.
+   * 
+   */
   @Override
   public void stop() {
     if (scrWorker != null) {
@@ -134,6 +142,12 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     return getScriptFilePath().equals(path) || getConfigFilePath().equals(path);
   }
   
+  /** Loads the properties from the specified file into a <code>Properties</code>
+   * object.
+   * 
+   * @param f
+   * @return 
+   */
   private Properties parseConfigFile(File f) {
     Properties cfg = new Properties();
     try {
@@ -144,6 +158,10 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     return cfg;
   }
   
+  /** Returns the configured script file directory path.
+   * 
+   * @return script file directory path
+   */
   public String getScriptDir() {
     String sd = config.get(Constants.PROPKEY_SCRIPTDIR);
     if (sd.startsWith("/")) {
@@ -154,11 +172,20 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
   }
   
+  /** Returns the full path of the configured operator script.
+   * 
+   * @return full path of operator script
+   */
   public String getScriptFilePath() {
     String scriptDir = getScriptDir();
     return scriptDir + File.separator + config.get(Constants.PROPKEY_SCRIPTFILE);
   }
   
+  /** Returns the full path of the configuration file for the configured script
+   * file. 
+   * 
+   * @return path of config file
+   */
   public String getConfigFilePath() {
     String scriptDir = getScriptDir();
     String filename = config.get(Constants.PROPKEY_SCRIPTFILE);
