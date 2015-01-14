@@ -43,6 +43,6 @@ public interface FrameSource {
   
   long getFrameNumber();
   
-  int getFPS();
+  double getFPS();
 
 }
