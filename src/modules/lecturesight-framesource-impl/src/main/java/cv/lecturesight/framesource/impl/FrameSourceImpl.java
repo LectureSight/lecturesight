@@ -31,14 +31,20 @@ class FrameSourceImpl implements FrameSource {
   FrameGrabber frameGrabber;
   FrameUploader uploader;
   CLImage2D lastImage;
+
+  // frame information
   long frameNumber = 0L;
+  final int FPS_SAMPLES = 30;
+  long lastFrame;
+  double[] frameTime = new double[FPS_SAMPLES];
+  int sample_i = 0;
 
   public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader) {
     this.type = type;
     this.frameGrabber = frameGrabber;
     this.uploader = loader;
   }
-  
+
   @Override
   public String getType() {
     return type;
@@ -53,11 +59,11 @@ class FrameSourceImpl implements FrameSource {
   public CLImage2D getImage() {
     return uploader.getOutputImage();
   }
-  
+
   public CLImage2D getLastImage() {
     return uploader.getLastOutputImage();
   }
-  
+
   @Override
   public CLImage2D getRawImage() {
     return uploader.getRawOutputImage();
@@ -70,7 +76,13 @@ class FrameSourceImpl implements FrameSource {
       if (buf != null) {
         lastImage = uploader.getOutputImage();
         uploader.upload(buf);
+
         frameNumber++;
+        frameTime[sample_i++] = 1000.0 / (double) (System.currentTimeMillis() - lastFrame);
+        lastFrame = System.currentTimeMillis();
+        if (sample_i == FPS_SAMPLES) {
+          sample_i = 0;
+        }
       } else {
         throw new IllegalStateException("Underlying frame grabber did not provide data.");
       }
@@ -88,7 +100,7 @@ class FrameSourceImpl implements FrameSource {
   public int getHeight() {
     return frameGrabber.getHeight();
   }
-  
+
   public long getFrameNumber() {
     return frameNumber;
   }
@@ -96,5 +108,14 @@ class FrameSourceImpl implements FrameSource {
   @Override
   public BufferedImage getImageHost() {
     return uploader.getOutputImageHost();
+  }
+
+  @Override
+  public double getFPS() {
+    double sum = 0.0;
+    for (int i = 0; i < FPS_SAMPLES; i++) {
+      sum += (double) frameTime[i];
+    }
+    return sum / FPS_SAMPLES;
   }
 }
