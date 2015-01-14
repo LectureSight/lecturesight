@@ -42,5 +42,7 @@ public interface FrameSource {
   int getHeight();
   
   long getFrameNumber();
+  
+  int getFPS();
 
 }
