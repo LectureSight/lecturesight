@@ -1,5 +1,6 @@
 package cv.lecturesight.cameraoperator.scripted;
 
+import cv.lecturesight.scripting.api.ScriptParent;
 import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +18,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-public class ScriptWorker implements Runnable {
+public class ScriptWorker implements ScriptParent, Runnable {
 
   Log log = new Log("Script");  // our logger
 
@@ -90,15 +91,16 @@ public class ScriptWorker implements Runnable {
   }
 
   /** Enqueues a new <code>Invocation</code> that will execute the specified 
-   * <code>function</code>. 
+   * <code>function</code>. This method is intended only for invocing callbacks
+   * from inside a script call to a bridge function.
    * 
    * @param function
    * @param args 
    */ 
-  public void invoke(String function, Object... args) {
-    log.debug("Submitting invoking of function " + function + " with " + args.length + " parameters.");
-    Invocation inv = new Invocation(function, args);
-    invokeQueue.add(inv);
+  public void invokeCallback(Object func, Object... args) {
+    Context ctx = Context.enter();
+    Function function = (Function)func;
+    function.call(ctx, scope, scope, args);  
   }
 
   /** Injects an object <code>obj</code> into the script space under the 
@@ -164,5 +166,17 @@ public class ScriptWorker implements Runnable {
    */ 
   public boolean isStopped() {
     return stopped;
+  }
+
+  @Override
+  public void invokeMethod(String function, Object... args) {
+    log.debug("Submitting invoking of function " + function + " with " + args.length + " parameters.");
+    Invocation inv = new Invocation(function, args);
+    invokeQueue.add(inv);
+  }
+
+  @Override
+  public Object invokeFunction(String name, Object... args) {
+    return null;
   }
 }
