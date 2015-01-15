@@ -94,7 +94,7 @@ public class ScriptWorker implements ScriptParent, Runnable {
    * <code>function</code>. This method is intended only for invocing callbacks
    * from inside a script call to a bridge function.
    * 
-   * @param function
+   * @param func
    * @param args 
    */ 
   public void invokeCallback(Object func, Object... args) {
@@ -132,6 +132,11 @@ public class ScriptWorker implements ScriptParent, Runnable {
     }
   }
   
+  /** Creates the JS code of the <code>Config</code> object, creates the object
+   * and injects it into the script scope.
+   * 
+   * @param props Configuration Properties
+   */
   void setScriptConfig(Properties props) {
     // make JS code of config object
     List<String> params = new ArrayList<String>();
@@ -168,15 +173,33 @@ public class ScriptWorker implements ScriptParent, Runnable {
     return stopped;
   }
 
+  /** Invokes the JS function with the specified name and the specified parameter
+   * list. 
+   * 
+   * @param function
+   * @param args 
+   */
   @Override
   public void invokeMethod(String function, Object... args) {
-    log.debug("Submitting invoking of function " + function + " with " + args.length + " parameters.");
+    log.debug("Submitting invocation of function " + function + " with " + args.length + " parameters.");
     Invocation inv = new Invocation(function, args);
     invokeQueue.add(inv);
   }
 
+  /** Invokes the JS function with the specified name and the specified parameter
+   * list and returns the functions return value as a Java object.
+   * 
+   * @param name
+   * @param args
+   * @return 
+   */
   @Override
   public Object invokeFunction(String name, Object... args) {
     return null;
+  }
+  
+  @Override
+  public Log getLogger() {
+    return log;
   }
 }
