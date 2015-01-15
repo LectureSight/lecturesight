@@ -1,0 +1,703 @@
+package cv.lecturesight.videoanalysis.templ;
+
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLEvent;
+import com.nativelibs4java.opencl.CLImage2D;
+import com.nativelibs4java.opencl.CLKernel;
+import com.nativelibs4java.opencl.CLMem;
+import com.nativelibs4java.opencl.CLQueue;
+import cv.lecturesight.cca.ConnectedComponentLabeler;
+import cv.lecturesight.cca.ConnectedComponentService;
+import cv.lecturesight.display.DisplayService;
+import cv.lecturesight.framesource.FrameSource;
+import cv.lecturesight.framesource.FrameSourceProvider;
+import cv.lecturesight.gui.api.UserInterface;
+import cv.lecturesight.objecttracker.ObjectTracker;
+import cv.lecturesight.objecttracker.TrackerObject;
+import cv.lecturesight.opencl.OpenCLService;
+import cv.lecturesight.opencl.OpenCLService.Format;
+import cv.lecturesight.opencl.api.ComputationRun;
+import cv.lecturesight.opencl.api.OCLSignal;
+import cv.lecturesight.util.Log;
+import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
+import cv.lecturesight.util.geometry.Position;
+import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+
+@Component(name = "lecturesight.videoanalysis", immediate = true)
+@Service
+@Properties({
+  @Property(name = "osgi.command.scope", value = "va"),
+  @Property(name = "osgi.command.function", value = {"reset"})
+})
+public class VideoAnalysisTemplateMatching implements ObjectTracker, ConfigurationListener {
+
+  // -- configuration properties --
+  private final static String PROKEY_CHANGE_THRESH = "change.threshold";
+  private final static String PROPKEY_CELL_THRESH = "cell.activation.threshold";
+  private final static String PROPKEY_OBJECT_CELLS_MIN = "object.cells.min";
+  private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
+  private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
+
+  Log log = new Log("Video Analysis Service");
+
+  @Reference
+  Configuration config;       // configuration parameters
+
+  @Reference
+  OpenCLService ocl;          // OpenCL service
+  OCLSignal sig_START;        // signal triggering processing of new frame
+  OCLSignal sig_IMAGEPROC;
+  OCLSignal sig_TRACKPREP;
+  OCLSignal sig_VA_DONE;
+
+  @Reference
+  ConnectedComponentService ccs;
+  ConnectedComponentLabeler cclabel;
+
+  @Reference
+  DisplayService dsps;        // display service
+
+  @Reference
+  FrameSourceProvider fsp;    // service providing the input FrameSource
+  FrameSource fsrc;           // input FrameSource
+
+  ComputationRun ocl_main;
+  ComputationRun ocl_trackingPrep;
+  ComputationRun ocl_trackingUpdate;
+
+  // -- OpenCL Kernels --
+  CLKernel abs_diff_thresh_K;
+  CLKernel cell_max_K;
+  CLKernel visualization_K;
+  CLKernel reset_bbox_K;
+  CLKernel region_stats_K;
+  CLKernel compute_avg_K;
+  CLKernel headpos_avg_K;
+  CLKernel update_templates_K;
+  CLKernel match_templates_K;
+
+  // -- GPU Buffers -- 
+  CLImage2D input_rgb;
+  CLImage2D input_rgb_last;
+  CLImage2D change;
+  CLImage2D cells;
+  CLImage2D visual;
+  CLImage2D cell_labels;
+  CLImage2D templates;
+  CLImage2D match;
+
+  // GPU buffers & host arrays for object data
+  CLBuffer<Integer> weights_gpu;
+  CLBuffer<Integer> centroids_gpu;
+  CLBuffer<Integer> bboxes_gpu;
+  CLBuffer<Integer> head_data_gpu;
+  CLBuffer<Integer> head_pos_gpu;
+
+  int numRegions;
+  int[] region_weights;
+  int[] region_centroids;
+  int[] region_bboxes;
+  int[] region_headpos;
+
+  int numTargets = 0;
+  Target[] targets;
+
+  int[] updateBuffer;
+  IntBuffer updateBuffer_host;
+  CLBuffer<Integer> updateBuffer_gpu;
+
+  // kernel launch and buffer parameters
+  final int MAX_REGIONS = 36; // maximum number of foreground objects
+  final int CELL_SIZE = 8;    // size of cells
+  final int TARGET_SIZE = 32;
+  final int MAX_TARGETS = 6;
+  final int MAX_SAMPLES = 4;
+  int[] imageWorkDim;         // work group size of per-pixel kernels
+  int[] cellWorkDim;          // work group size of cell kernels
+  int[] numCells;             // number of cells in x and y dimension
+  int[] templateDim;
+  int[] templateBufferDim;
+
+  // computation parameters
+  int change_threshold;
+  int cell_activation_threshold;
+  int object_min_cells;
+  int object_max_cells;
+  int object_max_dormant;
+
+  /**
+   * GPU Main Program implementing the video analysis.
+   *
+   */
+  class DetectionRun implements ComputationRun {
+
+    @Override
+    public void launch(CLQueue queue) {
+
+      abs_diff_thresh_K.setArgs(input_rgb, input_rgb_last, change, change_threshold);
+      abs_diff_thresh_K.enqueueNDRange(queue, imageWorkDim);
+      ocl.utils().copyImage(0, 0, imageWorkDim[0], imageWorkDim[1], input_rgb, 0, 0, input_rgb_last);
+
+      cell_max_K.setArgs(change, cells, cell_activation_threshold);
+      cell_max_K.enqueueNDRange(queue, imageWorkDim, cellWorkDim);
+
+      visualization_K.setArgs(input_rgb, cells, change, visual);
+      visualization_K.enqueueNDRange(queue, imageWorkDim);
+    }
+
+    @Override
+    public void land() {
+      ocl.castSignal(sig_IMAGEPROC);
+    }
+  }
+
+  class TrackingPreparationRun implements ComputationRun {
+
+    IntBuffer weights_host, centroids_host, headpos_host, bboxes_host;
+    final int[] regionsDim = {MAX_REGIONS};
+
+    {
+      reset_bbox_K.setArgs(bboxes_gpu);
+      region_stats_K.setArgs(change, cell_labels, weights_gpu, centroids_gpu, head_data_gpu, bboxes_gpu);
+      headpos_avg_K.setArgs(head_data_gpu, head_pos_gpu);
+      compute_avg_K.setArgs(centroids_gpu, weights_gpu);
+    }
+
+    @Override
+    public void launch(CLQueue queue) {
+      // reset buffers
+      ocl.utils().setValues(0, MAX_REGIONS, weights_gpu, 0);
+      ocl.utils().setValues(0, MAX_REGIONS * 2, centroids_gpu, 0);
+      ocl.utils().setValues(0, MAX_REGIONS * 3, head_data_gpu, Integer.MAX_VALUE);
+      reset_bbox_K.enqueueNDRange(queue, regionsDim);
+
+      // compute region statistics
+      region_stats_K.enqueueNDRange(queue, imageWorkDim, cellWorkDim);
+      compute_avg_K.enqueueNDRange(queue, regionsDim);
+      headpos_avg_K.enqueueNDRange(queue, regionsDim);
+
+      // download results
+      weights_host = weights_gpu.read(queue);
+      centroids_host = centroids_gpu.read(queue);
+      headpos_host = head_pos_gpu.read(queue);
+      bboxes_host = bboxes_gpu.read(queue);
+    }
+
+    @Override
+    public void land() {
+      numRegions = cclabel.getNumBlobs();
+
+      if (numRegions > 0) {
+        weights_host.get(region_weights);
+        centroids_host.get(region_centroids);
+        headpos_host.get(region_headpos);
+        bboxes_host.get(region_bboxes);
+
+        for (int i = 0; i < numRegions; i++) {
+
+          Box changeBox = new Box(region_bboxes[4 * i],
+                  region_bboxes[4 * i + 1],
+                  region_bboxes[4 * i + 2],
+                  region_bboxes[4 * i + 3]);
+          Box searchBox = new Box(changeBox.x - 16, changeBox.y - 16, changeBox.max_x + 16, changeBox.max_y + 16);
+
+          List<Target> updated = new LinkedList<Target>();
+          for (Target t : targets) {
+            if (t != null) {
+              if (searchBox.includes(t.x, t.y)) {
+
+                // UPDATE TARGET
+                
+                t.updatebox.x = region_centroids[i * 2] - TARGET_SIZE / 2;
+                t.updatebox.y = changeBox.y;
+                t.updatebox.max_x = t.updatebox.x + TARGET_SIZE;
+                t.updatebox.max_y = t.updatebox.y + TARGET_SIZE;
+                updated.add(t);
+              }
+            }
+          }
+
+          if (updated.size() > 1) {
+            Target oldest = null;
+            for (Target u : updated) {
+              if (oldest == null || u.id < oldest.id) {
+                oldest = u;
+              }
+            }
+            for (Target u : updated) {
+              if (oldest.id != u.id) {
+                discardTarget(u);
+              }
+            }
+          } else if (updated.isEmpty()) {
+            if (changeBox.width() > TARGET_SIZE/2 && changeBox.height() > TARGET_SIZE/2) {
+              Target new_t = new Target(changeBox.x + changeBox.width() / 2, changeBox.y + TARGET_SIZE / 2);
+              int idx = addTarget(new_t);
+            }
+          }
+        }
+      }
+
+      ocl.castSignal(sig_TRACKPREP);
+    }
+
+  }
+
+  class TrackingUpdateRun implements ComputationRun {
+
+    int   numTemplUpdates, numTemplMatches;
+    int[] updateDim = new int[]{0, 32};
+    IntBuffer output_host;
+
+    @Override
+    public void launch(CLQueue queue) {
+      // matches templates of targets that already have a template
+      numTemplMatches = makeTargetList(updateBuffer, false);
+      if (numTemplMatches > 0) {
+        ocl.utils().setValues(0, 0, imageWorkDim[0], imageWorkDim[1], match, 0);
+        updateDim[0] = TARGET_SIZE * numTemplMatches;
+        CLEvent uploaded = updateBuffer_gpu.write(queue, updateBuffer_host, true);
+        match_templates_K.setArgs(input_rgb, templates, updateBuffer_gpu);
+        CLEvent matched = match_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+        output_host = updateBuffer_gpu.read(queue, matched);
+      }
+
+      // update templates for all targets
+      numTemplUpdates = makeTargetList(updateBuffer, true);
+      if (numTemplUpdates > 0) {
+        updateDim[0] = TARGET_SIZE * numTemplUpdates;
+        CLEvent uploaded = updateBuffer_gpu.write(queue, updateBuffer_host, false);
+        update_templates_K.setArgs(input_rgb, cells, templates, updateBuffer_gpu);
+        update_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+      }
+    }
+
+    @Override
+    public void land() {
+      // update targets that were matched
+      if (numTemplMatches > 0) {
+        int [] results = new int[numTemplMatches*4];
+        output_host.get(results);
+        for (int i=0; i < numTemplMatches; i++) {
+          int idx = i*4;
+          int id = results[idx]+1;    // index --> ID
+          updateTarget(id, results[idx+1], results[idx+2], results[idx+3]);   
+        }
+      }
+      
+      incrementTargetLifetimes();
+      discardInactiveTargets();
+      ocl.castSignal(sig_VA_DONE);
+    }
+  }
+
+  class Target {
+
+    int id = -1;
+    int x, y;
+    int vx, vy;
+    double vt;
+    long first_seen = 0;
+    long time = 0;
+    long last_move = 0;
+    int matchscore = 0;
+    Box searchbox;
+    Box updatebox;
+
+    public Target(int x, int y) {
+      this.x = x;
+      this.y = y;
+      int ht = TARGET_SIZE / 2;
+      this.searchbox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
+      this.updatebox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
+      first_seen = System.currentTimeMillis();
+    }
+  }
+
+  class Box {
+
+    int x, y, max_x, max_y;
+
+    public Box(int min_x, int min_y, int max_x, int max_y) {
+      this.x = min_x;
+      this.y = min_y;
+      this.max_x = max_x;
+      this.max_y = max_y;
+    }
+
+    public int width() {
+      return max_x - x;
+    }
+
+    public int height() {
+      return max_y - y;
+    }
+
+    public boolean includes(int x, int y) {
+      return x >= this.x && y >= this.y && x <= max_x && y <= max_y;
+    }
+  }
+
+  protected void activate(ComponentContext cc) {
+
+    fsrc = fsp.getFrameSource();              // obtain frame source
+
+    sig_START = fsrc.getSignal();             // obtain start signal
+    sig_IMAGEPROC = ocl.getSignal("VA_IMAGEPROC");
+    sig_TRACKPREP = ocl.getSignal("VA_TRACKPREP");
+    sig_VA_DONE = ocl.getSignal("VA_DONE");
+
+    // determine kernel launch & buffer parameters
+    imageWorkDim = new int[]{fsrc.getWidth(), fsrc.getHeight()};
+    cellWorkDim = new int[]{CELL_SIZE, CELL_SIZE};
+    numCells = new int[]{imageWorkDim[0] / CELL_SIZE, imageWorkDim[1] / CELL_SIZE};
+    templateDim = new int[]{TARGET_SIZE, TARGET_SIZE};
+    templateBufferDim = new int[]{MAX_SAMPLES * TARGET_SIZE, MAX_TARGETS * TARGET_SIZE};
+
+    mapParameters();      // get computation parameters from configuration
+    getKernels();         // get kernels
+    allocateBuffers();    // allocate GPU buffers
+    initBuffers();        // initialize GPU buffers
+    registerDisplays();   // register displays
+
+    // register UI
+    UserInterface trackerUI = new TrackerUI(this);
+    cc.getBundleContext().registerService(UserInterface.class.getName(), trackerUI, null);
+
+    // create connected component labeler working on cell array
+    cclabel = ccs.createLabeler(cells, MAX_REGIONS, object_min_cells, object_max_cells);
+    cclabel.doLabels(sig_IMAGEPROC);
+    cell_labels = cclabel.getLabelImage();
+
+    ocl_trackingPrep = new TrackingPreparationRun();
+    ocl.registerLaunch(cclabel.getSignal(ConnectedComponentLabeler.Signal.DONE), ocl_trackingPrep);
+
+    ocl_trackingUpdate = new TrackingUpdateRun();
+    ocl.registerLaunch(sig_TRACKPREP, ocl_trackingUpdate);
+
+    ocl_main = new DetectionRun();
+    ocl.registerLaunch(sig_START, ocl_main);
+
+    log.info("Activated.");
+  }
+
+  int addTarget(Target t) {
+    if (numTargets == MAX_TARGETS) {
+      log.warn("Maximum number of targets excceded, forced reset.");
+      reset(null);
+    }
+    for (int i = 0; i < MAX_TARGETS; i++) {
+      if (targets[i] == null) {
+        targets[i] = t;
+        t.id = i + 1;
+        numTargets++;
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  void discardTarget(Target t) {
+    if (targets[t.id - 1] == t) {
+      targets[t.id - 1] = null;
+      t.id = -1;
+      numTargets--;
+    } else {
+      throw new IllegalStateException("Target with ID " + t.id + " should be at index " + (t.id - 1) + " but is not!");
+    }
+  }
+
+  void updateTarget(int id, int x, int y, int match) {
+    for (Target t : targets) {
+      if (t != null && t.id == id) {
+        t.vx = -(t.x - x);
+        t.vy = -(t.y - y);
+        t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vx, 2));
+        
+        if (t.vt > 0.0) {
+          t.last_move = System.currentTimeMillis();
+        }
+        
+        t.x = x;
+        t.y = y;
+        t.matchscore = match;
+        
+        int ht = TARGET_SIZE / 2;
+        t.searchbox.x = x-ht-5;
+        t.searchbox.y = y-ht-5;
+        t.searchbox.max_x = x+ht+5;
+        t.searchbox.max_y = y+ht+5;
+        double vfactor = 3.0;
+        if (t.vx < 0) t.searchbox.x += vfactor*t.vx;
+        if (t.vx > 0) t.searchbox.max_x += vfactor*t.vx;
+        if (t.vy < 0) t.searchbox.y += vfactor*t.vy;
+        if (t.vy > 0) t.searchbox.max_y += vfactor*t.vy;
+        break;
+      }
+    }
+  }
+  
+  void incrementTargetLifetimes() {
+    for (Target t : targets) {
+      if (t != null) {
+        t.time++;
+      }
+    }
+  }
+  
+  void discardInactiveTargets() {
+    long now = System.currentTimeMillis();
+    for (Target t : targets) {
+      if (t != null && now - t.last_move > object_max_dormant) {
+        discardTarget(t);
+      }
+    }
+  }
+  
+  int makeTargetList(int[] a, boolean filterTargets) {
+    int num = 0;
+    int j = 0;
+    for (int i = 0; i < MAX_TARGETS; i++) {
+
+      // try to find next target that needs update
+      Target next = null;
+      for (; j < MAX_TARGETS; j++) {
+        Target t = targets[j];
+        
+        if (t != null) {
+          if (filterTargets && t.time > 0) {
+            next = targets[j++];
+            break;
+          } else {
+              next = targets[j++];
+              break;
+          }
+        }
+      }
+
+      // if next target was found, put coords into update list
+      if (next != null) {
+        num++;
+        int idx = i * 4;
+        a[idx] = next.id - 1;  // ID --> index !
+        a[idx + 1] = next.updatebox.x+16;
+        a[idx + 2] = next.updatebox.y+16;
+        a[idx + 3] = 0;
+      }
+
+      if (j + 1 == MAX_TARGETS) {
+        break;
+      }
+    }
+    return num;
+  }
+  
+  void printArray(int[] a, int gap) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("[ ");
+    for (int i=0; i < a.length; i++) {
+      sb.append(Integer.toString(a[i])).append(" ");
+      if ((i+1) < a.length && (i+1) % gap == 0) {
+        sb.append("][ ");
+      }
+    }
+    sb.append("]");
+    System.out.println(sb.toString());
+  } 
+
+  /**
+   * Gets computation parameters from the configuration.
+   *
+   */
+  private void mapParameters() {
+    change_threshold = config.getInt(PROKEY_CHANGE_THRESH);
+    cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
+    object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
+    object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
+    object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+  }
+
+  /**
+   * Obtains OpenCL kernels from OpenCL service.
+   *
+   */
+  private void getKernels() {
+    abs_diff_thresh_K = ocl.programs().getKernel("util", "abs_diff_thresh");
+    cell_max_K = ocl.programs().getKernel("cells", "cells_max_8");
+    visualization_K = ocl.programs().getKernel("cells", "viz_cells");
+    region_stats_K = ocl.programs().getKernel("foreground", "compute_object_stats_8");
+    reset_bbox_K = ocl.programs().getKernel("foreground", "reset_bbox_buffer");
+    compute_avg_K = ocl.programs().getKernel("foreground", "compute_average");
+    headpos_avg_K = ocl.programs().getKernel("foreground", "avg_headpos");
+    update_templates_K = ocl.programs().getKernel("template", "update_templates");
+    match_templates_K = ocl.programs().getKernel("template", "match_templates");
+  }
+
+  /**
+   * Allocates GPU buffers.
+   *
+   * @throws IllegalStateException
+   */
+  private void allocateBuffers() throws IllegalStateException {
+    // obtain buffers from FrameSource
+    input_rgb = fsrc.getImage();
+    input_rgb_last = fsrc.getLastImage();
+
+    // allocate working buffers
+    change = allocImage2D(Format.INTENSITY_UINT8, imageWorkDim);
+    cells = allocImage2D(Format.INTENSITY_UINT8, numCells);
+    visual = allocImage2D(Format.BGRA_UINT8, imageWorkDim);
+
+    targets = new Target[MAX_TARGETS];
+    updateBuffer = new int[MAX_TARGETS * 4];
+    updateBuffer_host = IntBuffer.wrap(updateBuffer);
+    updateBuffer_gpu = ocl.context().createBuffer(CLMem.Usage.InputOutput, updateBuffer_host);
+
+    templates = allocImage2D(Format.BGRA_UINT8, templateBufferDim);
+    match = allocImage2D(Format.INTENSITY_UINT8, imageWorkDim);
+
+    // allocate buffers and arrays for object data
+    weights_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS);
+    centroids_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS * 2);
+    bboxes_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS * 4);
+    head_data_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS * 3);
+    head_pos_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS);
+
+    region_weights = new int[MAX_REGIONS];
+    region_centroids = new int[MAX_REGIONS * 2];
+    region_bboxes = new int[MAX_REGIONS * 4];
+    region_headpos = new int[MAX_REGIONS];
+  }
+
+  private CLImage2D allocImage2D(Format format, int[] dim) {
+    return ocl.context().createImage2D(CLMem.Usage.InputOutput, format.getCLImageFormat(), dim[0], dim[1]);
+  }
+
+  /**
+   * Initializes GPU buffers where necessary.
+   *
+   */
+  private void initBuffers() {
+    ocl.utils().setValues(0, 0, templateBufferDim[0], templateBufferDim[1], templates, 0);
+  }
+
+  private void registerDisplays() {
+    dsps.registerDisplay("visual", visual, sig_VA_DONE);
+    dsps.registerDisplay("change", change, sig_VA_DONE);
+    dsps.registerDisplay("templates", templates, sig_VA_DONE);
+    dsps.registerDisplay("cells", cells, sig_VA_DONE);
+  }
+
+  @Override
+  public void configurationChanged() {
+    if (change_threshold != config.getInt(PROKEY_CHANGE_THRESH)) {
+      change_threshold = config.getInt(PROKEY_CHANGE_THRESH);
+      log.info("Setting change threshold to " + change_threshold);
+    }
+
+    if (cell_activation_threshold != config.getInt(PROPKEY_CELL_THRESH)) {
+      cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
+      log.info("Setting cell activation threshold " + cell_activation_threshold);
+    }
+
+    if (object_min_cells != config.getInt(PROPKEY_OBJECT_CELLS_MIN)) {
+      object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
+      log.info("Setting min number of cells in objects to " + object_min_cells);
+    }
+
+    if (object_max_cells != config.getInt(PROPKEY_OBJECT_CELLS_MAX)) {
+      object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
+      log.info("Setting max number of cells in objects to " + object_max_cells);
+    }
+    
+    if (object_max_dormant != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
+      object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+      log.info("Setting max number of frames of inactivity before discarding a target to " + object_max_dormant);
+    }
+  }
+
+  // Tracker methods ___________________________________________________________
+  @Override
+  public OCLSignal getSignal() {
+    return sig_VA_DONE;
+  }
+
+  @Override
+  public TrackerObject getObject(int id) {
+    for (Target t : targets) {
+      if (t != null && t.id == id) {
+        return makeTrackerObject(t);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public boolean isCurrentlyTracked(TrackerObject object) {
+    for (Target t : targets) {
+      if (t != null && t.id == object.getId()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public void discardObject(TrackerObject object) {
+    for (Target t : targets) {
+      if (t != null && t.id == object.getId()) {
+        discardTarget(t);
+      }
+    }
+  }
+
+  @Override
+  public Map<Integer, TrackerObject> getAllObjects() {
+    Map m = new HashMap<Integer, TrackerObject>();
+    for (Target t : targets) {
+      if (t != null) {
+        m.put(t.id, makeTrackerObject(t));
+      }
+    }
+    return m;
+  }
+
+  @Override
+  public List<TrackerObject> getCurrentlyTracked() {
+    List l = new LinkedList<TrackerObject>();
+    for (Target t : targets) {
+      if (t != null) {
+        l.add(makeTrackerObject(t));
+      }
+    }
+    return l;
+  }
+  
+  TrackerObject makeTrackerObject(Target t) {
+    TrackerObject o = new TrackerObject(t.first_seen);
+    o.setId(t.id);
+    o.setLastSeen(t.last_move);
+    o.setProperty(ObjectTracker.OBJ_PROPKEY_CENTROID, new Position(t.x, t.y));
+    return o;
+  }
+  
+  // Console Commands __________________________________________________________
+  public void reset(String[] args) {
+    for (int i = 0; i < MAX_TARGETS; i++) {
+      targets[i] = null;
+    }
+    numTargets = 0;
+    log.info("Clearing target list.");
+  }
+}
