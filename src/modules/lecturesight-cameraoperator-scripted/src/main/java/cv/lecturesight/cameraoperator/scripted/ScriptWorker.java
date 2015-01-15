@@ -7,12 +7,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.codehaus.plexus.util.StringUtils;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
@@ -145,7 +145,7 @@ public class ScriptWorker implements ScriptParent, Runnable {
       String val = (String)entry.getValue();       // TODO sanitize value string
       params.add("\"" + key + "\":\"" + val + "\"");
     }
-    String code = "var Config = {" + StringUtils.join(params.iterator(), ",") + "};";
+    String code = "var Config = {" + join(params.iterator(), ",") + "};";
     
     // inject Config object 
     Context ctx = Context.enter();
@@ -156,6 +156,18 @@ public class ScriptWorker implements ScriptParent, Runnable {
     } finally {
       Context.exit();
     }
+  }
+  
+  private String join(Iterator<String> it, String sep) {
+    StringBuilder sb = new StringBuilder();
+    while (it.hasNext()) {
+      String s = it.next();
+      sb.append(s);
+      if (it.hasNext()) {
+        sb.append(sep);
+      }
+    }
+    return sb.toString();
   }
 
   /** Requests this worker to stop.
