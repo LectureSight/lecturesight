@@ -42,6 +42,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   private OpenCLService ocl;
   private ComputationRun initRun, updateRun, resultRun;
   private CLImage2D input;
+  CLImage2D labelImage;
   CLBuffer<Integer> labels_work, sizes_work, ids, sizes, changed;
   int[] imageDim, bufferDim;
   int[] ids_out, sizes_out;
@@ -69,6 +70,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     changed = ocl.context().createIntBuffer(Usage.InputOutput, 1);
     ids = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs+1);   // +1 -> [0] = numBlobs
     sizes = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs);
+    labelImage = ocl.context().createImage2D(Usage.InputOutput, OpenCLService.Format.INTENSITY_UINT8.getCLImageFormat(), imageDim[0], imageDim[1]);
 
     // instantiate ComputationRuns
     initRun = new InitRun();
@@ -121,6 +123,11 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   @Override
   public OCLSignal getSignal(Signal signal) {
     return signals.get(signal);
+  }
+  
+  @Override
+  public CLImage2D getLabelImage() {
+    return labelImage;
   }
 
   @Override
@@ -251,7 +258,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
       ocl.utils().setValues(0, (int) ids.getElementCount(), ids, 0);
       getResultsK.setArgs(labels_work, ids, sizes_work, sizes, imageDim[0], imageDim[1], minSize, maxSize, maxBlobs);
       getResultsK.enqueueNDRange(queue, imageDim);
-      updateResultLabelK.setArgs(labels_work, imageDim[0], imageDim[1]);
+      updateResultLabelK.setArgs(labels_work, labelImage, imageDim[0], imageDim[1]);
       updateResultLabelK.enqueueNDRange(queue, imageDim);
       idsH = ids.read(queue);
       sizesH = sizes.read(queue);

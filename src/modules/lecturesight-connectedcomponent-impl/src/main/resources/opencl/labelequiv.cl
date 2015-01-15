@@ -8,6 +8,7 @@ const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK
 #define DECODE_INDEX(idx) (int2)(idx % (width+2), idx / (width+2))
 
 #define MAXINT 2147483647
+#define BLACK (uint4)(0,0,0,255)
 
 __kernel void assign_indices
 (
@@ -154,18 +155,21 @@ __kernel void make_blob_ids
 
 __kernel void update_blob_ids
 (
-	__global int* labels,
-	         int  width,
-		       int  height
+	__global     int*      labels,
+  __write_only image2d_t label_img,
+	             int       width,
+		           int       height
 )	
 {
 	int2 pos = (int2)( get_global_id(0)+1,            // get thread group position
                      get_global_id(1)+1 );
+  int2 ipos = (int2)(pos.x-1, pos.y-1);
 	CLAMP_POS(pos);                                   // clamp position
 
 	int adr = ENCODE_INDEX(pos);                      // compute 1D index
 	int idx = labels[adr];                            // read elements value
 	int num = 1;                                      // init num positive
+  uint4 pxl_out;
 
 	if (idx > 0)                                      // element references?
 	{
@@ -179,7 +183,16 @@ __kernel void update_blob_ids
 	if (num < 0)                                      // negative value -> root of valid blob found
 	{
     labels[adr] = num;                              // assign element with blob ID
+    num *= -1;                                      // make sign positive
+    pxl_out = (uint4)(num,num,num,255);             // so blob ID can be written to label image
 	}
+  else
+  {
+    pxl_out = BLACK;
+  }
+
+  barrier(CLK_GLOBAL_MEM_FENCE);
+  write_imageui(label_img, ipos, pxl_out);
 }
 
 
