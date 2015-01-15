@@ -61,7 +61,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
   boolean moving = false;             // indicates if the camera if moving
 
-  List<UISlave> slaves;       // list of listeners
+  List<UISlave> uiListeners;       // list of listeners
+  List<MoveListener> moveListeners;
 
   private class SteeringWorker implements Runnable {
 
@@ -70,6 +71,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     boolean steering = false;
     int last_ps = 0;
     int last_ts = 0;
+    boolean last_moving = false;
 
     @Override
     public void run() {
@@ -90,7 +92,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
         log.warn("Unable to update camera postion: " + e.getMessage());
         return;
       }
-
+      
       if (steering) {
         Position target_pos = model.getTargetPosition();
 
@@ -127,17 +129,13 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
             camera.moveUpRight(ps, ts);
 
           } else if (dx < 0 && dy > 0 && ps > 0 && ts > 0) {
-            camera.setLimitUpRight(target_pos.getX(), camera_pos.getY()+10);
-//            camera.setLimitUpRight(target_pos.getX(), tilt_max);
-            camera.setLimitDownLeft(camera_pos.getX()-10, target_pos.getY());
-//            camera.setLimitDownLeft(pan_min, target_pos.getY());
+            camera.setLimitUpRight(target_pos.getX(), tilt_max);
+            camera.setLimitDownLeft(pan_min, target_pos.getY());
             camera.moveDownRight(ps, ts);
 
           } else if (dx > 0 && dy < 0 && ps > 0 && ts > 0) {
-            camera.setLimitUpRight(camera_pos.getX()+10, target_pos.getY());
-//            camera.setLimitUpRight(pan_max, target_pos.getY());
-            camera.setLimitDownLeft(target_pos.getX(), target_pos.getY()-10);            
-//            camera.setLimitDownLeft(target_pos.getX(), tilt_min);
+            camera.setLimitUpRight(pan_max, target_pos.getY());
+            camera.setLimitDownLeft(target_pos.getX(), tilt_min);
             camera.moveUpLeft(ps, ts);
 
           } else if (dx > 0 && dy > 0 && ps > 0 && ts > 0) {
@@ -172,7 +170,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   protected void activate(ComponentContext cc) throws Exception {
     model = initModel();
-    slaves = new LinkedList<UISlave>();
+    uiListeners = new LinkedList<UISlave>();
+    moveListeners = new LinkedList<MoveListener>();
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
@@ -288,9 +287,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void setZoom(float zoom, float speed) {
-    // TODO implement!
+    throw new UnsupportedOperationException("Not implemented.");
   }
-
+  
   @Override
   public float getZoom() {
     return ((float) camera.getZoom()) / ((float) camera.getProfile().getZoomMax());
@@ -323,17 +322,37 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void addUISlave(UISlave slave) {
-    slaves.add(slave);
+    uiListeners.add(slave);
   }
 
   @Override
   public void removeUISlave(UISlave slave) {
-    slaves.remove(slave);
+    uiListeners.remove(slave);
   }
-
+  
   private void informUISlaves() {
-    for (UISlave s : slaves) {
+    for (UISlave s : uiListeners) {
       s.refresh();
+    }
+  }
+  
+  public void addMoveListener(MoveListener l) {
+    moveListeners.add(l);
+  }
+  
+  public void removeMoveListener(MoveListener l) {
+    moveListeners.remove(l);
+  }
+  
+  private void informMoveListenersStart(NormalizedPosition current, NormalizedPosition target) {
+    for (MoveListener l : moveListeners) {
+      l.moveStart(current, target);
+    }
+  }
+  
+  private void informMoveListenersStop(NormalizedPosition current, NormalizedPosition target) {
+    for (MoveListener l : moveListeners) {
+      l.moveStop(current, target);
     }
   }
 }
