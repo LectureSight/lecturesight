@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 
 public interface Display {
 
+  long getCurrentFrame();
   Dimension getSize();
   OCLSignal getSignal();
   BufferedImage getImage();

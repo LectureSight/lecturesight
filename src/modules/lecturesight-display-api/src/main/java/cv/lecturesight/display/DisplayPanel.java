@@ -19,11 +19,14 @@ package cv.lecturesight.display;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.io.File;
 import javax.swing.JLabel;
 
 public abstract class DisplayPanel extends JLabel {
   
   private CustomRenderer renderer = null;
+  protected boolean isRecording = false;
+  protected File recordingDir = null;
   
   public abstract Dimension getImageDimension();
   
@@ -47,5 +50,26 @@ public abstract class DisplayPanel extends JLabel {
     int y = p.y - ((cDim.height - iDim.height) / 2);
     
     return new Point(x, y);
+  }
+ 
+  public void setRecordingDir(String path) {
+    String prefix = System.getProperty("recording.dir");
+    if (prefix != null) {
+      recordingDir = new File(prefix + File.separator + path);
+    } else {
+      recordingDir = new File("record" + File.separator + path);
+    }
+  }
+  
+  public File getRecordingDir() {
+    return recordingDir;
+  }
+  
+  public boolean isRecording() {
+    return isRecording;
+  }
+
+  public void setRecording(boolean isRecording) {
+    this.isRecording = isRecording;
   }
 }
