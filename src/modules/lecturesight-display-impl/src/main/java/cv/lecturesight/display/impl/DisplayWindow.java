@@ -34,7 +34,6 @@ public class DisplayWindow implements WindowListener, KeyListener {
     this.title = title;
     this.display = display;
     initComponents();
-    
   }
   
   private void initComponents() {
@@ -44,7 +43,6 @@ public class DisplayWindow implements WindowListener, KeyListener {
     frame.addWindowListener(this);
   }
   
-  // TODO deactivate image fatching when made invisible
   public void setVisible(boolean b) {
     frame.setVisible(b);  
   }

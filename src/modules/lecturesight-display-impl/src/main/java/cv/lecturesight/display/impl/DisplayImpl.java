@@ -41,6 +41,7 @@ public class DisplayImpl implements Display {
   private BufferedImage imageHost;
   private boolean active = false;
   private Set<DisplayListener> listeners = new HashSet<DisplayListener>();
+  long currentFrame = 0;      // incremented each time image data is updated
 
   public DisplayImpl(OpenCLService ocl, OCLSignal trigger, CLImage2D imageCL) {
     this.ocl = ocl;
@@ -116,6 +117,11 @@ public class DisplayImpl implements Display {
     return new Dimension(width, height);
   }
 
+  @Override
+  public long getCurrentFrame() {
+    return currentFrame;
+  }
+
   private class WorkingRun implements ComputationRun {
 
     @Override
@@ -125,6 +131,11 @@ public class DisplayImpl implements Display {
 
     @Override
     public void land() {
+      if (currentFrame == Long.MAX_VALUE) {
+        currentFrame = 0;
+      } else {
+        currentFrame++;
+      }
       ocl.castSignal(sig_DONE);
       notifyListeners();
     }

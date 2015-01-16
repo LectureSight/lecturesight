@@ -19,22 +19,28 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayListener;
 import cv.lecturesight.display.DisplayPanel;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, HierarchyListener {
 
   private DisplayImpl display;
-  private BufferedImage image;
+  private BufferedImage gpuImage;
+  private BufferedImage renderBuffer;
   private Dimension size;
 
   public DisplayPanelImpl(DisplayImpl display) {
     this.display = display;
     this.size = display.getSize();
-    image = display.getImage();
+    gpuImage = display.getImage();
+    renderBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
   }
 
   @Override
@@ -43,23 +49,40 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
   }
   
   @Override
-  public void paint(Graphics g) {
-    //System.out.println("PAINT");
+  public void paint(Graphics componentG) {
     display.addListener(this);
-    image = display.getImage();
+    // image = display.getImage();    // is this necessary?
+    Graphics renderBufferG = renderBuffer.getGraphics();
 
+    // draw gpu image to render buffer
+    renderBufferG.drawImage(gpuImage, 0, 0, this);
+    
+    // draw custom graphics (if any) to render buffer
+    if (hasCustomRenderer()) {
+      getCustomRenderer().render(renderBufferG);
+    }
+    
+    // draw render buffer to component
     int x = 0, y = 0;
-
     if (size.getWidth() < getWidth() || size.getHeight() < getHeight()) {
       x = (getWidth() - (int) size.getWidth()) / 2;
       y = (getHeight() - (int) size.getHeight()) / 2;
     }
-
-    g.drawImage(image, x, y, this);
-
-    if (hasCustomRenderer()) {
-      getCustomRenderer().render(g.create(x, y, (int) size.getWidth(), (int) size.getHeight()));
+    componentG.setColor(Color.black);
+    componentG.drawRect(0, 0, getWidth(), getHeight());
+    componentG.drawImage(renderBuffer, x, y, this);
+    
+    // save render buffer if recording
+    if (isRecording()) {
+      File filepath = new File(getRecordingDir().getAbsolutePath() + File.separator + "frame-" + Long.toString(display.getCurrentFrame()) + ".png");
+      
+      try {
+        ImageIO.write(renderBuffer, "PNG", filepath);
+      } catch (IOException ex) {
+        // TODO add error logging here
+      }      
     }
+    // TODO dispose renderBufferG here??
   }
 
   public Dimension getPrefferedSize() {
@@ -68,7 +91,7 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
 
   @Override
   public void imageUpdated(BufferedImage image) {
-    this.image = image;
+    this.gpuImage = image;
     repaint();
   }
 

@@ -28,7 +28,7 @@ public class DisplayUI implements UserInterface {
   
   public DisplayUI(Display display, String title) {
     this.title = title;
-    ui = new DisplayUIPanel();
+    ui = new DisplayUIPanel(title);
     ui.setDisplay(display);
   }
   

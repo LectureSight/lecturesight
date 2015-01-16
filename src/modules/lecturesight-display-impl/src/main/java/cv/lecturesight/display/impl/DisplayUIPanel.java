@@ -2,12 +2,12 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
+import cv.lecturesight.util.Log;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -16,13 +16,16 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class DisplayUIPanel extends javax.swing.JPanel {
 
+  Log log = new Log("Display Service");
   private Display display;
   private DisplayPanel displayPanel;
+  private String name;
 
   /**
    * Creates new form DisplayUIPanel
    */
-  public DisplayUIPanel() {
+  public DisplayUIPanel(String name) {
+    this.name = name;
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -35,6 +38,7 @@ public class DisplayUIPanel extends javax.swing.JPanel {
   void setDisplay(Display display) {
     this.display = display;
     this.displayPanel = display.getDisplayPanel();
+    displayPanel.setRecordingDir(name);
     Dimension size = display.getSize();
     this.setSize(size);
     this.setPreferredSize(size);
@@ -54,6 +58,8 @@ public class DisplayUIPanel extends javax.swing.JPanel {
 
     toolBar = new javax.swing.JToolBar();
     screenShotButton = new javax.swing.JButton();
+    recordToggleButton = new javax.swing.JToggleButton();
+    recordStatusLabel = new javax.swing.JLabel();
     displayHolder = new javax.swing.JPanel();
 
     setBackground(new java.awt.Color(1, 1, 1));
@@ -71,6 +77,18 @@ public class DisplayUIPanel extends javax.swing.JPanel {
       }
     });
     toolBar.add(screenShotButton);
+
+    recordToggleButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/film_save.png"))); // NOI18N
+    recordToggleButton.setFocusable(false);
+    recordToggleButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    recordToggleButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    recordToggleButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        recordToggleButtonActionPerformed(evt);
+      }
+    });
+    toolBar.add(recordToggleButton);
+    toolBar.add(recordStatusLabel);
 
     javax.swing.GroupLayout displayHolderLayout = new javax.swing.GroupLayout(displayHolder);
     displayHolder.setLayout(displayHolderLayout);
@@ -118,8 +136,28 @@ public class DisplayUIPanel extends javax.swing.JPanel {
       }
     }
   }//GEN-LAST:event_screenShotButtonActionPerformed
+
+  private void recordToggleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recordToggleButtonActionPerformed
+    if (recordToggleButton.isSelected()) {
+      File rdir = displayPanel.getRecordingDir();
+      try {
+        rdir.mkdirs();
+      } catch (Exception e) {
+        log.error("Unable to create capture directory -- Not starting capture.", e);
+        return;
+      }
+      displayPanel.setRecording(true);
+      recordStatusLabel.setText("Recodring to " + displayPanel.getRecordingDir().getPath());
+    } else {
+      displayPanel.setRecording(false);
+      recordStatusLabel.setText("");
+    }
+  }//GEN-LAST:event_recordToggleButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel displayHolder;
+  private javax.swing.JLabel recordStatusLabel;
+  private javax.swing.JToggleButton recordToggleButton;
   private javax.swing.JButton screenShotButton;
   private javax.swing.JToolBar toolBar;
   // End of variables declaration//GEN-END:variables
