@@ -40,7 +40,7 @@ public class CameraBridge implements ScriptBridge {
     this.tiltSpeed.min = 1;
     this.tiltSpeed.max = ((CameraSteeringWorkerImpl)steer).maxspeed_tilt;
     this.zoomSpeed.min = 1;
-    this.zoomSpeed.max = 7;   // TODO implement
+    this.zoomSpeed.max = ((CameraSteeringWorkerImpl)steer).maxspeed_zoom;
   }
   
   public NormalizedPosition targetPos() {

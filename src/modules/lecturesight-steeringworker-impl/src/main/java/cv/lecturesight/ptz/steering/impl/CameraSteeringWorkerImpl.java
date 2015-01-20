@@ -57,6 +57,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   int pan_min, pan_max;               // pan limits
   int tilt_min, tilt_max;             // tilt limits
+  int zoom_min, zoom_max;             // zoom limits
+  int maxspeed_zoom;                  // max zoom speed
   int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
   boolean moving = false;             // indicates if the camera if moving
@@ -174,6 +176,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     moveListeners = new LinkedList<MoveListener>();
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
+    maxspeed_zoom = camera.getProfile().getZoomMaxSpeed();
+    zoom_min = camera.getProfile().getZoomMin();
+    zoom_max = camera.getProfile().getZoomMax();
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
     worker = new SteeringWorker();
@@ -287,7 +292,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void setZoom(float zoom, float speed) {
-    throw new UnsupportedOperationException("Not implemented.");
+    int zoom_val = (int)(zoom_max * zoom);
+    int zoom_speed = (int)(maxspeed_zoom * speed);
+    camera.zoom(zoom_val);
   }
   
   @Override
