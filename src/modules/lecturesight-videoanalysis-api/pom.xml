@@ -42,9 +42,7 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              cv.lecturesight.videoanalysis.change;version=${project.version},
-              cv.lecturesight.videoanalysis.backgroundmodel;version=${project.version},
-              cv.lecturesight.videoanalysis.foreground;version=${project.version}
+              cv.lecturesight.videoanalysis.*;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>
