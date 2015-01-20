@@ -84,8 +84,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.decorator.color</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.script.util;version=${project.version}</Export-Package>
+            <Bundle-SymbolicName>cv.lecturesight.script.util</Bundle-SymbolicName>
+            <Export-Package>
+              cv.lecturesight.script.util.*;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -7,7 +7,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 
-@Component(name="lecturesight.script.util.time", immediate=true)
+@Component(name="lecturesight.script.util.log", immediate=true)
 @Service()
 @Properties({
  @Property(name="bridge.name", value="Log"),
