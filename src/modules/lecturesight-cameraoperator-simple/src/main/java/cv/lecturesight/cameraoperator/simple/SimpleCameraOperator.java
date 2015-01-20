@@ -44,13 +44,17 @@ public class SimpleCameraOperator implements CameraOperator {
   Log log = new Log("Pan-Only Camera Operator");
   @Reference
   Configuration config;
+  
   @Reference
   ObjectTracker tracker;
+  
   @Reference
   CameraSteeringWorker camera;
+  
   @Reference
   FrameSourceProvider fsp;
   FrameSource fsrc;
+  
   int interval = 200;
   int timeout;
   CoordinatesNormalization normalizer;
@@ -74,7 +78,7 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
-      //camera.setZoom(config.getInt(Constants.PROPKEY_ZOOM));  // FIXME causes problems with visca cam
+      camera.setZoom(config.getFloat(Constants.PROPKEY_ZOOM), 0.7f);  
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
     }
@@ -95,7 +99,7 @@ public class SimpleCameraOperator implements CameraOperator {
   public void reset() {
     NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
     camera.setTargetPosition(neutral);
-    //camera.setZoom(0);  // FIXME causes problems with visca cam
+    camera.setZoom(0.0f, 0.7f);  
   }
 
   private class CameraOperatorWorker implements Runnable {
@@ -105,7 +109,10 @@ public class SimpleCameraOperator implements CameraOperator {
     @Override
     public void run() {
       if (target == null) {
-        target = findBiggestTrackedObject(tracker.getCurrentlyTracked());
+        List<TrackerObject> objs = tracker.getCurrentlyTracked();
+        if (objs.size() > 0) {
+          target = findBiggestTrackedObject(objs);
+        }
       } else {
         if (System.currentTimeMillis() - target.lastSeen() < timeout) {
           Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
@@ -119,16 +126,17 @@ public class SimpleCameraOperator implements CameraOperator {
     }
 
     private TrackerObject findBiggestTrackedObject(List<TrackerObject> objects) {
-      TrackerObject out = null;
-      int maxWeight = 0;
-      for (TrackerObject obj : objects) {
-        Integer weight = (Integer) obj.getProperty(ObjectTracker.OBJ_PROPKEY_WEIGHT);
-        if (weight > maxWeight) {
-          maxWeight = weight;
-          out = obj;
-        }
-      }
-      return out;
+      return objects.get(0);
+//      TrackerObject out = null;
+//      int maxWeight = 0;
+//      for (TrackerObject obj : objects) {
+//        Integer weight = (Integer) obj.getProperty(ObjectTracker.OBJ_PROPKEY_WEIGHT);
+//        if (weight > maxWeight) {
+//          maxWeight = weight;
+//          out = obj;
+//        }
+//      }
+//      return out;
     }
   }
 }
