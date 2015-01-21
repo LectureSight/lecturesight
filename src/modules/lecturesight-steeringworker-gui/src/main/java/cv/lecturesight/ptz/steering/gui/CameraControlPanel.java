@@ -155,7 +155,7 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
             normalizer.normalizeY(e.getY()));
     tpos.setY(tpos.getY() * -1);
     camera.setTargetPosition(tpos);
-    //repaint();    // TODO is this necessary?
+    repaint(); 
   }
   
   @Override
