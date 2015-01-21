@@ -72,4 +72,9 @@ public class NormalizedPosition implements Cloneable {
   public NormalizedPosition clone() {
     return new NormalizedPosition(getX(), getY());
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof Position && this.x == ((NormalizedPosition)o).x && this.y == ((NormalizedPosition)o).y;
+  }
 }
