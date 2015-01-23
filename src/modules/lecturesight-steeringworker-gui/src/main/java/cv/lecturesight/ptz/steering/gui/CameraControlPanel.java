@@ -55,6 +55,8 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     updateSize();   // update normalizer in case display size changed
     
     // get center of coordinate system in display
+    int width = getWidth();
+    int height = getHeight();
     int rootX = getWidth() / 2;
     int rootY = getHeight() / 2;
     
@@ -71,6 +73,25 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 //      g.drawString(ln, 2, y);
 //      y += 10;
 //    }
+    
+    // draw movement limits
+    NormalizedPosition limitURn = camera.getLimitUpRight();
+    limitURn.setY(limitURn.getY() * -1);
+    Position limitUR = normalizer.fromNormalized(limitURn);
+   
+    NormalizedPosition limitDLn = camera.getLimitDownLeft();
+    limitDLn.setY(limitDLn.getY() * -1);
+    Position limitDL = normalizer.fromNormalized(limitDLn);
+    
+    g.setColor(Color.gray);
+    // up right
+    g.drawLine(limitUR.getX(), limitUR.getY(), 0, limitUR.getY());
+    g.drawLine(limitUR.getX(), limitUR.getY(), limitUR.getX(), height);
+    
+    // down left
+    g.drawLine(limitDL.getX(), limitDL.getY(), width, limitDL.getY());
+    g.drawLine(limitDL.getX(), limitDL.getY(), limitDL.getX(), 0);
+    
     
     // draw movement indicator
     g.drawRect(1, 1, 20, 10);

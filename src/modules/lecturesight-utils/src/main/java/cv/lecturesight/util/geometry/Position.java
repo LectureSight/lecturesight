@@ -69,6 +69,11 @@ public class Position implements Cloneable {
   
   @Override
   public boolean equals(Object o) {
-    return o instanceof Position && this.x == ((Position)o).x && this.y == ((Position)o).y;
+    if (o instanceof Position) {
+      Position other = (Position)o;
+      return other.x == this.x && other.y == this.y;
+    } else {
+      return false;
+    }
   }
 }
