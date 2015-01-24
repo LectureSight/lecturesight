@@ -70,4 +70,8 @@ public interface PTZCamera {
   void zoom(int zoom);
   
   int getZoom();
+  
+  void addCameraListener(CameraListener l);
+  
+  void removeCameraListener(CameraListener l);
 }
