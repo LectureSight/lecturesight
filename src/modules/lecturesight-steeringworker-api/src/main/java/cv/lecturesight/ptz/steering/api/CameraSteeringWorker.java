@@ -35,7 +35,7 @@ public interface CameraSteeringWorker {
   
   public NormalizedPosition getActualPosition();
   
-  public void setZoom(float zoom, float speed);
+  public void setZoom(float zoom);
   
   public float getZoom();
   

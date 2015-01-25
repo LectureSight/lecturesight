@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.ptz.steering.impl;
 
+import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
@@ -53,7 +54,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   CameraPositionModel model;  // model mapping normalized coords <--> camera coords
 
   SteeringWorker worker;              // worker updating the pan and tilt speed
-  ScheduledExecutorService executor;  // executor service running the worker
 
   int pan_min, pan_max;               // pan limits
   int tilt_min, tilt_max;             // tilt limits
@@ -63,10 +63,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
   boolean moving = false;             // indicates if the camera if moving
 
-  List<UISlave> uiListeners;       // list of listeners
-  List<MoveListener> moveListeners;
+  // lists of listeners
+  List<UISlave> uiListeners = new LinkedList<UISlave>();  
+  List<MoveListener> moveListeners = new LinkedList<MoveListener>();
 
-  private class SteeringWorker implements Runnable {
+  private class SteeringWorker implements CameraListener {
 
     Position camera_pos;
     Position limitUR = new Position(0,0);
@@ -94,9 +95,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     }
     
     @Override
-    public void run() {
+    public void positionUpdated(Position camera_pos) {
 
-      camera_pos = model.getCameraPosition();
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
@@ -141,10 +141,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
         if (target_changed || ps != last_ps || ts != last_ts) {
           //System.out.println("updating speeds: pan " + last_ps + " -> " + ps + "  tilt " + last_ts + " -> " + ts);
-
-//          Position dpos = new Position(
-//                  target_pos.getX() - camera_pos.getX(),
-//                  target_pos.getY() - camera_pos.getY());
           
           if (dx <= 0 && dy <= 0) {
 //            camera.clearLimits();
@@ -185,19 +181,25 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   protected void activate(ComponentContext cc) throws Exception {
-    model = initModel();
-    uiListeners = new LinkedList<UISlave>();
-    moveListeners = new LinkedList<MoveListener>();
+
+    model = initModel();   // init camera model
+    
+    // get camera parameters
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
     maxspeed_zoom = camera.getProfile().getZoomMaxSpeed();
     zoom_min = camera.getProfile().getZoomMin();
     zoom_max = camera.getProfile().getZoomMax();
+    
+    // get service configuration
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
+    
+    // initialize worker
     worker = new SteeringWorker();
     worker.camera_pos = camera.getPosition();
-    startWorker();
+    camera.addCameraListener(worker);
+    
     log.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
       setSteering(true);
@@ -205,7 +207,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    stopWorker();
+    camera.removeCameraListener(worker);
     log.info("Deactivated");
   }
 
@@ -242,20 +244,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
     return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max,
             config.getBoolean(Constants.PROPKEY_YFLIP));
-  }
-
-  public void startWorker() {
-    executor = Executors.newScheduledThreadPool(1);
-    executor.scheduleAtFixedRate(worker, 0,
-            config.getInt(Constants.PROPKEY_INTERVAL), TimeUnit.MILLISECONDS);
-    log.info("Worker started.");
-  }
-
-  public void stopWorker() {
-    setSteering(false);
-    executor.shutdownNow();
-    executor = null;
-    log.info("Worker stopped.");
   }
 
   public void stopMoving() {
@@ -305,15 +293,14 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   @Override
-  public void setZoom(float zoom, float speed) {
+  public void setZoom(float zoom) {
     int zoom_val = (int)(zoom_max * zoom);
-    int zoom_speed = (int)(maxspeed_zoom * speed);
     camera.zoom(zoom_val);
   }
   
   @Override
   public float getZoom() {
-    return ((float) camera.getZoom()) / ((float) camera.getProfile().getZoomMax());
+    return ((float) camera.getZoom()) / ((float)zoom_max);
   }
 
   @Override

@@ -55,8 +55,8 @@ public class CameraBridge implements ScriptBridge {
     return steer.getZoom();
   }
   
-  public void zoom(float zoom, int speed) {
-    steer.setZoom(zoom, speed);
+  public void zoom(float zoom) {
+    steer.setZoom(zoom);
   }
 
   private Object startMovCallback = null;

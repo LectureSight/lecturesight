@@ -79,11 +79,7 @@ public class ConsoleCommands implements DummyInterface {
     } else {
       try {
         float zoom = Float.parseFloat(args[0]);
-        float speed = 1.0f;
-        if (args.length > 1) {
-          speed = Float.parseFloat(args[1]);
-        }
-        steerer.setZoom(zoom, speed);
+        steerer.setZoom(zoom);
       } catch (NumberFormatException e) {
         System.out.println("Could not parse zoom factor.");
       }
