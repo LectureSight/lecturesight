@@ -78,7 +78,7 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
-      camera.setZoom(config.getFloat(Constants.PROPKEY_ZOOM), 0.7f);  
+      camera.setZoom(config.getFloat(Constants.PROPKEY_ZOOM));  
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
     }
@@ -99,7 +99,7 @@ public class SimpleCameraOperator implements CameraOperator {
   public void reset() {
     NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
     camera.setTargetPosition(neutral);
-    camera.setZoom(0.0f, 0.7f);  
+    camera.setZoom(0.0f);  
   }
 
   private class CameraOperatorWorker implements Runnable {
