@@ -314,6 +314,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     int matchscore = 0;
     Box searchbox;
     Box updatebox;
+    
+    TrackerObject to;   // TrackerObject repreenting this target 
 
     public Target(int x, int y) {
       this.x = x;
@@ -322,6 +324,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       this.searchbox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
       this.updatebox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
       first_seen = System.currentTimeMillis();
+      to = new TrackerObject(first_seen);
     }
   }
 
@@ -443,6 +446,9 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         if (t.vx > 0) t.searchbox.max_x += vfactor*t.vx;
         if (t.vy < 0) t.searchbox.y += vfactor*t.vy;
         if (t.vy > 0) t.searchbox.max_y += vfactor*t.vy;
+        
+        updateTrackerObject(t);
+        
         break;
       }
     }
@@ -637,7 +643,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   public TrackerObject getObject(int id) {
     for (Target t : targets) {
       if (t != null && t.id == id) {
-        return makeTrackerObject(t);
+        return t.to;
       }
     }
     return null;
@@ -667,7 +673,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     Map m = new HashMap<Integer, TrackerObject>();
     for (Target t : targets) {
       if (t != null) {
-        m.put(t.id, makeTrackerObject(t));
+        m.put(t.id, t.to);
       }
     }
     return m;
@@ -678,18 +684,16 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     List l = new LinkedList<TrackerObject>();
     for (Target t : targets) {
       if (t != null) {
-        l.add(makeTrackerObject(t));
+        l.add(t.to);
       }
     }
     return l;
   }
   
-  TrackerObject makeTrackerObject(Target t) {
-    TrackerObject o = new TrackerObject(t.first_seen);
-    o.setId(t.id);
-    o.setLastSeen(t.last_move);
-    o.setProperty(ObjectTracker.OBJ_PROPKEY_CENTROID, new Position(t.x, t.y));
-    return o;
+  void updateTrackerObject(Target t) {
+    t.to.setId(t.id);
+    t.to.setLastSeen(t.last_move);
+    t.to.setProperty(ObjectTracker.OBJ_PROPKEY_CENTROID, new Position(t.x, t.y));
   }
   
   // Console Commands __________________________________________________________
