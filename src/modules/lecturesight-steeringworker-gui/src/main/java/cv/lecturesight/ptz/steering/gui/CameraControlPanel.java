@@ -74,25 +74,6 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 //      y += 10;
 //    }
     
-    // draw movement limits
-    NormalizedPosition limitURn = camera.getLimitUpRight();
-    limitURn.setY(limitURn.getY() * -1);
-    Position limitUR = normalizer.fromNormalized(limitURn);
-   
-    NormalizedPosition limitDLn = camera.getLimitDownLeft();
-    limitDLn.setY(limitDLn.getY() * -1);
-    Position limitDL = normalizer.fromNormalized(limitDLn);
-    
-    g.setColor(Color.gray);
-    // up right
-    g.drawLine(limitUR.getX(), limitUR.getY(), 0, limitUR.getY());
-    g.drawLine(limitUR.getX(), limitUR.getY(), limitUR.getX(), height);
-    
-    // down left
-    g.drawLine(limitDL.getX(), limitDL.getY(), width, limitDL.getY());
-    g.drawLine(limitDL.getX(), limitDL.getY(), limitDL.getX(), 0);
-    
-    
     // draw movement indicator
     g.drawRect(1, 1, 20, 10);
     g.setColor(camera.isMoving() ? Color.green : Color.black);
