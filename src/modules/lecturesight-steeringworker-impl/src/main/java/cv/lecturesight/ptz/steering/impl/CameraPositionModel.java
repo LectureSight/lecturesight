@@ -137,7 +137,7 @@ public class CameraPositionModel {
   }
 
   public synchronized Position getTargetPosition() {
-    return target_pos;
+    return target_pos.clone();
   }
 
   public synchronized NormalizedPosition getTargetPositionNorm() {

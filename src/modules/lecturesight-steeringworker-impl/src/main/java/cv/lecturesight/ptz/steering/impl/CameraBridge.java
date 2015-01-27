@@ -16,15 +16,15 @@ import org.apache.felix.scr.annotations.Service;
 })
 public class CameraBridge implements ScriptBridge, MovementListener {
 
-  public class MinMax {
+  public class MinMaxCurrent {
 
     public float min;
     public float max;
+    public float current;
   }
 
-  public MinMax panSpeed = new MinMax();
-  public MinMax tiltSpeed = new MinMax();
-  public MinMax zoomSpeed = new MinMax();     // not really implemented, but for the future
+  public MinMaxCurrent panSpeed = new MinMaxCurrent();
+  public MinMaxCurrent tiltSpeed = new MinMaxCurrent();
 
   private ScriptParent parent;
 
@@ -34,10 +34,10 @@ public class CameraBridge implements ScriptBridge, MovementListener {
     this.steer = sw;
     this.panSpeed.min = 1;
     this.panSpeed.max = steer.maxspeed_pan;
+    this.panSpeed.current = 0;
     this.tiltSpeed.min = 1;
     this.tiltSpeed.max = steer.maxspeed_tilt;
-    this.zoomSpeed.min = 1;
-    this.zoomSpeed.max = steer.maxspeed_zoom;
+    this.tiltSpeed.current = 0;
   }
 
   public NormalizedPosition targetPos() {
