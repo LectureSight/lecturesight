@@ -27,9 +27,6 @@ import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -61,6 +58,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   int maxspeed_zoom;                  // max zoom speed
   int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
+  float damp_pan, damp_tilt;          // movement speed dampening factors 
+  boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
 
   // lists of listeners
@@ -70,39 +69,19 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   private class SteeringWorker implements CameraListener {
 
     Position camera_pos;
-    Position limitUR = new Position(0,0);
-    Position limitDL = new Position(0,0);
     Position last_target = new Position(0, 0);
-    boolean steering = false;
     int last_ps = 0;
     int last_ts = 0;
     boolean last_moving = false;
-
-    private void setLimitUpRight(int x, int y) {
-      if (limitUR.getX() != x || limitUR.getY() != y) {
-        limitUR.setX(x);
-        limitUR.setY(y);
-        camera.setLimitUpRight(x, y);
-      }
-    }
-    
-    private void setLimitDownLeft(int x, int y) {
-      if (limitDL.getX() != x || limitDL.getY() != y) {
-        limitDL.setX(x);
-        limitDL.setY(y);
-        camera.setLimitDownLeft(x, y);
-      }
-    }
     
     @Override
-    public void positionUpdated(Position camera_pos) {
+    public void positionUpdated(Position new_pos) {
 
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
       // update camera position model
       try {
-        Position new_pos = camera.getPosition();
         if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
           moving = true;
           model.setCameraPosition(new_pos);
@@ -118,57 +97,70 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       if (steering) {
         int dx = camera_pos.getX() - target_pos.getX();
         int dy = camera_pos.getY() - target_pos.getY();
+        double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
         int dx_abs = Math.abs(dx);
         int dy_abs = Math.abs(dy);
+        
+//        System.out.println("position update: " + new_pos + "  dx=" + dx + " dy=" + dy + "  d=" + d);
 
         // adjust pan speed
         int ps;
         if (dx_abs < alpha_x) {
           ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
-          ps = ps == 0 ? 1 : ps;
+          if (ps > 1) {
+            ps *= damp_pan;
+          } else if (ps == 0) {
+            dx = 0;
+          }
+          //ps = ps == 0 ? 1 : ps;
         } else {
-          ps = maxspeed_pan;
+          ps = (int)(maxspeed_pan * damp_pan);
         }
 
         // adjust tilt speed
         int ts;
         if (dy_abs < alpha_y) {
           ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
-          ts = ts == 0 ? 1 : ts;
+          if (ts > 1) {
+            ts *= damp_tilt;
+          } else if (ts == 0) {
+            dy = 0;
+          }
+          //ts = ts == 0 ? 1 : ts;
         } else {
-          ts = maxspeed_tilt;
+          ts = (int)(maxspeed_tilt * damp_tilt);
         }
-
+        
         if (target_changed || ps != last_ps || ts != last_ts) {
-          //System.out.println("updating speeds: pan " + last_ps + " -> " + ps + "  tilt " + last_ts + " -> " + ts);
+//          System.out.println("updating speeds: pan " + last_ps + " -> " + ps + "  tilt " + last_ts + " -> " + ts);
+
+          if (ps == 0 && ts == 0) {
+            camera.stopMove();
+            //camera.moveAbsolute(1, 1, target_pos);
           
-          if (dx <= 0 && dy <= 0) {
-//            camera.clearLimits();
-            setLimitDownLeft(camera_pos.getX(), camera_pos.getY());
-            setLimitUpRight(target_pos.getX(), target_pos.getY());
+          } else if (dx < 0 && dy == 0) {
+            camera.moveRight(ps);
+          
+          } else if (dx > 0 && dy == 0) {
+            camera.moveLeft(ps);
+            
+          } else if (dx == 0 && dy < 0) {
+            camera.moveUp(ts);
+            
+          } else if (dx == 0 && dy > 0) {
+            camera.moveDown(ts);
+          
+          } else if (dx < 0 && dy < 0) {
             camera.moveUpRight(ps, ts);
-//            camera.moveRelative(ps, ts, dpos);
 
-          } else if (dx <= 0 && dy >= 0) {
-//            camera.clearLimits();
-            setLimitDownLeft(camera_pos.getX(), target_pos.getY());
-            setLimitUpRight(target_pos.getX(), camera_pos.getY());
+          } else if (dx < 0 && dy > 0) {
             camera.moveDownRight(ps, ts);
-//            camera.moveRelative(ps, ts, dpos);
 
-          } else if (dx >= 0 && dy <= 0) {
-//            camera.clearLimits();
-            setLimitDownLeft(target_pos.getX(), camera_pos.getY());
-            setLimitUpRight(camera_pos.getX(), target_pos.getY());
+          } else if (dx > 0 && dy < 0) {
             camera.moveUpLeft(ps, ts);
-//            camera.moveRelative(ps, ts, dpos);
 
-          } else if (dx >= 0 && dy >= 0) {
-//            camera.clearLimits();
-            setLimitDownLeft(target_pos.getX(), target_pos.getY());
-            setLimitUpRight(camera_pos.getX(), camera_pos.getY());
+          } else if (dx > 0 && dy > 0) {
             camera.moveDownLeft(ps, ts);
-//            camera.moveRelative(ps, ts, dpos);
           }
           
           last_ps = ps;
@@ -194,11 +186,22 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     // get service configuration
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
+    damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
+    if (damp_pan > 1.0 || damp_pan < 0.0) {
+      log.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      damp_pan = 1.0f;
+    }
+    damp_tilt = config.getFloat(Constants.PROPKEY_DAMP_TILT);
+    if (damp_tilt > 1.0 || damp_tilt < 0.0) {
+      log.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      damp_tilt = 1.0f;
+    }
     
     // initialize worker
     worker = new SteeringWorker();
     worker.camera_pos = camera.getPosition();
     camera.addCameraListener(worker);
+    camera.clearLimits();
     
     log.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
@@ -257,12 +260,12 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public boolean isSteering() {
-    return worker.steering;
+    return steering;
   }
 
   @Override
   public void setSteering(boolean b) {
-    worker.steering = b;
+    steering = b;
     if (b) {
       log.info("Steering is now ON");
     } else {
@@ -321,16 +324,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   @Override
   public int getTiltMax() {
     return tilt_max;
-  }
-
-  @Override
-  public NormalizedPosition getLimitUpRight() {
-    return model.toNormalizedCoordinates(worker.limitUR);
-  }
-
-  @Override
-  public NormalizedPosition getLimitDownLeft() {
-    return model.toNormalizedCoordinates(worker.limitDL);
   }
   
   @Override
