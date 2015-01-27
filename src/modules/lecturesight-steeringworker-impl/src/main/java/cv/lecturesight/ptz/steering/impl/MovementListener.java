@@ -2,7 +2,7 @@ package cv.lecturesight.ptz.steering.impl;
 
 import cv.lecturesight.util.geometry.NormalizedPosition;
 
-public interface MoveListener {
+public interface MovementListener {
 
   public void moveStart(NormalizedPosition current, NormalizedPosition target);
   

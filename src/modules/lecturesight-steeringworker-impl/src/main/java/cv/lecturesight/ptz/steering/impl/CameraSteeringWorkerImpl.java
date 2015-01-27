@@ -22,9 +22,12 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.util.Log;
+import cv.lecturesight.util.conf.ConfigCommands;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.felix.scr.annotations.Component;
@@ -63,8 +66,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   boolean moving = false;             // indicates if the camera if moving
 
   // lists of listeners
-  List<UISlave> uiListeners = new LinkedList<UISlave>();  
-  List<MoveListener> moveListeners = new LinkedList<MoveListener>();
+  List<UISlave> uiListeners = new LinkedList<UISlave>();
+  List<MovementListener> moveListeners = new LinkedList<MovementListener>();
 
   private class SteeringWorker implements CameraListener {
 
@@ -72,38 +75,36 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     Position last_target = new Position(0, 0);
     int last_ps = 0;
     int last_ts = 0;
-    boolean last_moving = false;
-    
+
     @Override
     public void positionUpdated(Position new_pos) {
 
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
-      // update camera position model
-      try {
-        if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
-          moving = true;
-          model.setCameraPosition(new_pos);
-          camera_pos = new_pos;
-        } else {
-          moving = false;
+      // update camera position model, notify movement listeners
+      if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
+        if (!moving) {
+          informMoveListenersStart(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
         }
-      } catch (Exception e) {
-        log.warn("Unable to update camera postion: " + e.getMessage());
-        return;
+        moving = true;
+        model.setCameraPosition(new_pos);
+        camera_pos = new_pos;
+      } else {
+        if (moving) {
+          informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
+        }
+        moving = false;
       }
-      
+
+      // update pan/tilt speeds, if steering is active
       if (steering) {
         int dx = camera_pos.getX() - target_pos.getX();
         int dy = camera_pos.getY() - target_pos.getY();
-        double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
         int dx_abs = Math.abs(dx);
         int dy_abs = Math.abs(dy);
-        
-//        System.out.println("position update: " + new_pos + "  dx=" + dx + " dy=" + dy + "  d=" + d);
 
-        // adjust pan speed
+        // compute pan speed
         int ps;
         if (dx_abs < alpha_x) {
           ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
@@ -114,10 +115,10 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
           }
           //ps = ps == 0 ? 1 : ps;
         } else {
-          ps = (int)(maxspeed_pan * damp_pan);
+          ps = (int) (maxspeed_pan * damp_pan);
         }
 
-        // adjust tilt speed
+        // compute tilt speed
         int ts;
         if (dy_abs < alpha_y) {
           ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
@@ -128,28 +129,27 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
           }
           //ts = ts == 0 ? 1 : ts;
         } else {
-          ts = (int)(maxspeed_tilt * damp_tilt);
+          ts = (int) (maxspeed_tilt * damp_tilt);
         }
-        
+
+        // apply computed speeds if speeds or target have changed
         if (target_changed || ps != last_ps || ts != last_ts) {
-//          System.out.println("updating speeds: pan " + last_ps + " -> " + ps + "  tilt " + last_ts + " -> " + ts);
 
           if (ps == 0 && ts == 0) {
             camera.stopMove();
-            //camera.moveAbsolute(1, 1, target_pos);
-          
+
           } else if (dx < 0 && dy == 0) {
             camera.moveRight(ps);
-          
+
           } else if (dx > 0 && dy == 0) {
             camera.moveLeft(ps);
-            
+
           } else if (dx == 0 && dy < 0) {
             camera.moveUp(ts);
-            
+
           } else if (dx == 0 && dy > 0) {
             camera.moveDown(ts);
-          
+
           } else if (dx < 0 && dy < 0) {
             camera.moveUpRight(ps, ts);
 
@@ -162,7 +162,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
           } else if (dx > 0 && dy > 0) {
             camera.moveDownLeft(ps, ts);
           }
-          
+
           last_ps = ps;
           last_ts = ts;
         }
@@ -175,14 +175,14 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   protected void activate(ComponentContext cc) throws Exception {
 
     model = initModel();   // init camera model
-    
+
     // get camera parameters
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
     maxspeed_zoom = camera.getProfile().getZoomMaxSpeed();
     zoom_min = camera.getProfile().getZoomMin();
     zoom_max = camera.getProfile().getZoomMax();
-    
+
     // get service configuration
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
@@ -196,20 +196,28 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       log.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
       damp_tilt = 1.0f;
     }
-    
+
     // initialize worker
     worker = new SteeringWorker();
     worker.camera_pos = camera.getPosition();
     camera.addCameraListener(worker);
     camera.clearLimits();
-    
+
     log.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
       setSteering(true);
     }
+
+    // create Camera scripting bridge
+    CameraBridge bridge = new CameraBridge(this);
+    Dictionary<String, Object> props = new Hashtable<String, Object>();
+    props.put("bridge.name", "Camera");
+    props.put("bridge.imports", "cv.lecturesight.util.geometry");
+    cc.getBundleContext().registerService(CameraBridge.class.getName(), (Object)bridge, props);
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
+    camera.moveHome();
     camera.removeCameraListener(worker);
     log.info("Deactivated");
   }
@@ -297,13 +305,13 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void setZoom(float zoom) {
-    int zoom_val = (int)(zoom_max * zoom);
+    int zoom_val = (int) (zoom_max * zoom);
     camera.zoom(zoom_val);
   }
-  
+
   @Override
   public float getZoom() {
-    return ((float) camera.getZoom()) / ((float)zoom_max);
+    return ((float) camera.getZoom()) / ((float) zoom_max);
   }
 
   @Override
@@ -325,7 +333,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   public int getTiltMax() {
     return tilt_max;
   }
-  
+
   @Override
   public Position toCameraCoordinates(NormalizedPosition posn) {
     return model.toCameraCoordinates(posn);
@@ -340,29 +348,29 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   public void removeUISlave(UISlave slave) {
     uiListeners.remove(slave);
   }
-  
+
   private void informUISlaves() {
     for (UISlave s : uiListeners) {
       s.refresh();
     }
   }
-  
-  public void addMoveListener(MoveListener l) {
+
+  public void addMoveListener(MovementListener l) {
     moveListeners.add(l);
   }
-  
-  public void removeMoveListener(MoveListener l) {
+
+  public void removeMoveListener(MovementListener l) {
     moveListeners.remove(l);
   }
-  
+
   private void informMoveListenersStart(NormalizedPosition current, NormalizedPosition target) {
-    for (MoveListener l : moveListeners) {
+    for (MovementListener l : moveListeners) {
       l.moveStart(current, target);
     }
   }
-  
+
   private void informMoveListenersStop(NormalizedPosition current, NormalizedPosition target) {
-    for (MoveListener l : moveListeners) {
+    for (MovementListener l : moveListeners) {
       l.moveStop(current, target);
     }
   }
