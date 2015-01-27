@@ -49,10 +49,6 @@ public interface CameraSteeringWorker {
   
   public int getTiltMax();
   
-  public NormalizedPosition getLimitUpRight();
-  
-  public NormalizedPosition getLimitDownLeft();
-  
   public Position toCameraCoordinates(NormalizedPosition posn);
   
   public void addUISlave(UISlave slave);
