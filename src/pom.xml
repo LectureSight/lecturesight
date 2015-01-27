@@ -250,11 +250,13 @@
   
   <!--____________________________ Repositories _____________________________-->
   <repositories>
-    <repository>
+    
+    <!--repository>
       <id>sonatype</id>
       <name>Sonatype OSS Snapshots Repository</name>
       <url>http://oss.sonatype.org/content/groups/public</url>
-    </repository>
+    </repository-->
+    
     <repository>
       <id>maven2-repository.dev.java.net</id>
       <name>Java.net Repository for Maven</name>
@@ -286,7 +288,7 @@
     </repository>
     
     <!-- Manchesters own local Repo -->
-    <!--repository>
+    <repository>
       <id>man-mtt</id>
       <name>manchester-mtt</name>
       <url>http://garnier.rcs.manchester.ac.uk:9090/nexus/content/repositories/man-mtt</url>
@@ -296,7 +298,7 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository-->
+    </repository>
     
     <!-- blackpad often breaks build -->
     <repository>
@@ -309,6 +311,7 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    
   </repositories>
 
   <!--_____________________________ Developers ______________________________-->
