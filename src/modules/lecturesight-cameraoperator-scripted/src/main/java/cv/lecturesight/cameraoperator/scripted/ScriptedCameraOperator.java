@@ -1,9 +1,13 @@
 package cv.lecturesight.cameraoperator.scripted;
 
 import cv.lecturesight.operator.CameraOperator;
+import cv.lecturesight.scripting.api.ScriptBridge;
+import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
@@ -13,9 +17,9 @@ import org.osgi.service.component.ComponentContext;
 
 @Component(name = "lecturesight.cameraoperator.scripted", immediate = true)
 @Service
-public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller {
+public class ScriptedCameraOperator implements CameraOperator, ScriptingService, ArtifactInstaller {
 
-  Log log = new Log("Scripted Camera Operator");
+  Log log = new Log("Scripted Camera Operator");    // logger for this service
   
   @Reference
   Configuration config;               // service configuration
@@ -23,9 +27,16 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
   File scriptFile = null;             // script file when loaded
   File configFile = null;             // config file for script
   
-  ScriptWorker scrWorker = null;      // worker executing the script
-  Thread scrWorkerThread = null;      // thread handle for worker's execution
+  ScriptWorker scriptWorker = null;   // worker executing the script
+  Thread workerThread = null;         // thread handle for worker's execution
+  
+  List<BridgeRegistration> serviceObjects;  // collection of registetred service objects
+                                            // that are made available in the script scope
     
+  public ScriptedCameraOperator() {
+    serviceObjects = new LinkedList<BridgeRegistration>();
+  }
+  
   protected void activate(ComponentContext cc) throws Exception {
     log.info("Activated");
   }
@@ -45,16 +56,33 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     }
     log.info("Attempting to start script worker.");
     try {
-      scrWorker = new ScriptWorker(scriptFile);
+      scriptWorker = new ScriptWorker(scriptFile.getName());
       
       // make config object
-      Properties props = parseConfigFile(configFile);
-      scrWorker.setScriptConfig(props);
+      if (configFile != null) {
+        Properties props = parseConfigFile(configFile);
+        scriptWorker.setScriptConfig(props);
+      }
       
       // equip engine with bridge objects
+      for (BridgeRegistration reg : serviceObjects) {
+    
+        // load required imports into script scope
+        for (String pkg : reg.imports) {      
+          scriptWorker.addImport(pkg);
+        }
+        
+        // add bridge object to script scope
+        scriptWorker.addScriptObject(reg.identifier, reg.bridgeObject);
+      }
       
-      scrWorkerThread = new Thread(scrWorker);
-      scrWorkerThread.start();
+      // load and evaluate script
+      // throws IllegalStateException
+      scriptWorker.load(scriptFile);
+      
+      // create script worker thread and start it
+      workerThread = new Thread(scriptWorker);
+      workerThread.start();
       
     } catch (Exception e) {
       log.error("Failed to instantiate script worker.", e);
@@ -69,12 +97,12 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
    */
   @Override
   public void stop() {
-    if (scrWorker != null) {
+    if (scriptWorker != null) {
       log.info("Attempting to stop script worker.");
       
       // try to gracefully stop the interpreter thread
-      scrWorker.stop();
-      scrWorkerThread.interrupt();    // TODO better scrWorker.interrupt() ??
+      scriptWorker.stop();
+      workerThread.interrupt();    // TODO better scrWorker.interrupt() ??
       
       // wait grace period
       try {
@@ -83,11 +111,11 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
         log.warn("Interruped while waiting for interpreter to exit.");
       }
       
-      // if worker was not stopped, hard kill it. using deprecated stop() here as
-      // there isn't really any other way.
-      if (!scrWorker.isStopped()) {
+      // if worker was not stopped, hard kill it. Using deprecated Thread.stop() 
+      // here as there isn't really any other way.
+      if (!scriptWorker.isStopped()) {
         log.warn("Script worker did not stop, hard killing thread.");
-        scrWorkerThread.stop();
+        workerThread.stop();
       }      
     } else {
       log.warn("stop() called but nothing to stop.");
@@ -187,5 +215,56 @@ public class ScriptedCameraOperator implements CameraOperator, ArtifactInstaller
     String filename = config.get(Constants.PROPKEY_SCRIPTFILE);
     filename = filename.replace(".js", ".conf");
     return scriptDir + File.separator + filename;
+  }
+
+  // _____________________ Methods from ScriptingService _______________________
+  @Override
+  public void registerSerivceObject(String identifier, ScriptBridge serviceObject, String[] requiredImports) {
+    if (requiredImports == null) {
+      requiredImports = new String[0];
+    }
+    BridgeRegistration reg = new BridgeRegistration(identifier, serviceObject, requiredImports);
+    serviceObjects.add(reg);
+  }
+
+  @Override
+  public Log getLogger() {
+    if (scriptWorker != null) {
+      return scriptWorker.log;
+    } else {
+      return new Log("Script");
+    }
+  }
+
+  @Override
+  public void invokeCallback(Object function, Object[] args) {
+    if (scriptWorker != null && !scriptWorker.isStopped()) {
+      scriptWorker.invokeCallback(function, args);
+    } else {
+      log.warn("invokeCallback() called but no script running.");
+    }
+  }
+
+  @Override
+  public void invokeMethod(String method, Object... args) {
+    if (scriptWorker != null && !scriptWorker.isStopped()) {
+      scriptWorker.invokeMethod(method, args);
+    } else {
+      log.warn("invokeMethod() called but no script running.");
+    }
+  }
+
+  @Override
+  public void invokeMethod(Object method, Object... args) {
+    if (scriptWorker != null && !scriptWorker.isStopped()) {
+      scriptWorker.invokeCallback(method, args);
+    } else {
+      log.warn("invokeMethod() called but no script running.");
+    }
+  }
+
+  @Override
+  public Object invokeFunction(String function, Object... args) {
+    throw new UnsupportedOperationException("invokeFunction() is not implemented.");
   }
 }

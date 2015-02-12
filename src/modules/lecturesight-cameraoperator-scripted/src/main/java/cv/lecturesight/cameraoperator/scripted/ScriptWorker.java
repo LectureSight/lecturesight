@@ -1,6 +1,5 @@
 package cv.lecturesight.cameraoperator.scripted;
 
-import cv.lecturesight.scripting.api.ScriptParent;
 import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +7,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -18,63 +19,63 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-public class ScriptWorker implements ScriptParent, Runnable {
+public class ScriptWorker implements Runnable {
 
-  Log log = new Log("Script");  // our logger
+  Log log;             // logger for the script
 
-  String filename;     // name of the js file that this worker executes
+  String name;         // name used for the script logger
+  Scriptable scope;    // scope the script is running in
   
-  Scriptable scope;
-  
+  List<String> imports;        // list of imports that are added to script space before the script is loaded
+  Map<String,Object> objects;  // list of Java object that are added to script space before script is loaded
+
   // queue that stores function calls to be made
-  BlockingQueue<Invocation> invokeQueue = new LinkedBlockingQueue<Invocation>();
+  BlockingQueue<Invocation> invocationQueue = new LinkedBlockingQueue<Invocation>();
 
   private boolean running = true;   // indicates if this worker shuold still run
   private boolean stopped = false;  // indicates if this worker is still running
 
-  /** Constructor, prepares the script for function invocation.
-   * 
+  /**
+   * Constructor, prepares the script for function invocation.
+   *
    * @param source File holding the script's source code
-   * @throws Exception 
+   * @throws Exception
    */
-  public ScriptWorker(File source) throws Exception {
-    Context ctx = Context.enter();                                // TODO refine this
-    scope = ctx.initStandardObjects(null, true);
-    filename = source.getName();
-    try {
-      ctx.evaluateReader(scope, new FileReader(source), filename, 1, null); // why doesn't this throw anything in case of compilation error?
-    } catch (FileNotFoundException e) {
-      log.error("Source file not found.", e);
-      throw e;
-    } catch (IOException e) {
-      log.error("Failed reading source file.", e);
-      throw e;
-    } finally {
-      Context.exit();
-    }
+  public ScriptWorker(String name) throws Exception {
+    this.name = name;
+    log = new Log(this.name);
+    imports = new LinkedList<String>();
+    
   }
 
-  /** Run method implementing main loop of this worker. While <code>running == 
+  /**
+   * Run method implementing main loop of this worker. While <code>running ==
    * true</code> and not being interrupted an <code>Invocation</code> is taken
    * from the queue and executed. Before ending, <code>stopped</code> is set to
    * <code>true</code> to indicate that this worker was gracefully stopped.
-   * 
+   *
    * If an error is encountered during execution of an invocation, the error is
    * reported to the logger but the worker is not shut down, so that subsequent
-   * invocations can still be executed (errors don't completely break the script).
+   * invocations can still be executed (errors don't completely break the
+   * script).
    */
   @Override
   public void run() {
     Context ctx = Context.enter();
     try {
       while (running) {
-        Invocation inv = invokeQueue.take();
+        Invocation inv = invocationQueue.take();
         try {
-          Object o = scope.get(inv.function, scope);
-          if (!(o instanceof Function)) {
-            log.error("Invocation error: function " + inv.function + " not found.");
+          Object ref;
+          if (inv instanceof InvocationByName) {
+            ref = scope.get(((InvocationByName)inv).getName(), scope);
           } else {
-            Function func = (Function)o;
+            ref = ((InvocationByReference)inv).getReference();
+          }
+          if (!(ref instanceof Function)) {
+            log.error("Invocation error: function not found.");
+          } else {
+            Function func = (Function) ref;
             func.call(ctx, scope, scope, inv.args);
           }
         } catch (Exception e) {
@@ -90,63 +91,129 @@ public class ScriptWorker implements ScriptParent, Runnable {
     }
   }
 
-  /** Enqueues a new <code>Invocation</code> that will execute the specified 
-   * <code>function</code>. This method is intended only for invocing callbacks
-   * from inside a script call to a bridge function.
-   * 
-   * @param func
-   * @param args 
-   */ 
-  public void invokeCallback(Object func, Object... args) {
-    Context ctx = Context.enter();
-    Function function = (Function)func;
-    function.call(ctx, scope, scope, args);  
-  }
-
-  /** Injects an object <code>obj</code> into the script space under the 
-   * specified <code>name</code> as identifier.
-   * 
-   * @param name
-   * @param obj 
-   */
-  public void injectObject(String name, Object obj) {
-    Object wrapped = Context.javaToJS(obj, scope);
-    ScriptableObject.putProperty(scope, name, wrapped);
-  }
-
-  /** Makes the interpreter import the Java package specified by 
+  /**
+   * Makes the interpreter import the Java package specified by
    * <code>package</code>.
-   * 
-   * @param packageName 
+   *
+   * @param packageName
    */
-  public void injectPackage(String packageName) {
+  public void addImport(String packageName) {
     Context ctx = Context.enter();
     try {
       StringBuilder code = new StringBuilder();
       code.append("importPackage(Packages.").append(packageName).append(");");
-      ctx.evaluateString(scope, code.toString(), "<scriptWorker>", 1, null);
+      ctx.evaluateString(scope, code.toString(), "scriptWorker", 1, null);
     } catch (Exception e) {
-      log.error("Unable to import package " + packageName + " in script. ", e);
+      log.error("Failed to import package " + packageName , e);
+    } finally {
+      Context.exit();
+    }
+  }
+
+  /**
+   * Adds an object <code>obj</code> to the list of objects that are loaded into 
+   * script space when load() is called.
+   *
+   * @param name
+   * @param obj
+   */
+  public void addScriptObject(String name, Object obj) {
+    Context.enter();
+    try {
+      Object wrapped = Context.javaToJS(obj, scope);
+      ScriptableObject.putProperty(scope, name, wrapped);
+    } catch (Exception e) {
+      log.error("Failed to add script object " + name, e);
     } finally {
       Context.exit();
     }
   }
   
-  /** Creates the JS code of the <code>Config</code> object, creates the object
-   * and injects it into the script scope.
+  /** Loads and evaluates the specified <code>scriptfile</code>. 
    * 
+   * @param scriptfile 
+   */
+  public void load(File scriptfile) {
+    Context ctx = Context.enter();
+    scope = ctx.initStandardObjects(null, true);
+    try {
+      ctx.evaluateReader(scope, new FileReader(scriptfile), this.name, 1, null);
+    } catch (FileNotFoundException e) {
+      String msg = "Source file not found: " + scriptfile.getAbsolutePath();
+      throw new IllegalStateException(msg, e);
+    } catch (IOException e) {
+      String msg = "Failed reading source: " + scriptfile.getAbsolutePath();
+      log.error(msg, e);
+    } catch (IllegalStateException e) {
+      log.error("Error while evaluating script.", e);
+      throw e;
+    } finally {
+      Context.exit();
+    }
+  }
+
+  /**
+   * Will execute the specified <code>function</code> with the specified
+   * <code>args</code>. This method is intended only for invoking callbacks from
+   * inside a script call to a bridge function.
+   *
+   * @param func
+   * @param args
+   */
+  public void invokeCallback(Object func, Object... args) {
+    Context ctx = Context.enter();       // TODO aren't we still in the context?
+    try {
+      Function function = (Function) func;
+      function.call(ctx, scope, scope, args);
+    } catch (Exception e) {
+      log.error("Exception while calling script function. ", e);
+    } finally {
+      Context.exit();
+    }
+  }
+
+  /**
+   * Creates and enqueues an <code>Invocation</code> of the JS function with the
+   * specified name and the specified parameter list.
+   *
+   * @param function
+   * @param args
+   */
+  public void invokeMethod(String function, Object... args) {
+    log.debug("Submitting invocation of function " + function + " with " + args.length + " parameters.");
+    Invocation inv = new InvocationByName(function, args);
+    invocationQueue.add(inv);
+  }
+
+  /**
+   * Creates and enqueues an <code>Invocation</code> of the JS function with the
+   * specified name and the specified parameter list.
+   *
+   * @param function
+   * @param args
+   */
+  public void invokeMethod(Object function, Object... args) {
+    log.debug("Submitting invocation of function reference with " + args.length + " parameters.");
+    Invocation inv = new InvocationByReference(function, args);
+    invocationQueue.add(inv);
+  }
+
+  /**
+   * Creates the JS code of the <code>Config</code> object, creates the object
+   * and injects it into the script scope.
+   *
    * @param props Configuration Properties
    */
   void setScriptConfig(Properties props) {
     // make JS code of config object
     List<String> params = new ArrayList<String>();
-    for (Entry<Object,Object> entry : props.entrySet()) {
-      String key = (String)entry.getKey();         // TODO sanitize key string
-      String val = (String)entry.getValue();       // TODO sanitize value string
+    for (Entry<Object, Object> entry : props.entrySet()) {
+      String key = (String) entry.getKey();         // TODO sanitize key string
+      String val = (String) entry.getValue();       // TODO sanitize value string
       params.add("\"" + key + "\":\"" + val + "\"");
     }
     String code = "var Config = {" + join(params.iterator(), ",") + "};";
-    
+
     // inject Config object 
     Context ctx = Context.enter();
     try {
@@ -157,7 +224,7 @@ public class ScriptWorker implements ScriptParent, Runnable {
       Context.exit();
     }
   }
-  
+
   private String join(Iterator<String> it, String sep) {
     StringBuilder sb = new StringBuilder();
     while (it.hasNext()) {
@@ -170,47 +237,23 @@ public class ScriptWorker implements ScriptParent, Runnable {
     return sb.toString();
   }
 
-  /** Requests this worker to stop.
-   * 
+  /**
+   * Requests this worker to stop.
+   *
    */
   public void stop() {
     running = false;
   }
-  
-  /** Returns true iff this worker has stopped gracefully.
-   * 
-   * @return ture, if this worker has stopped 
-   */ 
+
+  /**
+   * Returns true iff this worker has stopped gracefully.
+   *
+   * @return ture, iff this worker has stopped
+   */
   public boolean isStopped() {
     return stopped;
   }
 
-  /** Invokes the JS function with the specified name and the specified parameter
-   * list. 
-   * 
-   * @param function
-   * @param args 
-   */
-  @Override
-  public void invokeMethod(String function, Object... args) {
-    log.debug("Submitting invocation of function " + function + " with " + args.length + " parameters.");
-    Invocation inv = new Invocation(function, args);
-    invokeQueue.add(inv);
-  }
-
-  /** Invokes the JS function with the specified name and the specified parameter
-   * list and returns the functions return value as a Java object.
-   * 
-   * @param name
-   * @param args
-   * @return 
-   */
-  @Override
-  public Object invokeFunction(String name, Object... args) {
-    return null;
-  }
-  
-  @Override
   public Log getLogger() {
     return log;
   }

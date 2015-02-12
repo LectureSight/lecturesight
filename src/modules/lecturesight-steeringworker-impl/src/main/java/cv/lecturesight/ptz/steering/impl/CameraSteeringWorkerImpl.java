@@ -21,6 +21,7 @@ import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
+import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
@@ -45,17 +46,20 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   private Log log = new Log("Camera Steering Worker");
 
   @Reference
-  Configuration config;       // service configuration
+  Configuration config;        // service configuration
 
   @Reference
-  PTZCamera camera;           // PTZCamera implementation
-
-  CameraPositionModel model;  // model mapping normalized coords <--> camera coords
-
-  SteeringWorker worker;      // worker updating the pan and tilt speed
+  PTZCamera camera;            // PTZCamera implementation
   
-  CameraBridge bridge;        // this services bridge into the script world 
+  @Reference
+  private ScriptingService engine;
 
+  CameraPositionModel model;   // model mapping normalized coords <--> camera coords
+
+  SteeringWorker worker;       // worker updating the pan and tilt speed
+  
+  private CameraBridge bridge; // script bridge
+  
   int pan_min, pan_max;               // pan limits
   int tilt_min, tilt_max;             // tilt limits
   int zoom_min, zoom_max;             // zoom limits
@@ -213,7 +217,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     }
 
     // create Camera scripting bridge
-    bridge = new CameraBridge(this);
+    bridge = new CameraBridge(this, engine);
     Dictionary<String, Object> props = new Hashtable<String, Object>();
     props.put("bridge.name", "Camera");
     props.put("bridge.imports", "cv.lecturesight.util.geometry");

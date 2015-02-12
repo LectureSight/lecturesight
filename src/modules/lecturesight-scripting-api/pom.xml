@@ -32,6 +32,21 @@
       <artifactId>osgi-wrapped-rhino</artifactId>
       <version>1.7R4</version>
     </dependency>
+    <!-- dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>tools</groupId>
+      <artifactId>tools</artifactId>
+      <version>1.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>1.6.5</version>
+    </dependency -->
   </dependencies>
 
   <build>
@@ -46,6 +61,16 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <!-- _exportcontents>org.mozilla.javascript.*</_exportcontents -->
+            <Import-Package>
+              org.mozilla.*;
+              org.apache.*;resolution:=optional,
+              com.sun.*;resolution:=optional,
+              kaffe.*;resolution:=optional,
+              sun.*;resolution:=optional,
+              *
+            </Import-Package>
+            <!--Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency -->
             <Export-Package>
               cv.lecturesight.scripting.api;version=${project.version}
             </Export-Package>

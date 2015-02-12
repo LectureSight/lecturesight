@@ -57,7 +57,6 @@
         <module>modules/lecturesight-profile-manager</module>
         <module>modules/lecturesight-profile-ui</module>
         <module>modules/lecturesight-ptzcontrol-api</module>
-        <!--module>modules/lecturesight-ptzcontrol-visca</module-->
         <module>modules/lecturesight-regiontracker-api</module>
         <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-scheduler</module>
@@ -82,7 +81,7 @@
       </activation>
       <modules>
         <module>modules/lecturesight-cameraoperator-api</module>
-        <module>modules/lecturesight-cameraoperator-simple</module>
+        <module>modules/lecturesight-cameraoperator-scripted</module>
         <module>modules/lecturesight-connectedcomponent-api</module>
         <module>modules/lecturesight-connectedcomponent-impl</module>
         <module>modules/lecturesight-display-api</module>

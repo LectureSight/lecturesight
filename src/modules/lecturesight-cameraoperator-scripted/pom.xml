@@ -19,12 +19,12 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-cameraoperator-api</artifactId>
+      <artifactId>lecturesight-scripting-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-scripting-api</artifactId>
+      <artifactId>lecturesight-cameraoperator-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -90,6 +90,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.cameraoperator.scripted</Bundle-SymbolicName>
+            <Import-Package>
+              org.mozilla.*;
+              org.apache.*;resolution:=optional,
+              com.sun.*;resolution:=optional,
+              kaffe.*;resolution:=optional,
+              sun.*;resolution:=optional,
+              *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>

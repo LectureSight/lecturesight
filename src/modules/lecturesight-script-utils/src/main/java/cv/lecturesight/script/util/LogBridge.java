@@ -1,40 +1,38 @@
 package cv.lecturesight.script.util;
 
 import cv.lecturesight.scripting.api.ScriptBridge;
-import cv.lecturesight.scripting.api.ScriptParent;
+import cv.lecturesight.scripting.api.ScriptingService;
+import cv.lecturesight.util.Log;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 
-@Component(name="lecturesight.script.util.log", immediate=true)
+@Component(name = "lecturesight.script.bridge.log", immediate = true)
 @Service()
-@Properties({
- @Property(name="bridge.name", value="Log"),
- @Property(name="bridge.imports", value="")  
-})
 public class LogBridge implements ScriptBridge {
 
-  ScriptParent parent;
+  @Reference
+  ScriptingService engine;
+  Log scriptLog;
+  
+  protected void activate(ComponentContext cc) {
+    engine.registerSerivceObject("Log", this, null);
+  }
   
   public void debug(String msg) {
-    parent.getLogger().debug(msg);
+    engine.getLogger().debug(msg);
   }
   
   public void info(String msg) {
-    parent.getLogger().info(msg);
+    engine.getLogger().info(msg);
   }
   
   public void warn(String msg) {
-    parent.getLogger().warn(msg);
+    engine.getLogger().warn(msg);
   }
   
   public void error(String msg) {
-    parent.getLogger().error(msg);
-  }
-  
-  @Override
-  public void setScriptParent(ScriptParent p) {
-    this.parent = p;
+    engine.getLogger().error(msg);
   }
 }

@@ -1,4 +1,4 @@
-package cv.lecturesight.script.util.tracker;
+package cv.lecturesight.script.util.geometry;
 
 public class Area {
 
