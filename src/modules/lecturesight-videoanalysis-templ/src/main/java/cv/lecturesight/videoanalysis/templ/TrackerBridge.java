@@ -1,9 +1,9 @@
 package cv.lecturesight.videoanalysis.templ;
 
+import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.script.util.geometry.TrackerTarget;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
-import cv.lecturesight.videoanalysis.VideoAnalysisService;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +14,7 @@ import org.osgi.service.component.ComponentContext;
 public class TrackerBridge implements ScriptBridge {
 
   @Reference
-  VideoAnalysisService tracker;        
+  ObjectTracker tracker;        
   
   @Reference
   ScriptingService engine;
