@@ -3,16 +3,17 @@ package cv.lecturesight.manpages;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.util.Log;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -21,6 +22,10 @@ import org.osgi.service.component.ComponentContext;
 
 @Component(name = "lecturesight.cameracalibration", immediate = true)
 @Service
+@Properties({
+  @Property(name = "osgi.command.scope", value = "man"),
+  @Property(name = "osgi.command.function", value = {"list"})
+})
 public class ManualPagesUI implements UserInterface, BundleListener {
 
   Log log = new Log("Manual Pages UI");
@@ -29,6 +34,12 @@ public class ManualPagesUI implements UserInterface, BundleListener {
 
   protected void activate(ComponentContext cc) throws Exception {
     cc.getBundleContext().addBundleListener(this);
+    
+    // search for man pages of already installed bundles
+    log.info("Searching for manual pages.");
+    for (Bundle b : cc.getBundleContext().getBundles()) {
+      installManPages(b);
+    }
   }
   
   @Override
@@ -79,6 +90,18 @@ public class ManualPagesUI implements UserInterface, BundleListener {
     }
   }
 
+  private void uninstallManPages(Bundle bundle) {
+    log.debug("Uninstalling manual pages from bundle " + bundle.getSymbolicName());
+    model.removeBundleNode(bundle);
+  }
+  
+  /** Reads the content retrieved from <code>url</code> via a BufferedReader
+   * into a String and closes the stream quietly. The method also silences 
+   * IOExceptions.
+   * 
+   * @param url
+   * @return Content retrieved from url
+   */ 
   String urlReadClose(URL url) {
     String out = "";
     try {
@@ -97,6 +120,15 @@ public class ManualPagesUI implements UserInterface, BundleListener {
     return out;
   }
   
-  private void uninstallManPages(Bundle bundle) {
+  public void list(String args[]) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Manual Pages:\n\n");
+    for (BundleNode bn : model.nodes) {
+      sb.append("  ").append(bn.toString()).append(" (").append(bn.pages.size()).append(")\n");
+      for (ManPage m : bn.pages) {
+        sb.append("      ").append(m.getTitle()).append("\n");
+      }
+    }
+    System.out.println(sb.toString());
   }
 }

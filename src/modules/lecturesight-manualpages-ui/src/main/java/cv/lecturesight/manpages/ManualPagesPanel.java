@@ -37,6 +37,8 @@ public class ManualPagesPanel extends javax.swing.JPanel {
     LowerScrollPane = new javax.swing.JScrollPane();
     pageView = new javax.swing.JEditorPane();
 
+    splitPane.setDividerLocation(170);
+    splitPane.setDividerSize(4);
     splitPane.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
     treeView.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {

@@ -1,5 +1,6 @@
 package cv.lecturesight.manpages;
 
+import cv.lecturesight.util.Log;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.event.TreeModelEvent;
@@ -16,6 +17,8 @@ import org.osgi.framework.Bundle;
  */
 public class ManPagesModel implements TreeModel {
 
+  private Log log = new Log("Man Pages Model");
+  
   enum EventType {
 
     ADDED, REMOVED, CHANGED;
@@ -38,9 +41,9 @@ public class ManPagesModel implements TreeModel {
    * @return
    */
   public BundleNode getBundleNode(Bundle bundle) {
-    for (BundleNode bp : nodes) {
-      if (bundle.equals(bp)) {
-        return bp;
+    for (BundleNode bnode : nodes) {
+      if (bundle.getSymbolicName().equals(bnode.bundle.getSymbolicName())) {
+        return bnode;
       }
     }
     return null;
@@ -58,14 +61,15 @@ public class ManPagesModel implements TreeModel {
     nodes.add(newNode);
     int index = nodes.indexOf(newNode);
 
-    // create event
+    // send notifications
     Object[] path = {rootElement};
     int[] childIndices = {index};
     Object[] changedChildren = {newNode};
     TreeModelEvent event = new TreeModelEvent(this, path, childIndices, changedChildren);
-
     notifyListeners(event, EventType.ADDED);
 
+    log.debug("Added BundleNode " + newNode);
+    
     return newNode;
   }
 
@@ -80,13 +84,14 @@ public class ManPagesModel implements TreeModel {
     if (bn != null) {
       nodes.remove(bn);
 
-      // create event
+      // send notifications
       Object[] path = {rootElement};
       int[] childIndices = {index};
       Object[] changedChildren = {bn};
       TreeModelEvent event = new TreeModelEvent(this, path, childIndices, changedChildren);
-
       notifyListeners(event, EventType.REMOVED);
+      
+      log.debug("Removed BundleNode " + bn);
     }
   }
 
@@ -109,12 +114,13 @@ public class ManPagesModel implements TreeModel {
       indices[i++] = bnode.pages.indexOf(p);
     }
 
-    // create event
+    // send notifications
     Object[] path = {rootElement, bnode};
     Object[] changedChildren = pages.toArray();
     TreeModelEvent event = new TreeModelEvent(this, path, indices, changedChildren);
-
     notifyListeners(event, EventType.ADDED);
+    
+    log.debug("Added " + i + " pages to BundleNode " + bnode);
   }
 
   @Override
@@ -188,7 +194,7 @@ public class ManPagesModel implements TreeModel {
   class RootElement {
 
     public String toString() {
-      return "Lecture Sight Manual";
+      return "LectureSight Manual";
     }
   }
 }

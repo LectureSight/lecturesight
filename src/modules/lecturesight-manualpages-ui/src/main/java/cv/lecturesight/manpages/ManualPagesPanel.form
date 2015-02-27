@@ -28,6 +28,8 @@
   <SubComponents>
     <Container class="javax.swing.JSplitPane" name="splitPane">
       <Properties>
+        <Property name="dividerLocation" type="int" value="170"/>
+        <Property name="dividerSize" type="int" value="4"/>
         <Property name="orientation" type="int" value="0"/>
       </Properties>
 

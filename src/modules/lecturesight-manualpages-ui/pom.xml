@@ -89,7 +89,7 @@
             <Private-Package>
               org.markdownj
             </Private-Package>
-            <Export-Package>cv.lecturesight.manpage;version=${project.version}</Export-Package>
+            <!-- Export-Package>cv.lecturesight.manpage;version=${project.version}</Export-Package -->
           </instructions>
         </configuration>
       </plugin>
