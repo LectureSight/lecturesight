@@ -12,7 +12,7 @@
   <parent>
     <groupId>cv.lecturesight</groupId>
     <artifactId>base</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   
@@ -20,11 +20,6 @@
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-scripting-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-ptzcontrol-visca</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -65,7 +60,7 @@
     </dependency>
   </dependencies>
   
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
 
   <build>
     <plugins>

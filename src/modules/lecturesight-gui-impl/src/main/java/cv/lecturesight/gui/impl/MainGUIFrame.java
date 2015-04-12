@@ -88,40 +88,40 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   }
 
   @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-        desktop = new javax.swing.JDesktopPane();
-        mainMenu = new javax.swing.JMenuBar();
-        servicesMenu = new javax.swing.JMenu();
+    desktop = new javax.swing.JDesktopPane();
+    mainMenu = new javax.swing.JMenuBar();
+    servicesMenu = new javax.swing.JMenu();
 
-        setTitle("LectureSight 0.3-SNAPSHOT");
+    setTitle("LectureSight 0.3");
 
-        desktop.setDesktopManager(null);
+    desktop.setDesktopManager(null);
 
-        servicesMenu.setText("Services");
-        mainMenu.add(servicesMenu);
+    servicesMenu.setText("Services");
+    mainMenu.add(servicesMenu);
 
-        setJMenuBar(mainMenu);
+    setJMenuBar(mainMenu);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 750, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE)
-        );
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addComponent(desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 750, Short.MAX_VALUE)
+    );
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addComponent(desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
+    );
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JDesktopPane desktop;
-    private javax.swing.JMenuBar mainMenu;
-    private javax.swing.JMenu servicesMenu;
-    // End of variables declaration//GEN-END:variables
+    pack();
+  }// </editor-fold>//GEN-END:initComponents
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JDesktopPane desktop;
+  private javax.swing.JMenuBar mainMenu;
+  private javax.swing.JMenu servicesMenu;
+  // End of variables declaration//GEN-END:variables
 
   @Override
   public void internalFrameOpened(InternalFrameEvent e) {

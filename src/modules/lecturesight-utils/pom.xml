@@ -6,12 +6,12 @@
   <name>LectureSight Utilities</name>
   <packaging>bundle</packaging>
   
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   
   <parent>
     <groupId>cv.lecturesight</groupId>
     <artifactId>base</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   
