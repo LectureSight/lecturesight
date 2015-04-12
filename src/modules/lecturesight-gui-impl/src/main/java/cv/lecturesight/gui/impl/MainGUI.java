@@ -26,6 +26,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import cv.lecturesight.util.Log;
 import cv.lecturesight.util.DummyInterface;
+import java.awt.HeadlessException;
 
 @Component(name="lecturesight.gui", immediate=true)
 @Service
@@ -37,8 +38,12 @@ public class MainGUI implements DummyInterface {
   
   protected void activate(ComponentContext cc) {
     log.info("Activated");
-    window = new MainGUIFrame();
-    window.setVisible(true);
+    try {
+      window = new MainGUIFrame();
+      window.setVisible(true);
+    } catch (HeadlessException he) {
+      log.warn("No X11 environment present. Starting LectureSight in HEADLESS MODE.");
+    }
     uiTracker = new UserInterfaceTracker(cc.getBundleContext());
     uiTracker.open();
   }
