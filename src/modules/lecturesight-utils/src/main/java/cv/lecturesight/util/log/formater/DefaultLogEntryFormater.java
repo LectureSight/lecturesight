@@ -15,8 +15,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.util.log.listener;
+package cv.lecturesight.util.log.formater;
 
+import cv.lecturesight.util.log.listener.LogEntryFormater;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;

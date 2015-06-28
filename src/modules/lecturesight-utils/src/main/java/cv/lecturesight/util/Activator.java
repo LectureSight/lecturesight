@@ -18,7 +18,10 @@
 package cv.lecturesight.util;
 
 import cv.lecturesight.util.conf.*;
+import cv.lecturesight.util.log.formater.DefaultLogEntryFormater;
+import cv.lecturesight.util.log.formater.ecma48.ECMA48LogEntryFormater;
 import cv.lecturesight.util.log.listener.ConsoleOutputLogListener;
+import cv.lecturesight.util.log.listener.LogEntryFormater;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,6 +39,7 @@ import org.osgi.service.log.LogService;
 public final class Activator implements BundleActivator {
 
   final static String LOGLISTENER_ACTIVE_PROPERTY = "cv.lecturesight.util.log.console.enabled";
+  final static String LOGLISTENER_COLOR_ENABLED = "cv.lecturesight.util.log.console.color";
   final static String CONFIG_NAME = "lecturesight.properties";
   final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
   private ServiceRegistration consoleLogRegistration = null;
@@ -57,7 +61,18 @@ public final class Activator implements BundleActivator {
     // activate log console output if configured
     String active = context.getProperty(LOGLISTENER_ACTIVE_PROPERTY);
     if (active != null && ("TRUE".equalsIgnoreCase(active) || "YES".equalsIgnoreCase(active))) {
-      ConsoleOutputLogListener consoleLog = new ConsoleOutputLogListener();
+      
+      ConsoleOutputLogListener consoleLog;
+      LogEntryFormater formater;
+      String color = context.getProperty(LOGLISTENER_COLOR_ENABLED);
+      if (color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color))) {
+        formater = new ECMA48LogEntryFormater();
+      } else {
+        formater = new DefaultLogEntryFormater();
+      }
+      
+      consoleLog = new ConsoleOutputLogListener(formater);
+      
       ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
       if (ref != null) {
         LogReaderService reader = (LogReaderService) context.getService(ref);

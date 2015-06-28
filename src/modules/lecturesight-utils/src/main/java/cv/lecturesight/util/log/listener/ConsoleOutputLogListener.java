@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.util.log.listener;
 
-import cv.lecturesight.util.log.formater.ecma48.ECMA48LogEntryFormater;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 
@@ -26,7 +25,11 @@ import org.osgi.service.log.LogListener;
  */
 public class ConsoleOutputLogListener implements LogListener {
 
-  private LogEntryFormater formater = new ECMA48LogEntryFormater();   // TODO make this configurable
+  private LogEntryFormater formater;
+  
+  public ConsoleOutputLogListener(LogEntryFormater formater) {
+    this.formater = formater;
+  }
 
   @Override
   public void logged(LogEntry entry) {
