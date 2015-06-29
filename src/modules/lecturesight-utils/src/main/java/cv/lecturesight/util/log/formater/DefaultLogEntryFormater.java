@@ -18,6 +18,10 @@
 package cv.lecturesight.util.log.formater;
 
 import cv.lecturesight.util.log.listener.LogEntryFormater;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogService;
@@ -30,9 +34,16 @@ public class DefaultLogEntryFormater implements LogEntryFormater {
   public String formatEntry(LogEntry entry) {
     // print log message
     StringBuilder sb = new StringBuilder();
-    sb.append(formatLevel(entry.getLevel()));
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    sb.append(sdf.format(new Date(entry.getTime()))).append(" ");
+
+    sb.append(formatLevel(entry.getLevel())).append(" ");
+
     sb.append(formatReference(entry));
+
     sb.append(entry.getMessage());
+
     //System.out.println("\033[34mThis is blue.\033[0m\n");
 
     // print Exception if present
@@ -53,13 +64,13 @@ public class DefaultLogEntryFormater implements LogEntryFormater {
   public String formatLevel(int level) {
     switch (level) {
       case LogService.LOG_DEBUG:
-        return "[ D ] ";
+        return "DEBUG";
       case LogService.LOG_ERROR:
-        return "[ E ] ";
+        return "ERROR";
       case LogService.LOG_INFO:
-        return "[ I ] ";
+        return "INFO ";
       case LogService.LOG_WARNING:
-        return "[ W ] ";
+        return "WARN ";
       default:
         return "[ ? ] ";  // should never happen
     }
