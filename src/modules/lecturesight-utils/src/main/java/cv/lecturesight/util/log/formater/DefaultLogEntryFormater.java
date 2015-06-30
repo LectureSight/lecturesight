@@ -35,7 +35,7 @@ public class DefaultLogEntryFormater implements LogEntryFormater {
     // print log message
     StringBuilder sb = new StringBuilder();
 
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     sb.append(sdf.format(new Date(entry.getTime()))).append(" ");
 
     sb.append(formatLevel(entry.getLevel())).append(" ");
