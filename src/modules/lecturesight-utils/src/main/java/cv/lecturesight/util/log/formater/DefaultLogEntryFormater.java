@@ -50,7 +50,7 @@ public class DefaultLogEntryFormater implements LogEntryFormater {
     Throwable th = entry.getException();
     if (th != null) {
       sb.append(NEWLINE);
-      sb.append(th.getMessage());
+      sb.append(th.toString());
       sb.append(NEWLINE);
       StackTraceElement[] trace = th.getStackTrace();
       for (StackTraceElement elm : trace) {
