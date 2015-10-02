@@ -66,6 +66,10 @@ public class Position implements Cloneable {
   public Position clone() {
     return new Position(x,y);
   }
+
+  public Position flip(boolean xflip, boolean yflip) {
+    return new Position(xflip ? (-1 * x) : x, yflip ? (-1 * y) : y);
+  }
   
   @Override
   public boolean equals(Object o) {

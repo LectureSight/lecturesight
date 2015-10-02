@@ -27,19 +27,17 @@ public class CameraPositionModel {
   private final int pan_max;
   private final int tilt_min;
   private final int tilt_max;
-  private final boolean yflip;
 
   private Position camera_pos = new Position(0, 0);   // camera position in camera coordinates
   private Position target_pos = new Position(0, 0);   // target position in camera coordinates
   private NormalizedPosition target_posn = new NormalizedPosition(0.0f, 0.0f);  // camera position in normalized coordinates
   private NormalizedPosition camera_posn = new NormalizedPosition(0.0f, 0.0f);  // target position in normalized coordinates
 
-  public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max, boolean yflip) {
+  public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max) {
     this.pan_max = pan_max;
     this.pan_min = pan_min;
     this.tilt_max = tilt_max;
     this.tilt_min = tilt_min;
-    this.yflip = yflip;
   }
 
   /**
@@ -52,26 +50,21 @@ public class CameraPositionModel {
     NormalizedPosition out = new NormalizedPosition(0.0f, 0.0f);
     float x = pos.getX();
     float y = pos.getY();
+
     // x
     if (x < 0) {
       out.setX(-1 * (x / pan_min));
     } else if (x > 0) {
       out.setX(x / pan_max);
     }
+
     // y
-    if (yflip) {
-      if (y < 0) {
-        out.setY(y / tilt_max);
-      } else if (y > 0) {
-        out.setY(-1 * (y / tilt_min));
-      }
-    } else {
-      if (y < 0) {
-        out.setY(-1 * (y / tilt_min));
-      } else if (y > 0) {
-        out.setY(y / tilt_max);
-      }
+    if (y < 0) {
+      out.setY(-1 * (y / tilt_min));
+    } else if (y > 0) {
+      out.setY(y / tilt_max);
     }
+
     return out;
   }
 
@@ -85,26 +78,21 @@ public class CameraPositionModel {
     Position out = new Position(0, 0);
     float x = pos.getX();
     float y = pos.getY();
+
     // x
     if (x < 0) {
       out.setX((int) (-1 * (x * pan_min)));
     } else if (x > 0) {
       out.setX((int) (x * pan_max));
     }
+
     // y
-    if (yflip) {
-      if (y < 0) {
-        out.setY((int) (y * tilt_max));
-      } else if (y > 0) {
-        out.setY((int) (-1 * (y * tilt_min)));
-      }
-    } else {
-      if (y < 0) {
-        out.setY((int) (-1 * (y * tilt_min)));
-      } else if (y > 0) {
-        out.setY((int) (y * tilt_max));
-      }
+    if (y < 0) {
+      out.setY((int) (-1 * (y * tilt_min)));
+    } else if (y > 0) {
+      out.setY((int) (y * tilt_max));
     }
+
     return out;
   }
 

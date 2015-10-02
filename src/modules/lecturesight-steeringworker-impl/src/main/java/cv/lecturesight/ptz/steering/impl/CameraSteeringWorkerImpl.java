@@ -69,6 +69,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   float damp_pan, damp_tilt;          // movement speed dampening factors 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
+  boolean xflip = false;
+  boolean yflip = false;
 
   // lists of listeners
   List<UISlave> uiListeners = new LinkedList<UISlave>();
@@ -82,7 +84,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     int last_ts = 0;
 
     @Override
-    public void positionUpdated(Position new_pos) {
+    public void positionUpdated(Position new_pos_camera) {
+
+      Position new_pos = new_pos_camera.flip(xflip, yflip);
 
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
@@ -266,8 +270,12 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
     log.debug("Camera pan/tilt limits: pan " + pan_min + " to " + pan_max + ", tilt " + tilt_min + " to " + tilt_max);
 
-    return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max,
-            config.getBoolean(Constants.PROPKEY_YFLIP));
+    yflip = config.getBoolean(Constants.PROPKEY_YFLIP);
+    xflip = config.getBoolean(Constants.PROPKEY_XFLIP);
+
+    log.debug("Camera co-ordinates: xflip=" + xflip + " yflip=" + yflip);
+
+    return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
   }
 
   public void stopMoving() {
