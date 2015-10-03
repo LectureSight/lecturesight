@@ -40,7 +40,7 @@ public class DutyScheduler implements ArtifactInstaller {
   @Reference
   HeartBeat heart;
   @Reference(policy = ReferencePolicy.DYNAMIC)
-  CameraSteeringWorker camera;
+  volatile CameraSteeringWorker camera;
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
   private EventExecutor eventExecutor = new EventExecutor();
   private EventList events = new EventList();
@@ -173,7 +173,7 @@ public class DutyScheduler implements ArtifactInstaller {
     try {
       if (camera != null) {
         if (!camera.isSteering()) {
-          camera.start();
+          camera.setSteering(true);
           log.info("Camera Control activated.");
         } else {
           log.info("Camera Control is already active.");
@@ -193,7 +193,7 @@ public class DutyScheduler implements ArtifactInstaller {
     try {
       if (camera != null) {
         if (camera.isSteering()) {
-          camera.stop();
+          camera.setSteering(false);
           log.info("Camera Control deactivated.");
         } else {
           log.info("Camera Control is already deactivated.");
