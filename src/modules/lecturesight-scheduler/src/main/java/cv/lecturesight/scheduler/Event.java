@@ -38,7 +38,11 @@ public class Event implements Comparable {
 
   @Override
   public int compareTo(Object other) {
-    //return ((Event)other).time.compareTo(time);
-    return time.compareTo(((Event)other).time);
+    int time_c = time.compareTo(((Event)other).time);
+
+    if (time_c == 0)
+	return action.compareTo(((Event)other).action);
+    else
+    	return time_c;
   }
 }

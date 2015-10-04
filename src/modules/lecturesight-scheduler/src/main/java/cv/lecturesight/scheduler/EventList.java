@@ -61,7 +61,7 @@ public class EventList {
 
   /**
    * Remove all events from the beginning of the list to the last event before
-   * <code>time</code>. Doing so when a list of events has be loaded form a
+   * <code>time</code>. Doing so when a list of events has be loaded from a
    * calendar removes all events that will never be relevant. This will lead to
    * <code>getLastBefore</code> and
    * <code>getFirstAfter</code> working in only one step in their search loop.
@@ -80,6 +80,24 @@ public class EventList {
         events.removeAll(remove);
       }
     }
+  }
+
+  /**
+   * Remove all events before <code>time</code>. Doing so when a list of events 
+   * has be loaded from a calendar removes all events that will never be relevant.
+   */
+  synchronized void removeBefore(long time) {
+      List<Event> remove = new LinkedList<Event>();
+      for (Iterator<Event> it = events.iterator(); it.hasNext();) {
+        Event event = it.next();
+        if (event.getTime() < time) {
+          remove.add(event);
+        } else
+          break;
+      }
+      if (remove.size() > 0) {
+        events.removeAll(remove);
+      }
   }
 
   /**

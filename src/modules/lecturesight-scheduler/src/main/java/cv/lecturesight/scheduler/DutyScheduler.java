@@ -33,7 +33,6 @@ public class DutyScheduler implements ArtifactInstaller {
   final static String PROPKEY_FILENAME = "schedule.file";
   final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String PROPKEY_AGENTNAME = "agent.name";
-  final static String SCHEDULE_DIRECTORY_NAME = "schedule";
   private Log log = new Log("Duty Scheduler");
   @Reference
   Configuration config;
@@ -48,16 +47,17 @@ public class DutyScheduler implements ArtifactInstaller {
   private String scheduleFileAbsolutePath;
 
   protected void activate(ComponentContext cc) {
-    // generate absolut search path for schedule file
-    scheduleFileName = config.get(PROPKEY_FILENAME);
-    File scheduleDir = new File(SCHEDULE_DIRECTORY_NAME);
-    scheduleFileAbsolutePath = scheduleDir.getAbsolutePath() + File.separator + scheduleFileName;
 
     // look for schedule file and load events if existing
-    File scheduleFile = new File(SCHEDULE_DIRECTORY_NAME + File.separator + scheduleFileName);
-    if (scheduleFile.exists()) {
-      loadEvents(scheduleFile);
-    }
+    scheduleFileName = config.get(PROPKEY_FILENAME);
+    File scheduleFile = new File(scheduleFileName);
+    scheduleFileAbsolutePath = scheduleFile.getAbsolutePath();
+
+    // Tracking and camera control are initially stopped
+    Event stopTracker = new Event(0, Event.Action.STOP_TRACKING);
+    events.add(stopTracker);
+    Event stopCamera = new Event(0, Event.Action.STOP_CAMERACONTROL);
+    events.add(stopCamera);
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
@@ -92,6 +92,7 @@ public class DutyScheduler implements ArtifactInstaller {
     timeZoneOffset *= 1000 * 60 * 60;                        // make time zone offset hours
     String agentName = config.get(PROPKEY_AGENTNAME);        // get agent name
     int trackerLeadTime = config.getInt(PROPKEY_LEADTIME);   // get tracker lead time
+    trackerLeadTime *= 1000;                                 // tracker lead time is in seconds
 
     synchronized (events) {
       try {
@@ -122,7 +123,7 @@ public class DutyScheduler implements ArtifactInstaller {
         events.clear();                             // clear schedule 
         eventExecutor.reset();                      // reset the event executor
         events.addAll(newEvents);                   // load new events
-        events.cutHead(System.currentTimeMillis()); // discard events from the past
+        events.removeBefore(System.currentTimeMillis()); // discard events from the past
 
       } catch (Exception e) {
         log.error("Unable to load calendar. ", e);
@@ -235,51 +236,34 @@ public class DutyScheduler implements ArtifactInstaller {
    */
   class EventExecutor implements Runnable {
 
-    Event current = null;   // current event
-    Event next = null;      // next event to come
-    long now;               // time at the beginning of the execution of run()
-
     /**
      * Resets this object into original state.
      */
     public void reset() {
-      current = null;
-      next = null;
     }
 
     @Override
     public void run() {
-      now = System.currentTimeMillis();   // get current time
 
-      synchronized (events) {
-        // try to load last event if we don't have one
-        if (current == null) {
-          current = events.getLastBefore(now);
-        }
+      synchronized (events) { 
+        long now = System.currentTimeMillis();   // get current time
+	Event current = events.getNextAfter(0);	 // get earliest event
 
-        ensureEvents();
-
-        // check if next has become current
-        if (next != null && now >= next.getTime()) {
-          current = next;
-          ensureEvents();
-          next = null;
-        }
-
-        // try to load next event if we don't have one
-        if (next == null) {
-          next = events.getNextAfter(now);
-        }
+	while ((current != null)  && (current.getTime() <= now)) {
+		fireEvent(current);
+		events.remove(current);
+      		now = System.currentTimeMillis();
+		current = events.getNextAfter(0);
+	}
       }
     }
 
     /**
      * Ensure that action associated with current event was set in motion.
      */
-    void ensureEvents() {
-      if (current != null && now >= current.getTime()) {
-        log.debug("Firing action " + current.getAction().name());
-        switch (current.getAction()) {
+    void fireEvent(Event event) {
+        log.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
+        switch (event.getAction()) {
           case START_TRACKING:
             ensureTrackingON();
             break;
@@ -292,9 +276,6 @@ public class DutyScheduler implements ArtifactInstaller {
           case STOP_CAMERACONTROL:
             ensureCameraControlOFF();
             break;
-        }
-        events.remove(current);
-        current = null;
       }
     }
   }
