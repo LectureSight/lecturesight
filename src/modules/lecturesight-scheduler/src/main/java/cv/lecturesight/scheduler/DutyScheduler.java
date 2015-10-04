@@ -45,13 +45,13 @@ public class DutyScheduler implements ArtifactInstaller {
   private EventExecutor eventExecutor = new EventExecutor();
   private EventList events = new EventList();
   private String scheduleFileName;
-  private String scheduleFileAbsoultePath;
+  private String scheduleFileAbsolutePath;
 
   protected void activate(ComponentContext cc) {
     // generate absolut search path for schedule file
     scheduleFileName = config.get(PROPKEY_FILENAME);
     File scheduleDir = new File(SCHEDULE_DIRECTORY_NAME);
-    scheduleFileAbsoultePath = scheduleDir.getAbsolutePath() + File.separator + scheduleFileName;
+    scheduleFileAbsolutePath = scheduleDir.getAbsolutePath() + File.separator + scheduleFileName;
 
     // look for schedule file and load events if existing
     File scheduleFile = new File(SCHEDULE_DIRECTORY_NAME + File.separator + scheduleFileName);
@@ -61,7 +61,7 @@ public class DutyScheduler implements ArtifactInstaller {
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
-    log.info("Activated. Listening for changes on " + scheduleFileAbsoultePath);
+    log.info("Activated. Listening for changes on " + scheduleFileAbsolutePath);
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -225,7 +225,7 @@ public class DutyScheduler implements ArtifactInstaller {
 
   @Override
   public boolean canHandle(File file) {
-    return file.getAbsolutePath().equals(scheduleFileAbsoultePath);
+    return file.getAbsolutePath().equals(scheduleFileAbsolutePath);
   }
 
   /**
