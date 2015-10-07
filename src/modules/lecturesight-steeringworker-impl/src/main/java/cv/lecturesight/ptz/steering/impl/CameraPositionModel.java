@@ -41,7 +41,7 @@ public class CameraPositionModel {
   }
 
   /**
-   * Translates camera coordinates to normalized coordinates.
+   * Translates camera coordinates to normalized coordinates (-1 to 1)
    *
    * @param pos camera coordinates
    * @return normalized coordinates
@@ -51,25 +51,14 @@ public class CameraPositionModel {
     float x = pos.getX();
     float y = pos.getY();
 
-    // x
-    if (x < 0) {
-      out.setX(-1 * (x / pan_min));
-    } else if (x > 0) {
-      out.setX(x / pan_max);
-    }
-
-    // y
-    if (y < 0) {
-      out.setY(-1 * (y / tilt_min));
-    } else if (y > 0) {
-      out.setY(y / tilt_max);
-    }
+    out.setX((x - pan_min) / (pan_max - pan_min) * 2 - 1);
+    out.setY((y - tilt_min) / (tilt_max - tilt_min) * 2 - 1);
 
     return out;
   }
 
   /**
-   * Translates normalized coordinates to camera coordinates.
+   * Translates normalized coordinates (-1 to 1) to camera coordinates.
    *
    * @param pos normalized coordinates
    * @return camera coordinates
@@ -79,19 +68,8 @@ public class CameraPositionModel {
     float x = pos.getX();
     float y = pos.getY();
 
-    // x
-    if (x < 0) {
-      out.setX((int) (-1 * (x * pan_min)));
-    } else if (x > 0) {
-      out.setX((int) (x * pan_max));
-    }
-
-    // y
-    if (y < 0) {
-      out.setY((int) (-1 * (y * tilt_min)));
-    } else if (y > 0) {
-      out.setY((int) (y * tilt_max));
-    }
+    out.setX( (int) ( (x+1) * (pan_max - pan_min) * 0.5 + pan_min));
+    out.setY( (int) ( (y+1) * (tilt_max - tilt_min) * 0.5 + tilt_min));
 
     return out;
   }
