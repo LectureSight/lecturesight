@@ -214,7 +214,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     worker.camera_pos = camera.getPosition();
     camera.addCameraListener(worker);
     camera.clearLimits();
-    camera.moveHome();
 
     log.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
@@ -230,7 +229,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    camera.moveHome();
     camera.removeCameraListener(worker);
     log.info("Deactivated");
   }
