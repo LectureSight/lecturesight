@@ -91,6 +91,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
         if (!moving) {
           informMoveListenersStart(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
+          log.debug("Camera started moving");
         }
         moving = true;
         model.setCameraPosition(new_pos);
@@ -98,6 +99,7 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
       } else {
         if (moving) {
           informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
+          log.debug("Camera stopped moving");
         }
         moving = false;
       }
@@ -136,9 +138,11 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
         } else {
           ts = (int) (maxspeed_tilt * damp_tilt);
         }
-        
+
         // apply computed speeds if speeds or target have changed
-        if (target_changed || ps != last_ps || ts != last_ts) {
+        if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0))) {
+
+          log.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
@@ -225,7 +229,6 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    camera.moveHome();
     camera.removeCameraListener(worker);
     log.info("Deactivated");
   }
@@ -260,6 +263,8 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
     } else {
       tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
     }
+
+    log.debug("Camera pan/tilt limits: pan " + pan_min + " to " + pan_max + ", tilt " + tilt_min + " to " + tilt_max);
 
     return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max,
             config.getBoolean(Constants.PROPKEY_YFLIP));
@@ -297,6 +302,9 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
 
   @Override
   public void setTargetPosition(NormalizedPosition pos) {
+
+    log.debug("Set target normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
+
     model.setTargetPositionNorm(pos);
     informUISlaves();
   }
