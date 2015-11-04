@@ -41,19 +41,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.swt.gtk.linux</groupId>
-      <artifactId>x86</artifactId>
-      <version>3.3.0-v3346</version>
-    </dependency>
-    <dependency>
       <groupId>com.googlecode.gstreamer-java</groupId>
       <artifactId>gstreamer-java</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mozilla</groupId>
-      <artifactId>xpcom</artifactId>
-      <version>1.8.0.90</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -98,12 +88,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Private-Package>
-              org.gstreamer.*,
-              org.eclipse.swt.*,
-              org.mozilla.xpcom
-            </Private-Package>
             <Export-Package>cv.lecturesight.framesource.rtph264;version=${project.version}</Export-Package>
+            <Import-Package>
+              *;resolution:=optional
+            </Import-Package>
+            <Embed-Dependency>
+              gstreamer-java;inline=true,
+            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
