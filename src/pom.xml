@@ -21,7 +21,7 @@
   <profiles>
     
     <profile>
-      <id>full</id>
+      <id>production-with-gui</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
