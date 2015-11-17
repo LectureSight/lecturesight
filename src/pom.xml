@@ -21,9 +21,9 @@
   <profiles>
     
     <profile>
-      <id>production-with-gui</id>
+      <id>full</id>
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
         <module>modules/lecturesight-cameraoperator-api</module>
@@ -77,7 +77,7 @@
     <profile>
       <id>production-with-gui</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
         <module>modules/lecturesight-cameraoperator-api</module>
