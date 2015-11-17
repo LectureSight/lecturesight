@@ -256,6 +256,19 @@
       <url>http://oss.sonatype.org/content/groups/public</url>
     </repository-->
     
+    <!-- Fraunhofer IAIS Repository -->
+    <repository>
+      <id>iais.fraunhofer.de</id>
+      <name>Fraunhofer IAIS</name>
+      <url>http://mp-devel.iais.fraunhofer.de:8081/nexus/content/repositories/lecturesight/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+
     <repository>
       <id>maven2-repository.dev.java.net</id>
       <name>Java.net Repository for Maven</name>
