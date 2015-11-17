@@ -290,7 +290,7 @@
     <repository>
       <id>man-mtt</id>
       <name>manchester-mtt</name>
-      <url>http://garnier.rcs.manchester.ac.uk:9090/nexus/content/repositories/man-mtt</url>
+      <url>http://garnier.rcs.manchester.ac.uk:8081/nexus/content/repositories/man-mtt</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
