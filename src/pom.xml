@@ -101,6 +101,7 @@
         <module>modules/lecturesight-ptzcontrol-api</module>
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-script-utils</module>
+        <module>modules/lecturesight-scripting-stub</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-impl</module>
