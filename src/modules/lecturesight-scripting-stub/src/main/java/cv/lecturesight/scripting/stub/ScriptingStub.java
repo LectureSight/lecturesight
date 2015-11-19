@@ -7,7 +7,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name = "lecturesight.cameraoperator.scripted", immediate = true)
+@Component(name = "lecturesight.scripting.stub", immediate = true)
 @Service
 public class ScriptingStub implements ScriptingService {
 
