@@ -58,6 +58,7 @@ public class ConfigurationFactory implements ServiceFactory {
         // add bundle defaults to default properties
         for (Iterator<String> keys = bundleDefaults.stringPropertyNames().iterator(); keys.hasNext();) {
           String key = keys.next();
+          log.debug("Setting property " + key + " = " + bundleDefaults.getProperty(key) + " of " + bundleName);
           defaultProps.setProperty(key, bundleDefaults.getProperty(key));
         }
         configService.notifyListeners();

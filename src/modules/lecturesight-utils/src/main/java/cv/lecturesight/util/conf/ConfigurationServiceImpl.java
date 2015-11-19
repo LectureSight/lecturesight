@@ -99,7 +99,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
     try {
       // event on service that implements the ConfigurationListener interface
       Object service = bcontext.getService(se.getServiceReference());
-      if (service instanceof ConfigurationListener) {
+      if (service != null && service instanceof ConfigurationListener) {
 
         // add/remove ConfigurationListener
         switch (se.getType()) {
