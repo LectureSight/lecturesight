@@ -3,6 +3,7 @@ package cv.lecturesight.ptz.steering.impl;
 public class Constants {
 
   static final String PROPKEY_AUTOSTART ="cv.lecturesight.ptz.steering.worker.autostart";
+  static final String PROPKEY_XFLIP = "cv.lecturesight.ptz.steering.worker.xflip";
   static final String PROPKEY_YFLIP = "cv.lecturesight.ptz.steering.worker.yflip";
   static final String PROPKEY_ALPHAX = "cv.lecturesight.ptz.steering.worker.move.alpha.x";
   static final String PROPKEY_ALPHAY = "cv.lecturesight.ptz.steering.worker.move.alpha.y";
