@@ -71,6 +71,8 @@
         <module>modules/lecturesight-videoanalysis-impl</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
         <module>modules/lecturesight-visualization</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-service</module>
       </modules>      
     </profile>
     
@@ -80,6 +82,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-cameraoperator-api</module>
         <module>modules/lecturesight-cameraoperator-scripted</module>
         <module>modules/lecturesight-connectedcomponent-api</module>
@@ -105,9 +108,10 @@
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-impl</module>
-        <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-service</module>
       </modules>
     </profile>
     
@@ -142,6 +146,8 @@
         <module>modules/lecturesight-steeringworker-impl</module>
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-service</module>
       </modules>            
     </profile>
     
