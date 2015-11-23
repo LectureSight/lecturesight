@@ -65,7 +65,7 @@ public class VISCA {
   public static final Message CMD_MOVE_UP_RIGHT = new Message(MessageType.MOVEMENT, CODE_MoveUpRight_Cmd);
   public static final Message CMD_MOVE_DOWN_LEFT = new Message(MessageType.MOVEMENT, CODE_MoveDownLeft_Cmd);
   public static final Message CMD_MOVE_DOWN_RIGHT = new Message(MessageType.MOVEMENT, CODE_MoveDownRight_Cmd);
-  public static final Message CMD_MOVE_ABSOULTE = new Message(MessageType.MOVEMENT, CODE_MoveAbsolute_Cmd);
+  public static final Message CMD_MOVE_ABSOLUTE = new Message(MessageType.MOVEMENT, CODE_MoveAbsolute_Cmd);
   public static final Message CMD_MOVE_RELATIVE = new Message(MessageType.MOVEMENT, CODE_MoveRelative_Cmd);
   public static final Message CMD_STOP_MOVE = new Message(MessageType.MOVEMENT, CODE_StopMove_Cmd);
   public static final Message CMD_LIMIT_SET = new Message(MessageType.CAM_COMMAND, CODE_LimitSet_Cmd);
