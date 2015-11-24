@@ -24,7 +24,7 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-steeringworker-api</artifactId>
+      <artifactId>lecturesight-cameraoperator-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
