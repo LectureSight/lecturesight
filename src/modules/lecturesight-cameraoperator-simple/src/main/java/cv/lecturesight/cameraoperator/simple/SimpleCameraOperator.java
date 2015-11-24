@@ -60,13 +60,20 @@ public class SimpleCameraOperator implements CameraOperator {
   CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
+ 
+  float start_zoom = 0;
+  float start_tilt = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
     timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
+    idle_preset = config.getInt(Constants.PROPKEY_IDLEPRESET);
+    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
+    start_tilt = config.getFloat(Constants.PROPKEY_TILT);
+
     fsrc = fsp.getFrameSource();
     normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
     start();    
-    log.info("Activated. Timeout is " + timeout + " ms");
+    log.info("Activated. Timeout is " + timeout + " ms, zoom is " + start_zoom + ", tilt is " + start_tilt);
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -78,7 +85,10 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor == null) {
       executor = Executors.newScheduledThreadPool(1);
       worker = new CameraOperatorWorker();
-      camera.setZoom(config.getFloat(Constants.PROPKEY_ZOOM));  
+
+      setInitialTrackingPosition();
+      camera.setSteering(true);
+
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
     }
@@ -93,13 +103,36 @@ public class SimpleCameraOperator implements CameraOperator {
     } else {
       log.warn("Nothing to stop");
     }
+
+    camera.setSteering(false);
+    setIdlePosition();
   }
 
   @Override
   public void reset() {
-    NormalizedPosition neutral = new NormalizedPosition(0.0f, 0.0f);
-    camera.setTargetPosition(neutral);
-    camera.setZoom(0.0f);  
+      log.debug("Reset");
+      setInitialTrackingPosition();
+  }
+
+  /* 
+   * Move the camera to the initial pan/tilt/zoom position for start of tracking
+   */
+  private setInitialTrackingPosition() {
+      camera.setPanOnly(true);
+      camera.setZoom(start_zoom);  
+      NormalizedPosition neutral = new NormalizedPosition(0.0f, start_tilt);
+      camera.setTargetPosition(neutral);
+  }
+
+  /* 
+   * Move the camera to the idle position (not tracking)
+   */
+  private setIdlePosition() {
+    if (idle_preset >= 0) {
+       camera.movePreset(idle_preset);
+    } else {
+       camera.moveHome();
+    }
   }
 
   private class CameraOperatorWorker implements Runnable {
@@ -115,6 +148,7 @@ public class SimpleCameraOperator implements CameraOperator {
         }
       } else {
         if (System.currentTimeMillis() - target.lastSeen() < timeout) {
+          log.debug("Moving camera to track object lastSeen: " + target.lastSeen());
           Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
           NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
           NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));

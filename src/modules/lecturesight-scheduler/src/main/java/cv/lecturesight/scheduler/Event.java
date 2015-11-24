@@ -10,8 +10,8 @@ public class Event implements Comparable {
   enum Action {
     START_TRACKING,
     STOP_TRACKING,
-    START_CAMERACONTROL,
-    STOP_CAMERACONTROL
+    START_OPERATOR,
+    STOP_OPERATOR
   }
   
   Long time;        // time of the event
