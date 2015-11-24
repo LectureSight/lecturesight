@@ -87,6 +87,7 @@ public class SimpleCameraOperator implements CameraOperator {
       worker = new CameraOperatorWorker();
 
       setInitialTrackingPosition();
+      camera.setSteering(true);
 
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
@@ -103,6 +104,7 @@ public class SimpleCameraOperator implements CameraOperator {
       log.warn("Nothing to stop");
     }
 
+    camera.setSteering(false);
     setIdlePosition();
   }
 
