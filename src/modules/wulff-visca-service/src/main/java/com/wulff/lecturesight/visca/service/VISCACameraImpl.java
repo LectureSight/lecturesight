@@ -173,6 +173,23 @@ public class VISCACameraImpl implements PTZCamera {
   }
 
   @Override
+  public void movePreset(int preset) {
+
+    log.debug("Move preset " + preset);
+
+    Message msg = VISCA.CMD_MOVE_PRESET.clone();
+    byte[] pkg = msg.getBytes();
+
+    // set address
+    pkg[0] += this.address;
+
+    // set preset
+    pkg[5] = (byte) preset;
+ 
+    pendingMsg.add(msg);
+  }
+
+  @Override
   public void moveUp(int tiltSpeed) {
 
     log.debug("Move up speed " + tiltSpeed);
