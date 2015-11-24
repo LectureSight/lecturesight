@@ -1,7 +1,7 @@
 package cv.lecturesight.scheduler;
 
 import cv.lecturesight.heartbeat.api.HeartBeat;
-import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
+import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
 import cv.lecturesight.util.Log;
@@ -23,7 +23,7 @@ import org.osgi.service.component.ComponentContext;
 
 /**
  * A service that loads a schedule from a iCal file and starts/stops object
- * tracking and camera control accordingly.
+ * tracking and camera operator accordingly.
  */
 @Component(name = "lecturesight.dutyscheduler", immediate = true)
 @Service
@@ -38,8 +38,9 @@ public class DutyScheduler implements ArtifactInstaller {
   Configuration config;
   @Reference
   HeartBeat heart;
-  @Reference(policy = ReferencePolicy.DYNAMIC)
-  volatile CameraSteeringWorker camera;
+  @Reference
+  CameraOperator operator;
+
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
   private EventExecutor eventExecutor = new EventExecutor();
   private EventList events = new EventList();
@@ -53,11 +54,11 @@ public class DutyScheduler implements ArtifactInstaller {
     File scheduleFile = new File(scheduleFileName);
     scheduleFileAbsolutePath = scheduleFile.getAbsolutePath();
 
-    // Tracking and camera control are initially stopped
+    // Tracking and camera operator are initially stopped
     Event stopTracker = new Event(0, Event.Action.STOP_TRACKING);
     events.add(stopTracker);
-    Event stopCamera = new Event(0, Event.Action.STOP_CAMERACONTROL);
-    events.add(stopCamera);
+    Event stopOperator = new Event(0, Event.Action.STOP_OPERATOR);
+    events.add(stopOperator);
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
@@ -107,15 +108,15 @@ public class DutyScheduler implements ArtifactInstaller {
             Date startDate = new Date(vevent.getStart().getTime() + timeZoneOffset);
             Event startTracker = new Event(startDate.getTime(), Event.Action.START_TRACKING);
             newEvents.add(startTracker);
-            Event startCamera = new Event(startDate.getTime() + trackerLeadTime, Event.Action.START_CAMERACONTROL);
-            newEvents.add(startCamera);
+            Event startOperator = new Event(startDate.getTime() + trackerLeadTime, Event.Action.START_OPERATOR);
+            newEvents.add(startOperator);
 
             // create stop events, apply configured time zone offset to UTC dates from iCal
             Date stopDate = new Date(vevent.getEnd().getTime() + timeZoneOffset);
             Event stopTracker = new Event(stopDate.getTime(), Event.Action.STOP_TRACKING);
             newEvents.add(stopTracker);
-            Event stopCamera = new Event(stopDate.getTime() - 1, Event.Action.STOP_CAMERACONTROL);
-            newEvents.add(stopCamera);
+            Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR);
+            newEvents.add(stopOperator);
 
             log.info("Created recording event:  Start: " + startDate.toString() + "  End: " + stopDate.toString());
           }
@@ -167,46 +168,6 @@ public class DutyScheduler implements ArtifactInstaller {
     }
   }
 
-  /**
-   * Ensures that camera control is running.
-   */
-  private void ensureCameraControlON() {
-    try {
-      if (camera != null) {
-        if (!camera.isSteering()) {
-          camera.setSteering(true);
-          log.info("Camera Control activated.");
-        } else {
-          log.info("Camera Control is already active.");
-        }
-      } else {
-        log.warn("Activation of camera contol failed! No camera controller present.");
-      }
-    } catch (Exception e) {
-      log.error("Unexpected error in ensureCameraControlON.", e);
-    }
-  }
-
-  /**
-   * Ensures that camera control is not running.
-   */
-  private void ensureCameraControlOFF() {
-    try {
-      if (camera != null) {
-        if (camera.isSteering()) {
-          camera.setSteering(false);
-          log.info("Camera Control deactivated.");
-        } else {
-          log.info("Camera Control is already deactivated.");
-        }
-      } else {
-        log.warn("No camera controller present.");
-      }
-    } catch (Exception e) {
-      log.error("Unexpected error in ensureCameraControlOFF.", e);
-    }
-  }
-
   @Override
   public void install(File file) throws Exception {
     clearSchedule();
@@ -231,8 +192,8 @@ public class DutyScheduler implements ArtifactInstaller {
 
   /**
    * Periodically called
-   * <code>Runable</code> that is responsible for starting and stopping the
-   * tracking/camera control.
+   * <code>Runnable</code> that is responsible for starting and stopping the
+   * tracking and camera operator.
    */
   class EventExecutor implements Runnable {
 
@@ -270,11 +231,11 @@ public class DutyScheduler implements ArtifactInstaller {
           case STOP_TRACKING:
             ensureTrackingOFF();
             break;
-          case START_CAMERACONTROL:
-            ensureCameraControlON();
+          case START_OPERATOR:
+            operator.start();
             break;
-          case STOP_CAMERACONTROL:
-            ensureCameraControlOFF();
+          case STOP_OPERATOR:
+            operator.stop();
             break;
       }
     }
