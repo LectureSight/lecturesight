@@ -45,6 +45,11 @@ public class VISCA {
   public static final int[] CODE_LimitSet_Cmd = {ADR_CAMERA_N, 0x01, 0x06, 0x07, 0x00, DATA, DATA, DATA,  DATA, DATA, DATA, DATA,  DATA, DATA, TERMINATOR};
   public static final int[] CODE_LimitClear_Cmd = {ADR_CAMERA_N, 0x01, 0x06, 0x07, 0x01, DATA, 0x07, 0x0f,  0x0f, 0x0f, 0x07, 0x0f,  0x0f, 0x0f, TERMINATOR};
   public static final int[] CODE_Zoom_Cmd = {ADR_CAMERA_N, 0x01, 0x04, 0x47, DATA, DATA, DATA, DATA, TERMINATOR};
+
+  // Non-standard VISCA commands (Vaddio cameras, maybe others)
+  public static final int[] CODE_MemoryReset_Cmd = {ADR_CAMERA_N, 0x01, 0x04, 0x3F, 0x00, DATA, TERMINATOR};
+  public static final int[] CODE_MemorySet_Cmd = {ADR_CAMERA_N, 0x01, 0x04, 0x3F, 0x01, DATA, TERMINATOR};
+  public static final int[] CODE_MemoryRecall_Cmd = {ADR_CAMERA_N, 0x01, 0x04, 0x3F, 0x02, DATA, TERMINATOR};
   
   // Network messages __________________________________________________________
   public static final Message NET_ADDRESS_SET = new Message(MessageType.NET, CODE_AddressSet);
@@ -65,10 +70,14 @@ public class VISCA {
   public static final Message CMD_MOVE_UP_RIGHT = new Message(MessageType.MOVEMENT, CODE_MoveUpRight_Cmd);
   public static final Message CMD_MOVE_DOWN_LEFT = new Message(MessageType.MOVEMENT, CODE_MoveDownLeft_Cmd);
   public static final Message CMD_MOVE_DOWN_RIGHT = new Message(MessageType.MOVEMENT, CODE_MoveDownRight_Cmd);
-  public static final Message CMD_MOVE_ABSOULTE = new Message(MessageType.MOVEMENT, CODE_MoveAbsolute_Cmd);
+  public static final Message CMD_MOVE_ABSOLUTE = new Message(MessageType.MOVEMENT, CODE_MoveAbsolute_Cmd);
   public static final Message CMD_MOVE_RELATIVE = new Message(MessageType.MOVEMENT, CODE_MoveRelative_Cmd);
   public static final Message CMD_STOP_MOVE = new Message(MessageType.MOVEMENT, CODE_StopMove_Cmd);
   public static final Message CMD_LIMIT_SET = new Message(MessageType.CAM_COMMAND, CODE_LimitSet_Cmd);
   public static final Message CMD_LIMIT_CLEAR = new Message(MessageType.CAM_COMMAND, CODE_LimitClear_Cmd);
   public static final Message CMD_ZOOM = new Message(MessageType.ZOOM, CODE_Zoom_Cmd);
+
+  // Non-standard VISCA commands (Vaddio cameras, maybe others)
+  public static final Message CMD_MOVE_PRESET = new Message(MessageType.MOVEMENT, CODE_MemoryRecall_Cmd);
+
 }
