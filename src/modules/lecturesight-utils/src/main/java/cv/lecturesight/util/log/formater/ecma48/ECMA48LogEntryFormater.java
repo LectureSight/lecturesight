@@ -92,13 +92,13 @@ public class ECMA48LogEntryFormater implements LogEntryFormater {
   }
 
   public void formatReference(LogEntry entry) {
+    String out = "";
     try {
       ServiceReference ref = entry.getServiceReference();
-      String pid = (String) ref.getProperty("service.pid");
-      if (pid != null) {
-        writer.write(pid);
-        writer.write(" : ");
-      }
+      out = (String) ref.getProperty("service.pid");
+      out = out == null ? "-" : out;
+      out += " : ";
+      writer.write(out);
     } catch (Exception e) {
     }
   }

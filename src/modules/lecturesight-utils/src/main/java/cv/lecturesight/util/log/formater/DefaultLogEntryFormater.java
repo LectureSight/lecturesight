@@ -83,6 +83,7 @@ public class DefaultLogEntryFormater implements LogEntryFormater {
     try {
       ServiceReference ref = entry.getServiceReference();
       out = (String) ref.getProperty("service.pid");
+      out = out == null ? "-" : out;
       out += " : ";
     } catch (Exception e) {
     }

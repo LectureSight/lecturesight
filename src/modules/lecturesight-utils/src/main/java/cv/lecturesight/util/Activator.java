@@ -40,6 +40,7 @@ public final class Activator implements BundleActivator {
 
   final static String LOGLISTENER_ACTIVE_PROPERTY = "cv.lecturesight.util.log.console.enabled";
   final static String LOGLISTENER_COLOR_ENABLED = "cv.lecturesight.util.log.console.color";
+  final static String LOGLISTENER_SUPPRESS_OSGI_EVENTS = "cv.lecturesight.util.log.suppress.osgievents";
   final static String CONFIG_NAME = "lecturesight.properties";
   final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
   private ServiceRegistration consoleLogRegistration = null;
@@ -63,15 +64,13 @@ public final class Activator implements BundleActivator {
     if (active != null && ("TRUE".equalsIgnoreCase(active) || "YES".equalsIgnoreCase(active))) {
       
       ConsoleOutputLogListener consoleLog;
-      LogEntryFormater formater;
       String color = context.getProperty(LOGLISTENER_COLOR_ENABLED);
-      if (color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color))) {
-        formater = new ECMA48LogEntryFormater();
-      } else {
-        formater = new DefaultLogEntryFormater();
-      }
+      String suppStr = context.getProperty(LOGLISTENER_SUPPRESS_OSGI_EVENTS);
+      boolean suppress = suppStr != null && ("TRUE".equalsIgnoreCase(suppStr) || "YES".equalsIgnoreCase(suppStr));
+      LogEntryFormater formater = color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color)) ?
+                                    new ECMA48LogEntryFormater() : new DefaultLogEntryFormater();
       
-      consoleLog = new ConsoleOutputLogListener(formater);
+      consoleLog = new ConsoleOutputLogListener(formater, suppress);
       
       ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
       if (ref != null) {

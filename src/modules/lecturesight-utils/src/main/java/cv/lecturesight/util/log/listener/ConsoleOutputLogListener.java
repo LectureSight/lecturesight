@@ -26,13 +26,17 @@ import org.osgi.service.log.LogListener;
 public class ConsoleOutputLogListener implements LogListener {
 
   private LogEntryFormater formater;
+  private boolean suppressEvents = false;
   
-  public ConsoleOutputLogListener(LogEntryFormater formater) {
+  public ConsoleOutputLogListener(LogEntryFormater formater, boolean suppressEvents) {
     this.formater = formater;
+    this.suppressEvents = suppressEvents;
   }
 
   @Override
   public void logged(LogEntry entry) {
+    String msg = entry.getMessage();
+    if (suppressEvents && msg.startsWith("BundleEvent") || msg.startsWith("FrameworkEvent") || msg.startsWith("ServiceEvent")) return;
     System.out.println(formater.formatEntry(entry));
   }
 }
