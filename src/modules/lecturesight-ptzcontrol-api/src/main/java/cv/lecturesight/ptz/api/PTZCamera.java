@@ -32,6 +32,8 @@ public interface PTZCamera {
   void stopMove();
   
   void moveHome();
+
+  void movePreset(int preset);
   
   void moveUp(int tiltSpeed);
   
