@@ -46,6 +46,10 @@ public class ScriptWorker implements Runnable {
     log = new Log(this.name);
     imports = new LinkedList<String>();
     
+    // initialize script scope
+    Context ctx = Context.enter();
+    scope = ctx.initStandardObjects(null, true);
+    Context.exit();
   }
 
   /**
@@ -118,6 +122,7 @@ public class ScriptWorker implements Runnable {
    * @param obj
    */
   public void addScriptObject(String name, Object obj) {
+    log.info("Adding object \"" + name + "\" to script scope.");
     Context.enter();
     try {
       Object wrapped = Context.javaToJS(obj, scope);
@@ -134,8 +139,8 @@ public class ScriptWorker implements Runnable {
    * @param scriptfile 
    */
   public void load(File scriptfile) {
+    log.info("Loading script " + scriptfile.getName());
     Context ctx = Context.enter();
-    scope = ctx.initStandardObjects(null, true);
     try {
       ctx.evaluateReader(scope, new FileReader(scriptfile), this.name, 1, null);
     } catch (FileNotFoundException e) {
