@@ -339,6 +339,16 @@ public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
   }
 
   @Override
+  public void movePreset(int preset) {
+    camera.movePreset(preset);
+  }
+
+  @Override
+  public void moveHome() {
+    camera.moveHome();
+  }
+
+  @Override
   public int getPanMin() {
     return pan_min;
   }

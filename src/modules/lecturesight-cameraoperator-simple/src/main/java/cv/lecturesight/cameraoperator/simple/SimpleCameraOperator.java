@@ -57,6 +57,7 @@ public class SimpleCameraOperator implements CameraOperator {
   
   int interval = 200;
   int timeout;
+  int idle_preset = -1;
   CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
@@ -66,7 +67,7 @@ public class SimpleCameraOperator implements CameraOperator {
 
   protected void activate(ComponentContext cc) throws Exception {
     timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
-    idle_preset = config.getInt(Constants.PROPKEY_IDLEPRESET);
+    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
     start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
 
@@ -117,8 +118,7 @@ public class SimpleCameraOperator implements CameraOperator {
   /* 
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
-  private setInitialTrackingPosition() {
-      camera.setPanOnly(true);
+  private void setInitialTrackingPosition() {
       camera.setZoom(start_zoom);  
       NormalizedPosition neutral = new NormalizedPosition(0.0f, start_tilt);
       camera.setTargetPosition(neutral);
@@ -127,7 +127,7 @@ public class SimpleCameraOperator implements CameraOperator {
   /* 
    * Move the camera to the idle position (not tracking)
    */
-  private setIdlePosition() {
+  private void setIdlePosition() {
     if (idle_preset >= 0) {
        camera.movePreset(idle_preset);
     } else {
