@@ -22,6 +22,12 @@ public interface ScriptingService {
    */
   public Log getLogger();
   
+  /** Returns the timestamp of the last script launch.
+   * 
+   * @return time of script launch
+   */
+  public long getTimeOfStart();
+  
   /** Calls the specified <code>function</code> immediately with the specified
    * <code>args</code>. This method is only intended for calling a callback from
    * inside the same (script executing) thread that lead execution back into 

@@ -32,6 +32,8 @@ public class ScriptedCameraOperator implements CameraOperator, ScriptingService,
   
   List<BridgeRegistration> serviceObjects;  // collection of registetred service objects
                                             // that are made available in the script scope
+  
+  long lastStart = 0l;
     
   public ScriptedCameraOperator() {
     serviceObjects = new LinkedList<BridgeRegistration>();
@@ -83,6 +85,9 @@ public class ScriptedCameraOperator implements CameraOperator, ScriptingService,
       // create script worker thread and start it
       workerThread = new Thread(scriptWorker);
       workerThread.start();
+      
+      // save timestamp of script launch
+      lastStart = System.currentTimeMillis();
       
     } catch (Exception e) {
       log.error("Failed to instantiate script worker.", e);
@@ -215,6 +220,11 @@ public class ScriptedCameraOperator implements CameraOperator, ScriptingService,
     String filename = config.get(Constants.PROPKEY_SCRIPTFILE);
     filename = filename.replace(".js", ".conf");
     return scriptDir + File.separator + filename;
+  }
+  
+  @Override
+  public long getTimeOfStart() {
+    return lastStart;
   }
 
   // _____________________ Methods from ScriptingService _______________________
