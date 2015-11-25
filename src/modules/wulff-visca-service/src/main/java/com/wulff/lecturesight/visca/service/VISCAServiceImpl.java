@@ -40,6 +40,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   ComponentContext cc;
 
   boolean debug = false;
+  boolean camera_alive = false;
 
   @Reference
   Configuration config;   // service configuration
@@ -58,6 +59,8 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 
   int updateInterval = 200;   // min number of millisec. between state updates on a camera
   int senderInterval = 20;
+  int config_timeout = 3000;  // ms within which camera must reply to initial inquiry
+
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
   ScheduledFuture updaterHandle;
   ScheduledFuture senderHandle;
@@ -104,6 +107,19 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     // start sender thread
     senderHandle = executor.scheduleAtFixedRate(new CameraCommandSender(),
             senderInterval, senderInterval, TimeUnit.MILLISECONDS);
+
+    try {
+	    Thread.sleep(config_timeout);
+
+	    if (camera_alive) {
+		log.info("Completed VISCA camera initialization");
+	    } else {
+		log.error("Unable to initialize VISCA camera (no response within " + config_timeout + "ms)");
+		// cc.getBundleContext().getBundle(0).stop(); 
+	    }
+    } catch (Exception e) {
+	log.warn("Exception testing for camera startup" + e.getMessage());
+    }
   }
 
   /**
@@ -316,6 +332,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     props.put("port", config.get(Constants.PROPKEY_PORT_DEVCICE));
 
     cc.getBundleContext().registerService(PTZCamera.class.getName(), camera, props);
+    camera_alive = true;
   }
 
   /**
