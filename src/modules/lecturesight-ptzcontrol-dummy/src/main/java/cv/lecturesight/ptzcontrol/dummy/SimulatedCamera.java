@@ -19,13 +19,13 @@ public class SimulatedCamera implements PTZCamera {
 
   static final String PROPKEY_DELAY ="delay";
   static final String CAMERA_NAME = "Simulated Camera";
-  static final int PAN_MAX_SPEED = 10;
-  static final int TILT_MAX_SPEED = 10;
+  static final int PAN_MAX_SPEED = 100;
+  static final int TILT_MAX_SPEED = 100;
   static final int ZOOM_MAX_SPEED = 100;
-  static final int PAN_MIN = -100;
-  static final int PAN_MAX = 100;
-  static final int TILT_MIN = -100;
-  static final int TILT_MAX = 100;
+  static final int PAN_MIN = -10000;
+  static final int PAN_MAX = 10000;
+  static final int TILT_MIN = -10000;
+  static final int TILT_MAX = 10000;
   static final int ZOOM_MAX = 1000;
   final Position HOME_POS = new Position(0, 0);
   
@@ -65,28 +65,51 @@ public class SimulatedCamera implements PTZCamera {
         int dx,dy;
         while(running) {
           synchronized(mutex) {
-            // update X
-
+            
             dx = target_pos.getX() - current_pos.getX();
-
+            dy = target_pos.getY() - current_pos.getY();
+            
+            // update X
             if (dx > 0 ) {
               current_pos.setX(current_pos.getX() + speedPan);
-              if (current_pos.getX() > target_pos.getX()) current_pos.setX(target_pos.getX());
+              if (current_pos.getX() > target_pos.getX()) {
+                current_pos.setX(target_pos.getX());
+                speedPan = 0;
+              }
             } else if (dx < 0) {
               current_pos.setX(current_pos.getX() - speedPan);
-              if (current_pos.getX() < target_pos.getX()) current_pos.setX(target_pos.getX());
+              if (current_pos.getX() < target_pos.getX()) {
+                current_pos.setX(target_pos.getX());
+                speedPan = 0;
+              }
+            } else {
+              speedPan = 0;
             }
 
             // update Y
-            dy = target_pos.getY() - current_pos.getY();
-
             if (dy > 0 ) {
               current_pos.setY(current_pos.getY() + speedTilt);
-              if (current_pos.getY() > target_pos.getY()) current_pos.setY(target_pos.getY());
+              if (current_pos.getY() > target_pos.getY()) {
+                current_pos.setY(target_pos.getY());
+                speedTilt = 0;
+              }
             } else if (dy < 0) {
               current_pos.setY(current_pos.getY() - speedTilt);
-              if (current_pos.getY() > target_pos.getY()) current_pos.setY(target_pos.getY());
+              if (current_pos.getY() < target_pos.getY()) {
+                current_pos.setY(target_pos.getY());
+                speedTilt = 0;
+              }
+            } else {
+              speedTilt = 0;
             }
+            
+            informListeners();
+          }
+          
+          try {
+            Thread.sleep(delay);
+          } catch (InterruptedException e) {
+            log.warn("Worker thread interrupted.");
           }
         }
         
@@ -146,7 +169,9 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveUp(int speed) {
+    log.debug("move up (" + speed + ")");
     synchronized(mutex) {
+      target_pos.setX(current_pos.getX());
       target_pos.setY(TILT_MAX);
       speedTilt = speed;
     }
@@ -154,7 +179,9 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDown(int speed) {
+    log.debug("move down (" + speed + ")");
     synchronized(mutex) {
+      target_pos.setX(current_pos.getX());
       target_pos.setY(TILT_MIN);
       speedTilt = speed;
     }
@@ -162,22 +189,27 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveLeft(int speed) {
+    log.debug("move left (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
+      target_pos.setY(current_pos.getY());
       speedPan = speed;
     }
   }
 
   @Override
   public void moveRight(int speed) {
+    log.debug("move right (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
+      target_pos.setY(current_pos.getY());
       speedPan = speed;
     }
   }
 
   @Override
   public void moveUpLeft(int panSpeed, int tiltSpeed) {
+    log.debug("move up-left (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
       target_pos.setY(TILT_MAX);
@@ -188,6 +220,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveUpRight(int panSpeed, int tiltSpeed) {
+    log.debug("move up-right (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
       target_pos.setY(TILT_MAX);
@@ -198,6 +231,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDownLeft(int panSpeed, int tiltSpeed) {
+    log.debug("move down-left (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
       target_pos.setY(TILT_MIN);
@@ -208,6 +242,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDownRight(int panSpeed, int tiltSpeed) {
+    log.debug("move down-right (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
       target_pos.setY(TILT_MIN);
@@ -218,10 +253,11 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveAbsolute(int panSpeed, int tiltSpeed, Position target) {
+    log.debug("move absolute (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
     synchronized(mutex) {
-      Position new_target = ensureTargetInLimits(target);
-      target_pos.setX(new_target.getX());
-      target_pos.setY(new_target.getY());
+      clampPosition(target);
+      target_pos.setX(target.getX());
+      target_pos.setY(target.getY());
       speedPan = panSpeed;
       speedTilt = tiltSpeed;
     }
@@ -229,11 +265,12 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveRelative(int panSpeed, int tiltSpeed, Position target) {
+    log.debug("move relative (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
     synchronized(mutex) {
       Position new_target = current_pos.clone();
       new_target.setX(current_pos.getX() + target.getX());
       new_target.setY(current_pos.getY() + target.getY());
-      new_target = ensureTargetInLimits(new_target);
+      clampPosition(new_target);
       target_pos.setX(new_target.getX());
       target_pos.setY(new_target.getY());
       speedPan = panSpeed;
@@ -241,12 +278,13 @@ public class SimulatedCamera implements PTZCamera {
     }
   }
   
-  Position ensureTargetInLimits(Position in) {
-    Position out = in.clone();
-    
-    // TODO add logic
-    
-    return out;
+  void clampPosition(Position in) {
+    int x = in.getX();
+    if (x < PAN_MIN) in.setX(PAN_MIN);
+    if (x > PAN_MAX) in.setX(PAN_MAX);
+    int y = in.getY();
+    if (y < TILT_MIN) in.setX(TILT_MIN);
+    if (x < TILT_MAX) in.setX(TILT_MAX);
   }
 
   @Override
@@ -317,6 +355,13 @@ public class SimulatedCamera implements PTZCamera {
   @Override
   public void removeCameraListener(CameraListener l) {
     listeners.remove(l);
+  }
+  
+  private void informListeners() {
+    for (CameraListener l : listeners) {
+      log.debug("informListeners()");
+      l.positionUpdated(current_pos.clone());
+    }
   }
   
 }
