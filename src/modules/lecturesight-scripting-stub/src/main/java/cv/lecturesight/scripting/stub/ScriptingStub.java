@@ -50,4 +50,9 @@ public class ScriptingStub implements ScriptingService {
   public Object invokeFunction(String function, Object... args) {
     throw new UnsupportedOperationException("invokeFunction() is not implemented.");
   }
+
+  @Override
+  public long getTimeOfStart() {
+      return 0l;
+  }
 }
