@@ -1,4 +1,4 @@
-package cv.lecturesight.ptz.steering.impl;
+package cv.lecturesight.ptz.steering.relativemove;
 
 import cv.lecturesight.util.geometry.NormalizedPosition;
 

@@ -1,4 +1,4 @@
-package cv.lecturesight.ptz.steering.impl;
+package cv.lecturesight.ptz.steering.relativemove;
 
 public class Constants {
 

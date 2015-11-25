@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-steeringworker-impl</artifactId>
-  <name>LectureSight Camera Steering Worker</name>
+  <artifactId>lecturesight-steeringworker-relative-move</artifactId>
+  <name>LectureSight Relative Move Steering Worker</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
@@ -94,7 +94,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.ptz.steering.worker</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.ptz.steering.worker.relativemove</Bundle-SymbolicName>
           </instructions>
         </configuration>
       </plugin>

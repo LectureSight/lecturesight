@@ -1,4 +1,4 @@
-package cv.lecturesight.ptz.steering.impl;
+package cv.lecturesight.ptz.steering.relativemove;
 
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
@@ -18,9 +18,9 @@ public class CameraBridge implements ScriptBridge, MovementListener {
   public MinMaxCurrent tiltSpeed = new MinMaxCurrent();
 
   private ScriptingService engine;
-  private CameraSteeringWorkerImpl camera;
+  private CameraSteeringWorkerRelativeMove camera;
 
-  public CameraBridge(CameraSteeringWorkerImpl sw, ScriptingService engine) {
+  public CameraBridge(CameraSteeringWorkerRelativeMove sw, ScriptingService engine) {
     this.camera = sw;
     this.engine = engine;
     this.panSpeed.min = 1;

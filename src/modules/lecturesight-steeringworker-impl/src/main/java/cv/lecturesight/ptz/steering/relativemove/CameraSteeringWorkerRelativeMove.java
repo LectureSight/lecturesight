@@ -15,7 +15,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.ptz.steering.impl;
+package cv.lecturesight.ptz.steering.relativemove;
 
 import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
@@ -39,9 +39,9 @@ import org.osgi.service.component.ComponentContext;
  * Camera Steering SteeringWorker Implementation
  *
  */
-@Component(name = "lecturesight.ptz.steering.worker", immediate = true)
+@Component(name = "lecturesight.ptz.steering.worker.relativemove", immediate = true)
 @Service
-public class CameraSteeringWorkerImpl implements CameraSteeringWorker {
+public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
   private Log log = new Log("Camera Steering Worker");
 
