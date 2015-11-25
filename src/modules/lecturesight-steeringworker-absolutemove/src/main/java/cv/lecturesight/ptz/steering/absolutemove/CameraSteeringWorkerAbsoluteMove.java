@@ -39,7 +39,7 @@ import org.osgi.service.component.ComponentContext;
  * Camera Steering SteeringWorker Implementation
  *
  */
-@Component(name = "lecturesight.ptz.steering.worker.relativemove", immediate = true)
+@Component(name = "lecturesight.ptz.steering.worker.absolutemove", immediate = true)
 @Service
 public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
 
