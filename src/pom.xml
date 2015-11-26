@@ -110,8 +110,9 @@
         <module>modules/lecturesight-steeringworker-impl</module>
         <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
-        <module>modules/wulff-visca-api</module>
-        <module>modules/wulff-visca-service</module>
+        <module>modules/lecturesight-ptzcontrol-dummy</module>
+        <!--module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-service</module -->
       </modules>
     </profile>
     
