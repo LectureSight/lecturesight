@@ -65,7 +65,7 @@ public class NormalizedPosition implements Cloneable {
 
   @Override
   public String toString() {
-    return new StringBuilder().append(getX()).append(",").append(getY()).toString();
+    return String.format("%.4f,%.4f", x, y);
   }
 
   @Override

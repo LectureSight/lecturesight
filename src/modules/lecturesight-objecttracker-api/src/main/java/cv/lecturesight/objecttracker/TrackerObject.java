@@ -17,6 +17,8 @@
  */
 package cv.lecturesight.objecttracker;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +32,9 @@ public class TrackerObject {
   private int id = nextId++;
   private long firstSeen, lastSeen;
   private HashMap<String,Object> properties = new HashMap<String,Object>();
-  
+ 
+  final Calendar cal = Calendar.getInstance();
+ 
   public TrackerObject() {
     firstSeen = System.currentTimeMillis();
     lastSeen = firstSeen;
@@ -60,7 +64,17 @@ public class TrackerObject {
   public long lastSeen() {
     return lastSeen;
   }
-  
+ 
+  public String toString() {
+    cal.setTimeInMillis(firstSeen);
+    final String fs = new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
+
+    cal.setTimeInMillis(lastSeen);
+    final String ls = new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
+
+    return "objid=" + id + " fs=" + fs + " ls=" + ls;
+  }
+ 
   public boolean hasProperty(String key) {
     return properties.containsKey(key);
   }
