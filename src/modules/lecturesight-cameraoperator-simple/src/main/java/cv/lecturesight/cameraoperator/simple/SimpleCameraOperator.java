@@ -49,7 +49,7 @@ public class SimpleCameraOperator implements CameraOperator {
   ObjectTracker tracker;
   
   @Reference
-  CameraSteeringWorker camera;
+  CameraSteeringWorker steerer;
   
   @Reference
   FrameSourceProvider fsp;
@@ -64,12 +64,14 @@ public class SimpleCameraOperator implements CameraOperator {
  
   float start_zoom = 0;
   float start_tilt = 0;
+  float frame_width = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
     timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
     idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
     start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
+    frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
 
     fsrc = fsp.getFrameSource();
     normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
@@ -88,7 +90,7 @@ public class SimpleCameraOperator implements CameraOperator {
       worker = new CameraOperatorWorker();
 
       setInitialTrackingPosition();
-      camera.setSteering(true);
+      steerer.setSteering(true);
 
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
       log.info("Started");
@@ -105,7 +107,7 @@ public class SimpleCameraOperator implements CameraOperator {
       log.warn("Nothing to stop");
     }
 
-    camera.setSteering(false);
+    steerer.setSteering(false);
     setIdlePosition();
   }
 
@@ -119,9 +121,9 @@ public class SimpleCameraOperator implements CameraOperator {
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
   private void setInitialTrackingPosition() {
-      camera.setZoom(start_zoom);  
+      steerer.setZoom(start_zoom);  
       NormalizedPosition neutral = new NormalizedPosition(0.0f, start_tilt);
-      camera.setTargetPosition(neutral);
+      steerer.setTargetPosition(neutral);
   }
 
   /* 
@@ -129,9 +131,9 @@ public class SimpleCameraOperator implements CameraOperator {
    */
   private void setIdlePosition() {
     if (idle_preset >= 0) {
-       camera.movePreset(idle_preset);
+       steerer.movePreset(idle_preset);
     } else {
-       camera.moveHome();
+       steerer.moveHome();
     }
   }
 
@@ -147,12 +149,39 @@ public class SimpleCameraOperator implements CameraOperator {
           target = findBiggestTrackedObject(objs);
         }
       } else {
+
         if (System.currentTimeMillis() - target.lastSeen() < timeout) {
-          log.debug("Moving camera to track object lastSeen: " + target.lastSeen());
-          Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-          NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
-          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
-          camera.setTargetPosition(target_pos);
+
+	  boolean move = true;
+
+          // Target position
+	  Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+	  NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
+	  NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
+
+ 	  // Actual position
+          NormalizedPosition actual_pos = steerer.getActualPosition();
+
+          log.debug("Tracking object " + target + " currently at position " + target_pos);
+
+          // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
+          if ((frame_width > 0) && !steerer.isMoving()) {
+
+		  double trigger_left  = actual_pos.getX() - (frame_width/2);
+		  double trigger_right = actual_pos.getX() + (frame_width/2);
+
+		  if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
+		       move = false;
+		       log.debug("Not moving: camera=" + actual_pos + " target=" + target_pos + 
+				 " position is inside frame trigger limits " + String.format("%.4f to %.4f", trigger_left, trigger_right));
+		  }
+          }
+
+          if (move) {
+		  log.debug("Moving steerer for object " + target + " to position " + target_pos);
+		  steerer.setTargetPosition(target_pos);
+          }
+
         } else {
           target = null;
         }
