@@ -219,6 +219,13 @@
         <version>3.2.0</version>
       </dependency>
       
+      <!-- Logging -->
+      <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>tinylog</artifactId>
+        <version>1.0.2</version>
+      </dependency>
+      
       <!-- SCR Annotations -->
       <dependency>
         <groupId>org.apache.felix</groupId>
