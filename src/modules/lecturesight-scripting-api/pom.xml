@@ -47,6 +47,10 @@
       <artifactId>ant</artifactId>
       <version>1.6.5</version>
     </dependency -->
+    <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>tinylog</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

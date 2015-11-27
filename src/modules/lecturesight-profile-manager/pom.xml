@@ -51,6 +51,10 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency -->
+    <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>tinylog</artifactId>
+    </dependency>
   </dependencies>
   
   <version>0.3</version>

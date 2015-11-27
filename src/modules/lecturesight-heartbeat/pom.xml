@@ -69,6 +69,10 @@
       <version>3.2.6</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>tinylog</artifactId>
+    </dependency>
   </dependencies>
   
   <version>0.3</version>

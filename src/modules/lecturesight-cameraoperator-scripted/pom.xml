@@ -53,6 +53,10 @@
       <artifactId>org.apache.felix.fileinstall</artifactId>
       <type>jar</type>
     </dependency>
+    <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>tinylog</artifactId>
+    </dependency>
   </dependencies>
   
   <version>0.3</version>
