@@ -17,13 +17,13 @@
  */
 package cv.lecturesight.cameraoperator.simple;
 
+import org.pmw.tinylog.Logger;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
@@ -41,7 +41,6 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public class SimpleCameraOperator implements CameraOperator {
 
-  Log log = new Log("Pan-Only Camera Operator");
   @Reference
   Configuration config;
   
@@ -76,11 +75,11 @@ public class SimpleCameraOperator implements CameraOperator {
     fsrc = fsp.getFrameSource();
     normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
     start();    
-    log.info("Activated. Timeout is " + timeout + " ms, zoom is " + start_zoom + ", tilt is " + start_tilt);
+    Logger.info("Activated. Timeout is " + timeout + " ms, zoom is " + start_zoom + ", tilt is " + start_tilt);
   }
 
   protected void deactivate(ComponentContext cc) {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override
@@ -93,7 +92,7 @@ public class SimpleCameraOperator implements CameraOperator {
       steerer.setSteering(true);
 
       executor.scheduleAtFixedRate(worker, 0, interval, TimeUnit.MILLISECONDS);
-      log.info("Started");
+      Logger.info("Started");
     }
   }
 
@@ -102,9 +101,9 @@ public class SimpleCameraOperator implements CameraOperator {
     if (executor != null) {
       executor.shutdownNow();
       executor = null;
-      log.info("Stopped");
+      Logger.info("Stopped");
     } else {
-      log.warn("Nothing to stop");
+      Logger.warn("Nothing to stop");
     }
 
     steerer.setSteering(false);
@@ -113,7 +112,7 @@ public class SimpleCameraOperator implements CameraOperator {
 
   @Override
   public void reset() {
-      log.debug("Reset");
+      Logger.debug("Reset");
       setInitialTrackingPosition();
   }
 
@@ -162,7 +161,7 @@ public class SimpleCameraOperator implements CameraOperator {
  	  // Actual position
           NormalizedPosition actual_pos = steerer.getActualPosition();
 
-          log.debug("Tracking object " + target + " currently at position " + target_pos);
+          Logger.debug("Tracking object " + target + " currently at position " + target_pos);
 
           // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
           if ((frame_width > 0) && !steerer.isMoving()) {
@@ -172,13 +171,13 @@ public class SimpleCameraOperator implements CameraOperator {
 
 		  if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
 		       move = false;
-		       log.debug("Not moving: camera=" + actual_pos + " target=" + target_pos + 
+		       Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos + 
 				 " position is inside frame trigger limits " + String.format("%.4f to %.4f", trigger_left, trigger_right));
 		  }
           }
 
           if (move) {
-		  log.debug("Moving steerer for object " + target + " to position " + target_pos);
+		  Logger.debug("Moving steerer for object " + target + " to position " + target_pos);
 		  steerer.setTargetPosition(target_pos);
           }
 

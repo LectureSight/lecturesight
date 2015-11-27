@@ -18,7 +18,6 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.util.Log;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -27,12 +26,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Logger;
 
 public class DisplayServiceFactory implements ServiceFactory {
 
   final static String PROPKEY_AUTOSHOW = "autoshow";
 
-  private Log log = new Log("Display");
   private OpenCLService ocl;
   BundleContext bundleContext;
   
@@ -41,7 +40,7 @@ public class DisplayServiceFactory implements ServiceFactory {
   public DisplayServiceFactory(BundleContext bc) {
     this.bundleContext = bc;
     registerCommands();
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   private void registerCommands() {
@@ -53,7 +52,7 @@ public class DisplayServiceFactory implements ServiceFactory {
   }
   
   public void deactivate() {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override

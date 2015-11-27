@@ -12,7 +12,6 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationService;
 import java.util.Properties;
@@ -21,12 +20,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "lecturesight.cameracalibration", immediate = true)
 @Service
 public class CameraCalibrationUI implements UserInterface {
 
-  Log log = new Log("Camera Calibration UI");
   @Reference
   ConfigurationService configService;
   @Reference
@@ -56,7 +55,7 @@ public class CameraCalibrationUI implements UserInterface {
     tilt_fast = camera.getProfile().getTiltMaxSpeed();
     tilt_slow = tilt_fast / 3;
     tilt_fast = tilt_fast > 1 ? tilt_fast : 1;
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   @Override
@@ -96,7 +95,7 @@ public class CameraCalibrationUI implements UserInterface {
               Thread.sleep(100);
               productionCamera.captureFrame();
             } catch (Exception e) {
-              log.warn("Unable to capture frame. " + e.getMessage());
+              Logger.warn("Unable to capture frame. " + e.getMessage());
             }
           }
         };
@@ -121,7 +120,7 @@ public class CameraCalibrationUI implements UserInterface {
       try {
         fsm.destroyFrameSource(productionCamera);
       } catch (FrameSourceException e) {
-        log.warn("Unable to destroy FrameSource for production camera. " + e.getMessage());
+        Logger.warn("Unable to destroy FrameSource for production camera. " + e.getMessage());
       }
     }
   }

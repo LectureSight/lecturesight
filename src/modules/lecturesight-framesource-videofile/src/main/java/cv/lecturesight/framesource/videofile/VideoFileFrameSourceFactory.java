@@ -28,11 +28,10 @@ import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.log.LogService;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -45,19 +44,16 @@ import org.osgi.service.log.LogService;
 })
 public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
 
-  @Reference
-  private LogService log;
-
   private List<VideoFilePipeline> children = new LinkedList<VideoFilePipeline>();
 
   protected void activate(ComponentContext cc) {
-    log.log(log.LOG_INFO, "Activating VideoFileFrameSource");
+    Logger.info("Activating VideoFileFrameSource");
     // init gstreamer
     Gst.init();
   }
 
   protected void deactivate(ComponentContext cc) {
-    log.log(log.LOG_INFO, "Deactivating VideoFileFrameSource");
+    Logger.info("Deactivating VideoFileFrameSource");
     // stop all created pipelines
     for (Iterator<VideoFilePipeline> it = children.iterator(); it.hasNext();) {
       VideoFilePipeline child = it.next();
@@ -78,7 +74,7 @@ public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
     try {
       VideoFilePipeline grabber = new VideoFilePipeline(videoFile);
       children.add(grabber);
-      log.log(log.LOG_INFO, "Created FrameGrabber on video file " + input);
+      Logger.info("Created FrameGrabber on video file " + input);
       return grabber;
     } catch (UnableToLinkElementsException e) {
       throw new FrameSourceException("Error while creating FrameGrabber: " + e.getMessage());

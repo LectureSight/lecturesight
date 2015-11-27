@@ -23,12 +23,12 @@ import cv.lecturesight.cca.CentroidFinder;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.cca.ConnectedComponentService;
 import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -40,14 +40,13 @@ public class ConnectedComponentServiceImpl implements ConnectedComponentService 
   final static String PROPKEY_MAX_BLOBS = "blobs.max";
   final static String PROPKEY_BLOBSIZE_MIN = "blobsize.min";
   final static String PROPKEY_BLOBSIZE_MAX = "blobsize.max";
-  private Log log = new Log("Connected Component Analysis Service");
   @Reference
   private Configuration config;
   @Reference
   private OpenCLService ocl;
 
   protected void activate(ComponentContext cc) {
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   @Override

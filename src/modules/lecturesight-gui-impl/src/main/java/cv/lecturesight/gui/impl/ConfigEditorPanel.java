@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.gui.impl;
 
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.conf.ConfigurationService;
 import java.io.File;
@@ -32,10 +31,10 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import org.pmw.tinylog.Logger;
 
 public class ConfigEditorPanel extends javax.swing.JPanel implements ConfigurationListener {
 
-  private Log log;
   private ConfigurationService config;
   private Properties systemConfiguration, systemDefaults;
   private Object[][] data;
@@ -44,8 +43,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
   /**
    * Creates new form ConfigEditorPanel
    */
-  public ConfigEditorPanel(ConfigurationService cs, Log log) {
-    this.log = log;
+  public ConfigEditorPanel(ConfigurationService cs) {
     this.config = cs;
     config.addConfigurationListener(this);
     this.systemConfiguration = config.getSystemConfiguration();
@@ -55,7 +53,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception e) {
-      log.warn("Unable to set operating system look-and-feel. " + e.getMessage());
+      Logger.warn("Unable to set operating system look-and-feel. " + e.getMessage());
     }
     initComponents();
     update();
@@ -101,13 +99,13 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
         String newValue = (String)configTable.getValueAt(row, 1);
         systemConfiguration.setProperty(key, newValue);
         config.notifyListeners();                                  // TODO ConfigurationService should care for this
-        log.info(key + " : " + data[row][1] + " => " + newValue);
+        Logger.info(key + " : " + data[row][1] + " => " + newValue);
         data[row][1] = newValue;
       }
     
     });
     
-    log.debug("Configuration UI updated");
+    Logger.debug("Configuration UI updated");
   }
 
   @SuppressWarnings("unchecked")

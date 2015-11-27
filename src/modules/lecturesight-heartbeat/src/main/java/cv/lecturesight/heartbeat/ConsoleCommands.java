@@ -19,13 +19,13 @@ package cv.lecturesight.heartbeat;
 
 import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.util.DummyInterface;
-import cv.lecturesight.util.Log;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -38,12 +38,11 @@ import org.osgi.service.component.ComponentContext;
 })
 public class ConsoleCommands implements DummyInterface {
 
-  Log log = new Log("HeartBeat");
   @Reference
   private HeartBeat main;
 
   protected void activate(ComponentContext context) {
-    log.info("Commands activated");
+    Logger.info("Commands activated");
   }
 
   public void run(String param[]) {
@@ -51,7 +50,7 @@ public class ConsoleCommands implements DummyInterface {
       ensureReady();
       main.go();
     } catch (RuntimeException e) {
-      log.error("Failed to initialize HeartBeat: ", e);
+      Logger.error("Failed to initialize HeartBeat: ", e);
     }
   }
 
@@ -67,7 +66,7 @@ public class ConsoleCommands implements DummyInterface {
       try {
         main.stop();
       } catch (RuntimeException e) {
-        log.error("Failed to pause HeartBeat", e);
+        Logger.error("Failed to pause HeartBeat", e);
       }
     }
   }
@@ -78,14 +77,14 @@ public class ConsoleCommands implements DummyInterface {
         main.stop();
         main.deinit();
       } catch (RuntimeException e) {
-        log.error("Failed to stop HeartBeat", e);
+        Logger.error("Failed to stop HeartBeat", e);
       }
     }
     try {
       ensureReady();
       main.go();
     } catch (RuntimeException e) {
-      log.error("Failed to start HeartBeat", e);
+      Logger.error("Failed to start HeartBeat", e);
     }
   }
 
@@ -95,14 +94,14 @@ public class ConsoleCommands implements DummyInterface {
       try {
         i = Integer.parseInt(param[0]);
       } catch (NumberFormatException e) {
-        log.warn("Usage: ls:step <number of steps>");
+        Logger.warn("Usage: ls:step <number of steps>");
       }
     }
     try {
       ensureReady();
       main.step(i);
     } catch (IllegalStateException e) {
-      log.error("Failed to step", e);
+      Logger.error("Failed to step", e);
     }
   }
 

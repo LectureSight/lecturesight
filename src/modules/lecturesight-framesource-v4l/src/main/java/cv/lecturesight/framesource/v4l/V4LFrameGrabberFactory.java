@@ -28,19 +28,16 @@ import au.edu.jcu.v4l4j.exceptions.V4L4JException;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.framesource.FrameGrabberFactory;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -53,7 +50,6 @@ import org.osgi.service.component.ComponentContext;
 })
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
             
-  private Log log = new Log("Video4Linux FrameSource");
   @Reference
   private Configuration config;
 
@@ -64,10 +60,10 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
   @Override
   public FrameGrabber createFrameGrabber(String input, Map<String, String> conf) throws FrameSourceException {
     VideoDevice device = initVideoDevice(input);
-    log.info(generateDeviceInfo(device));
+    Logger.info(generateDeviceInfo(device));
     ControlList controlList = device.getControlList();
     Vector<Control> controls = (Vector <Control>) controlList.getList();
-    log.info("provided Controls:" );
+    Logger.info("provided Controls:" );
     for (Control control : controls){
         String values = "";
         String val="";
@@ -77,7 +73,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     val = " = " + control.getValue();
                     values = " Values: [0 | 1] [ \"false\" | \"true\" ]";
                 } catch (ControlException ex) {
-                    log.error("control.getValue() failed",ex);
+                    Logger.error("control.getValue() failed",ex);
                 }
                 break;  
             }
@@ -89,7 +85,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     int incr = control.getStepValue();
                     values = " Values: [ " + min + " .. " + max +" ] increment: " + incr;     
                 } catch (ControlException ex) {
-                    log.error("control.getValue() failed",ex);
+                    Logger.error("control.getValue() failed",ex);
                 }
                 break;  
             }
@@ -111,7 +107,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
                     values = " Values: " + control.getDiscreteValuesMap();
                  } catch (ControlException ex) {
-                    log.error("control.getStringValue() failed",ex);
+                    Logger.error("control.getStringValue() failed",ex);
                 }
                 break;  
             }
@@ -121,7 +117,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     val = " = " + control.getStringValue();
                     values = " Values: " + control.getDiscreteValueNames();
                  } catch (ControlException ex) {
-                    log.error("control.getValue() failed",ex);
+                    Logger.error("control.getValue() failed",ex);
                 }
                 break;  
             }
@@ -129,7 +125,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                 try {
                     val = " = " + control.getLongValue();
                 } catch (ControlException ex) {
-                    log.error("control.getLongValue() failed",ex);
+                    Logger.error("control.getLongValue() failed",ex);
                 }                
                 break;  
 
@@ -138,12 +134,12 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                 try {
                     val = " = " + control.getValue();
                 } catch (ControlException ex) {
-                    log.error("control.getValue() failed",ex);
+                    Logger.error("control.getValue() failed",ex);
                 }                
                 break;  
            }
         }
-        log.info("Name: " + control.getName() + val + " Type: " + V4LFrameGrabberConstants.CONTROL_TYPE_NAMES.get(control.getType()) + values);
+        Logger.info("Name: " + control.getName() + val + " Type: " + V4LFrameGrabberConstants.CONTROL_TYPE_NAMES.get(control.getType()) + values);
     }
     
     // HashMap<String,String> params = new HashMap<String, String>();
@@ -160,7 +156,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
         }
         Control cont = controlList.getControl(confItem);
         if (cont == null) {
-            log.error("Ignoring Config entry " + confItem + " = " + conf.get(confItem) + " - " + confItem + " Control does not exist for device.");
+            Logger.error("Ignoring Config entry " + confItem + " = " + conf.get(confItem) + " - " + confItem + " Control does not exist for device.");
         } else {
             String setVal="";
             switch (cont.getType()) {
@@ -174,7 +170,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                         }
                         
                     } catch (ControlException ex) {
-                        log.error("control.setValue() failed", ex);
+                        Logger.error("control.setValue() failed", ex);
                     }
                     try {
                         setVal = " = " + cont.getValue();
@@ -192,7 +188,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                         try {
                             cont.setValue(val);
                         } catch (ControlException ex) {
-                            log.error("control.setValue() failed", ex);
+                            Logger.error("control.setValue() failed", ex);
                         } 
                     }
                     try {
@@ -207,7 +203,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     try {
                         cont.setValue(1);
                     } catch (ControlException ex) {
-                        log.error("control.setValue() failed", ex);
+                        Logger.error("control.setValue() failed", ex);
                     }
                     setVal = " = active";
                     break;   
@@ -218,7 +214,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                         try {
                             cont.setValue(cont.getDiscreteValuesMap().get(val));
                         } catch (ControlException ex) {
-                            log.error("control.setStringValue() failed", ex);
+                            Logger.error("control.setStringValue() failed", ex);
                         }
                         setVal = " = " + val + "("+ cont.getDiscreteValuesMap().get(val) +")"; 
                     }
@@ -229,7 +225,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     try {
                         cont.setStringValue(val);
                     } catch (ControlException ex) {
-                        log.error("control.setStringValue() failed", ex);
+                        Logger.error("control.setStringValue() failed", ex);
                     }
                     try {
                         setVal = " = " + cont.getStringValue();
@@ -243,7 +239,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     try {
                         cont.setLongValue(val);
                     } catch (ControlException ex) {
-                        log.error("control.setLongValue() failed", ex);
+                        Logger.error("control.setLongValue() failed", ex);
                     }
                     try {
                         setVal = " = " + cont.getLongValue();
@@ -257,7 +253,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     try {
                         cont.setValue(val);
                     } catch (ControlException ex) {
-                        log.error("control.setValue() failed", ex);
+                        Logger.error("control.setValue() failed", ex);
                     }
                     try {
                         setVal = " = " + cont.getValue();
@@ -267,7 +263,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     break;  
                 }
             }
-            log.info("Setting Control : " + cont.getName() + " to " + setVal); 
+            Logger.info("Setting Control : " + cont.getName() + " to " + setVal); 
 
         }
     }
@@ -277,9 +273,9 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
   private VideoDevice initVideoDevice(String name) throws FrameSourceException {
     try {
-      log.info("Opening capture device " + name);
+      Logger.info("Opening capture device " + name);
       VideoDevice device = new VideoDevice(name);
-      log.info("Device name: " + device.getDeviceInfo().getName());
+      Logger.info("Device name: " + device.getDeviceInfo().getName());
       if (device == null) {
         throw new FrameSourceException("Could not open capture device: " + name);
       }

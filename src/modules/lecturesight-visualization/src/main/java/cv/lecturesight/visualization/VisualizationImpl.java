@@ -14,7 +14,6 @@ import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.regiontracker.RegionTracker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import javax.swing.JPanel;
@@ -22,6 +21,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /**
  * Visualization Service
@@ -34,7 +34,6 @@ public class VisualizationImpl implements Visualization, UserInterface {
   static final String OBJ_PROPKEY_COLOR = "obj.color";
   final static String WINDOWNAME_VISUAL = "visual";
   final static String SIGNAME_DONE_VISUAL = "visual.DONE";
-  private Log log = new Log("Tracker Display");
   @Reference
   private Configuration config;
   @Reference
@@ -65,11 +64,11 @@ public class VisualizationImpl implements Visualization, UserInterface {
     ocl.registerLaunch(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), new VisualizationRun());
     dsps.registerDisplay(WINDOWNAME_VISUAL, visual, sig_DONE);
     panel = new ObjectTrackerUIPanel(dsps.getDisplayBySID("visual"), rTracker, oTracker);
-    log.info("Activated.");
+    Logger.info("Activated.");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override

@@ -18,14 +18,13 @@
 package cv.lecturesight.opencl.impl;
 
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import org.pmw.tinylog.Logger;
 
 public class OCLSignalDispatcher extends Thread {
 
   static final int DEFAULT_QUEUE_SIZE = 100;
-  private Log log = new Log("OpenCL Signal Dispatcher");
   SignalManager signalManager = new SignalManager();
   private BlockingQueue<OCLSignal> signalQueue;
 
@@ -53,12 +52,12 @@ public class OCLSignalDispatcher extends Thread {
     try {
       signalQueue.put(signal);
     } catch (InterruptedException e) {
-      log.warn("Interrupted during enqueueSignal");
+      Logger.warn("Interrupted during enqueueSignal");
     }
   }
 
   public void shutdown() {
-    log.info("Shutting down");
+    Logger.info("Shutting down");
     interrupt();
   }
 }

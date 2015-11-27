@@ -38,7 +38,6 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import java.awt.image.BufferedImage;
 import org.osgi.service.component.ComponentContext;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -48,6 +47,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.pmw.tinylog.Logger;
 
 /** Foreground Service Implementation
  * 
@@ -72,9 +72,7 @@ public class ForegroundServiceImpl implements ForegroundService {
   // collection of this services signals
   private EnumMap<ForegroundService.Signal, OCLSignal> signals =
           new EnumMap<ForegroundService.Signal, OCLSignal>(ForegroundService.Signal.class);
-  
-  private Log log = new Log("Foreground Service");
-  
+    
   @Reference
   private Configuration config;             // this services configuration
   
@@ -159,7 +157,7 @@ public class ForegroundServiceImpl implements ForegroundService {
     ocl.registerLaunch(startBarrier.getSignal(), new UpdateRun());
     ocl.registerLaunch(ccl_DONE, new MaskCleanRun());               // register cleaning run to be launched when CCA is done
 
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
@@ -216,7 +214,7 @@ public class ForegroundServiceImpl implements ForegroundService {
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], fgUpdated, 0);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], (CLImage2D) fgBuffer.current(), 0);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], (CLImage2D) fgBuffer.last(), 0);
-    log.info("Working buffers initialized");
+    Logger.info("Working buffers initialized");
   }
 
   /** Run that computes the update map and performs the update of the foreground

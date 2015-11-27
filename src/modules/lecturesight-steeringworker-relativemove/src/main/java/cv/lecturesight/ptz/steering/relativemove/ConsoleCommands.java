@@ -19,13 +19,13 @@ package cv.lecturesight.ptz.steering.relativemove;
 
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.DummyInterface;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "cv.lecturesight.ptz.steering.commands", immediate = true)
 @Service()
@@ -35,7 +35,6 @@ import org.apache.felix.scr.annotations.Service;
 })
 public class ConsoleCommands implements DummyInterface {
 
-  Log log = new Log("Camera Steering Commands");
   @Reference
   CameraSteeringWorker steerer;
 
@@ -51,7 +50,7 @@ public class ConsoleCommands implements DummyInterface {
     try {
       steerer.setTargetPosition(getPosition(args));
     } catch (IllegalArgumentException e) {
-      log.warn(e.getMessage());
+      Logger.warn(e.getMessage());
       System.out.println("Usage: cs:move (float)x (float)y");
     }
   }

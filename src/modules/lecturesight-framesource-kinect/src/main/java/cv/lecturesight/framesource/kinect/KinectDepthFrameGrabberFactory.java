@@ -4,6 +4,7 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.util.Map;
+import org.pmw.tinylog.Logger;
 
 public class KinectDepthFrameGrabberFactory implements FrameGrabberFactory {
 
@@ -21,7 +22,7 @@ public class KinectDepthFrameGrabberFactory implements FrameGrabberFactory {
       Integer.parseInt(input);
     } catch (NumberFormatException e) {
       String msg = "Failed to parse device number";
-      parent.log.error(msg, e);
+      Logger.error(msg, e);
       throw new FrameSourceException(msg, e);
     }
 

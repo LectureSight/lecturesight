@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.gui.impl;
 
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -25,7 +25,6 @@ import cv.lecturesight.util.Log;
  */
 public class SystemStatusPanel extends javax.swing.JPanel {
 
-  Log log;
   SystemStatusUI parent;
   
   /**
@@ -35,10 +34,9 @@ public class SystemStatusPanel extends javax.swing.JPanel {
     initComponents();
   }
   
-  public SystemStatusPanel(SystemStatusUI parent, Log log) {
+  public SystemStatusPanel(SystemStatusUI parent) {
     initComponents();
     this.parent = parent;
-    this.log = log;
   }
 
   /**

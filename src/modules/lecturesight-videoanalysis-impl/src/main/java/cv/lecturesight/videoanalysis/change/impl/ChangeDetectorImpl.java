@@ -29,13 +29,13 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -44,7 +44,6 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public class ChangeDetectorImpl implements ChangeDetector {
 
-  Log log = new Log("Change Detector Service");
   @Reference
   Configuration config;
   @Reference
@@ -90,7 +89,7 @@ public class ChangeDetectorImpl implements ChangeDetector {
 
     // register computation runs
     ocl.registerLaunch(fsrc.getSignal(), new ChangeDetectRun());
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   private void registerDisplays() {

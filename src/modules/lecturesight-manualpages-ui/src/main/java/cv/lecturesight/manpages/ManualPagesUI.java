@@ -1,7 +1,6 @@
 package cv.lecturesight.manpages;
 
 import cv.lecturesight.gui.api.UserInterface;
-import cv.lecturesight.util.Log;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +18,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "lecturesight.cameracalibration", immediate = true)
 @Service
@@ -28,7 +28,6 @@ import org.osgi.service.component.ComponentContext;
 })
 public class ManualPagesUI implements UserInterface, BundleListener {
 
-  Log log = new Log("Manual Pages UI");
   ManPagesModel model = new ManPagesModel();
   ManualPagesPanel ui = new ManualPagesPanel(this);
 
@@ -36,7 +35,7 @@ public class ManualPagesUI implements UserInterface, BundleListener {
     cc.getBundleContext().addBundleListener(this);
     
     // search for man pages of already installed bundles
-    log.info("Searching for manual pages.");
+    Logger.info("Searching for manual pages.");
     for (Bundle b : cc.getBundleContext().getBundles()) {
       installManPages(b);
     }
@@ -71,7 +70,7 @@ public class ManualPagesUI implements UserInterface, BundleListener {
   }
 
   private void installManPages(Bundle bundle) {
-    log.debug("Searching for manual pages in bundle " + bundle.getSymbolicName());
+    Logger.debug("Searching for manual pages in bundle " + bundle.getSymbolicName());
     Enumeration pe = bundle.findEntries("manual", "*.md", false);
     
     if (pe != null && pe.hasMoreElements()) {
@@ -86,12 +85,12 @@ public class ManualPagesUI implements UserInterface, BundleListener {
         num++;
       }
       model.addPages(bundle, pages);
-      log.debug("Added " + num + " page(s) from bundle " + bundle.getSymbolicName());
+      Logger.debug("Added " + num + " page(s) from bundle " + bundle.getSymbolicName());
     }
   }
 
   private void uninstallManPages(Bundle bundle) {
-    log.debug("Uninstalling manual pages from bundle " + bundle.getSymbolicName());
+    Logger.debug("Uninstalling manual pages from bundle " + bundle.getSymbolicName());
     model.removeBundleNode(bundle);
   }
   
@@ -114,7 +113,7 @@ public class ManualPagesUI implements UserInterface, BundleListener {
       r.close();
       out = sb.toString();    // TODo use finally block
     } catch(IOException e) {
-      log.warn("IOException while reading " + url.toString());
+      Logger.warn("IOException while reading " + url.toString());
       throw new RuntimeException(e);
     }
     return out;

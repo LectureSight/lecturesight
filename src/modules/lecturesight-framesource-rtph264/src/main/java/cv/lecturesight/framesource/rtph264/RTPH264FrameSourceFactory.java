@@ -20,7 +20,6 @@ package cv.lecturesight.framesource.rtph264;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
-import cv.lecturesight.util.Log;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +30,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /**
  * RTP h.264 Streaming FrameSourceFactory
@@ -46,14 +46,12 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
 
   final static int DEFAULT_PORT = 8554;
 
-  private final Log log = new Log("RTPH264");
-
   private List<RTPH264ClientFrameGrabber> children = new LinkedList<RTPH264ClientFrameGrabber>();
 
   protected void activate(ComponentContext cc) {
     System.out.println("RTPH264FrameSourceFactory.activate");
     Gst.init();
-    log.info("RTP h.264 Streaming FrameSource activated");
+    Logger.info("RTP h.264 Streaming FrameSource activated");
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -61,7 +59,7 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
       RTPH264ClientFrameGrabber child = it.next();
       child.stop();
     }
-    log.info("RTP h.264 Streaming FrameSource deactivated");
+    Logger.info("RTP h.264 Streaming FrameSource deactivated");
   }
 
   @Override
@@ -81,7 +79,7 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
       }
     } catch (Exception e) {
       String msg = "Failed to parse server URL: " + input;
-      log.error(msg);
+      Logger.error(msg);
       throw new FrameSourceException(msg, e);
     }
 
@@ -89,11 +87,11 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
     try {
       RTPH264ClientFrameGrabber grabber = new RTPH264ClientFrameGrabber(host, port);
       children.add(grabber);
-      log.info("Created FrameGrabber " + grabber.toString());
+      Logger.info("Created FrameGrabber " + grabber.toString());
       return grabber;
     } catch (IllegalStateException e) {
       String msg = "Failed to create RTPH264ClientFrameGrabber for " + input;
-      log.error(msg);
+      Logger.error(msg);
       throw new FrameSourceException(msg, e);
     }
   }
@@ -104,7 +102,7 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
       ((RTPH264ClientFrameGrabber) fg).stop();
     } catch (Exception e) {
       String msg = "Error while stopping FrameSource.";
-      log.error(msg);
+      Logger.error(msg);
       throw new FrameSourceException(msg, e);
     }
   }

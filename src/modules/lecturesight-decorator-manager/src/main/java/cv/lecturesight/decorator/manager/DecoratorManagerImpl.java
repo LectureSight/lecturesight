@@ -20,7 +20,6 @@ package cv.lecturesight.decorator.manager;
 import cv.lecturesight.decorator.api.DecoratorManager;
 import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.TrackerObject;
-import cv.lecturesight.util.Log;
 import java.util.Dictionary;
 import java.util.EnumMap;
 import java.util.Hashtable;
@@ -35,6 +34,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "lecturesight.decorator.manager", immediate = true)
 @Service
@@ -46,7 +46,6 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
   static final String SERVICE_PROPKEY_CALLON = "lecturesight.decorator.callon";
   static final String SERVICE_PROPKEY_PRODUCES = "lecturesight.decorator.produces";
   
-  private Log log = new Log("Object Decorator Manager");
   private ComponentContext cc;
   private Map<CallType, List<ObjectDecorator>> decorators = new EnumMap<CallType, List<ObjectDecorator>>(CallType.class);
   {
@@ -70,7 +69,7 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
         }
       }
     } catch (Exception e) {
-      log.error("Error during scanning for plugins", e);
+      Logger.error("Error during scanning for plugins", e);
     }
     
     // listen to bundle un-/register events
@@ -78,7 +77,7 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
     Dictionary<String, Object> props = new Hashtable<String, Object>();
     props.put(EventConstants.EVENT_TOPIC, topics);
     cc.getBundleContext().registerService(EventHandler.class.getName(), this, props);
-    log.info("Listening for Decorators");
+    Logger.info("Listening for Decorators");
   }
   
   @Override
@@ -117,9 +116,9 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
       CallType type = CallType.valueOf(typeS);
       ObjectDecorator decorator = (ObjectDecorator) cc.getBundleContext().getService(ref);
       decorators.get(type).add(decorator);
-      log.info("Decorator installed: " + name + " (calltype=" + typeS + ")");
+      Logger.info("Decorator installed: " + name + " (calltype=" + typeS + ")");
     } catch (Exception e) {
-      log.error("Error while installing Decorator.", e);
+      Logger.error("Error while installing Decorator.", e);
     }
   }
 
@@ -130,7 +129,7 @@ public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
       ObjectDecorator decorator = (ObjectDecorator) cc.getBundleContext().getService(ref);
       decorators.get(type).remove(decorator);
     } catch (Exception e) {
-      log.error("Error while uninstalling Decorator.", e);
+      Logger.error("Error while uninstalling Decorator.", e);
     }
   }
 }

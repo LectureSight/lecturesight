@@ -5,7 +5,6 @@ import com.wulff.lecturesight.visca.protocol.*;
 import com.wulff.lecturesight.visca.api.VISCAService;
 import com.wulff.lecturesight.visca.protocol.VISCA.MessageType;
 import cv.lecturesight.ptz.api.PTZCamera;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
@@ -30,13 +29,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "com.bwulff.lecturesight.visca", immediate = true)
 @Service
 public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
-
-  public static Log log = new Log("VISCA Service");
-
+  
   ComponentContext cc;
 
   boolean debug = false;
@@ -87,7 +85,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 
     // open serial port
     initPort(devicename, speed, databits, stopbits, parity);
-    log.info("Opened port " + devicename);
+    Logger.info("Opened port " + devicename);
 
     // attach port listener
     try {
@@ -112,13 +110,13 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 	    Thread.sleep(config_timeout);
 
 	    if (camera_alive) {
-		log.info("Completed VISCA camera initialization");
+		Logger.info("Completed VISCA camera initialization");
 	    } else {
-		log.error("Unable to initialize VISCA camera (no response within " + config_timeout + "ms)");
+		Logger.error("Unable to initialize VISCA camera (no response within " + config_timeout + "ms)");
 		// cc.getBundleContext().getBundle(0).stop(); 
 	    }
     } catch (Exception e) {
-	log.warn("Exception testing for camera startup" + e.getMessage());
+	Logger.warn("Exception testing for camera startup" + e.getMessage());
     }
   }
 
@@ -200,16 +198,16 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
           String idStr = props.getProperty(Constants.PROFKEY_MODEL_ID);
           if (idStr.equals("DEFAULT")) {
             defaultProfile = props;
-            log.info("Registered default camera profile");
+            Logger.info("Registered default camera profile");
           } else {
             cameraProfiles.put(idStr, props);
-            log.info("Registered camera profile for " + props.getProperty(Constants.PROFKEY_VENDOR_NAME) + " " + props.getProperty(Constants.PROFKEY_MODEL_NAME));
+            Logger.info("Registered camera profile for " + props.getProperty(Constants.PROFKEY_VENDOR_NAME) + " " + props.getProperty(Constants.PROFKEY_MODEL_NAME));
           }
         } else {
-          log.warn("Camera profile " + url.toString() + " does not contain model ID!");
+          Logger.warn("Camera profile " + url.toString() + " does not contain model ID!");
         }
       } catch (IOException e) {
-        log.warn("Failed to load device profile from " + url.toString() + " : " + e.getMessage());
+        Logger.warn("Failed to load device profile from " + url.toString() + " : " + e.getMessage());
       }
     }
   }
@@ -222,13 +220,13 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
    */
   synchronized void send(byte[] b) {
     if (debug) {
-      log.debug(" >>" + ByteUtils.byteArrayToHex(b, -1));
+      Logger.debug(" >>" + ByteUtils.byteArrayToHex(b, -1));
     }
     try {
       commOut.write(b);
       commOut.flush();
     } catch (Exception e) {
-      log.error("Error while sending data: " + ByteUtils.byteArrayToHex(b, -1), e);
+      Logger.error("Error while sending data: " + ByteUtils.byteArrayToHex(b, -1), e);
     }
   }
 
@@ -248,7 +246,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
    *
    */
   void send_AddressSet() {
-    log.info("Send network discovery broadcast message.");
+    Logger.info("Send network discovery broadcast message.");
     send(VISCA.NET_ADDRESS_SET.getBytes());
   }
 
@@ -258,7 +256,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
    * @param adr address of the camera to be queried
    */
   void send_CamInfo(int adr) {
-    log.info("Send camera info inquiry command to #" + adr);
+    Logger.info("Send camera info inquiry command to #" + adr);
     Message msg = VISCA.INQ_CAM_VERSION.clone();
     msg.getBytes()[0] += adr;
     send(msg.getBytes());
@@ -269,7 +267,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     // TODO remove movement commands from pendingMsg!
     // TODO what to do with commands in issuedMsg (that did not receive ACK yet)
 
-    log.debug("Cancel movement");
+    Logger.debug("Cancel movement");
     
     VISCACameraImpl camera;
     if ((camera = cameras[cidx-1]) != null) {
@@ -287,7 +285,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   }
   
   void clearInterface(int adr) {
-    log.debug("Clear interface");
+    Logger.debug("Clear interface");
     Message msg = VISCA.NET_IF_CLEAR.clone();
     msg.getBytes()[0] += adr;
     send(msg.getBytes());
@@ -316,7 +314,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     }
 
     String modelStr = profile.getProperty("camera.vendor.name") + " " + profile.getProperty("camera.model.name");
-    log.info("Registered " + modelStr + " (model ID " + model + ", ROM version " + rom_ver + ") at address #" + adr);
+    Logger.info("Registered " + modelStr + " (model ID " + model + ", ROM version " + rom_ver + ") at address #" + adr);
 
     // register camera
     VISCACameraImpl camera = new VISCACameraImpl(adr, sockets, rom_ver, profile);
@@ -356,7 +354,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 
       // debug output
       if (debug) {
-        log.debug(" <<" + ByteUtils.byteArrayToHex(buffer, len));
+        Logger.debug(" <<" + ByteUtils.byteArrayToHex(buffer, len));
       }
 
       // did we receive an error?
@@ -377,7 +375,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       }
 
     } catch (IOException e) {
-      log.error("Error while receiving data. ", e);
+      Logger.error("Error while receiving data. ", e);
     }
   }
 
@@ -405,7 +403,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       default:
         msg += "Unknown error code " + ByteUtils.byteToHex(buffer[2]);
     }
-    log.warn(msg);
+    Logger.warn(msg);
   }
 
   private void handleACKCompletion(byte[] buffer) {
@@ -424,7 +422,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
           throw new IllegalStateException("Received ACK for #" + adr + " but no command to be assigned.");
         }
       } catch (NullPointerException e) {
-        log.error("Failed to set socket state on #" + adr + ", camera object not initialized.");
+        Logger.error("Failed to set socket state on #" + adr + ", camera object not initialized.");
       }
 
       msg = "ACK";
@@ -435,7 +433,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
         try {
           cam.setSocket(socket, null);
         } catch (NullPointerException e) {
-          log.error("Failed to set socket state on #" + adr + ", camera object not initialized.");
+          Logger.error("Failed to set socket state on #" + adr + ", camera object not initialized.");
         }
       }
 
@@ -444,7 +442,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     msg += " from #" + adr + " (socket: " + socket + ")";
     
     if (debug) {
-      log.info(msg);    
+      Logger.info(msg);    
     }
   }
 
@@ -454,7 +452,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   private void handlePositionUpdate(byte[] buffer) {
 
     if (debug) {
-    	log.debug("Received camera position update");
+    	Logger.debug("Received camera position update");
     }
 
     int adr = getAddress(buffer);
@@ -472,7 +470,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       CameraPosition pos = cameras[adr - 1].state.currentPosition();
 
       if (last_pan != pan || last_tilt != tlt) {
-	log.debug("Camera position updated: last_pan=" + last_pan + " last_tilt=" + last_tilt + " new pan=" + pan + " new tilt=" + tlt);
+	Logger.debug("Camera position updated: last_pan=" + last_pan + " last_tilt=" + last_tilt + " new pan=" + pan + " new tilt=" + tlt);
         last_pan = pan;
         last_tilt = tlt;
       }
@@ -485,13 +483,13 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 
   private void handleDiscoveryReply(byte[] msg) {
     int adr = buffer[2] - 1;
-    log.info("Camera discovered on address " + adr);
+    Logger.info("Camera discovered on address " + adr);
     send_CamInfo(adr);
   }
 
   private void handleCameraInfoReply(byte[] msg) {
     int adr = getAddress(buffer);
-    log.info("Received camera info from #" + adr);
+    Logger.info("Received camera info from #" + adr);
     createCamera(adr, ByteUtils.trimArray(buffer, buffer.length));
   }
 
@@ -510,7 +508,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 	      for (VISCACameraImpl cam : cameras) {
 		if (cam != null) {
 		  if (debug) {
-		  	log.debug("Requesting camera position update");
+		  	Logger.debug("Requesting camera position update");
 		  }
 		  inq_msg.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + cam.address);
 		  send(inq_msg.getBytes());

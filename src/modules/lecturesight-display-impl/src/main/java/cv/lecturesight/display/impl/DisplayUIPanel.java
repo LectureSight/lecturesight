@@ -2,7 +2,6 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
-import cv.lecturesight.util.Log;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,10 +12,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.pmw.tinylog.Logger;
 
 public class DisplayUIPanel extends javax.swing.JPanel {
 
-  Log log = new Log("Display Service");
   private Display display;
   private DisplayPanel displayPanel;
   private String name;
@@ -143,7 +142,7 @@ public class DisplayUIPanel extends javax.swing.JPanel {
       try {
         rdir.mkdirs();
       } catch (Exception e) {
-        log.error("Unable to create capture directory -- Not starting capture.", e);
+        Logger.error("Unable to create capture directory -- Not starting capture.", e);
         return;
       }
       displayPanel.setRecording(true);

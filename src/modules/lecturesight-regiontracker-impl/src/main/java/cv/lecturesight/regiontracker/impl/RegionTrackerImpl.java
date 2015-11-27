@@ -37,7 +37,7 @@ import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import cv.lecturesight.util.conf.Configuration;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
@@ -63,7 +63,6 @@ public class RegionTrackerImpl implements RegionTracker {
   // collection of this services signals
   private EnumMap<RegionTracker.Signal, OCLSignal> signals =
           new EnumMap<RegionTracker.Signal, OCLSignal>(RegionTracker.Signal.class);
-  private Log log = new Log("Region Tracker");
   @Reference
   private Configuration config;
   @Reference
@@ -139,7 +138,7 @@ public class RegionTrackerImpl implements RegionTracker {
     registerDisplays();
     debugEnabled = config.getBoolean(Constants.PROPKEY_DEBUG);
         
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
@@ -293,7 +292,7 @@ public class RegionTrackerImpl implements RegionTracker {
         if (lastId > 0) {
           region = trackedRegions.get(lastId);
           if (region == null) {
-            log.warn("Region " + lastId + " was not present in last frame!");
+            Logger.warn("Region " + lastId + " was not present in last frame!");
           }
           if (debugEnabled) {
             System.out.println(" u");
@@ -543,7 +542,7 @@ public class RegionTrackerImpl implements RegionTracker {
     @Override
     public void land() {
       if (debugEnabled) {
-        log.debug("Set region " + region.getLabel() + " to " + value);
+        Logger.debug("Set region " + region.getLabel() + " to " + value);
       }
     }
   }

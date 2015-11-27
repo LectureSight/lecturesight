@@ -22,7 +22,6 @@ import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
@@ -34,6 +33,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
@@ -48,7 +48,6 @@ import org.osgi.service.component.ComponentContext;
 public class ColorDecorator implements ObjectDecorator {
 
   final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
-  private Log log = new Log("Color Decorator");
   @Reference
   Configuration config;
   @Reference
@@ -63,11 +62,11 @@ public class ColorDecorator implements ObjectDecorator {
     height_min = config.getInt("height.min");
     height_max = config.getInt("height.max");
     channel_number = config.getInt("channel.number");
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override
@@ -87,20 +86,20 @@ public class ColorDecorator implements ObjectDecorator {
       ColorHistogram ch = (ColorHistogram) object.getProperty(
               OBJ_PROPKEY_COLOR_HISTOGRAM);
       if(ch == null) {
-        //log.info("ColorHistogram erstellt fuer TrackerObject "+object.getId());
+        //Logger.info("ColorHistogram erstellt fuer TrackerObject "+object.getId());
         object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, 
               new ColorHistogram(img, imgc, bbox, channel_number));
       }
       else {
-        //log.info("ColorHistogram geupdated fuer TrackerObject "+object.getId());
+        //Logger.info("ColorHistogram geupdated fuer TrackerObject "+object.getId());
         ColorHistogram ch2 = new ColorHistogram(
                 img, imgc, bbox, channel_number, ch);
         object.setProperty(OBJ_PROPKEY_COLOR_HISTOGRAM, ch2);
         double dist = ch.bhattacharya_distance(ch2);
-        //log.info("ColorHistogram-Update-Difference fuer TrackerObject "+object.getId()+": "+dist);
+        //Logger.info("ColorHistogram-Update-Difference fuer TrackerObject "+object.getId()+": "+dist);
       }
     } catch (Exception e) {
-        log.error("Error in color decorator!", e);
+        Logger.error("Error in color decorator!", e);
     }
   }
 }

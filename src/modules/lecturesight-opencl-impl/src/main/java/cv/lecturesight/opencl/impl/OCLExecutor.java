@@ -20,11 +20,11 @@ package cv.lecturesight.opencl.impl;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.opencl.api.ComputationRun;
-import cv.lecturesight.util.Log;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.pmw.tinylog.Logger;
 
 /** A Thread that takes care of putting the OpenCL commands of issued
  *  ComputationRuns orderly into a single CL command queue so that memory access
@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 public class OCLExecutor extends Thread {
 
   final static int DEFAULT_QUEUE_SIZE = 100;
-  private Log log = new Log("OpenCL Executor");
   private CLQueue oclQueue;
   private final BlockingQueue<ComputationRun> taskQueue;
   private final ExecutorService callbackExecutor = Executors.newCachedThreadPool();   // TODO think about the question if this is the right type of thread pool
@@ -77,7 +76,7 @@ public class OCLExecutor extends Thread {
       if (msg != null) {
         warn += ": " + msg;
       }
-      log.warn(warn);
+      Logger.warn(warn);
       return false;
     }
   }
@@ -87,13 +86,13 @@ public class OCLExecutor extends Thread {
       try {
         taskQueue.put(run);
       } catch (InterruptedException e) {
-        log.warn("Interrupted during enqueueRun()");
+        Logger.warn("Interrupted during enqueueRun()");
       }
     }
   }
 
   public void shutdown() {
-    log.info("Shutting down");
+    Logger.info("Shutting down");
     interrupt();
   }
 
@@ -119,7 +118,7 @@ public class OCLExecutor extends Thread {
         if (msg != null) {
           warn += ": " + msg;
         }
-        log.warn(warn);
+        Logger.warn(warn);
       }
       try {
         if (landing) {
@@ -131,7 +130,7 @@ public class OCLExecutor extends Thread {
         if (msg != null) {
           warn += ": " + msg;
         }
-        log.error(warn, e);
+        Logger.error(warn, e);
       }
     }
   }

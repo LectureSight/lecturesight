@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.util.conf;
 
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
@@ -31,7 +31,6 @@ public class ConfigurationFactory implements ServiceFactory {
 
   final static String DEFAULT_CONF_PATH = "conf";               // bundle resource dir
   final static String DEFAULT_CONF_NAME = "default.properties"; // default config file name
-  private static Log log = new Log("ConfigurationFactory");     // Logger
   static Properties configProps;                                // systems config properties
   static Properties defaultProps;                               // systems default properties
   ConfigurationServiceImpl configService;
@@ -49,7 +48,7 @@ public class ConfigurationFactory implements ServiceFactory {
     // try to find default config in caller bundle
     Enumeration res = bundle.findEntries(DEFAULT_CONF_PATH, DEFAULT_CONF_NAME, false);
     if (res != null && res.hasMoreElements()) {
-      log.debug("Found default configuration in bundle " + bundleName);
+      Logger.debug("Found default configuration in bundle " + bundleName);
       try {
         URL configUrl = (URL) res.nextElement();        // get URL of config file
         Properties bundleDefaults = new Properties();
@@ -58,16 +57,16 @@ public class ConfigurationFactory implements ServiceFactory {
         // add bundle defaults to default properties
         for (Iterator<String> keys = bundleDefaults.stringPropertyNames().iterator(); keys.hasNext();) {
           String key = keys.next();
-          log.debug("Setting property " + key + " = " + bundleDefaults.getProperty(key) + " of " + bundleName);
+          Logger.debug("Setting property " + key + " = " + bundleDefaults.getProperty(key) + " of " + bundleName);
           defaultProps.setProperty(key, bundleDefaults.getProperty(key));
         }
         configService.notifyListeners();
 
       } catch (IOException e) {
-        log.warn("Failed to load bundles default configuration: " + e.getMessage());
+        Logger.warn("Failed to load bundles default configuration: " + e.getMessage());
       }
     } else {
-      log.debug("No default configuration found in bundle " + bundle.getSymbolicName());
+      Logger.debug("No default configuration found in bundle " + bundle.getSymbolicName());
     }
 
     return new ConfigurationImpl(bundleName, configProps);  // create config object

@@ -30,7 +30,6 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.opencl.impl.profiling.ProfilingServer;
-import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,13 +47,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator, ServiceFactory {
 
   private final static String PROPKEY_DOPROFILING = "ocl.profiling";
   private final static String PROPKEY_DEVICE_TYPE = "ocl.device.type";
   private final static String PROPKEY_USE_GL = "ocl.use.gl";
-  private Log log = new Log("OpenCL Service");
   private BundleContext bundleContext;
   private CLContext oclContext;
   private CLQueue oclQueue;
@@ -68,7 +67,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
     // initialize OpenCL and print device report
     oclContext = initOpenCL();
-    log.info(generateDeviceReport(oclContext.getPlatform().getBestDevice()));
+    Logger.info(generateDeviceReport(oclContext.getPlatform().getBestDevice()));
 
     // set up CL Command Queue
     oclQueue = oclContext.createDefaultQueue();
@@ -81,7 +80,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
     // set up profiler if configured
     if (configured(PROPKEY_DOPROFILING)) {
-      log.info("Profiling is enabled!");
+      Logger.info("Profiling is enabled!");
       profiler = new ProfilingServer();
       OCLSignal SIG_nextFrame = dispatcher.signalManager.createSignal("BEGIN-FRAME");
       dispatcher.signalManager.registerWithSignal(SIG_nextFrame, new Triggerable() {
@@ -100,12 +99,12 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
     // set up service factory
     bundleContext.registerService(OpenCLService.class.getName(), this, null);
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   @Override
   public void stop(BundleContext context) throws Exception {
-    log.info("Shutting down");
+    Logger.info("Shutting down");
     if (configured(PROPKEY_DOPROFILING)) {
       profiler.shutdown();
     }
@@ -128,9 +127,9 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
       try {
         ctx = JavaCL.createContextFromCurrentGL();
-        log.info("Successfully created OpenCL context from current OpenGL context.");
+        Logger.info("Successfully created OpenCL context from current OpenGL context.");
       } catch (RuntimeException e) {
-        log.warn("Unable to create OpenCL context from current OpenGL context.");
+        Logger.warn("Unable to create OpenCL context from current OpenGL context.");
         ctx = null;
       }
 
@@ -164,7 +163,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
         
       } catch (Exception e) {
         Exception ex = new IllegalStateException("No suitable compute device found: " + type.name());
-        log.error("!! OPENCL INITIALIZATION FAILED !! ", ex);
+        Logger.error("!! OPENCL INITIALIZATION FAILED !! ", ex);
         throw ex;
       }
 
@@ -173,7 +172,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
     // testing if context is working by getting platform information 
     try {
       CLPlatform platform = ctx.getPlatform();
-      log.info("OpenCL platform: " + platform.getName() + " " + platform.getVersion() + " " + platform.getProfile());
+      Logger.info("OpenCL platform: " + platform.getName() + " " + platform.getVersion() + " " + platform.getProfile());
     } catch (Exception e) {   
       throw new IllegalStateException("Unable to query context for OpenCL platform!", e);
     }
@@ -197,7 +196,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
   @Override
   public Object getService(Bundle bundle, ServiceRegistration registration) {
-    log.debug("Creating new OpenCLService instance for " + bundle.getSymbolicName());
+    Logger.debug("Creating new OpenCLService instance for " + bundle.getSymbolicName());
 
     OpenCLServiceImpl serviceInstance = new OpenCLServiceImpl();
     Map<String, CLProgram> programs = buildPrograms(bundle.findEntries("opencl", "*.cl", false));
@@ -232,7 +231,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
         String programName = filename.substring(0, filename.length() - 3);
 
         try {
-          log.info("Compiling: " + sourceUrl.toString());
+          Logger.info("Compiling: " + sourceUrl.toString());
 
           InputStream in = sourceUrl.openStream();
           CLProgram prog = oclContext.createProgram(IOUtils.readTextClose(in));
@@ -241,7 +240,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
         } catch (IOException e) {
           throw new ServiceException("Error reading resource.", ServiceException.FACTORY_ERROR, e);
         } catch (CLBuildException e) {
-          log.warn("Could not build " + programName + "\n\n" + e.getMessage());
+          Logger.warn("Could not build " + programName + "\n\n" + e.getMessage());
           throw new ServiceException("Failed to compile OpenCL source.", ServiceException.FACTORY_ERROR, e);
         }
       }

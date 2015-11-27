@@ -22,7 +22,6 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
@@ -34,6 +33,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /**
  * Camera Steering SteeringWorker Implementation
@@ -42,8 +42,6 @@ import org.osgi.service.component.ComponentContext;
 @Component(name = "lecturesight.ptz.steering.worker.relativemove", immediate = true)
 @Service
 public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
-
-  private Log log = new Log("Camera Steering Worker");
 
   @Reference
   Configuration config;        // service configuration
@@ -95,7 +93,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
       if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
         if (!moving) {
           informMoveListenersStart(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
-          log.debug("Camera started moving");
+          Logger.debug("Camera started moving");
         }
         moving = true;
         model.setCameraPosition(new_pos);
@@ -103,7 +101,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
       } else {
         if (moving) {
           informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
-          log.debug("Camera stopped moving");
+          Logger.debug("Camera stopped moving");
         }
         moving = false;
       }
@@ -146,7 +144,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
         // apply computed speeds if speeds or target have changed
         if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0))) {
 
-          log.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
+          Logger.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
@@ -204,12 +202,12 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
     damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
     if (damp_pan > 1.0 || damp_pan < 0.0) {
-      log.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
       damp_pan = 1.0f;
     }
     damp_tilt = config.getFloat(Constants.PROPKEY_DAMP_TILT);
     if (damp_tilt > 1.0 || damp_tilt < 0.0) {
-      log.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
       damp_tilt = 1.0f;
     }
 
@@ -219,7 +217,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     camera.addCameraListener(worker);
     camera.clearLimits();
 
-    log.info("Activated. Steering " + camera.getName());
+    Logger.info("Activated. Steering " + camera.getName());
     if (config.getBoolean(Constants.PROPKEY_AUTOSTART)) {
       setSteering(true);
     }
@@ -234,7 +232,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
   protected void deactivate(ComponentContext cc) throws Exception {
     camera.removeCameraListener(worker);
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   private CameraPositionModel initModel() {
@@ -268,12 +266,12 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
       tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
     }
 
-    log.debug("Camera pan/tilt limits: pan " + pan_min + " to " + pan_max + ", tilt " + tilt_min + " to " + tilt_max);
+    Logger.debug("Camera pan/tilt limits: pan " + pan_min + " to " + pan_max + ", tilt " + tilt_min + " to " + tilt_max);
 
     yflip = config.getBoolean(Constants.PROPKEY_YFLIP);
     xflip = config.getBoolean(Constants.PROPKEY_XFLIP);
 
-    log.debug("Camera co-ordinates: xflip=" + xflip + " yflip=" + yflip);
+    Logger.debug("Camera co-ordinates: xflip=" + xflip + " yflip=" + yflip);
 
     return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
   }
@@ -283,7 +281,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     try {
       camera.stopMove();
     } catch (Exception e) {
-      log.warn("Unable to stop camera movement: " + e.getMessage());
+      Logger.warn("Unable to stop camera movement: " + e.getMessage());
     }
   }
 
@@ -296,10 +294,10 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   public void setSteering(boolean b) {
     steering = b;
     if (b) {
-      log.info("Steering is now ON");
+      Logger.info("Steering is now ON");
     } else {
       stopMoving();
-      log.info("Steering is now OFF");
+      Logger.info("Steering is now OFF");
     }
   }
 
@@ -311,7 +309,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   @Override
   public void setTargetPosition(NormalizedPosition pos) {
 
-    log.debug("Set target normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
+    Logger.debug("Set target normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
 
     model.setTargetPositionNorm(pos);
     informUISlaves();

@@ -26,7 +26,6 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.regiontracker.RegionTracker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.BoundingBox;
@@ -41,6 +40,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /**
  * Object Tracker Service
@@ -50,7 +50,6 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
-  private Log log = new Log("Object Tracker");
   @Reference
   private Configuration config;
   @Reference
@@ -77,12 +76,12 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
     sig_DONE = ocl.getSignal(Constants.SIGNAME_DONE);
     trackerUpdate = new TrackerUpdate();
     ocl.registerTriggerable(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), trackerUpdate);
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
     ocl.unregisterTriggerable(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), trackerUpdate);
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   private void updateConfiguration() {

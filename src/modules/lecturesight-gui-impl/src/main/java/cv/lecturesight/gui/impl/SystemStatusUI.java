@@ -18,7 +18,7 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.gui.api.UserInterface;
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -28,16 +28,15 @@ import org.osgi.service.component.ComponentContext;
 //@Service
 public class SystemStatusUI implements UserInterface {
 
-    Log log = new Log("System Status");
     JPanel systemStatusPanel;
     
     protected void activate(ComponentContext cc) {
-      systemStatusPanel = new SystemStatusPanel(this, log);
-      log.info("Activated");
+      systemStatusPanel = new SystemStatusPanel(this);
+      Logger.info("Activated");
     }
     
     protected void deactivate(ComponentContext cc) {
-      log.info("Deactivated");
+      Logger.info("Deactivated");
     }    
 
   @Override

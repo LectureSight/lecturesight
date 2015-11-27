@@ -12,7 +12,6 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.regiontracker.Region;
 import cv.lecturesight.regiontracker.RegionTracker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.BoundingBox;
@@ -26,12 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Object Tracker Service
  *
@@ -39,8 +37,6 @@ import org.osgi.service.component.ComponentContext;
 @Component(name = "lecturesight.objecttracker.simpel", immediate = true)
 @Service
 public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
-
-  private Log log = new Log("Object Tracker");
   
   @Reference
   private Configuration config;
@@ -79,7 +75,7 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
     sig_DONE = ocl.getSignal(Constants.SIGNAME_DONE);
     trackerUpdate = new ObjectTrackerImpl.TrackerUpdate();
     ocl.registerTriggerable(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), trackerUpdate);
-    log.info("Activated");
+    Logger.info("Activated");
     color_list.add(Color.BLUE);
     color_list.add(Color.CYAN);
     color_list.add(Color.GREEN);
@@ -91,7 +87,7 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
   protected void deactivate(ComponentContext cc) throws Exception {
     ocl.unregisterTriggerable(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), trackerUpdate);
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   private void updateConfiguration() {
@@ -557,7 +553,7 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
               result = act;
             }
           } catch (Exception ex) {
-            Logger.getLogger(ObjectTrackerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.error("Error", ex);
           }
         }
       }
@@ -745,7 +741,7 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
         }
         return d2;
       } catch (Exception ex) {
-        Logger.getLogger(ObjectTrackerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        Logger.error("Error", ex);
       }
       return Double.MAX_VALUE;
     } 

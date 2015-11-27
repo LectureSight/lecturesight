@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.profile.api;
 
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -38,8 +38,6 @@ public class SceneProfileSerializer {
   private static final String TAB = "\t";
   private static final String NEWLINE = "\n";
   private static final String COMMENT_INDICATOR = "#";
-
-  private static Log log = new Log("Scene Profile Serializer");
 
   public static void serialize(SceneProfile profile, OutputStream os) throws ProfileSerializerException {
     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os));
@@ -62,7 +60,7 @@ public class SceneProfileSerializer {
       out.flush();
     } catch (IOException e) {
       String msg = "Failed to serialize SceneProfile. ";
-      log.error(msg, e);
+      Logger.error(msg, e);
       throw new ProfileSerializerException(msg, e);
     }
   }
@@ -76,7 +74,7 @@ public class SceneProfileSerializer {
       os.close();
     } catch (IOException ex) {
       String msg = "Failed to convert OutputStream to String after serialization of Profile.";
-      log.error(msg, ex);
+      Logger.error(msg, ex);
       throw new ProfileSerializerException(msg, ex);
     }
     return out;
@@ -137,12 +135,12 @@ public class SceneProfileSerializer {
 
     } catch (IllegalArgumentException ex) {
       String msg = "Error while parsing value in line " + line_num + ". ";
-      log.error(msg, ex);
+      Logger.error(msg, ex);
       throw new ProfileSerializerException(msg, ex);
 
     } catch (IOException ex) {
       String msg = "Error while reading line " + line_num + ". ";
-      log.error(msg, ex);
+      Logger.error(msg, ex);
       throw new ProfileSerializerException(msg, ex);
     }
 
@@ -157,7 +155,7 @@ public class SceneProfileSerializer {
       is.close();
     } catch (IOException ex) {
       String msg = "Failed to convert OutputStream to String after serialization of Profile.";
-      log.error(msg, ex);
+      Logger.error(msg, ex);
       throw new ProfileSerializerException(msg, ex);
     }
     return profile;

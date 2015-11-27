@@ -26,15 +26,14 @@ import au.edu.jcu.v4l4j.VideoFrame;
 import au.edu.jcu.v4l4j.exceptions.V4L4JException;
 import cv.lecturesight.framesource.FrameGrabber.PixelFormat;
 import cv.lecturesight.framesource.FrameSourceException;
-import cv.lecturesight.util.Log;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Vector;
+import org.pmw.tinylog.Logger;
 
 public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber, CaptureCallback {
 
-  private Log log;
   private int exceptionCount = 0;
   private final int MAX_EXCEPTIONS = 5;
   VideoDevice device;
@@ -52,10 +51,9 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
     this.quality = videoQuality;
     Vector<ImageFormat> useFormat = new Vector<ImageFormat>();
     try {
-      log = new Log(device.getDeviceInfo().getName());
       List<ImageFormat> imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
       for (ImageFormat imageFormat : imageFormats) {
-        log.info("supported Format: " + imageFormat.getName());
+        Logger.info("supported Format: " + imageFormat.getName());
         ResolutionInfo resolutions = imageFormat.getResolutionInfo();
         for (ResolutionInfo.DiscreteResolution disRes : resolutions.getDiscreteResolutions()) {
           if (disRes.getHeight() == frameHeight && disRes.getWidth() == frameWidth) {
@@ -63,7 +61,7 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
           }
         }
       }
-      log.info("using : " + useFormat.firstElement().getName());
+      Logger.info("using : " + useFormat.firstElement().getName());
       grabber = device.getRGBFrameGrabber(width, height, channel, standard, useFormat.firstElement());
       frameBuffer = ByteBuffer.allocate(grabber.getWidth() * grabber.getHeight() * 3);
       grabber.setCaptureCallback(this);
@@ -107,29 +105,29 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
   @Override
   public void exceptionReceived(V4L4JException vlje) {
     exceptionCount++;
-    log.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
+    Logger.error("Could not capture frame from " + device.getDevicefile() + ": ", vlje);
     if (exceptionCount < MAX_EXCEPTIONS) {
-      log.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
+      Logger.info("Trying to restart frame grabber on " + device.getDevicefile() + ".");
       try {
         grabber.startCapture();
       } catch (V4L4JException ex) {
-        log.error("Could restart not frame grabber on" + device.getDevicefile() + ": ", ex);
+        Logger.error("Could restart not frame grabber on" + device.getDevicefile() + ": ", ex);
       }
     } else {
       // Hopeless
-      log.info("Frame grabber failed on " + device.getDevicefile() + Integer.toString(MAX_EXCEPTIONS) + " times ... giving up.");
+      Logger.info("Frame grabber failed on " + device.getDevicefile() + Integer.toString(MAX_EXCEPTIONS) + " times ... giving up.");
       shutdown();
     }
   }
 
   void shutdown() {
-    log.info("Shutting down");
+    Logger.info("Shutting down");
     try {
       grabber.stopCapture();
       device.releaseFrameGrabber();
       device.release();
     } catch (Exception e) {
-      log.error("Error during shutdown. ", e);
+      Logger.error("Error during shutdown. ", e);
     } finally {
       // TODO tell consuming FrameSource to deactivate
     }

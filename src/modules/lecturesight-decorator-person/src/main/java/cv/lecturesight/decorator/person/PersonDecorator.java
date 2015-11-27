@@ -3,7 +3,6 @@ package cv.lecturesight.decorator.person;
 import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
 import org.apache.felix.scr.annotations.Component;
@@ -12,6 +11,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
@@ -31,16 +31,15 @@ public class PersonDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_RADIUS = "head.radius";
   final static String PROPKEY_PROB = "person.probability";
 
-  private Log log = new Log("Person Finder");
   @Reference
   Configuration config;
 
   protected void activate(ComponentContext cc) throws Exception {
-    log.info("BrainzzZ!");
+    Logger.info("BrainzzZ!");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override
@@ -52,8 +51,8 @@ public class PersonDecorator implements ObjectDecorator {
       Position head    = (Position)obj.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
       
       if(head != null && gravity != null) {
-        //log.info("Gravity: "+gravity.toString());
-        //log.info("Head: "+head.toString());
+        //Logger.info("Gravity: "+gravity.toString());
+        //Logger.info("Head: "+head.toString());
 
         double distance = Helper.euclidean_distance(gravity, head);
         double radius = (Double)(obj.getProperty(OBJ_PROPKEY_HEAD_RADIUS));
@@ -70,7 +69,7 @@ public class PersonDecorator implements ObjectDecorator {
         obj.setProperty(PROPKEY_PROB, prob);
       }
     } catch (Exception e) {
-      log.error("Error in person finder!", e);
+      Logger.error("Error in person finder!", e);
     }
   }
 }

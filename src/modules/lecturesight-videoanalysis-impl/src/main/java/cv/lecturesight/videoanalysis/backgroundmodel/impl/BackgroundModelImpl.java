@@ -30,7 +30,6 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
 import org.apache.felix.scr.annotations.Component;
@@ -39,6 +38,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -51,7 +51,6 @@ import org.osgi.service.component.ComponentContext;
 })
 public class BackgroundModelImpl implements BackgroundModel {
 
-  Log log = new Log("Background Service");
   @Reference
   private Configuration config;
   @Reference
@@ -100,7 +99,7 @@ public class BackgroundModelImpl implements BackgroundModel {
     // register computation runs
     ocl.registerLaunch(fsrc.getSignal(), new AnalysisRun());
     ocl.registerLaunch(signals.get(Signal.DO_UPDATE), new UpdateRun());
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   private void registerDisplays() {
@@ -136,7 +135,7 @@ public class BackgroundModelImpl implements BackgroundModel {
 
   public void reset() {
     ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, (CLImage2D)bgBuffer.last());
-    log.info("Reinitialized");
+    Logger.info("Reinitialized");
   }
 
   private class AnalysisRun implements ComputationRun {

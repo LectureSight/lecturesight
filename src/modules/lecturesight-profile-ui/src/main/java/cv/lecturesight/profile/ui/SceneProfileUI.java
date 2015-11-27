@@ -23,7 +23,6 @@ import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
-import cv.lecturesight.util.Log;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -41,7 +40,6 @@ import org.osgi.service.component.ComponentContext;
 public class SceneProfileUI implements UserInterface, SceneProfileListener {
 
   final static String UI_TITLE = "Scene Profile Editor";  // window name
-  Log log = new Log(UI_TITLE);                            // also used for logging
   @Reference
   DisplayService dsps;                        // we need the display service
   @Reference

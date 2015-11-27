@@ -25,12 +25,12 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
@@ -41,7 +41,6 @@ public class HeartBeatImpl implements HeartBeat {
 
   static final String PROPKEY_LISTENTO = "listens.to";
   static final String PROPKEY_AUTOSTART = "autostart";
-  private Log log = new Log("Heartbeat");
   @Reference
   private Configuration config;
   @Reference
@@ -57,11 +56,11 @@ public class HeartBeatImpl implements HeartBeat {
 
   protected void activate(ComponentContext cc) throws Exception {
     sig_BEGINFRAME = ocl.getSignal("BEGIN-FRAME");
-    log.info("Activated.");
+    Logger.info("Activated.");
     final int autostart = config.getInt(PROPKEY_AUTOSTART);
     if (autostart > 0) {
       init();
-      log.info("Autostart in " + autostart + "ms...");
+      Logger.info("Autostart in " + autostart + "ms...");
       
       new Thread(new Runnable() {
 
@@ -84,7 +83,7 @@ public class HeartBeatImpl implements HeartBeat {
     if (ready) {
       deinit();
     }
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   private void nextFrame() {
@@ -92,7 +91,7 @@ public class HeartBeatImpl implements HeartBeat {
       ocl.castSignal(sig_BEGINFRAME);
       fsrc.captureFrame();
     } catch (FrameSourceException e) {
-      log.error("Unable to capture frame", e);
+      Logger.error("Unable to capture frame", e);
     }
   }
 
@@ -103,7 +102,7 @@ public class HeartBeatImpl implements HeartBeat {
     // get list of signals we are listening to
     String[] listenSignals = config.getList(PROPKEY_LISTENTO);
     if (listenSignals.length < 1) {
-      log.warn("No signals to listen to.");
+      Logger.warn("No signals to listen to.");
       return;
     }
     listenTo = new OCLSignal[listenSignals.length];
@@ -113,7 +112,7 @@ public class HeartBeatImpl implements HeartBeat {
       sb.append(signame).append(" ");
       listenTo[i] = ocl.getSignal(signame);
     }
-    log.info("Listening to: " + sb.toString());
+    Logger.info("Listening to: " + sb.toString());
 
     // create signal barrier
     barrier = ocl.createSignalBarrier(listenTo);
@@ -132,7 +131,7 @@ public class HeartBeatImpl implements HeartBeat {
             });
 
     ready = true;
-    log.info("Initialized");
+    Logger.info("Initialized");
   }
 
   @Override
@@ -143,7 +142,7 @@ public class HeartBeatImpl implements HeartBeat {
     }
     fsrc = null;
     ready = false;
-    log.info("Stopped");
+    Logger.info("Stopped");
   }
 
   @Override
@@ -161,7 +160,7 @@ public class HeartBeatImpl implements HeartBeat {
     if (ready) {
       iterationsToRun = -1;
       nextFrame();
-      log.info("Started");
+      Logger.info("Started");
     } else {
       throw new IllegalStateException("Cannot start, HeartBeat not initialized");
     }

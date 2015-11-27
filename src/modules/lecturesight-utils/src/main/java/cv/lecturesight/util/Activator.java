@@ -18,10 +18,6 @@
 package cv.lecturesight.util;
 
 import cv.lecturesight.util.conf.*;
-import cv.lecturesight.util.log.formater.DefaultLogEntryFormater;
-import cv.lecturesight.util.log.formater.ecma48.ECMA48LogEntryFormater;
-import cv.lecturesight.util.log.listener.ConsoleOutputLogListener;
-import cv.lecturesight.util.log.listener.LogEntryFormater;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,10 +27,8 @@ import java.util.Properties;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.log.LogReaderService;
-import org.osgi.service.log.LogService;
+import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator {
 
@@ -45,7 +39,6 @@ public final class Activator implements BundleActivator {
   final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
   private ServiceRegistration consoleLogRegistration = null;
   private ServiceRegistration confFactoryReg;
-  private Log log = new Log("Activator");
   private File configFile;
   private Properties defaultProperties = new Properties();
   private Properties systemProperties = new Properties(defaultProperties);
@@ -53,31 +46,30 @@ public final class Activator implements BundleActivator {
   @Override
   public void start(BundleContext context) throws Exception {
 
-    // TODO: wrap those two into a service tracker!!
-    // set LogService for lecturesight Log
-    ServiceReference logRef = context.getServiceReference(LogService.class.getName());
-    if (logRef != null) {
-      Log.setLogService((LogService) context.getService(logRef));
-    }
-    // activate log console output if configured
-    String active = context.getProperty(LOGLISTENER_ACTIVE_PROPERTY);
-    if (active != null && ("TRUE".equalsIgnoreCase(active) || "YES".equalsIgnoreCase(active))) {
-      
-      ConsoleOutputLogListener consoleLog;
-      String color = context.getProperty(LOGLISTENER_COLOR_ENABLED);
-      String suppStr = context.getProperty(LOGLISTENER_SUPPRESS_OSGI_EVENTS);
-      boolean suppress = suppStr != null && ("TRUE".equalsIgnoreCase(suppStr) || "YES".equalsIgnoreCase(suppStr));
-      LogEntryFormater formater = color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color)) ?
-                                    new ECMA48LogEntryFormater() : new DefaultLogEntryFormater();
-      
-      consoleLog = new ConsoleOutputLogListener(formater, suppress);
-      
-      ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
-      if (ref != null) {
-        LogReaderService reader = (LogReaderService) context.getService(ref);
-        reader.addLogListener(consoleLog);
-      }
-    }
+//    // set LogService for lecturesight Log
+//    ServiceReference logRef = context.getServiceReference(LogService.class.getName());
+//    if (logRef != null) {
+//      Log.setLogService((LogService) context.getService(logRef));
+//    }
+//    // activate log console output if configured
+//    String active = context.getProperty(LOGLISTENER_ACTIVE_PROPERTY);
+//    if (active != null && ("TRUE".equalsIgnoreCase(active) || "YES".equalsIgnoreCase(active))) {
+//      
+//      ConsoleOutputLogListener consoleLog;
+//      String color = context.getProperty(LOGLISTENER_COLOR_ENABLED);
+//      String suppStr = context.getProperty(LOGLISTENER_SUPPRESS_OSGI_EVENTS);
+//      boolean suppress = suppStr != null && ("TRUE".equalsIgnoreCase(suppStr) || "YES".equalsIgnoreCase(suppStr));
+//      LogEntryFormater formater = color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color)) ?
+//                                    new ECMA48LogEntryFormater() : new DefaultLogEntryFormater();
+//      
+//      consoleLog = new ConsoleOutputLogListener(formater, suppress);
+//      
+//      ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
+//      if (ref != null) {
+//        LogReaderService reader = (LogReaderService) context.getService(ref);
+//        reader.addLogListener(consoleLog);
+//      }
+//    }
 
     // get config file
     File configPath = getConfigPath(context);
@@ -87,9 +79,9 @@ public final class Activator implements BundleActivator {
     // load properties
     try {
       systemProperties.load(new FileInputStream(configFile));
-      log.debug("Loaded config properties from " + configFile.getAbsolutePath());
+      Logger.debug("Loaded config properties from " + configFile.getAbsolutePath());
     } catch (IOException e) {
-      log.warn("Failed to load config from " + configFile.getAbsolutePath());
+      Logger.warn("Failed to load config from " + configFile.getAbsolutePath());
     }
     
     // register config service
@@ -121,10 +113,10 @@ public final class Activator implements BundleActivator {
     if (path != null) {
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
-        log.debug("Using config directory specified in framework property: " + dir.getAbsolutePath());
+        Logger.debug("Using config directory specified in framework property: " + dir.getAbsolutePath());
         return dir;
       } else {
-        log.warn("Config directory specified in framework property does not exist: " + dir.getAbsolutePath());
+        Logger.warn("Config directory specified in framework property does not exist: " + dir.getAbsolutePath());
       }
     }
 
@@ -133,10 +125,10 @@ public final class Activator implements BundleActivator {
     if (path != null) {
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
-        log.debug("Using config directory specified in system property: " + dir.getAbsolutePath());
+        Logger.debug("Using config directory specified in system property: " + dir.getAbsolutePath());
         return dir;
       } else {
-        log.warn("Config directory specified in framework property does not exist: " + dir.getAbsolutePath());
+        Logger.warn("Config directory specified in framework property does not exist: " + dir.getAbsolutePath());
       }
     }
 
@@ -145,21 +137,21 @@ public final class Activator implements BundleActivator {
     if (path != null) {
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
-        log.debug("Using default config directory: " + dir.getAbsolutePath());
+        Logger.debug("Using default config directory: " + dir.getAbsolutePath());
         return dir;
       } else {
-        log.warn("Default config directory does not exist: " + dir.getAbsolutePath());
+        Logger.warn("Default config directory does not exist: " + dir.getAbsolutePath());
       }
     }
 
     File dir = new File(".");
-    log.debug("Using working directory as config directory: " + dir.getAbsolutePath());
+    Logger.debug("Using working directory as config directory: " + dir.getAbsolutePath());
     return dir;
   }
 
   private void ensureFile(File file) throws ServiceException {
     if (!file.exists()) {
-      log.warn("Config file does not exist, creating " + file.getAbsolutePath());
+      Logger.warn("Config file does not exist, creating " + file.getAbsolutePath());
       try {
         file.createNewFile();
       } catch (IOException ex) {

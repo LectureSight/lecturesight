@@ -18,7 +18,6 @@ import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.OpenCLService.Format;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.Position;
@@ -33,6 +32,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "lecturesight.videoanalysis", immediate = true)
 @Service
@@ -48,8 +48,6 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_CELLS_MIN = "object.cells.min";
   private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
   private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
-
-  Log log = new Log("Video Analysis Service");
 
   @Reference
   Configuration config;       // configuration parameters
@@ -392,12 +390,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     ocl_main = new DetectionRun();
     ocl.registerLaunch(sig_START, ocl_main);
 
-    log.info("Activated.");
+    Logger.info("Activated.");
   }
 
   int addTarget(Target t) {
     if (numTargets == MAX_TARGETS) {
-      log.warn("Maximum number of targets excceded, forced reset.");
+      Logger.warn("Maximum number of targets excceded, forced reset.");
       reset(null);
     }
     for (int i = 0; i < MAX_TARGETS; i++) {
@@ -609,27 +607,27 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   public void configurationChanged() {
     if (change_threshold != config.getInt(PROKEY_CHANGE_THRESH)) {
       change_threshold = config.getInt(PROKEY_CHANGE_THRESH);
-      log.info("Setting change threshold to " + change_threshold);
+      Logger.info("Setting change threshold to " + change_threshold);
     }
 
     if (cell_activation_threshold != config.getInt(PROPKEY_CELL_THRESH)) {
       cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
-      log.info("Setting cell activation threshold " + cell_activation_threshold);
+      Logger.info("Setting cell activation threshold " + cell_activation_threshold);
     }
 
     if (object_min_cells != config.getInt(PROPKEY_OBJECT_CELLS_MIN)) {
       object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
-      log.info("Setting min number of cells in objects to " + object_min_cells);
+      Logger.info("Setting min number of cells in objects to " + object_min_cells);
     }
 
     if (object_max_cells != config.getInt(PROPKEY_OBJECT_CELLS_MAX)) {
       object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
-      log.info("Setting max number of cells in objects to " + object_max_cells);
+      Logger.info("Setting max number of cells in objects to " + object_max_cells);
     }
     
     if (object_max_dormant != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
       object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
-      log.info("Setting max number of frames of inactivity before discarding a target to " + object_max_dormant);
+      Logger.info("Setting max number of frames of inactivity before discarding a target to " + object_max_dormant);
     }
   }
 
@@ -702,6 +700,6 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       targets[i] = null;
     }
     numTargets = 0;
-    log.info("Clearing target list.");
+    Logger.info("Clearing target list.");
   }
 }

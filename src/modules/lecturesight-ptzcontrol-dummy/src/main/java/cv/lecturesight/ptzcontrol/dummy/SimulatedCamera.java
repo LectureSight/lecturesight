@@ -3,7 +3,7 @@ package cv.lecturesight.ptzcontrol.dummy;
 import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
 import java.util.LinkedList;
@@ -28,9 +28,7 @@ public class SimulatedCamera implements PTZCamera {
   static final int TILT_MAX = 10000;
   static final int ZOOM_MAX = 1000;
   final Position HOME_POS = new Position(0, 0);
-  
-  static Log log = new Log(CAMERA_NAME);
-  
+    
   @Reference
   Configuration config;
   
@@ -60,7 +58,7 @@ public class SimulatedCamera implements PTZCamera {
 
       @Override
       public void run() {
-        log.info("Entering main loop");
+        Logger.info("Entering main loop");
         
         int dx,dy;
         while(running) {
@@ -109,20 +107,20 @@ public class SimulatedCamera implements PTZCamera {
           try {
             Thread.sleep(delay);
           } catch (InterruptedException e) {
-            log.warn("Worker thread interrupted.");
+            Logger.warn("Worker thread interrupted.");
           }
         }
         
-        log.info("Exited main loop");
+        Logger.info("Exited main loop");
       }
       
     })).start();
-    log.info("Activated. Delay is " + delay + " ms");
+    Logger.info("Activated. Delay is " + delay + " ms");
   }
   
   protected void deactivate(ComponentContext cc) {
     running = false;
-    log.info("Deactivating");
+    Logger.info("Deactivating");
   }
   
   @Override
@@ -169,7 +167,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveUp(int speed) {
-    log.debug("move up (" + speed + ")");
+    Logger.debug("move up (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(current_pos.getX());
       target_pos.setY(TILT_MAX);
@@ -179,7 +177,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDown(int speed) {
-    log.debug("move down (" + speed + ")");
+    Logger.debug("move down (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(current_pos.getX());
       target_pos.setY(TILT_MIN);
@@ -189,7 +187,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveLeft(int speed) {
-    log.debug("move left (" + speed + ")");
+    Logger.debug("move left (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
       target_pos.setY(current_pos.getY());
@@ -199,7 +197,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveRight(int speed) {
-    log.debug("move right (" + speed + ")");
+    Logger.debug("move right (" + speed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
       target_pos.setY(current_pos.getY());
@@ -209,7 +207,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveUpLeft(int panSpeed, int tiltSpeed) {
-    log.debug("move up-left (" + panSpeed + ", " + tiltSpeed + ")");
+    Logger.debug("move up-left (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
       target_pos.setY(TILT_MAX);
@@ -220,7 +218,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveUpRight(int panSpeed, int tiltSpeed) {
-    log.debug("move up-right (" + panSpeed + ", " + tiltSpeed + ")");
+    Logger.debug("move up-right (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
       target_pos.setY(TILT_MAX);
@@ -231,7 +229,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDownLeft(int panSpeed, int tiltSpeed) {
-    log.debug("move down-left (" + panSpeed + ", " + tiltSpeed + ")");
+    Logger.debug("move down-left (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MIN);
       target_pos.setY(TILT_MIN);
@@ -242,7 +240,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveDownRight(int panSpeed, int tiltSpeed) {
-    log.debug("move down-right (" + panSpeed + ", " + tiltSpeed + ")");
+    Logger.debug("move down-right (" + panSpeed + ", " + tiltSpeed + ")");
     synchronized(mutex) {
       target_pos.setX(PAN_MAX);
       target_pos.setY(TILT_MIN);
@@ -253,7 +251,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveAbsolute(int panSpeed, int tiltSpeed, Position target) {
-    log.debug("move absolute (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
+    Logger.debug("move absolute (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
     synchronized(mutex) {
       clampPosition(target);
       target_pos.setX(target.getX());
@@ -265,7 +263,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveRelative(int panSpeed, int tiltSpeed, Position target) {
-    log.debug("move relative (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
+    Logger.debug("move relative (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
     synchronized(mutex) {
       Position new_target = current_pos.clone();
       new_target.setX(current_pos.getX() + target.getX());
@@ -289,17 +287,17 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void clearLimits() {
-    log.warn("method clearLimits() currently not implemented");
+    Logger.warn("method clearLimits() currently not implemented");
   }
 
   @Override
   public void setLimitUpRight(int pan, int tilt) {
-    log.warn("method setLimitUpRight() currently not implemented");
+    Logger.warn("method setLimitUpRight() currently not implemented");
   }
 
   @Override
   public void setLimitDownLeft(int pan, int tilt) {
-    log.warn("method setLimitDownLeft() currently not implemented");
+    Logger.warn("method setLimitDownLeft() currently not implemented");
   }
 
   @Override
@@ -359,7 +357,7 @@ public class SimulatedCamera implements PTZCamera {
   
   private void informListeners() {
     for (CameraListener l : listeners) {
-      log.debug("informListeners()");
+      Logger.debug("informListeners()");
       l.positionUpdated(current_pos.clone());
     }
   }

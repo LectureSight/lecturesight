@@ -24,7 +24,6 @@ import cv.lecturesight.profile.api.ProfileSerializerException;
 import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
-import cv.lecturesight.util.Log;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -41,6 +40,7 @@ import java.util.List;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -49,7 +49,6 @@ import javax.swing.JOptionPane;
 public class SceneProfileEditorPanel extends javax.swing.JPanel implements CustomRenderer {
 
   final static int NEW_AREA_SIZE = 5;
-  Log log = new Log("Scene Profile Editor");
   private SceneProfileUI parent;
   private Display cameraDisplay;
   private DisplayPanel cameraDisplayPanel;
@@ -140,7 +139,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
       model.addElement(new SceneProfileListItem(p));
       num++;
     }
-    parent.log.debug(num + " profiles available");
+    Logger.debug(num + " profiles available");
     profileChooser.setModel(model);
     // make sure that currently edited profile is still in list, load currently
     // active profile if it was deleted
@@ -798,23 +797,23 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
       }
     }
     
-    log.info("Attemptig to save scene profile to " + file.getAbsolutePath());
+    Logger.info("Attemptig to save scene profile to " + file.getAbsolutePath());
     
     try {
       FileOutputStream os = new FileOutputStream(file);
-      parent.log.info("Writing new scene profile to " + file.getAbsolutePath());
+      Logger.info("Writing new scene profile to " + file.getAbsolutePath());
       SceneProfile newProfile = new SceneProfile(name, "");
       SceneProfileSerializer.serialize(newProfile, os);
       os.close();
       
     } catch (IOException e) {
       String msg = "Error while writing profile. " + e.getMessage();
-      parent.log.error(msg, e);
+      Logger.error(msg, e);
       showErrorDialog(msg);
       
     } catch (ProfileSerializerException e) {
       String msg = "Error while serializing profile. " + e.getMessage();
-      parent.log.error(msg, e);
+      Logger.error(msg, e);
       showErrorDialog(msg);
     }
   }//GEN-LAST:event_newProfileButtonActionPerformed

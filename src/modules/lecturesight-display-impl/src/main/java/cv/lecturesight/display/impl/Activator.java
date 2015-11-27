@@ -19,7 +19,6 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.util.Log;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
@@ -28,13 +27,12 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Logger;
 
 public class Activator implements BundleActivator, ServiceListener {
 
   final static String serviceFilter = "(objectClass=" + OpenCLService.class.getName() + ")";
-  
-  private Log log = new Log("Display Bundle Activator");
-  
+    
   private BundleContext bc;
   private DisplayServiceFactory serviceFactory;
   private ServiceRegistration serviceReg = null;
@@ -42,7 +40,7 @@ public class Activator implements BundleActivator, ServiceListener {
   @Override
   public void start(BundleContext bc) throws Exception {
     this.bc = bc;
-    log.info("Starting");
+    Logger.info("Starting");
     // try to obtain OpenCLService in case it was registered before this
     ServiceReference oclRef = bc.getServiceReference(OpenCLService.class.getName());
     if (oclRef != null) {
@@ -52,7 +50,7 @@ public class Activator implements BundleActivator, ServiceListener {
   }
 
   private void activateService(OpenCLService ocl) {
-    log.info("Registering Display Service Factory");
+    Logger.info("Registering Display Service Factory");
     if (serviceReg == null) {
       serviceFactory = new DisplayServiceFactory(bc);
       serviceFactory.setOpenCL(ocl);
@@ -67,7 +65,7 @@ public class Activator implements BundleActivator, ServiceListener {
       serviceFactory.deactivate();
       serviceReg.unregister();
     }
-    log.info("Stopped.");
+    Logger.info("Stopped.");
   }
   
   @Override
@@ -79,12 +77,12 @@ public class Activator implements BundleActivator, ServiceListener {
   public void serviceChanged(ServiceEvent se) {
     switch (se.getType()) {
       case ServiceEvent.REGISTERED:
-        log.debug("OpenCLService registered");
+        Logger.debug("OpenCLService registered");
         OpenCLService ocl = (OpenCLService)bc.getService(se.getServiceReference());
         activateService(ocl);
         break;
       case ServiceEvent.UNREGISTERING:
-        log.debug("OpenCLService unregistering");
+        Logger.debug("OpenCLService unregistering");
         deactivateService();
         break;
     }

@@ -3,7 +3,6 @@ package cv.lecturesight.framesource.kinect;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
-import cv.lecturesight.util.Log;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.openkinect.freenect.VideoFormat;
 import org.openkinect.freenect.VideoHandler;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.pmw.tinylog.Logger;
 
 public class Activator implements BundleActivator, LogHandler {
 
@@ -37,7 +37,7 @@ public class Activator implements BundleActivator, LogHandler {
       context = Freenect.createContext();
     } catch (IllegalStateException e) {
       String msg = "Failed to initialize Freenect context! ";
-      log.error(msg, e);
+      Logger.error(msg, e);
       throw new FrameSourceException(msg, e);
     }
 
@@ -57,7 +57,7 @@ public class Activator implements BundleActivator, LogHandler {
             LogLevel ll = LogLevel.valueOf(propval);
             setFreenectLogLevel(ll);
           } catch (Exception e) {
-            log.warn("Failed to parse Freenect log level. " + e.getMessage());
+            Logger.warn("Failed to parse Freenect log level. " + e.getMessage());
             setFreenectLogLevel(LogLevel.WARNING);
           }
         } else {
@@ -91,11 +91,11 @@ public class Activator implements BundleActivator, LogHandler {
     props.put("cv.lecturesight.framesource.type", "kinect-depth");
     bc.registerService(FrameGrabberFactory.class.getName(), depth, props);
 
-    log.info("Activated. Found " + context.numDevices() + " Kinect device(s).");
+    Logger.info("Activated. Found " + context.numDevices() + " Kinect device(s).");
   }
 
   private void setFreenectLogLevel(LogLevel ll) {
-    log.info("Setting Freenect log level to: " + ll.name());
+    Logger.info("Setting Freenect log level to: " + ll.name());
     context.setLogLevel(ll);
   }
 
@@ -113,12 +113,12 @@ public class Activator implements BundleActivator, LogHandler {
           try {
             dc.device.close();
           } catch (Exception e) {
-            log.warn(e.getClass().getSimpleName() + " while closing device. " + e.getMessage());
+            Logger.warn(e.getClass().getSimpleName() + " while closing device. " + e.getMessage());
           }
         }
       }
     }
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   public boolean hasConsumerRGB(int device) {
@@ -172,7 +172,7 @@ public class Activator implements BundleActivator, LogHandler {
       dc.device.startVideo((KinectVisualFrameGrabber)consumer);
       dc.consumerRGB = consumer;
     } catch (Exception e) {
-      log.error("Failed to initialize RGB consumer on device " + device, e);
+      Logger.error("Failed to initialize RGB consumer on device " + device, e);
     }
   }
 
@@ -195,7 +195,7 @@ public class Activator implements BundleActivator, LogHandler {
       dc.device.startVideo((KinectVisualFrameGrabber)consumer);
       dc.consumerRGB = consumer;
     } catch (Exception e) {
-      log.error("Failed to initialize depth consumer on device " + device, e);
+      Logger.error("Failed to initialize depth consumer on device " + device, e);
     }
   }
 
@@ -207,7 +207,7 @@ public class Activator implements BundleActivator, LogHandler {
       dev.setDepthFormat(DepthFormat.MM, Resolution.LOW);
       dev.setVideoFormat(VideoFormat.RGB, Resolution.LOW);
 
-      log.info("Opended Kinect #" + index);
+      Logger.info("Opended Kinect #" + index);
       return dev;
     } catch (IllegalStateException e) {
       throw new FrameSourceException("Failed to open device. ", e);
@@ -228,19 +228,19 @@ public class Activator implements BundleActivator, LogHandler {
     switch (ll) {
       case FATAL:
       case ERROR:
-        log.error(formatLogMessage(device, msg));
+        Logger.error(formatLogMessage(device, msg));
         break;
       case WARNING:
       case NOTICE:
-        log.warn(formatLogMessage(device, msg));
+        Logger.warn(formatLogMessage(device, msg));
         break;
       case INFO:
-        log.info(formatLogMessage(device, msg));
+        Logger.info(formatLogMessage(device, msg));
         break;
       case DEBUG:
       case SPEW:
       case FLOOD:
-        log.debug(formatLogMessage(device, msg));
+        Logger.debug(formatLogMessage(device, msg));
         break;
     }
   }

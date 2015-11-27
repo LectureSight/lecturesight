@@ -24,25 +24,24 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.DummyInterface;
 import java.awt.HeadlessException;
+import org.pmw.tinylog.Logger;
 
 @Component(name="lecturesight.gui", immediate=true)
 @Service
 public class MainGUI implements DummyInterface {
   
-  Log log = new Log("UI");
   UserInterfaceTracker uiTracker;
   MainGUIFrame window;
   
   protected void activate(ComponentContext cc) {
-    log.info("Activated");
+    Logger.info("Activated");
     try {
       window = new MainGUIFrame();
       window.setVisible(true);
     } catch (HeadlessException he) {
-      log.warn("No X11 environment present. Starting LectureSight in HEADLESS MODE.");
+      Logger.warn("No X11 environment present. Starting LectureSight in HEADLESS MODE.");
     }
     uiTracker = new UserInterfaceTracker(cc.getBundleContext());
     uiTracker.open();
@@ -50,16 +49,16 @@ public class MainGUI implements DummyInterface {
   
   protected void deactivate(ComponentContext cc) {
     uiTracker.close();
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
   
   void install(UserInterface ui) {
-    log.info("Installing interface: " + ui.getTitle());
+    Logger.info("Installing interface: " + ui.getTitle());
     window.addServiceUI(ui);
   }
   
   void uninstall(UserInterface ui) {
-    log.info("Uninstalling interface: " + ui.getTitle());
+    Logger.info("Uninstalling interface: " + ui.getTitle());
     window.removeServiceUI(ui);
   }
   

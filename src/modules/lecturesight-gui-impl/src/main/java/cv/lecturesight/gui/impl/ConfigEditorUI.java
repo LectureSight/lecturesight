@@ -25,24 +25,25 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
+
 
 @Component(name="lecturesight.gui.configeditor", immediate=true)
 @Service
 public class ConfigEditorUI implements UserInterface {
 
-    Log log = new Log("Config Editor");
     JPanel editorPanel;
 
     @Reference
     ConfigurationService configService;
     
     protected void activate(ComponentContext cc) {
-      editorPanel = new ConfigEditorPanel(configService, log);
-      log.info("Activated");
+      editorPanel = new ConfigEditorPanel(configService);
+      Logger.info("Activated");
     }
     
     protected void deactivate(ComponentContext cc) {
-      log.info("Deactivated");
+      Logger.info("Deactivated");
     }
 
   @Override

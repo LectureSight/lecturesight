@@ -9,15 +9,13 @@ import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.geometry.Position;
-import cv.lecturesight.util.Log;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import org.pmw.tinylog.Logger;
 
 public class VISCACameraImpl implements PTZCamera {
-
-  Log log = new Log("VISCA Camera");
 
   int address;
   int numSockets;
@@ -71,7 +69,7 @@ public class VISCACameraImpl implements PTZCamera {
   int intOrDie(String key, Properties props) {
     if (!props.containsKey(key)) {
       String msg = "Failed loading value " + key + " from camera profile. Key not existing.";
-      log.warn(msg);
+      Logger.warn(msg);
       throw new IllegalArgumentException(msg);
     }
     return Integer.parseInt(props.getProperty(key));
@@ -80,7 +78,7 @@ public class VISCACameraImpl implements PTZCamera {
   String stringOrDie(String key, Properties props) {
     if (!props.containsKey(key)) {
       String msg = "Failed loading value " + key + " from camera profile. Key not existing.";
-      log.warn(msg);
+      Logger.warn(msg);
       throw new IllegalArgumentException(msg);
     }
     return props.getProperty(key);
@@ -110,7 +108,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void zoom(int zoom) {
 
-    log.debug("Zoom to " + zoom);
+    Logger.debug("Zoom to " + zoom);
 
     Message msg = VISCA.CMD_ZOOM.clone();
     byte[] pkg = msg.getBytes();
@@ -145,7 +143,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void stopMove() {
 
-    log.debug("Stop movement");
+    Logger.debug("Stop movement");
 
     Message msg = VISCA.CMD_STOP_MOVE.clone();
     byte[] pkg = msg.getBytes();
@@ -162,7 +160,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveHome() {
 
-    log.debug("Move home");
+    Logger.debug("Move home");
 
     Message msg = VISCA.CMD_MOVE_HOME.clone();
     byte[] pkg = msg.getBytes();
@@ -175,7 +173,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void movePreset(int preset) {
 
-    log.debug("Move preset " + preset);
+    Logger.debug("Move preset " + preset);
 
     Message msg = VISCA.CMD_MOVE_PRESET.clone();
     byte[] pkg = msg.getBytes();
@@ -192,7 +190,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveUp(int tiltSpeed) {
 
-    log.debug("Move up speed " + tiltSpeed);
+    Logger.debug("Move up speed " + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_UP.clone();
     byte[] pkg = msg.getBytes();
@@ -209,7 +207,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveDown(int tiltSpeed) {
 
-    log.debug("Move down speed " + tiltSpeed);
+    Logger.debug("Move down speed " + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_DOWN.clone();
     byte[] pkg = msg.getBytes();
@@ -226,7 +224,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveLeft(int panSpeed) {
 
-    log.debug("Move left speed " + panSpeed);
+    Logger.debug("Move left speed " + panSpeed);
 
     Message msg = VISCA.CMD_MOVE_LEFT.clone();
     byte[] pkg = msg.getBytes();
@@ -243,7 +241,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveRight(int panSpeed) {
 
-    log.debug("Move right speed " + panSpeed);
+    Logger.debug("Move right speed " + panSpeed);
 
     Message msg = VISCA.CMD_MOVE_RIGHT.clone();
     byte[] pkg = msg.getBytes();
@@ -260,7 +258,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveUpLeft(int panSpeed, int tiltSpeed) {
 
-    log.debug("Move up-left speed " + panSpeed + "/" + tiltSpeed);
+    Logger.debug("Move up-left speed " + panSpeed + "/" + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_UP_LEFT.clone();
     byte[] pkg = msg.getBytes();
@@ -277,7 +275,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveUpRight(int panSpeed, int tiltSpeed) {
 
-    log.debug("Move up-right speed " + panSpeed + "/" + tiltSpeed);
+    Logger.debug("Move up-right speed " + panSpeed + "/" + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_UP_RIGHT.clone();
     byte[] pkg = msg.getBytes();
@@ -294,7 +292,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveDownLeft(int panSpeed, int tiltSpeed) {
 
-    log.debug("Move down-left speed " + panSpeed + "/" + tiltSpeed);
+    Logger.debug("Move down-left speed " + panSpeed + "/" + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_DOWN_LEFT.clone();
     byte[] pkg = msg.getBytes();
@@ -311,7 +309,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveDownRight(int panSpeed, int tiltSpeed) {
 
-    log.debug("Move down-right " + panSpeed + "/" + tiltSpeed);
+    Logger.debug("Move down-right " + panSpeed + "/" + tiltSpeed);
 
     Message msg = VISCA.CMD_MOVE_DOWN_RIGHT.clone();
     byte[] pkg = msg.getBytes();
@@ -328,7 +326,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveAbsolute(int panSpeed, int tiltSpeed, Position target) {
 
-    log.debug("Move absolute target " + target + " at pan speed " + panSpeed + ", tilt speed " + tiltSpeed);
+    Logger.debug("Move absolute target " + target + " at pan speed " + panSpeed + ", tilt speed " + tiltSpeed);
     
     // cancel current movement
 //    parent.cancelMovement(address);
@@ -369,7 +367,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void moveRelative(int panSpeed, int tiltSpeed, Position target) {
 
-    log.debug("Move relative target " + panSpeed + "/" + tiltSpeed);
+    Logger.debug("Move relative target " + panSpeed + "/" + tiltSpeed);
     
     // set new movement target and speeds
     Message msg = VISCA.CMD_MOVE_RELATIVE.clone();
@@ -406,7 +404,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void clearLimits() {
 
-    log.debug("Clear camera limits");
+    Logger.debug("Clear camera limits");
    
     // clear down-left limit
     Message msg_dl = VISCA.CMD_LIMIT_CLEAR.clone();
@@ -425,7 +423,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void setLimitUpRight(int pan, int tilt) {
 
-    log.debug("Set limit up-right");
+    Logger.debug("Set limit up-right");
 
     Message msg = VISCA.CMD_LIMIT_SET.clone();
     byte[] pkg = msg.getBytes();
@@ -458,7 +456,7 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public void setLimitDownLeft(int pan, int tilt) {
 
-    log.debug("Set limit down-left");
+    Logger.debug("Set limit down-left");
 
     Message msg = VISCA.CMD_LIMIT_SET.clone();
     byte[] pkg = msg.getBytes();

@@ -1,6 +1,5 @@
 package cv.lecturesight.cameraoperator.scripted;
 
-import cv.lecturesight.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,10 +17,9 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.pmw.tinylog.Logger;
 
 public class ScriptWorker implements Runnable {
-
-  Log log;             // logger for the script
 
   String name;         // name used for the script logger
   Scriptable scope;    // scope the script is running in
@@ -43,7 +41,6 @@ public class ScriptWorker implements Runnable {
    */
   public ScriptWorker(String name) throws Exception {
     this.name = name;
-    log = new Log(this.name);
     imports = new LinkedList<String>();
     
     // initialize script scope
@@ -77,18 +74,18 @@ public class ScriptWorker implements Runnable {
             ref = ((InvocationByReference)inv).getReference();
           }
           if (!(ref instanceof Function)) {
-            log.error("Invocation error: function not found.");
+            Logger.error("Invocation error: function not found.");
           } else {
             Function func = (Function) ref;
             func.call(ctx, scope, scope, inv.args);
           }
         } catch (Exception e) {
-          log.error("Error: " + e.getMessage(), e);
+          Logger.error("Error: " + e.getMessage(), e);
         }
       }
-      log.info("Interpreter exiting.");
+      Logger.info("Interpreter exiting.");
     } catch (InterruptedException ie) {
-      log.info("Interrupted while waiting for invocations. Interpreter exiting.");
+      Logger.info("Interrupted while waiting for invocations. Interpreter exiting.");
     } finally {
       Context.exit();
       stopped = true;
@@ -108,7 +105,7 @@ public class ScriptWorker implements Runnable {
       code.append("importPackage(Packages.").append(packageName).append(");");
       ctx.evaluateString(scope, code.toString(), "scriptWorker", 1, null);
     } catch (Exception e) {
-      log.error("Failed to import package " + packageName , e);
+      Logger.error("Failed to import package " + packageName , e);
     } finally {
       Context.exit();
     }
@@ -122,13 +119,13 @@ public class ScriptWorker implements Runnable {
    * @param obj
    */
   public void addScriptObject(String name, Object obj) {
-    log.info("Adding object \"" + name + "\" to script scope.");
+    Logger.info("Adding object \"" + name + "\" to script scope.");
     Context.enter();
     try {
       Object wrapped = Context.javaToJS(obj, scope);
       ScriptableObject.putProperty(scope, name, wrapped);
     } catch (Exception e) {
-      log.error("Failed to add script object " + name, e);
+      Logger.error("Failed to add script object " + name, e);
     } finally {
       Context.exit();
     }
@@ -139,7 +136,7 @@ public class ScriptWorker implements Runnable {
    * @param scriptfile 
    */
   public void load(File scriptfile) {
-    log.info("Loading script " + scriptfile.getName());
+    Logger.info("Loading script " + scriptfile.getName());
     Context ctx = Context.enter();
     try {
       ctx.evaluateReader(scope, new FileReader(scriptfile), this.name, 1, null);
@@ -148,9 +145,9 @@ public class ScriptWorker implements Runnable {
       throw new IllegalStateException(msg, e);
     } catch (IOException e) {
       String msg = "Failed reading source: " + scriptfile.getAbsolutePath();
-      log.error(msg, e);
+      Logger.error(msg, e);
     } catch (IllegalStateException e) {
-      log.error("Error while evaluating script.", e);
+      Logger.error("Error while evaluating script.", e);
       throw e;
     } finally {
       Context.exit();
@@ -171,7 +168,7 @@ public class ScriptWorker implements Runnable {
       Function function = (Function) func;
       function.call(ctx, scope, scope, args);
     } catch (Exception e) {
-      log.error("Exception while calling script function. ", e);
+      Logger.error("Exception while calling script function. ", e);
     } finally {
       Context.exit();
     }
@@ -185,7 +182,7 @@ public class ScriptWorker implements Runnable {
    * @param args
    */
   public void invokeMethod(String function, Object... args) {
-    log.debug("Submitting invocation of function " + function + " with " + args.length + " parameters.");
+    Logger.debug("Submitting invocation of function " + function + " with " + args.length + " parameters.");
     Invocation inv = new InvocationByName(function, args);
     invocationQueue.add(inv);
   }
@@ -198,7 +195,7 @@ public class ScriptWorker implements Runnable {
    * @param args
    */
   public void invokeMethod(Object function, Object... args) {
-    log.debug("Submitting invocation of function reference with " + args.length + " parameters.");
+    Logger.debug("Submitting invocation of function reference with " + args.length + " parameters.");
     Invocation inv = new InvocationByReference(function, args);
     invocationQueue.add(inv);
   }
@@ -224,7 +221,7 @@ public class ScriptWorker implements Runnable {
     try {
       ctx.evaluateString(scope, code, "<scriptWorker>", 1, null);
     } catch (Exception e) {
-      log.error("Failed to inject configuration object into script. ", e);
+      Logger.error("Failed to inject configuration object into script. ", e);
     } finally {
       Context.exit();
     }
@@ -257,9 +254,5 @@ public class ScriptWorker implements Runnable {
    */
   public boolean isStopped() {
     return stopped;
-  }
-
-  public Log getLogger() {
-    return log;
   }
 }

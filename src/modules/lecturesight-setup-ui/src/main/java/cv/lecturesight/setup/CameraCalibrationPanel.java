@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import javax.swing.UIManager;
+import org.pmw.tinylog.Logger;
 
 public class CameraCalibrationPanel extends javax.swing.JPanel implements HierarchyListener, CustomRenderer {
 
@@ -453,25 +454,25 @@ public class CameraCalibrationPanel extends javax.swing.JPanel implements Hierar
     try {
       top = Integer.parseInt(upperBoundText.getText());
     } catch (Exception e) {
-      parent.log.warn("Unable to parse value TOP");
+      Logger.warn("Unable to parse value TOP");
     }
     
     try {
       bottom = Integer.parseInt(bottomBoundText.getText());
     } catch (Exception e) {
-      parent.log.warn("Unable to parse value BOTTOM");
+      Logger.warn("Unable to parse value BOTTOM");
     }
     
     try {
       left = Integer.parseInt(leftBoundText.getText());
     } catch (Exception e) {
-      parent.log.warn("Unable to parse value LEFT");
+      Logger.warn("Unable to parse value LEFT");
     }
     
     try {
       right = Integer.parseInt(rightBoundText.getText());;
     } catch (Exception e) {
-      parent.log.warn("Unable to parse value RIGHT");
+      Logger.warn("Unable to parse value RIGHT");
     }
     
     parent.saveParameters(left, right, top, bottom);

@@ -30,7 +30,6 @@ import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileEventAdapter;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.Zone;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -47,6 +46,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.pmw.tinylog.Logger;
 
 /**
  * Implementation of Service API
@@ -70,7 +70,6 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private DisplayService dsps;
   @Reference
   private SceneProfileManager spm;
-  Log log = new Log("Frame Source Manager");
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
@@ -78,7 +77,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
 
-    log.info("Starting....");
+    Logger.info("Starting....");
 
     // scan for plugins already installed
     try {
@@ -92,7 +91,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
         }
       }
     } catch (Exception e) {
-      log.error("Error during scanning for plugins", e);
+      Logger.error("Error during scanning for plugins", e);
     }
 
     // listen to bundle un-/register events
@@ -104,10 +103,10 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     try {
       providerMRL = new FrameSourceDescriptor(config.get(PROPKEY_MRL));
     } catch (Exception e) {
-      log.warn("Unable to parse default source MRL. FrameSourceProvider will not be availabel!");
+      Logger.warn("Unable to parse default source MRL. FrameSourceProvider will not be availabel!");
     }
 
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   @Override
@@ -179,7 +178,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
         String name = (String) ref.getProperty(FRAMESOURCE_NAME_PROPERTY);
         for (String type : types.split(",")) {
           sourceTypes.remove(type.trim());
-          log.info("Unregistered " + name);
+          Logger.info("Unregistered " + name);
         }
       }
     }
@@ -201,14 +200,14 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     for (String type : types.split(",")) {
       FrameGrabberFactory factory = (FrameGrabberFactory) componentContext.getBundleContext().getService(ref);
       sourceTypes.put(type.trim(), factory);
-      log.info("Registered FrameGrabberFactory " + name + " (type: " + type.trim() + ")");
+      Logger.info("Registered FrameGrabberFactory " + name + " (type: " + type.trim() + ")");
       try {
         FrameSourceDescriptor fsd = new FrameSourceDescriptor(config.get(PROPKEY_MRL));
         if (fsd.getType().equals(type.trim())) {
           activateProvider(config.get(PROPKEY_MRL));
         }
       } catch (Exception e) {
-        log.warn("Unable to check if newly installed FrameGrabberFactory fits FrameSourceProvider configuration");
+        Logger.warn("Unable to check if newly installed FrameGrabberFactory fits FrameSourceProvider configuration");
       }
     }
   }
@@ -221,7 +220,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {
-      log.error("Failed to activate FrameSourceProvider with source " + mrl, e);
+      Logger.error("Failed to activate FrameSourceProvider with source " + mrl, e);
     }
   }
 

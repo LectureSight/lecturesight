@@ -23,7 +23,6 @@ import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
 import cv.lecturesight.profile.api.Zone;
 import static cv.lecturesight.profile.api.Zone.Type.PERSON;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationService;
 import java.io.*;
@@ -33,6 +32,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name="lecturesight.profile.manager", immediate=true)
 @Service()
@@ -40,7 +40,6 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
 
   static final String PROPKEY_PROFILE = "active.profile";
   static final String FILEEXT_PROFILE = ".scn";
-  private Log log = new Log("Scene Profile Manager");
   @Reference
   private Configuration config;
   @Reference
@@ -54,11 +53,11 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     // make sure profile directory existis
     File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");  
     if (!profileDir.exists()) {
-      log.info("Profile directory not existing. Attempting to create " + profileDir.getAbsolutePath());
+      Logger.info("Profile directory not existing. Attempting to create " + profileDir.getAbsolutePath());
       try {
         profileDir.mkdir();
       } catch (Exception e) {
-        log.error("Failed to create profile directory. ", e);
+        Logger.error("Failed to create profile directory. ", e);
       }
     }
     
@@ -79,11 +78,11 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
             activeProfile = loadProfile;
         }
     }
-    log.info("Activated. Configured scene profile is: " + activeProfile.name );
+    Logger.info("Activated. Configured scene profile is: " + activeProfile.name );
   }
 
   protected void deactivate(ComponentContext cc) {
-    log.info("Deactivated.");
+    Logger.info("Deactivated.");
   }
 
   @Override
@@ -95,12 +94,12 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   public void setActiveProfile(SceneProfile profile) {
     activeProfile = profile.clone();
     notifySubscribersActivated(profile);
-    log.info("Activated scene profile: " + activeProfile.name);
+    Logger.info("Activated scene profile: " + activeProfile.name);
     
     // if profile has a person zone then adjust video analysis parameters accordingly
     Zone person = findPersonZone(activeProfile);
     if (person != null) {
-      log.info("Adjusting video analysis parameters according to person area from profile.");
+      Logger.info("Adjusting video analysis parameters according to person area from profile.");
       double width = person.width;
       double height = person.height;
       double whole = width * height;
@@ -196,7 +195,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (filename != null) {
       try {
         File outfile = new File(filename);
-        log.info("Writing scene profile \"" + profile.name + "\" to " + outfile.getAbsolutePath());
+        Logger.info("Writing scene profile \"" + profile.name + "\" to " + outfile.getAbsolutePath());
         OutputStream out = new FileOutputStream(outfile);
         SceneProfileSerializer.serialize(profile, out);
         out.close();
@@ -257,7 +256,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
     profiles.putWithFilename(filename, profile);
-    log.info("Installed scene profile \"" + profile.name + "\" from " + filename);
+    Logger.info("Installed scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersInstalled(profile);
     
     // test if the installed artifact contains the active profile, activate it if so
@@ -271,7 +270,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
     profiles.putWithFilename(filename, profile);
-    log.info("Updated scene profile \"" + profile.name + "\" from " + filename);
+    Logger.info("Updated scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersUpdated(profile);
     
     // test if active profile was updated
@@ -287,7 +286,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (profiles.hasFilename(filename)) {
       SceneProfile profile = profiles.getByFilename(filename);
       profiles.remove(profile);
-      log.info("Removed scene profile " + filename);
+      Logger.info("Removed scene profile " + filename);
       notifySubscribersRemoved(profile);
       
       // test if active profile was removed, activated default profile if so

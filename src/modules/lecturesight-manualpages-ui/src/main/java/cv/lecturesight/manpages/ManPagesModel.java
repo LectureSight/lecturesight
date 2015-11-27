@@ -1,6 +1,6 @@
 package cv.lecturesight.manpages;
 
-import cv.lecturesight.util.Log;
+import org.pmw.tinylog.Logger;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.event.TreeModelEvent;
@@ -16,8 +16,6 @@ import org.osgi.framework.Bundle;
  * @author wulff
  */
 public class ManPagesModel implements TreeModel {
-
-  private Log log = new Log("Man Pages Model");
   
   enum EventType {
 
@@ -68,7 +66,7 @@ public class ManPagesModel implements TreeModel {
     TreeModelEvent event = new TreeModelEvent(this, path, childIndices, changedChildren);
     notifyListeners(event, EventType.ADDED);
 
-    log.debug("Added BundleNode " + newNode);
+    Logger.debug("Added BundleNode " + newNode);
     
     return newNode;
   }
@@ -91,7 +89,7 @@ public class ManPagesModel implements TreeModel {
       TreeModelEvent event = new TreeModelEvent(this, path, childIndices, changedChildren);
       notifyListeners(event, EventType.REMOVED);
       
-      log.debug("Removed BundleNode " + bn);
+      Logger.debug("Removed BundleNode " + bn);
     }
   }
 
@@ -120,7 +118,7 @@ public class ManPagesModel implements TreeModel {
     TreeModelEvent event = new TreeModelEvent(this, path, indices, changedChildren);
     notifyListeners(event, EventType.ADDED);
     
-    log.debug("Added " + i + " pages to BundleNode " + bnode);
+    Logger.debug("Added " + i + " pages to BundleNode " + bnode);
   }
 
   @Override

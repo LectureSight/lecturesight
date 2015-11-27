@@ -19,12 +19,11 @@ package cv.lecturesight.framesource.impl;
 
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
-import cv.lecturesight.util.Log;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 public class FrameSourceProviderImpl implements FrameSourceProvider {
 
-  private Log log = new Log("FrameSource Provider");
   private FrameSource source;
 
   public FrameSourceProviderImpl(FrameSource source) {
@@ -32,7 +31,7 @@ public class FrameSourceProviderImpl implements FrameSourceProvider {
   }
 
   protected void activate(ComponentContext context) {
-    log.info("Activated");
+    Logger.info("Activated");
   }
 
   @Override

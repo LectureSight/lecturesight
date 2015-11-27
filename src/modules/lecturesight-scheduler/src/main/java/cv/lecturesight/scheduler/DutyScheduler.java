@@ -4,7 +4,6 @@ import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,9 +16,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
+
 
 /**
  * A service that loads a schedule from a iCal file and starts/stops object
@@ -33,7 +33,6 @@ public class DutyScheduler implements ArtifactInstaller {
   final static String PROPKEY_FILENAME = "schedule.file";
   final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String PROPKEY_AGENTNAME = "agent.name";
-  private Log log = new Log("Duty Scheduler");
   @Reference
   Configuration config;
   @Reference
@@ -62,12 +61,12 @@ public class DutyScheduler implements ArtifactInstaller {
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
-    log.info("Activated. Listening for changes on " + scheduleFileAbsolutePath);
+    Logger.info("Activated. Listening for changes on " + scheduleFileAbsolutePath);
   }
 
   protected void deactivate(ComponentContext cc) {
     executor.shutdownNow();     // shut down the event executor
-    log.info("Deactivated.");
+    Logger.info("Deactivated.");
   }
 
   /**
@@ -87,7 +86,7 @@ public class DutyScheduler implements ArtifactInstaller {
    * @param file iCal file that holds the schedule
    */
   private void loadEvents(File file) {
-    log.info("Loading schedule from " + file.getName());
+    Logger.info("Loading schedule from " + file.getName());
 
     long timeZoneOffset = config.getLong(PROPKEY_TZOFFSET);  // get time zone offset
     timeZoneOffset *= 1000 * 60 * 60;                        // make time zone offset hours
@@ -118,7 +117,7 @@ public class DutyScheduler implements ArtifactInstaller {
             Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR);
             newEvents.add(stopOperator);
 
-            log.info("Created recording event:  Start: " + startDate.toString() + "  End: " + stopDate.toString());
+            Logger.info("Created recording event:  Start: " + startDate.toString() + "  End: " + stopDate.toString());
           }
         }
         events.clear();                             // clear schedule 
@@ -127,7 +126,7 @@ public class DutyScheduler implements ArtifactInstaller {
         events.removeBefore(System.currentTimeMillis()); // discard events from the past
 
       } catch (Exception e) {
-        log.error("Unable to load calendar. ", e);
+        Logger.error("Unable to load calendar. ", e);
         throw new RuntimeException("Unable to load calendar. ", e);
       }
     }
@@ -143,12 +142,12 @@ public class DutyScheduler implements ArtifactInstaller {
           heart.init();
         }
         heart.go();
-        log.info("Object Tracker activated.");
+        Logger.info("Object Tracker activated.");
       } else {
-        log.info("Object Tracker is already active.");
+        Logger.info("Object Tracker is already active.");
       }
     } catch (Exception e) {
-      log.error("Unexpected error in ensureTrackingON.", e);
+      Logger.error("Unexpected error in ensureTrackingON.", e);
     }
   }
 
@@ -159,12 +158,12 @@ public class DutyScheduler implements ArtifactInstaller {
     try {
       if (heart.isRunning()) {
         heart.stop();
-        log.info("Stopped Object Tracking");
+        Logger.info("Stopped Object Tracking");
       } else {
-        log.info("Object Tracking is already deactivated.");
+        Logger.info("Object Tracking is already deactivated.");
       }
     } catch (Exception e) {
-      log.error("Unexpected error in ensureTrackingOFF.", e);
+      Logger.error("Unexpected error in ensureTrackingOFF.", e);
     }
   }
 
@@ -223,7 +222,7 @@ public class DutyScheduler implements ArtifactInstaller {
      * Ensure that action associated with current event was set in motion.
      */
     void fireEvent(Event event) {
-        log.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
+        Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
         switch (event.getAction()) {
           case START_TRACKING:
             ensureTrackingON();

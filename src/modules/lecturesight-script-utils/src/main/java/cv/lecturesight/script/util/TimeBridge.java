@@ -8,6 +8,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 @Component(name = "lecturesight.script.bridge.time", immediate = true)
 @Service()
@@ -60,7 +61,7 @@ public class TimeBridge implements ScriptBridge {
       try {
         Thread.sleep(this.millis);
       } catch (InterruptedException e) {
-        engine.getLogger().warn("Time.sleep thread interrupted.");
+        Logger.warn("Time.sleep thread interrupted.");
       }
       engine.invokeCallback(callback, new Object[0]);
     }

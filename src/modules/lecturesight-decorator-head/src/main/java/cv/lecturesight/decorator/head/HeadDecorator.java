@@ -20,7 +20,6 @@ package cv.lecturesight.decorator.head;
 import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
@@ -34,6 +33,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
@@ -56,7 +56,6 @@ public class HeadDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_CLUSTERS = "head.clusters";
   final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
   
-  private Log log = new Log("Head Finder");
   @Reference
   Configuration config;
   @Reference
@@ -67,11 +66,11 @@ public class HeadDecorator implements ObjectDecorator {
   protected void activate(ComponentContext cc) throws Exception {
     PARAM_K = config.getInt(PROPKEY_K);
     MAX_ITER = config.getInt(PROPKEY_MAXITER);
-    log.info("BrainzzZ!");
+    Logger.info("BrainzzZ!");
   }
 
   protected void deactivate(ComponentContext cc) throws Exception {
-    log.info("Deactivated");
+    Logger.info("Deactivated");
   }
 
   @Override
@@ -152,7 +151,7 @@ public class HeadDecorator implements ObjectDecorator {
           iterations++;
         }
 
-        //log.debug("iterations: " + iterations);
+        //Logger.debug("iterations: " + iterations);
 
         double d = Double.MAX_VALUE;
         int optimal = 0;
@@ -180,7 +179,7 @@ public class HeadDecorator implements ObjectDecorator {
         object.setProperty(OBJ_PROPKEY_HEAD_CLUSTERS, clusters);
       }
     } catch (Exception e) {
-      log.error("Error in head finder!", e.getCause());
+      Logger.error("Error in head finder!", e.getCause());
     }
   }
 }

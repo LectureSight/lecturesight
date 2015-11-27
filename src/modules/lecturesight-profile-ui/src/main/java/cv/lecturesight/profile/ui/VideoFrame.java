@@ -28,12 +28,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -69,7 +68,7 @@ public class VideoFrame extends JPanel {
       setComponentZOrder(video, 0);
       setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
     } catch (IOException ex) {
-      Logger.getLogger(SceneAreasUI.class.getName()).log(Level.SEVERE, null, ex);
+      Logger.error("Error", ex);
     }
 
     addMouseListener(new MouseAdapter() {
