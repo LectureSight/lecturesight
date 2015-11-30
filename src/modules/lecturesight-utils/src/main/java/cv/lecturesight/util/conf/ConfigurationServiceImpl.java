@@ -95,25 +95,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
   
   @Override
   public void serviceChanged(ServiceEvent se) {
+    Object service = null;
     try {
-      // event on service that implements the ConfigurationListener interface
-      Object service = bcontext.getService(se.getServiceReference());
-      if (service != null && service instanceof ConfigurationListener) {
-
-        // add/remove ConfigurationListener
-        switch (se.getType()) {
-          case ServiceEvent.REGISTERED:
-            addConfigurationListener((ConfigurationListener) service);
-            break;
-          case ServiceEvent.UNREGISTERING:
-            removeConfigurationListener((ConfigurationListener) service);
-            break;
-          default:
-            break;
-        }
-      }
+      service = bcontext.getService(se.getServiceReference());
     } catch (Exception e) {
-      Logger.warn(e.getClass().getName() + " in serviceChanged(): " + e.getMessage());
+      // java.lang.IllegalStateException: Invalid BundleContext --> this service already unregistered
+    }
+    
+    if (service != null && service instanceof ConfigurationListener) {
+
+      // add/remove ConfigurationListener
+      switch (se.getType()) {
+        case ServiceEvent.REGISTERED:
+          addConfigurationListener((ConfigurationListener) service);
+          break;
+        case ServiceEvent.UNREGISTERING:
+          removeConfigurationListener((ConfigurationListener) service);
+          break;
+        default:
+          break;
+      }
     }
   }
 }
