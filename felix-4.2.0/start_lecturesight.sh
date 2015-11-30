@@ -5,4 +5,4 @@ LOG_OPTS="-Dtinylog.configuration=conf/log.properties"
 FELIX_CACHE="./felix-cache"
 
 rm -rf $FELIX_CACHE/*
-java $DEBUG_OPTS -Dlecturesight.basedir=. -jar bin/felix.jar $FELIX_CACHE
+java $LOG_OPTS -Dlecturesight.basedir=. -jar bin/felix.jar $FELIX_CACHE
