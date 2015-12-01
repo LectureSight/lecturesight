@@ -64,6 +64,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   int maxspeed_zoom;                  // max zoom speed
   int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
+  int stop_x, stop_y;                 // Distance within which the camera is considered to have reached the target
   int initial_delay;                  // Time in milliseconds to allow camera to reach initial position
   float damp_pan, damp_tilt;          // movement speed dampening factors 
   boolean steering = false;           // indicates if the update callback steers camera
@@ -123,7 +124,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
           } else if (ps == 0) {
             dx = 0;
           }
-          //ps = ps == 0 ? 1 : ps;
+          ps = (ps == 0) ? 1 : ps;
         } else {
           ps = (int) (maxspeed_pan * damp_pan);
         }
@@ -137,9 +138,18 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
           } else if (ts == 0) {
             dy = 0;
           }
-          //ts = ts == 0 ? 1 : ts;
+          ts = (ts == 0) ? 1 : ts;
         } else {
           ts = (int) (maxspeed_tilt * damp_tilt);
+        }
+
+        // Stop moving if the camera is close enough
+        if (dx_abs < stop_x) {
+		dx = dx_abs = ps = 0;
+        }
+
+        if (dy_abs < stop_y) {
+		dy = dy_abs = ts = 0;
         }
 
         // apply computed speeds if speeds or target have changed
@@ -201,6 +211,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     // get service configuration
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
+    stop_x = config.getInt(Constants.PROPKEY_STOPX);
+    stop_y = config.getInt(Constants.PROPKEY_STOPY);
     damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
     if (damp_pan > 1.0 || damp_pan < 0.0) {
       Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
