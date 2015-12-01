@@ -28,6 +28,8 @@ public interface CameraSteeringWorker {
   public boolean isSteering();
   
   public void setSteering(boolean on);
+
+  public void setInitialPosition(NormalizedPosition pos);
   
   public void setTargetPosition(NormalizedPosition pos);
   
