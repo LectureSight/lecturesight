@@ -9,6 +9,7 @@ public class Constants {
   static final String PROPKEY_ALPHAY = "cv.lecturesight.ptz.steering.worker.relativemove.move.alpha.y";
   static final String PROPKEY_DAMP_PAN = "cv.lecturesight.ptz.steering.worker.relativemove.move.damp.pan";
   static final String PROPKEY_DAMP_TILT = "cv.lecturesight.ptz.steering.worker.relativemove.move.damp.tilt";
+  static final String PROPKEY_INITIAL_DELAY = "cv.lecturesight.ptz.steering.worker.relativemove.move.initial.delay";
   static final String PROPKEY_LIMIT_LEFT = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.left";
   static final String PROPKEY_LIMIT_RIGHT = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.right";
   static final String PROPKEY_LIMIT_TOP = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.top";

@@ -61,21 +61,24 @@ public class SimpleCameraOperator implements CameraOperator {
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
  
-  float start_zoom = 0;
+  float start_pan = 0;
   float start_tilt = 0;
+  float start_zoom = 0;
   float frame_width = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
     timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
     idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
-    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
+    start_pan = config.getFloat(Constants.PROPKEY_PAN);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
+    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
     frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
+
+    Logger.info("Activated. Timeout is " + timeout + " ms, pan is " + start_pan + ", tilt is " + start_tilt + ",  zoom is " + start_zoom);
 
     fsrc = fsp.getFrameSource();
     normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
-    start();    
-    Logger.info("Activated. Timeout is " + timeout + " ms, zoom is " + start_zoom + ", tilt is " + start_tilt);
+    start();
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -120,9 +123,9 @@ public class SimpleCameraOperator implements CameraOperator {
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
   private void setInitialTrackingPosition() {
+      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
       steerer.setZoom(start_zoom);  
-      NormalizedPosition neutral = new NormalizedPosition(0.0f, start_tilt);
-      steerer.setTargetPosition(neutral);
+      steerer.setInitialPosition(neutral);
   }
 
   /* 

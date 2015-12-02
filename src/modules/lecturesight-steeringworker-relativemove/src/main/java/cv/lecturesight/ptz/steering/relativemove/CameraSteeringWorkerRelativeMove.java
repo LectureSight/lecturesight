@@ -64,6 +64,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   int maxspeed_zoom;                  // max zoom speed
   int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
+  int initial_delay;                  // Time in milliseconds to allow camera to reach initial position
   float damp_pan, damp_tilt;          // movement speed dampening factors 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
@@ -210,6 +211,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
       Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
       damp_tilt = 1.0f;
     }
+    initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
 
     // initialize worker
     worker = new SteeringWorker();
@@ -296,14 +298,42 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     if (b) {
       Logger.info("Steering is now ON");
     } else {
-      stopMoving();
       Logger.info("Steering is now OFF");
+      stopMoving();
     }
   }
 
   @Override
   public boolean isMoving() {
     return moving;
+  }
+
+  @Override
+  public void setInitialPosition(NormalizedPosition pos) {
+
+    Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
+
+    // Implemented using an absolute move
+    int ps = (int) (maxspeed_pan * damp_pan);
+    int ts = (int) (maxspeed_tilt * damp_tilt);
+
+    boolean s = steering;
+    setSteering(false);
+
+    model.setTargetPositionNorm(pos);
+    Position target_pos = model.getTargetPosition();
+
+    camera.moveAbsolute(ps, ts, target_pos.flip(xflip, yflip));
+
+    // Allow the camera to reach the target absolute position before sending it any other movement commands
+    try {
+       Thread.sleep(initial_delay);
+    } catch (Exception e) {
+       // ignore
+    }
+    setSteering(s);
+
+    informUISlaves();
   }
 
   @Override
