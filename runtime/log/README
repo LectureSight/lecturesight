@@ -1,0 +1,11 @@
+This is the default location for log files.
+
+By default only logging to console is enabled. To activate logging to file
+edit the file conf/log.properties and uncomment the second section.
+
+We rely on tinyLog for system-wide logging. For more information and 
+configuration options please refer to
+
+http://www.tinylog.org/
+
+

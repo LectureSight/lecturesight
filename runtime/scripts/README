@@ -1,0 +1,19 @@
+This is the location where the camera operator script files live.
+
+This directory is watched by the scripting service. The scripting service
+will notice when the configured camera operator script changes and re-load
+and re-start it automatically. 
+
+configuration property: cv.lecturesight.cameraoperator.scripted.script
+
+Every camera operator script can bring its own configuration file. The 
+scripting service will detect files with the same name as the script
+file but with the suffix .cfg and load them as the scripts configuration.
+So the script 'default.js' can have a configuration file 'default.cfg'.
+
+Script configuration files are standard Java property files. All properties
+defined in the script file will be accessible in script scope as properties
+of the 'Config' object.
+
+
+
