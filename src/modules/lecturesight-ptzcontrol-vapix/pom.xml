@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>cv.lecturesight</groupId>
+	<artifactId>lecturesight-vapix-camera</artifactId>
+	<name>Lecturesight VAPIX Camera</name>
+	<version>0.3</version>
+	<packaging>bundle</packaging>
+
+	<parent>
+		<groupId>cv.lecturesight</groupId>
+		<artifactId>base</artifactId>
+		<version>0.3</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>maven-scr-plugin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>cv.lecturesight</groupId>
+			<artifactId>lecturesight-util</artifactId>
+			<version>0.3</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>cv.lecturesight</groupId>
+			<artifactId>lecturesight-ptzcontrol-api</artifactId>
+			<version>0.3</version>
+			<type>jar</type>
+		</dependency>
+
+		<!-- dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>avalon-logkit</groupId>
+			<artifactId>avalon-logkit</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.jms</artifactId>
+			<version>3.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javax.mail</artifactId>
+			<version>1.4.1_5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jdmk</groupId>
+			<artifactId>jmxtools</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-osgi</artifactId>
+			<version>5.0.4.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.antlr-runtime</artifactId>
+			<version>3.5.2_1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.javassist</artifactId>
+			<version>3.12.1.GA_3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.avalon-framework</artifactId>
+			<version>4.3.1_1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spymemcached</artifactId>
+			<version>2.5_2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.9</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient-osgi</artifactId>
+			<version>4.5.1</version>
+		</dependency-->
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<!-- Generate Declarative Service Descriptor -->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-scr-scrdescriptor</id>
+						<goals>
+							<goal>scr</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.plexus</groupId>
+						<artifactId>plexus-utils</artifactId>
+						<version>3.0.4</version>
+					</dependency>
+				</dependencies>
+
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.0.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>cv.lecturesight.vapix</Bundle-SymbolicName>
+						<!-- Private-Package>
+							org.apache.commons.*,org.apache.avalon.framework.*,net.sf.ehcache.*,net.sf.ehcache
+							,javax.servlet,javax.servlet.*,javax.jms,net.spy.*
+							,javax.mail.*,com.sun.mail.*,com.sun.jdmk.*
+							,org.apache.log,org.apache.log.*,org.apache.log4j.*
+							,org.hibernate.*
+							,antlr,antlr.*
+							,javassist,javassist.*
+							,org.apache.http.*
+						</Private-Package-->
+						<Export-Package>
+							cv.lecturesight.ptz.api,cv.lecturesight.vapix.service
+						</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
