@@ -782,7 +782,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 			float z = this.map((int) zoom, lim_zoom.min, scale_zoom, -1);
 
 			try {
-				Logger.trace("Zoom to [" + Zoom + "]");
+				Logger.trace("Zoom to [" + zoom + "]");
 				Logger.trace("    Z:" + z + " (" + zoom + "; " + lim_zoom.min + "; " + scale_zoom + "; 0)");
 
 				if (this.ptz_device.absoluteZoom(this.profile_token, z)) {
@@ -791,7 +791,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 				Logger.error("zoom: " + e.getMessage());
 			}
 		} else {
-			this.moveNotSupported(panSpeed, tiltSpeed);
+			this.moveNotSupported(zoom);
 		}
 	}
 

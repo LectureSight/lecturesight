@@ -385,7 +385,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 	public void stopMove() {
 
 		try {
-			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=stop");
+			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=stop&continuouspantiltmove=0,0");
 			Logger.trace("Stop movement (" + result + ")");
 		} catch (IOException e) {
 			Logger.error("stop: " + e.getMessage());
