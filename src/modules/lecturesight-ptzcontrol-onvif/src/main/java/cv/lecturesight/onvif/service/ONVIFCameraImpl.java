@@ -216,7 +216,9 @@ public class ONVIFCameraImpl implements PTZCamera {
 							updateInterval, TimeUnit.MILLISECONDS);
 
 				} else {
-					Logger.debug("Could not connect to camera - null object.");
+					String msg = "Could not connect to camera - null object.";
+					Logger.debug(msg);
+					throw new PTZCameraException(msg);
 				}
 
 			} catch (ConnectException e) {
@@ -692,7 +694,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 	private List<PTZPreset> getPresets() {
 
 		try {
-			Logger.trace("getPresets);
+			Logger.trace("getPresets");
 			return this.ptz_device.getPresets(profile_token);
 		} catch (Exception e) {
 			Logger.error("getPresets: " + e.getMessage());

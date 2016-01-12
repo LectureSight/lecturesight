@@ -220,12 +220,20 @@ public class VAPIXCameraImpl implements PTZCamera {
 					// start update thread
 					updaterHandle = executor.scheduleAtFixedRate(new CameraStateUpdater(), updateInterval,
 							updateInterval, TimeUnit.MILLISECONDS);
+				} else {
+					String msg = "Camera not responding to HTTPRequest - group=PTZ.";
+					Logger.debug(msg);
+					throw new PTZCameraException(msg);
 				}
+			} else {
+				String msg = "Camera not responding to HTTPRequest - group=Brand.";
+				Logger.debug(msg);
+				throw new PTZCameraException(msg);
 			}
 
 		} else {
 
-			String msg = "Could not connect to ONVIF Camera - no ip address.";
+			String msg = "Could not connect to VAPIX Camera - no ip address.";
 			Logger.debug(msg);
 
 			// OSGI-Hint: In case this service is not able initialize its
