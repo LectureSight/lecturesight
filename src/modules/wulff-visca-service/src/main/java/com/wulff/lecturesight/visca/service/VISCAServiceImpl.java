@@ -37,7 +37,6 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   
   ComponentContext cc;
 
-  boolean debug = false;
   boolean camera_alive = false;
 
   @Reference
@@ -81,7 +80,6 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     String stopbits = config.get(Constants.PROPKEY_PORT_STOPBITS);
     String parity = config.get(Constants.PROPKEY_PORT_PARITY);
     updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
-    debug = config.getBoolean(Constants.PROPKEY_DEBUG);
 
     // open serial port
     initPort(devicename, speed, databits, stopbits, parity);
@@ -219,9 +217,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
    * @param a
    */
   synchronized void send(byte[] b) {
-    if (debug) {
-      Logger.debug(" >>" + ByteUtils.byteArrayToHex(b, -1));
-    }
+    Logger.trace(" >>" + ByteUtils.byteArrayToHex(b, -1));
     try {
       commOut.write(b);
       commOut.flush();
@@ -353,9 +349,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       }
 
       // debug output
-      if (debug) {
-        Logger.debug(" <<" + ByteUtils.byteArrayToHex(buffer, len));
-      }
+      Logger.trace(" <<" + ByteUtils.byteArrayToHex(buffer, len));
 
       // did we receive an error?
       if (ByteUtils.high(buffer[1]) == 6) {
@@ -441,9 +435,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     }
     msg += " from #" + adr + " (socket: " + socket + ")";
     
-    if (debug) {
-      Logger.info(msg);    
-    }
+    Logger.trace(msg);    
   }
 
   int last_pan = -1;
@@ -451,9 +443,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 
   private void handlePositionUpdate(byte[] buffer) {
 
-    if (debug) {
-    	Logger.debug("Received camera position update");
-    }
+    Logger.trace("Received camera position update");
 
     int adr = getAddress(buffer);
     int pan = ((buffer[2] & 0x0f) << 12) + ((buffer[3] & 0x0f) << 8) + ((buffer[4] & 0x0f) << 4) + (buffer[5] & 0x0f);
@@ -507,9 +497,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       try {
 	      for (VISCACameraImpl cam : cameras) {
 		if (cam != null) {
-		  if (debug) {
-		  	Logger.debug("Requesting camera position update");
-		  }
+		  Logger.trace("Requesting camera position update");
 		  inq_msg.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + cam.address);
 		  send(inq_msg.getBytes());
 		}
