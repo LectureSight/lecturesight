@@ -1122,11 +1122,11 @@ public class VAPIXCameraImpl implements PTZCamera {
 
 		protected PasswordAuthentication getPasswordAuthentication() {
 			String promptString = getRequestingPrompt();
-			System.out.println(promptString);
+			Logger.trace(promptString);
 			String hostname = getRequestingHost();
-			System.out.println(hostname);
+			Logger.trace(hostname);
 			InetAddress ipaddr = getRequestingSite();
-			System.out.println(ipaddr);
+			Logger.trace(ipaddr);
 			int port = getRequestingPort();
 
 			return new PasswordAuthentication(user, password.toCharArray());
