@@ -40,7 +40,7 @@ public class ConfigurationImpl implements Configuration {
     key = ensureBundleName(key);
     String value = props.getProperty(key);
     if (value != null) {
-      return value;
+      return value.trim();
     } else {
       throw new IllegalArgumentException("Unknown configuration key: " + key);
     }
