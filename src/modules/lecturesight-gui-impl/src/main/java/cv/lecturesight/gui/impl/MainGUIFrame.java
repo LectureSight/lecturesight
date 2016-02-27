@@ -30,13 +30,20 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
+import org.osgi.framework.BundleContext;
+import org.pmw.tinylog.Logger;
 
 public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,InternalFrameListener {
 
   Map<JMenuItem, UserInterface> servicesMenuItems = new HashMap<JMenuItem, UserInterface>();
   Map<UserInterface, JInternalFrame> visibleUIs = new HashMap<UserInterface, JInternalFrame>();
+
+  private int menuItems = 0;
+  private BundleContext bundleContext;
   
-  public MainGUIFrame() {
+  public MainGUIFrame(BundleContext bc) {
+    bundleContext = bc;
+
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -49,7 +56,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   public void addServiceUI(UserInterface ui) {
     JMenuItem item = new JMenuItem(ui.getTitle());
     item.addActionListener(this);
-    servicesMenu.add(item);
+    servicesMenu.insert(item, menuItems++);
     servicesMenuItems.put(item, ui);
   }
 
@@ -114,6 +121,24 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addComponent(desktop, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
     );
+
+    // Quit menu item
+    JMenuItem item = new JMenuItem("Quit LectureSight");
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+            // Shut down
+            try {
+               Logger.info("Normal shutdown (from menu)");
+               bundleContext.getBundle(0).stop();
+            } catch (Exception e) {
+               Logger.warn(e, "Abnormal shutdown");
+               System.exit(1);
+            }
+        }
+
+    });
+    servicesMenu.addSeparator();
+    servicesMenu.add(item);
 
     pack();
   }// </editor-fold>//GEN-END:initComponents

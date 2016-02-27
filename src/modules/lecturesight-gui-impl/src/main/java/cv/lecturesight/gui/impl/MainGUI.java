@@ -38,7 +38,7 @@ public class MainGUI implements DummyInterface {
   protected void activate(ComponentContext cc) {
     Logger.info("Activated");
     try {
-      window = new MainGUIFrame();
+      window = new MainGUIFrame(cc.getBundleContext());
       window.setVisible(true);
     } catch (HeadlessException he) {
       Logger.warn("No X11 environment present. Starting LectureSight in HEADLESS MODE.");
