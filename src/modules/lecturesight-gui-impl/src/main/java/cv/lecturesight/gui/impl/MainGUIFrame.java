@@ -21,7 +21,9 @@ import cv.lecturesight.gui.api.UserInterface;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
@@ -54,11 +56,17 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   }
 
   public void removeServiceUI(UserInterface ui) {
+    List<JMenuItem> itemsToRemove = new ArrayList<JMenuItem>();
+
     for (JMenuItem item : servicesMenuItems.keySet()) {
       if (servicesMenuItems.get(item) == ui) {
-        servicesMenu.remove(item);
-        servicesMenuItems.remove(item);
+        itemsToRemove.add(item);
       }
+    }
+
+    for (JMenuItem item : itemsToRemove) {
+      servicesMenuItems.remove(item);
+      servicesMenu.remove(item);
     }
   }
   
