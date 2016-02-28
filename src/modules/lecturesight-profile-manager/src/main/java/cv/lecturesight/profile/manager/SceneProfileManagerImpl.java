@@ -48,6 +48,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   private SceneProfile defaultProfile, activeProfile, loadProfile;
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
   private String configuredProfile;
+  private boolean active = true;
 
   protected void activate(ComponentContext cc) throws Exception {
     // make sure profile directory existis
@@ -82,6 +83,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   }
 
   protected void deactivate(ComponentContext cc) {
+    active = false;
     Logger.info("Deactivated.");
   }
 
@@ -253,6 +255,8 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   
   @Override
   public void install(File file) throws Exception {
+    if (!active) return;
+
     String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
     profiles.putWithFilename(filename, profile);
@@ -267,6 +271,8 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
 
   @Override
   public void update(File file) throws Exception {
+    if (!active) return;
+
     String filename = file.getAbsolutePath();
     SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
     profiles.putWithFilename(filename, profile);
@@ -281,6 +287,8 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
 
   @Override
   public void uninstall(File file) throws Exception {
+    if (!active) return;
+
     String filename = file.getAbsolutePath();
     
     if (profiles.hasFilename(filename)) {
