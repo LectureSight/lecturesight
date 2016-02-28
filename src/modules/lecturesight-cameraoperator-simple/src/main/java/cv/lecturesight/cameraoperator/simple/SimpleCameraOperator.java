@@ -82,6 +82,7 @@ public class SimpleCameraOperator implements CameraOperator {
   }
 
   protected void deactivate(ComponentContext cc) {
+    stop();
     Logger.info("Deactivated");
   }
 

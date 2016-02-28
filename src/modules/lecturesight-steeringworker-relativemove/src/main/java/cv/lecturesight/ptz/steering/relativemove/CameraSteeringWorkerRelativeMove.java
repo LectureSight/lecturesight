@@ -246,6 +246,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
   protected void deactivate(ComponentContext cc) throws Exception {
     camera.removeCameraListener(worker);
+    camera.stopMove();
     Logger.info("Deactivated");
   }
 
