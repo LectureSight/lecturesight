@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -95,6 +96,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
   
   @Override
   public void serviceChanged(ServiceEvent se) {
+
+    // Ignore service events during framework shutdown (otherwise some bundles can get restarted)
+    if (bcontext.getBundle(0).getState() != Bundle.ACTIVE) {
+        return;
+    }
+
     Object service = null;
     try {
       service = bcontext.getService(se.getServiceReference());
