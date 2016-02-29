@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -129,13 +130,20 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
    */
   protected void deactivate(ComponentContext cc) {
     try {
+      Thread.sleep(500);
       executor.shutdown();
       executor.awaitTermination(1, TimeUnit.SECONDS);
       Thread.sleep(1500);
     } catch (Exception e) {
       Logger.debug("Unable to terminate scheduled processes cleanly");
     }
+
+    // Unregister camera
+    ServiceReference serviceReference = cc.getBundleContext().getServiceReference(PTZCamera.class.getName());
+    cc.getBundleContext().ungetService(serviceReference);
+
     deinitPort();
+
     Logger.debug("Deactivated");
   }
 
