@@ -32,12 +32,8 @@ import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator {
 
-  final static String LOGLISTENER_ACTIVE_PROPERTY = "cv.lecturesight.util.log.console.enabled";
-  final static String LOGLISTENER_COLOR_ENABLED = "cv.lecturesight.util.log.console.color";
-  final static String LOGLISTENER_SUPPRESS_OSGI_EVENTS = "cv.lecturesight.util.log.suppress.osgievents";
   final static String CONFIG_NAME = "lecturesight.properties";
   final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
-  private ServiceRegistration consoleLogRegistration = null;
   private ServiceRegistration confFactoryReg;
   private File configFile;
   private Properties defaultProperties = new Properties();
@@ -45,31 +41,6 @@ public final class Activator implements BundleActivator {
 
   @Override
   public void start(BundleContext context) throws Exception {
-
-//    // set LogService for lecturesight Log
-//    ServiceReference logRef = context.getServiceReference(LogService.class.getName());
-//    if (logRef != null) {
-//      Log.setLogService((LogService) context.getService(logRef));
-//    }
-//    // activate log console output if configured
-//    String active = context.getProperty(LOGLISTENER_ACTIVE_PROPERTY);
-//    if (active != null && ("TRUE".equalsIgnoreCase(active) || "YES".equalsIgnoreCase(active))) {
-//      
-//      ConsoleOutputLogListener consoleLog;
-//      String color = context.getProperty(LOGLISTENER_COLOR_ENABLED);
-//      String suppStr = context.getProperty(LOGLISTENER_SUPPRESS_OSGI_EVENTS);
-//      boolean suppress = suppStr != null && ("TRUE".equalsIgnoreCase(suppStr) || "YES".equalsIgnoreCase(suppStr));
-//      LogEntryFormater formater = color != null && ("TRUE".equalsIgnoreCase(color) || "YES".equalsIgnoreCase(color)) ?
-//                                    new ECMA48LogEntryFormater() : new DefaultLogEntryFormater();
-//      
-//      consoleLog = new ConsoleOutputLogListener(formater, suppress);
-//      
-//      ServiceReference ref = context.getServiceReference(LogReaderService.class.getName());
-//      if (ref != null) {
-//        LogReaderService reader = (LogReaderService) context.getService(ref);
-//        reader.addLogListener(consoleLog);
-//      }
-//    }
 
     // get config file
     File configPath = getConfigPath(context);
