@@ -232,9 +232,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 			}
 
 		} else {
-
-			String msg = "Could not connect to VAPIX Camera - no ip address.";
-			Logger.debug(msg);
+			String msg = "Could not connect to VAPIX Camera - no host name";
+			Logger.error(msg);
 
 			// OSGI-Hint: In case this service is not able initialize its
 			// functionality it must to throw an Exception
@@ -252,6 +251,13 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	protected void deactivate(ComponentContext cc) {
 		// de-init
+		try {
+			executor.shutdown();
+			executor.awaitTermination(1, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			Logger.debug("Unable to terminate scheduled processes cleanly");
+		}
+		Logger.debug("Deactivated");
 	}
 
 	/**
@@ -375,7 +381,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	@Override
 	public void reset() {
-		Logger.trace("Reset (do nothing)");
+		Logger.debug("Reset (do nothing)");
 	}
 
 	/**
@@ -392,6 +398,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void stopMove() {
 
+		Logger.debug("Stop movement");
+
 		try {
 			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=stop&continuouspantiltmove=0,0");
 			Logger.trace("Stop movement (" + result + ")");
@@ -405,6 +413,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	@Override
 	public void moveHome() {
+
+		Logger.debug("Move home");
 
 		try {
 			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=home");
@@ -424,6 +434,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	public void movePreset(int preset_index) {
 
+		Logger.debug("Move preset index " + preset_index);
+
 		if (presets == null) {
 
 			if (presets.length <= (preset_index + 1) && (preset_index >= 0)) {
@@ -436,7 +448,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 				} finally {
 				}
 			} else {
-				Logger.debug("Preset not found: " + preset_index);
+				Logger.debug("Preset index not found: " + preset_index);
 			}
 
 		} else {
@@ -452,6 +464,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	public void movePreset(String preset) {
 
+		Logger.debug("Move preset name " + preset);
+
 		if (Arrays.asList(presets).contains(preset)) {
 
 			try {
@@ -462,7 +476,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 			} finally {
 			}
 		} else {
-			Logger.debug("Preset not found: " + preset);
+			Logger.debug("Preset name not found: " + preset);
 		}
 	}
 
@@ -844,6 +858,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	@Override
 	public void zoomIn(int speed) {
+
+		Logger.debug("Zoom to " + zoom);
 
 		try {
 
