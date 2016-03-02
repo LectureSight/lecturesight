@@ -57,6 +57,8 @@ public class SimpleCameraOperator implements CameraOperator {
   int interval = 200;
   int timeout;
   int idle_preset = -1;
+  int target_limit = 10;
+
   CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
@@ -73,6 +75,7 @@ public class SimpleCameraOperator implements CameraOperator {
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
     start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
     frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
+    target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
     Logger.info("Activated. Timeout is " + timeout + " ms, pan is " + start_pan + ", tilt is " + start_tilt + ",  zoom is " + start_zoom);
 
@@ -152,7 +155,7 @@ public class SimpleCameraOperator implements CameraOperator {
     public void run() {
       if (target == null) {
         List<TrackerObject> objs = tracker.getCurrentlyTracked();
-        if (objs.size() > 0) {
+        if ((objs.size() > 0) && (objs.size() <= target_limit)) {
           target = findBiggestTrackedObject(objs);
         }
       } else {
