@@ -168,7 +168,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 					 * root.PTZ.Limit.L1.MaxFieldAngle=623
 					 * root.PTZ.Limit.L1.MaxFocus=9999
 					 * root.PTZ.Limit.L1.MaxIris=9999
-					 * root.PTZ.Limit.L1.MaxPan=170 root.PTZ.Limit.L1.MaxTilt=90
+					 * root.PTZ.Limit.L1.MaxPan=170
+					 * root.PTZ.Limit.L1.MaxTilt=90
 					 * root.PTZ.Limit.L1.MaxZoom=9999
 					 * root.PTZ.Limit.L1.MinBrightness=1
 					 * root.PTZ.Limit.L1.MinFieldAngle=22
@@ -918,8 +919,9 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void zoom(int zoom) {
 
-		try {
+		Logger.debug("Zoom to " + zoom);
 
+		try {
 			String result = doCommand("/axis-cgi/com/ptz.cgi?zoom=" + zoom);
 			Logger.trace("Zoom to " + zoom + " (" + result + ")");
 		} catch (IOException e) {
