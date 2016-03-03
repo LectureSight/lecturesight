@@ -153,7 +153,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
         }
 
         // apply computed speeds if speeds or target have changed
-        if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0))) {
+        if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0) && (ts == 0))) {
 
           Logger.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
 
