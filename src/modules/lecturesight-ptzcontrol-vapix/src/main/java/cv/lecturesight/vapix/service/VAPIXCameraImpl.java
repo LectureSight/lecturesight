@@ -418,7 +418,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 		Logger.debug("Move home");
 
 		try {
-			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=home");
+			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=home&speed=100");
 			Logger.trace("Move home (" + result + ")");
 		} catch (IOException e) {
 			Logger.error("moveHome: " + e.getMessage());
