@@ -88,6 +88,13 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
       Position new_pos = new_pos_camera.flip(xflip, yflip);
 
+      // If no target has been set yet, do nothing except record position
+      if (!model.isTargetSet()) {
+         model.setCameraPosition(new_pos);
+         camera_pos = new_pos;
+         return;
+      }
+
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
