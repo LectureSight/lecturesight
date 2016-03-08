@@ -64,6 +64,9 @@ public class VAPIXCameraImpl implements PTZCamera {
 
 	String model_name, brand, host, username, password;
 
+	// Is camera inverted
+	int inverted = 0;
+
 	public Limits lim_pan, lim_tilt, lim_zoom;
 	Limits speed_pan, speed_tilt, speed_zoom;
 	public Limits range_pan, range_tilt, range_zoom, range_focus;
@@ -113,6 +116,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 		host = config.get(Constants.PROPKEY_VAPIX_CAMERA);
 		username = config.get(Constants.PROPKEY_VAPIX_USERNAME);
 		password = config.get(Constants.PROPKEY_VAPIX_PASSWORD);
+
+		inverted = config.getInt(Constants.PROPKEY_INVERTED);
 
 		updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
 
@@ -180,8 +185,13 @@ public class VAPIXCameraImpl implements PTZCamera {
 					range_pan = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinPan")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxPan")));
 
-					range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt")),
+					if (inverted==1) {
+						range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt"))*-1,
+							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt"))*-1);
+					} else {
+						range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt")));
+					}
 
 					range_zoom = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinZoom")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxZoom")));
