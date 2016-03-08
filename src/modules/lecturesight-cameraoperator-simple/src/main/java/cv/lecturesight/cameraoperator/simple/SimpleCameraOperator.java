@@ -119,6 +119,11 @@ public class SimpleCameraOperator implements CameraOperator {
       setInitialTrackingPosition();
   }
 
+  @Override
+  public boolean isRunning() {
+      return steerer.isSteering();
+  }
+
   /* 
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */

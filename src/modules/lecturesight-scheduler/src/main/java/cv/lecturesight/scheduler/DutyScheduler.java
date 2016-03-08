@@ -5,6 +5,7 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.DummyInterface;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
@@ -15,6 +16,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -27,7 +30,12 @@ import org.pmw.tinylog.Logger;
  */
 @Component(name = "lecturesight.dutyscheduler", immediate = true)
 @Service
-public class DutyScheduler implements ArtifactInstaller {
+@Properties({
+  @Property(name = "osgi.command.scope", value = "scheduler"),
+  @Property(name = "osgi.command.function", value = {"start", "stop", "status"})
+})
+
+public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
   final static String PROPKEY_LEADTIME = "tracker.leadtime";
   final static String PROPKEY_FILENAME = "schedule.file";
@@ -67,6 +75,13 @@ public class DutyScheduler implements ArtifactInstaller {
   protected void deactivate(ComponentContext cc) {
     executor.shutdownNow();     // shut down the event executor
     Logger.info("Deactivated.");
+  }
+
+  /**
+   * System status
+   */
+  public String getStatus() {
+    return (heart.isRunning() && operator.isRunning()) ? "active" : "idle";
   }
 
   /**
@@ -135,7 +150,7 @@ public class DutyScheduler implements ArtifactInstaller {
   /**
    * Ensures that object tracking is running.
    */
-  private void ensureTrackingON() {
+  public void startTracking() {
     try {
       if (!heart.isRunning()) {
         if (!heart.isReady()) {
@@ -147,14 +162,14 @@ public class DutyScheduler implements ArtifactInstaller {
         Logger.info("Object Tracker is already active.");
       }
     } catch (Exception e) {
-      Logger.error("Unexpected error in ensureTrackingON.", e);
+      Logger.error("Unexpected error in startTracking.", e);
     }
   }
 
   /**
    * Ensures that objects tracking is not running.
    */
-  private void ensureTrackingOFF() {
+  public void stopTracking() {
     try {
       if (heart.isRunning()) {
         heart.stop();
@@ -163,8 +178,19 @@ public class DutyScheduler implements ArtifactInstaller {
         Logger.info("Object Tracking is already deactivated.");
       }
     } catch (Exception e) {
-      Logger.error("Unexpected error in ensureTrackingOFF.", e);
+      Logger.error("Unexpected error in stopTracking.", e);
     }
+  }
+
+  /**
+   * Start and stop camera operator
+  */
+  public void startOperator() {
+    operator.start();
+  }
+
+  public void stopOperator() {
+    operator.stop();
   }
 
   @Override
@@ -187,6 +213,23 @@ public class DutyScheduler implements ArtifactInstaller {
   @Override
   public boolean canHandle(File file) {
     return file.getAbsolutePath().equals(scheduleFileAbsolutePath);
+  }
+
+  /*
+   * Commands
+   */
+  public void start() {
+     startTracking();
+     startOperator();
+  }
+
+  public void stop() {
+     stopOperator();
+     stopTracking();
+  }
+  
+  public void status() {
+     System.out.println(getStatus());
   }
 
   /**
@@ -225,16 +268,16 @@ public class DutyScheduler implements ArtifactInstaller {
         Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
         switch (event.getAction()) {
           case START_TRACKING:
-            ensureTrackingON();
+            startTracking();
             break;
           case STOP_TRACKING:
-            ensureTrackingOFF();
+            stopTracking();
             break;
           case START_OPERATOR:
-            operator.start();
+            startOperator();
             break;
           case STOP_OPERATOR:
-            operator.stop();
+            stopOperator();
             break;
       }
     }

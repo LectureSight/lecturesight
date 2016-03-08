@@ -25,5 +25,6 @@ public interface CameraOperator {
   void start();
   void stop();
   void reset();
+  boolean isRunning();
   
 }

@@ -132,6 +132,11 @@ public class ScriptedCameraOperator implements CameraOperator, ScriptingService,
   }
 
   @Override
+  public boolean isRunning() {
+    return (scriptWorker != null && !scriptWorker.isStopped());
+  }
+
+  @Override
   public void install(File file) throws Exception {
     if (file.getAbsolutePath().equals(getScriptFilePath())) {
       scriptFile = file;
