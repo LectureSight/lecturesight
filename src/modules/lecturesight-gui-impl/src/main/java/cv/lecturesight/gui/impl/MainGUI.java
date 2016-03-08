@@ -53,13 +53,17 @@ public class MainGUI implements DummyInterface {
   }
   
   void install(UserInterface ui) {
-    Logger.info("Installing interface: " + ui.getTitle());
-    window.addServiceUI(ui);
+    if (window != null) {
+       Logger.info("Installing interface: " + ui.getTitle());
+       window.addServiceUI(ui);
+    }
   }
   
   void uninstall(UserInterface ui) {
-    Logger.info("Uninstalling interface: " + ui.getTitle());
-    window.removeServiceUI(ui);
+    if (window != null) {
+       Logger.info("Uninstalling interface: " + ui.getTitle());
+       window.removeServiceUI(ui);
+    }
   }
   
   private class UserInterfaceTracker extends ServiceTracker {
