@@ -274,7 +274,7 @@
       <id>sonatype</id>
       <name>Sonatype OSS Snapshots Repository</name>
       <url>http://oss.sonatype.org/content/groups/public</url>
-    </repository-->
+    </repository>
     
     <!-- Fraunhofer IAIS Repository -->
     <repository>
