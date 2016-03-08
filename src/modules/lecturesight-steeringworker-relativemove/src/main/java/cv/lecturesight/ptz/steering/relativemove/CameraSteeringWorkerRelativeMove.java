@@ -338,16 +338,13 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
 
     // Implemented using an absolute move
-    int ps = (int) (maxspeed_pan * damp_pan);
-    int ts = (int) (maxspeed_tilt * damp_tilt);
-
     boolean s = steering;
     setSteering(false);
 
     model.setTargetPositionNorm(pos);
     Position target_pos = model.getTargetPosition();
 
-    camera.moveAbsolute(ps, ts, target_pos.flip(xflip, yflip));
+    camera.moveAbsolute(maxspeed_pan, maxspeed_tilt, target_pos.flip(xflip, yflip));
 
     // Allow the camera to reach the target absolute position before sending it any other movement commands
     try {
