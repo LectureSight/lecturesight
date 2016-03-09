@@ -116,7 +116,7 @@ public class VISCACameraImpl implements PTZCamera {
     // set address
     pkg[0] += this.address;
 
-    // set pan target
+    // set zoom target
     byte[] a = ByteUtils.s2b((short)zoom);
     pkg[4] = a[0];
     pkg[5] = a[1];
@@ -124,6 +124,58 @@ public class VISCACameraImpl implements PTZCamera {
     pkg[7] = a[3];
 
     pendingMsg.add(msg);
+  }
+
+  @Override
+  public void focus(int focus) {
+
+    Logger.debug("Focus to " + focus);
+
+    Message msg = VISCA.CMD_FOCUS_DIRECT.clone();
+    byte[] pkg = msg.getBytes();
+
+    // set address
+    pkg[0] += this.address;
+
+    // set zoom target
+    byte[] a = ByteUtils.s2b((short)focus);
+    pkg[4] = a[0];
+    pkg[5] = a[1];
+    pkg[6] = a[2];
+    pkg[7] = a[3];
+
+    pendingMsg.add(msg);
+
+  }
+
+  @Override
+  public void focusMode(FocusMode mode) {
+
+    // STOP, NEAR, FAR, MANUAL, AUTO
+    Logger.debug("Focus mode to " + mode);
+
+    Message msg = null;
+
+    switch (mode) {
+	case STOP: 
+		msg = VISCA.CMD_FOCUS_STOP.clone();
+		break;
+	case NEAR: 
+		msg = VISCA.CMD_FOCUS_NEAR.clone();
+		break;
+	case FAR: 
+		msg = VISCA.CMD_FOCUS_FAR.clone();
+		break;
+	case MANUAL: 
+		msg = VISCA.CMD_FOCUS_MANUAL.clone();
+		break;
+	case AUTO: 
+		msg = VISCA.CMD_FOCUS_AUTO.clone();
+		break;
+    }
+
+    pendingMsg.add(msg);
+
   }
 
   @Override
@@ -506,6 +558,11 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public int getZoom() {
     return 0;               // TODO implement!
+  }
+
+  @Override
+  public int getFocus() {
+    return -1;               // TODO implement!
   }
 
   public void cancel() {

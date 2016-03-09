@@ -956,6 +956,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 * @param new_focus
 	 *            The focus level to set the camera to
 	 */
+	@Override
 	public void focus(int new_focus) {
 
 		try {
@@ -971,10 +972,19 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 * 
 	 * @return Value of the current focus level
 	 */
+	@Override
 	public int getFocus() {
 
 		Logger.trace("Get focus " + focus);
 		return focus;
+	}
+
+	/**
+	 * Focus mode
+	 */
+	@Override
+	public void focusMode(FocusMode mode) {
+
 	}
 
 	/**
