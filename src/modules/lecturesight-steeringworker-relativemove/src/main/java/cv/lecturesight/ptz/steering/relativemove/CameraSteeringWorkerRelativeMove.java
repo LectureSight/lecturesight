@@ -71,6 +71,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   boolean moving = false;             // indicates if the camera if moving
   boolean xflip = false;
   boolean yflip = false;
+  boolean focus_fixed = false;        // Switch off auto-focus when in tracking position
 
   // lists of listeners
   List<UISlave> uiListeners = new LinkedList<UISlave>();
@@ -232,6 +233,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     }
     initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
 
+    focus_fixed = config.getBoolean(Constants.PROPKEY_FOCUS_FIXED);
+
     // initialize worker
     worker = new SteeringWorker();
     worker.camera_pos = camera.getPosition();
@@ -354,6 +357,10 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     }
     setSteering(s);
 
+    if (focus_fixed) {
+       camera.focusMode(PTZCamera.FocusMode.MANUAL);
+    }
+
     informUISlaves();
   }
 
@@ -390,11 +397,17 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
   @Override
   public void movePreset(int preset) {
     camera.movePreset(preset);
+    if (focus_fixed) {
+       camera.focusMode(PTZCamera.FocusMode.AUTO);
+    }
   }
 
   @Override
   public void moveHome() {
     camera.moveHome();
+    if (focus_fixed) {
+       camera.focusMode(PTZCamera.FocusMode.AUTO);
+    }
   }
 
   @Override
