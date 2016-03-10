@@ -8,6 +8,7 @@ public class Constants {
   final static String PROPKEY_PORT_STOPBITS = "port.stopbits";
   final static String PROPKEY_PORT_PARITY = "port.parity";
   final static String PROPKEY_UPDATER_INTERVAL = "updater.interval";
+  final static String PROPKEY_UPDATER_POLL_FOCUS = "updater.poll.focus";
 
   final static String PROFKEY_VENDOR_ID = "camera.vendor.id";
   final static String PROFKEY_VENDOR_NAME = "camera.vendor.name";

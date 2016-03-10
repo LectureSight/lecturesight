@@ -174,6 +174,10 @@ public class VISCACameraImpl implements PTZCamera {
 		break;
     }
 
+    // set address
+    byte[] pkg = msg.getBytes();
+    pkg[0] += this.address;
+
     pendingMsg.add(msg);
 
   }
@@ -562,7 +566,7 @@ public class VISCACameraImpl implements PTZCamera {
 
   @Override
   public int getFocus() {
-    return -1;               // TODO implement!
+    return this.state.currentFocus();
   }
 
   public void cancel() {

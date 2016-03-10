@@ -4,6 +4,8 @@ import com.wulff.lecturesight.visca.api.CameraPosition;
 
 public class CameraState {
 
+  int focus = -1;
+
   CameraPosition position = new CameraPosition();
 
   public boolean isMoving() {
@@ -12,5 +14,9 @@ public class CameraState {
 
   public CameraPosition currentPosition() {
     return position;
+  }
+
+  public int currentFocus() {
+    return focus;
   }
 }
