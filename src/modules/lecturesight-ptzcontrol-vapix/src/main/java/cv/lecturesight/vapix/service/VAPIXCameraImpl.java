@@ -65,7 +65,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 	String model_name, brand, host, username, password;
 
 	// Is camera inverted
-	int inverted = 0;
+	boolean inverted = false;
 
 	public Limits lim_pan, lim_tilt, lim_zoom;
 	Limits speed_pan, speed_tilt, speed_zoom;
@@ -117,7 +117,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 		username = config.get(Constants.PROPKEY_VAPIX_USERNAME);
 		password = config.get(Constants.PROPKEY_VAPIX_PASSWORD);
 
-		inverted = config.getInt(Constants.PROPKEY_INVERTED);
+		inverted = config.getBoolean(Constants.PROPKEY_INVERTED);
 
 		updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
 
@@ -185,7 +185,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 					range_pan = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinPan")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxPan")));
 
-					if (inverted==1) {
+					if (inverted) {
 						range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt"))*-1,
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt"))*-1);
 					} else {
