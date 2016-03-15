@@ -17,14 +17,14 @@
  */
 package cv.lecturesight.framesource.impl;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FrameSourceDescriptor {
 
   private String type;
   private String locator;
-  private Map<String,String> config = new HashMap<String,String>();
+  private Map<String,String> config = new LinkedHashMap<String,String>();
 
   public FrameSourceDescriptor(String fsdStr) throws FrameSourceDescriptorParsingException {
     parseSourceDescriptorString(fsdStr);

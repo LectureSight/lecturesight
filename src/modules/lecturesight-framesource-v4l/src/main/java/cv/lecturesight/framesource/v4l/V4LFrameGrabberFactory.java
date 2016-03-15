@@ -68,7 +68,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
         String values = "";
         String val="";
         switch (control.getType()) {
-            case V4L4JConstants.CTRL_TYPE_BUTTON: {
+            case V4L4JConstants.CTRL_TYPE_SWITCH: {
                 try {
                     val = " = " + control.getValue();
                     values = " Values: [0 | 1] [ \"false\" | \"true\" ]";
@@ -89,7 +89,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                 }
                 break;  
             }
-            case V4L4JConstants.CTRL_TYPE_SWITCH: {
+            case V4L4JConstants.CTRL_TYPE_BUTTON: {
                 val = " = 0";
                 values = " [any Value will trigger]";
                     
@@ -162,7 +162,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
         } else {
             String setVal="";
             switch (cont.getType()) {
-                case V4L4JConstants.CTRL_TYPE_BUTTON :{
+                case V4L4JConstants.CTRL_TYPE_SWITCH :{
                     String val = conf.get(confItem);
                     try {
                         if (("true".equalsIgnoreCase(val.trim()) || "1".equals(val.trim()))){
@@ -200,7 +200,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
                     }
                     break;
                 }
-                case V4L4JConstants.CTRL_TYPE_SWITCH : {
+                case V4L4JConstants.CTRL_TYPE_BUTTON : {
                     String val = conf.get(confItem);
                     try {
                         cont.setValue(1);
