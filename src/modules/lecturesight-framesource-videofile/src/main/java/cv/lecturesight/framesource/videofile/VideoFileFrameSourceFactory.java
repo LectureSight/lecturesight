@@ -48,8 +48,6 @@ public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
 
   protected void activate(ComponentContext cc) {
     Logger.info("Activating VideoFileFrameSource");
-    // init gstreamer
-    Gst.init();
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -59,8 +57,6 @@ public class VideoFileFrameSourceFactory implements FrameGrabberFactory {
       VideoFilePipeline child = it.next();
       child.stop();
     }
-    // deinit gstreamer
-    Gst.deinit();
   }
 
   @Override

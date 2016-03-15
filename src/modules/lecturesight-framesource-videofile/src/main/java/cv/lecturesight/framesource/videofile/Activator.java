@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Benjamin Wulff
+/* Copyright (C) 2015 Waldemar Smirnow
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,17 +15,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cv.lecturesight.framesource.videofile;
 
-import org.gstreamer.Element;
+import org.gstreamer.Gst;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
-public class UnableToLinkElementsException extends Exception {
-    
-    public UnableToLinkElementsException(Element src, Element sink) {
-        super("Can not link " + src.getName() + " to " + sink.getName());
-    }
+public class Activator implements BundleActivator {
+
+  @Override
+  public void start(BundleContext bc) throws Exception {
+    // init gstreamer
+    Gst.init();
+  }
+
+  @Override
+  public void stop(BundleContext bc) throws Exception {
+    // deinit gstreamer
+//    Gst.deinit();
+  }
 }
