@@ -32,7 +32,7 @@ import org.pmw.tinylog.Logger;
 @Service
 public class ConfigEditorUI implements UserInterface {
 
-    JPanel editorPanel;
+    ConfigEditorPanel editorPanel;
 
     @Reference
     ConfigurationService configService;
@@ -43,6 +43,7 @@ public class ConfigEditorUI implements UserInterface {
     }
     
     protected void deactivate(ComponentContext cc) {
+      editorPanel.deactivate();
       Logger.info("Deactivated");
     }
 
