@@ -149,6 +149,8 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
     int videoStandard = conf.containsKey("standard") ? Integer.parseInt(conf.get("standard")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_STANDARD);
     int videoChannel = conf.containsKey("channel") ? Integer.parseInt(conf.get("channel")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_CHANNEL);
     int videoQuality = conf.containsKey("quality") ? Integer.parseInt(conf.get("quality")) : config.getInt(V4LFrameGrabberConstants.PROPKEY_QUALITY);
+    String videoFormat = conf.containsKey("format") ? conf.get("format") : config.get(V4LFrameGrabberConstants.PROPKEY_FORMAT);
+
     for (String confItem: conf.keySet()){
         confItem = confItem.trim();
         if (V4LFrameGrabberConstants.PROPKEYS.contains(confItem)){
@@ -268,7 +270,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
         }
     }
     device.releaseControlList();
-    return new V4LFrameGrabber(device, width, height, videoStandard, videoChannel, videoQuality);
+    return new V4LFrameGrabber(device, width, height, videoStandard, videoChannel, videoQuality, videoFormat);
   }
 
   private VideoDevice initVideoDevice(String name) throws FrameSourceException {

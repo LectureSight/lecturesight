@@ -22,6 +22,7 @@ public class V4LFrameGrabberConstants {
   public final static String PROPKEY_STANDARD = "standard";
   public final static String PROPKEY_CHANNEL = "channel";
   public final static String PROPKEY_QUALITY = "quality";
+  public final static String PROPKEY_FORMAT = "format";
   
   public final static Vector<String> PROPKEYS = new Vector<String>();
   
@@ -35,6 +36,7 @@ public class V4LFrameGrabberConstants {
       PROPKEYS.add(V4LFrameGrabberConstants.PROPKEY_STANDARD);
       PROPKEYS.add(V4LFrameGrabberConstants.PROPKEY_CHANNEL);
       PROPKEYS.add(V4LFrameGrabberConstants.PROPKEY_QUALITY);
+      PROPKEYS.add(V4LFrameGrabberConstants.PROPKEY_FORMAT);
       CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_BUTTON, "CTRL_TYPE_BUTTON"); 
       CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_SLIDER, "CTRL_TYPE_SLIDER"); 
       CONTROL_TYPE_NAMES.put(V4L4JConstants.CTRL_TYPE_SWITCH, "CTRL_TYPE_SWITCH"); 

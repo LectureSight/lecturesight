@@ -40,20 +40,28 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
   int width, height, standard, channel, quality;
   private FrameGrabber grabber;
   private ByteBuffer frameBuffer;
+  private String videoFormat;
 
   V4LFrameGrabber(VideoDevice device, int frameWidth, int frameHeight, int videoStandard,
-          int videoChannel, int videoQuality) throws FrameSourceException {
+          int videoChannel, int videoQuality, String videoFormat) throws FrameSourceException {
     this.device = device;
     this.width = frameWidth;
     this.height = frameHeight;
     this.standard = videoStandard;
     this.channel = videoChannel;
     this.quality = videoQuality;
+    this.videoFormat = videoFormat;
+
+    ImageFormat selectedFormat = null;
+
     Vector<ImageFormat> useFormat = new Vector<ImageFormat>();
     try {
       List<ImageFormat> imageFormats = device.getDeviceInfo().getFormatList().getNativeFormats();
       for (ImageFormat imageFormat : imageFormats) {
         Logger.info("supported Format: " + imageFormat.getName());
+        if (videoFormat != null && videoFormat.equalsIgnoreCase(imageFormat.getName())) {
+          selectedFormat = imageFormat;
+        }
         ResolutionInfo resolutions = imageFormat.getResolutionInfo();
         for (ResolutionInfo.DiscreteResolution disRes : resolutions.getDiscreteResolutions()) {
           if (disRes.getHeight() == frameHeight && disRes.getWidth() == frameWidth) {
@@ -61,8 +69,14 @@ public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber
           }
         }
       }
-      Logger.info("using : " + useFormat.firstElement().getName());
-      grabber = device.getRGBFrameGrabber(width, height, channel, standard, useFormat.firstElement());
+
+      if (selectedFormat == null) {
+         selectedFormat = useFormat.firstElement();
+      }
+
+      Logger.info("using : " + selectedFormat.getName());
+      grabber = device.getRGBFrameGrabber(width, height, channel, standard, selectedFormat);
+
       frameBuffer = ByteBuffer.allocate(grabber.getWidth() * grabber.getHeight() * 3);
       grabber.setCaptureCallback(this);
       grabber.startCapture();
