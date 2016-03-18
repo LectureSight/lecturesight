@@ -18,7 +18,6 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.gui.api.UserInterface;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.ConfigurationService;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
