@@ -23,10 +23,6 @@ package cv.lecturesight.framesource.videofile;
 
 import org.gstreamer.Element;
 
-/**
- *
- * @author wsmirnow
- */
 public class UnableToLinkElementsException extends Exception {
     
     public UnableToLinkElementsException(Element src, Element sink) {

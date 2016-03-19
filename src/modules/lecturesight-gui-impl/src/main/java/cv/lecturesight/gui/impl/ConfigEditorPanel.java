@@ -226,4 +226,9 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
   public void configurationChanged() {
     update();
   }
+
+  public void deactivate() {
+    Logger.debug("Deactivating");
+    config.removeConfigurationListener(this);
+  }
 }

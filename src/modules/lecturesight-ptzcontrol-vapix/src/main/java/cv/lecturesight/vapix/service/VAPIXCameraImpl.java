@@ -64,6 +64,9 @@ public class VAPIXCameraImpl implements PTZCamera {
 
 	String model_name, brand, host, username, password;
 
+	// Is camera inverted
+	boolean inverted = false;
+
 	public Limits lim_pan, lim_tilt, lim_zoom;
 	Limits speed_pan, speed_tilt, speed_zoom;
 	public Limits range_pan, range_tilt, range_zoom, range_focus;
@@ -113,6 +116,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 		host = config.get(Constants.PROPKEY_VAPIX_CAMERA);
 		username = config.get(Constants.PROPKEY_VAPIX_USERNAME);
 		password = config.get(Constants.PROPKEY_VAPIX_PASSWORD);
+
+		inverted = config.getBoolean(Constants.PROPKEY_INVERTED);
 
 		updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
 
@@ -168,7 +173,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 					 * root.PTZ.Limit.L1.MaxFieldAngle=623
 					 * root.PTZ.Limit.L1.MaxFocus=9999
 					 * root.PTZ.Limit.L1.MaxIris=9999
-					 * root.PTZ.Limit.L1.MaxPan=170 root.PTZ.Limit.L1.MaxTilt=90
+					 * root.PTZ.Limit.L1.MaxPan=170
+					 * root.PTZ.Limit.L1.MaxTilt=90
 					 * root.PTZ.Limit.L1.MaxZoom=9999
 					 * root.PTZ.Limit.L1.MinBrightness=1
 					 * root.PTZ.Limit.L1.MinFieldAngle=22
@@ -179,8 +185,13 @@ public class VAPIXCameraImpl implements PTZCamera {
 					range_pan = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinPan")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxPan")));
 
-					range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt")),
+					if (inverted) {
+						range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt"))*-1,
+							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt"))*-1);
+					} else {
+						range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt")));
+					}
 
 					range_zoom = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinZoom")),
 							Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxZoom")));
@@ -232,9 +243,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 			}
 
 		} else {
-
-			String msg = "Could not connect to VAPIX Camera - no ip address.";
-			Logger.debug(msg);
+			String msg = "Could not connect to VAPIX Camera - no host name";
+			Logger.error(msg);
 
 			// OSGI-Hint: In case this service is not able initialize its
 			// functionality it must to throw an Exception
@@ -252,6 +262,13 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	protected void deactivate(ComponentContext cc) {
 		// de-init
+		try {
+			executor.shutdown();
+			executor.awaitTermination(1, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			Logger.debug("Unable to terminate scheduled processes cleanly");
+		}
+		Logger.debug("Deactivated");
 	}
 
 	/**
@@ -375,7 +392,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	@Override
 	public void reset() {
-		Logger.trace("Reset (do nothing)");
+		Logger.debug("Reset (do nothing)");
 	}
 
 	/**
@@ -392,8 +409,10 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void stopMove() {
 
+		Logger.debug("Stop movement");
+
 		try {
-			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=stop&continuouspantiltmove=0,0");
+			String result = this.doCommand("/axis-cgi/com/ptz.cgi?continuouspantiltmove=0,0");
 			Logger.trace("Stop movement (" + result + ")");
 		} catch (IOException e) {
 			Logger.error("stop: " + e.getMessage());
@@ -406,8 +425,10 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void moveHome() {
 
+		Logger.debug("Move home");
+
 		try {
-			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=home");
+			String result = this.doCommand("/axis-cgi/com/ptz.cgi?move=home&speed=100");
 			Logger.trace("Move home (" + result + ")");
 		} catch (IOException e) {
 			Logger.error("moveHome: " + e.getMessage());
@@ -424,6 +445,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	public void movePreset(int preset_index) {
 
+		Logger.debug("Move preset index " + preset_index);
+
 		if (presets == null) {
 
 			if (presets.length <= (preset_index + 1) && (preset_index >= 0)) {
@@ -436,7 +459,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 				} finally {
 				}
 			} else {
-				Logger.debug("Preset not found: " + preset_index);
+				Logger.debug("Preset index not found: " + preset_index);
 			}
 
 		} else {
@@ -452,6 +475,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	 */
 	public void movePreset(String preset) {
 
+		Logger.debug("Move preset name " + preset);
+
 		if (Arrays.asList(presets).contains(preset)) {
 
 			try {
@@ -462,7 +487,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 			} finally {
 			}
 		} else {
-			Logger.debug("Preset not found: " + preset);
+			Logger.debug("Preset name not found: " + preset);
 		}
 	}
 
@@ -845,6 +870,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void zoomIn(int speed) {
 
+		Logger.debug("Zoom to " + zoom);
+
 		try {
 
 			if (this.can_move_continuous) {
@@ -902,8 +929,9 @@ public class VAPIXCameraImpl implements PTZCamera {
 	@Override
 	public void zoom(int zoom) {
 
-		try {
+		Logger.debug("Zoom to " + zoom);
 
+		try {
 			String result = doCommand("/axis-cgi/com/ptz.cgi?zoom=" + zoom);
 			Logger.trace("Zoom to " + zoom + " (" + result + ")");
 		} catch (IOException e) {
@@ -1122,11 +1150,11 @@ public class VAPIXCameraImpl implements PTZCamera {
 
 		protected PasswordAuthentication getPasswordAuthentication() {
 			String promptString = getRequestingPrompt();
-			System.out.println(promptString);
+			Logger.trace(promptString);
 			String hostname = getRequestingHost();
-			System.out.println(hostname);
+			Logger.trace(hostname);
 			InetAddress ipaddr = getRequestingSite();
-			System.out.println(ipaddr);
+			Logger.trace(ipaddr);
 			int port = getRequestingPort();
 
 			return new PasswordAuthentication(user, password.toCharArray());
