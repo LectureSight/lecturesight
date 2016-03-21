@@ -20,7 +20,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.cameracalibration", immediate = true)
+@Component(name = "lecturesight.manpages", immediate = true)
 @Service
 @Properties({
   @Property(name = "osgi.command.scope", value = "man"),
