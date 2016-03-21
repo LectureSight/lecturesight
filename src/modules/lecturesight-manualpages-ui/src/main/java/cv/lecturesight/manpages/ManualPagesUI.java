@@ -104,7 +104,7 @@ public class ManualPagesUI implements UserInterface, BundleListener {
   String urlReadClose(URL url) {
     String out = "";
     try {
-      BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
+      BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
       String line;
       StringBuilder sb = new StringBuilder();
       while ((line = r.readLine()) != null) {
