@@ -20,13 +20,16 @@ package cv.lecturesight.framesource.gst;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.ByteBuffer;
-import org.gstreamer.Caps;
-import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.gstreamer.Structure;
-import org.gstreamer.elements.AppSink;
+
+import org.freedesktop.gstreamer.Caps;
+import org.freedesktop.gstreamer.Element;
+import org.freedesktop.gstreamer.ElementFactory;
+import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.State;
+import org.freedesktop.gstreamer.Structure;
+import org.freedesktop.gstreamer.elements.AppSink;
+
+import org.pmw.tinylog.Logger;
 
 public class GStreamerFrameGrabber implements FrameGrabber {
 
@@ -108,8 +111,7 @@ public class GStreamerFrameGrabber implements FrameGrabber {
 
   private void getVideoFrameSize() throws FrameSourceException {
     try {
-      org.gstreamer.Buffer buf = appsink.pullPreroll();
-      Structure str = buf.getCaps().getStructure(0);
+      Structure str = appsink.pullPreroll().getCaps().getStructure(0);
       width = str.getInteger("width");
       height = str.getInteger("height");
     } catch (Exception e) {
@@ -120,11 +122,11 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      org.gstreamer.Buffer buf = appsink.pullBuffer();
+      org.freedesktop.gstreamer.Buffer buf = appsink.pullSample().getBuffer();
       if (buf == null) {
         System.out.println("Buffer is NULL!!");
       }
-      lastFrame = buf.getByteBuffer();
+      lastFrame = buf.map(false);
     } else {
       if (lastFrame == null) {
         throw new FrameSourceException("Stream is EOS and no previously captured frame availabel.");
