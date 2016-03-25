@@ -17,7 +17,7 @@
  */
 package cv.lecturesight.framesource.videofile;
 
-import org.gstreamer.Gst;
+import org.freedesktop.gstreamer.Gst;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

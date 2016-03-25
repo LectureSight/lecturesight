@@ -22,19 +22,21 @@ import cv.lecturesight.framesource.FrameSourceException;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
-import org.gstreamer.Buffer;
-import org.gstreamer.Bus;
-import org.gstreamer.Caps;
-import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pad;
-import org.gstreamer.PadDirection;
-import org.gstreamer.PadLinkReturn;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.gstreamer.Structure;
-import org.gstreamer.elements.AppSink;
+import org.freedesktop.gstreamer.Buffer;
+import org.freedesktop.gstreamer.Bus;
+import org.freedesktop.gstreamer.Caps;
+import org.freedesktop.gstreamer.Element;
+import org.freedesktop.gstreamer.ElementFactory;
+import org.freedesktop.gstreamer.GstObject;
+import org.freedesktop.gstreamer.Pad;
+import org.freedesktop.gstreamer.PadDirection;
+import org.freedesktop.gstreamer.PadLinkReturn;
+import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.State;
+import org.freedesktop.gstreamer.Structure;
+import org.freedesktop.gstreamer.elements.AppSink;
+
+import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -44,7 +46,7 @@ public class VideoFilePipeline implements FrameGrabber {
 
   private Element src;
   private Element decodebin;
-  private Element colorspace;
+  private Element videoconvert;
   private Element capsfilter;
   private AppSink appsink;
   private Pipeline pipeline;
@@ -99,7 +101,7 @@ public class VideoFilePipeline implements FrameGrabber {
   private void createElements() {
     src = ElementFactory.make("filesrc", null);
     decodebin = ElementFactory.make("decodebin", null);
-    colorspace = ElementFactory.make("ffmpegcolorspace", null);
+    videoconvert = ElementFactory.make("videoconvert", null);
     capsfilter = ElementFactory.make("capsfilter", null);
     appsink = (AppSink) ElementFactory.make("appsink", null);
 
@@ -107,14 +109,14 @@ public class VideoFilePipeline implements FrameGrabber {
 
     pipeline.add(src);
     pipeline.add(decodebin);
-    pipeline.add(colorspace);
+    pipeline.add(videoconvert);
     pipeline.add(capsfilter);
     pipeline.add(appsink);
   }
 
   private void setElementProperties(File video) {
     src.set("location", video.getAbsolutePath());
-    Caps caps = Caps.fromString("video/x-raw-rgb");
+    Caps caps = Caps.fromString("video/x-raw,format=RGB");
     capsfilter.set("caps", caps);
     appsink.setCaps(caps);
     appsink.set("async", "false");
@@ -125,14 +127,15 @@ public class VideoFilePipeline implements FrameGrabber {
 
   private void linkElements() throws UnableToLinkElementsException {
     elementsLinked = false;
+
     decodebin.connect(new Element.PAD_ADDED() {
 
       @Override
       public void padAdded(Element element, Pad pad) {
-        Pad peerPad = colorspace.getStaticPad("sink");
-        if (pad.getDirection() == PadDirection.SRC && pad.acceptCaps(peerPad.getCaps())) {
-          if (pad.link(peerPad) != PadLinkReturn.OK) {
-//            System.err.println("Can't link decodebin to colorspace\n");
+        Pad peerPad = videoconvert.getStaticPad("sink");
+        if (pad.getDirection() == PadDirection.SRC) {
+	  if (pad.link(peerPad) != PadLinkReturn.OK) {
+            Logger.error("Can't link decodebin to videoconvert");
           } else {
             elementsLinked = true;
           }
@@ -144,11 +147,11 @@ public class VideoFilePipeline implements FrameGrabber {
       throw new UnableToLinkElementsException(src, decodebin);
     }
 
-    Pad p = new Pad(null, PadDirection.SRC);
-    decodebin.addPad(p);
+    // Pad p = new Pad(null, PadDirection.SRC);
+    // decodebin.addPad(p);
 
-    if (!colorspace.link(capsfilter)) {
-      throw new UnableToLinkElementsException(colorspace, capsfilter);
+    if (!videoconvert.link(capsfilter)) {
+      throw new UnableToLinkElementsException(videoconvert, capsfilter);
     }
     if (!capsfilter.link(appsink)) {
       throw new UnableToLinkElementsException(capsfilter, appsink);
@@ -174,7 +177,7 @@ public class VideoFilePipeline implements FrameGrabber {
 
       @Override
       public void errorMessage(GstObject source, int code, String message) {
-//        System.err.printf("Gstreamer error from %s (error code: %s): %s\n", source, code, message);
+        Logger.error("Gstreamer error from {} (error code: {}): {}\n", source, code, message);
         error = true;
         pipeline.stop();
       }
@@ -196,11 +199,11 @@ public class VideoFilePipeline implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buffer = appsink.pullBuffer();
+      Buffer buffer = appsink.pullSample().getBuffer();
       if (buffer == null) {
         throw new FrameSourceException("Can't grab video frame.");
       }
-      lastFrame = buffer.getByteBuffer();
+      lastFrame = buffer.map(false);
     } else {
       if (lastFrame == null) {
         throw new FrameSourceException("Stream is EOS and no previously captured frame availabel.");
