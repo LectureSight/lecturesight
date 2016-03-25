@@ -20,13 +20,15 @@ package cv.lecturesight.framesource.rtph264;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.ByteBuffer;
-import org.gstreamer.Caps;
-import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.gstreamer.Structure;
-import org.gstreamer.elements.AppSink;
+import org.freedesktop.gstreamer.Caps;
+import org.freedesktop.gstreamer.Element;
+import org.freedesktop.gstreamer.ElementFactory;
+import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.State;
+import org.freedesktop.gstreamer.Structure;
+import org.freedesktop.gstreamer.elements.AppSink;
+
+import org.pmw.tinylog.Logger;
 
 public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
@@ -62,20 +64,20 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
     addToPipeline(pipeline, rtph264depay);
     linkElements(gdpdepay, rtph264depay);
 
-    Element ffdec_h264 = createElement("ffdec_h264", "ffdec_h264");
-    addToPipeline(pipeline, ffdec_h264);
-    linkElements(rtph264depay, ffdec_h264);
+    Element avdec_h264 = createElement("avdec_h264", "avdec_h264");
+    addToPipeline(pipeline, avdec_h264);
+    linkElements(rtph264depay, avdec_h264);
 
-    Element colorspace = createElement("ffmpegcolorspace", "ffmpegcolorspace");
-    addToPipeline(pipeline, colorspace);
-    linkElements(ffdec_h264, colorspace);
+    Element videoconvert = createElement("videoconvert", "videoconvert");
+    addToPipeline(pipeline, videoconvert);
+    linkElements(avdec_h264, videoconvert);
 
-    Caps caps = Caps.fromString("video/x-raw-rgb");
+    Caps caps = Caps.fromString("video/x-raw,format=RGB");
 
     Element capsfilter = createElement("capsfilter", "capsfilter");
     capsfilter.set("caps", caps);
     addToPipeline(pipeline, capsfilter);
-    linkElements(colorspace, capsfilter);
+    linkElements(videoconvert, capsfilter);
 
     appsink = (AppSink) createElement("appsink", "appsink");
     appsink.setCaps(caps);
@@ -120,8 +122,7 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
   private void getVideoFrameSize() throws FrameSourceException {
     try {
-      org.gstreamer.Buffer buf = appsink.pullPreroll();
-      Structure str = buf.getCaps().getStructure(0);
+      Structure str = appsink.pullPreroll().getCaps().getStructure(0);
       width = str.getInteger("width");
       height = str.getInteger("height");
     } catch (Exception e) {
@@ -132,14 +133,14 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      org.gstreamer.Buffer buf = appsink.pullBuffer();
+      org.freedesktop.gstreamer.Buffer buf = appsink.pullSample().getBuffer();
       if (buf == null) {
-        System.out.println("Buffer is NULL!!");
+        Logger.debug("Buffer is NULL!!");
       }
-      lastFrame = buf.getByteBuffer();
+      lastFrame = buf.map(false);
     } else {
       if (lastFrame == null) {
-        throw new FrameSourceException("Stream is EOS and no previously captured frame availabel.");
+        throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
       }
     }
     return lastFrame;

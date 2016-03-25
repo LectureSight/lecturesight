@@ -41,9 +41,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.gstreamer-java</groupId>
-      <artifactId>gstreamer-java</artifactId>
-      <version>1.5</version>
+      <groupId>org.freedesktop.gstreamer</groupId>
+      <artifactId>gst1-java-core</artifactId>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -97,7 +97,7 @@
               *;resolution:=optional
             </Import-Package>
             <Embed-Dependency>
-              gstreamer-java;inline=true,
+              gst1-java-core;inline=true,
             </Embed-Dependency>
           </instructions>
         </configuration>
