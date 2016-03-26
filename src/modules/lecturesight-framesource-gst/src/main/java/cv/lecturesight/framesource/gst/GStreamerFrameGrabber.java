@@ -64,22 +64,16 @@ public class GStreamerFrameGrabber implements FrameGrabber {
     // find most downstream element in user pipeline
     Element last = pipe.getElementsSorted().get(0);
 
-    Logger.debug("Attaching videoconvert");
-
     // attach colorspace, capsfilter and appsink
     Element colorspace = createElement("videoconvert", "videoconvert");
     addToPipeline(pipe, colorspace);
     linkElements(last, colorspace);
-
-    Logger.debug("Attaching caps");
 
     Caps caps = Caps.fromString("video/x-raw,format=RGB");
     Element capsfilter = createElement("capsfilter", "capsfilter");
     capsfilter.set("caps", caps);
     addToPipeline(pipe, capsfilter);
     linkElements(colorspace, capsfilter);
-
-    Logger.debug("Attaching appsink");
 
     appsink = (AppSink) createElement("appsink", "appsink");
     appsink.setCaps(caps);
@@ -89,8 +83,6 @@ public class GStreamerFrameGrabber implements FrameGrabber {
     appsink.set("max-buffers", "5");
     addToPipeline(pipe, appsink);
     linkElements(capsfilter, appsink);
-
-    Logger.debug("Finished creating pipeline");
 
     return pipe;
   }
@@ -116,7 +108,6 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   }
 
   void start() {
-    Logger.debug("Pipeline start");
     pipeline.play();
   }
 
