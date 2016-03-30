@@ -21,6 +21,7 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.ByteBuffer;
 
+import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.ElementFactory;
@@ -37,6 +38,7 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   private final Pipeline pipeline;
   private int width, height;
   private ByteBuffer lastFrame;
+  private Buffer lastBuf;
   private AppSink appsink;
   private boolean dropFrames;
 
@@ -129,16 +131,23 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      org.freedesktop.gstreamer.Buffer buf = appsink.pullSample().getBuffer();
-      if (buf == null) {
-        System.out.println("Buffer is NULL!!");
-      }
-      lastFrame = buf.map(false);
-    } else {
-      if (lastFrame == null) {
-        throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
+      Buffer buf = appsink.pullSample().getBuffer();
+      if (buf != null) {
+        lastFrame = buf.map(false);
+	if (lastBuf != null) {
+           // Free memory allocated for the previous buffer so we don't leak memory
+	   lastBuf.unmap();
+	}
+	lastBuf = buf;
+      } else {
+        Logger.warn("Buffer is NULL!!");
       }
     }
+
+    if (lastFrame == null) {
+      throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
+    }
+
     return lastFrame;
   }
 
