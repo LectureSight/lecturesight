@@ -20,6 +20,7 @@ package cv.lecturesight.framesource.rtph264;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.nio.ByteBuffer;
+import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.ElementFactory;
@@ -37,6 +38,7 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
   private final Pipeline pipeline;
   private int width, height;
   private ByteBuffer lastFrame;
+  private Buffer lastBuf;
   private AppSink appsink;
 
 
@@ -133,16 +135,23 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      org.freedesktop.gstreamer.Buffer buf = appsink.pullSample().getBuffer();
-      if (buf == null) {
-        Logger.debug("Buffer is NULL!!");
-      }
-      lastFrame = buf.map(false);
-    } else {
-      if (lastFrame == null) {
-        throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
+      Buffer buf = appsink.pullSample().getBuffer();
+      if (buf != null) {
+        lastFrame = buf.map(false);
+        if (lastBuf != null) {
+           // Free memory allocated for the previous buffer so we don't leak memory
+           lastBuf.unmap();
+        }
+        lastBuf = buf;
+      } else {
+        Logger.warn("Buffer is NULL!!");
       }
     }
+
+    if (lastFrame == null) {
+      throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
+    }
+
     return lastFrame;
   }
 

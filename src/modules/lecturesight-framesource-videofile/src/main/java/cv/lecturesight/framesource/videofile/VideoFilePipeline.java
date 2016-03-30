@@ -53,6 +53,7 @@ public class VideoFilePipeline implements FrameGrabber {
 
   private int width, height;    // the video frame size
   private ByteBuffer lastFrame;
+  private Buffer lastBuf;
   private boolean elementsLinked;
   private boolean error;
   private boolean playing;
@@ -194,16 +195,23 @@ public class VideoFilePipeline implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buffer = appsink.pullSample().getBuffer();
-      if (buffer == null) {
-        throw new FrameSourceException("Can't grab video frame.");
-      }
-      lastFrame = buffer.map(false);
-    } else {
-      if (lastFrame == null) {
-        throw new FrameSourceException("Stream is EOS and no previously captured frame availabel.");
+      Buffer buf = appsink.pullSample().getBuffer();
+      if (buf != null) {
+        lastFrame = buf.map(false);
+        if (lastBuf != null) {
+           // Free memory allocated for the previous buffer so we don't leak memory
+           lastBuf.unmap();
+        }
+        lastBuf = buf;
+      } else {
+        Logger.warn("Buffer is NULL!!");
       }
     }
+
+    if (lastFrame == null) {
+      throw new FrameSourceException("Stream is EOS and no previously captured frame available.");
+    }
+
     return lastFrame;
   }
 
