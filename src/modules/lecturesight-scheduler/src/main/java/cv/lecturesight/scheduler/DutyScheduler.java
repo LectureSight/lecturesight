@@ -41,6 +41,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   final static String PROPKEY_FILENAME = "schedule.file";
   final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String PROPKEY_AGENTNAME = "agent.name";
+  final static String PROPKEY_ENABLE = "enable";
   @Reference
   Configuration config;
   @Reference
@@ -48,6 +49,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   @Reference
   CameraOperator operator;
 
+  boolean enable = true;
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
   private EventExecutor eventExecutor = new EventExecutor();
   private EventList events = new EventList();
@@ -60,6 +62,13 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     scheduleFileName = config.get(PROPKEY_FILENAME);
     File scheduleFile = new File(scheduleFileName);
     scheduleFileAbsolutePath = scheduleFile.getAbsolutePath();
+
+    // Is the scheduler enabled?
+    enable = config.getBoolean(PROPKEY_ENABLE);
+    if (!enable) {
+       Logger.info("Activated. Scheduler is not enabled.");
+       return;
+    }
 
     // Tracking and camera operator are initially stopped
     Event stopTracker = new Event(0, Event.Action.STOP_TRACKING);
