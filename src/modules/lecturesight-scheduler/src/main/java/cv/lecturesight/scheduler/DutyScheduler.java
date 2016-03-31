@@ -204,24 +204,30 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
   @Override
   public void install(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
     loadEvents(file);
   }
 
   @Override
   public void update(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
     loadEvents(file);
   }
 
   @Override
   public void uninstall(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
   }
 
   @Override
   public boolean canHandle(File file) {
-    return file.getAbsolutePath().equals(scheduleFileAbsolutePath);
+    return enable ? file.getAbsolutePath().equals(scheduleFileAbsolutePath) : false;
   }
 
   /*
