@@ -71,10 +71,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     }
 
     // Tracking and camera operator are initially stopped
-    Event stopTracker = new Event(0, Event.Action.STOP_TRACKING);
-    events.add(stopTracker);
-    Event stopOperator = new Event(0, Event.Action.STOP_OPERATOR);
-    events.add(stopOperator);
+    stop();
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
