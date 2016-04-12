@@ -424,7 +424,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       if (t != null && t.id == id) {
         t.vx = -(t.x - x);
         t.vy = -(t.y - y);
-        t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vx, 2));
+        t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
         
         if (t.vt > 0.0) {
           t.last_move = System.currentTimeMillis();
