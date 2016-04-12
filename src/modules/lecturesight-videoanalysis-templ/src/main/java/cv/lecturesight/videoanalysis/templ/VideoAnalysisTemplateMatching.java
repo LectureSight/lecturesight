@@ -397,8 +397,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   int addTarget(Target t) {
     if (numTargets == MAX_TARGETS) {
-      Logger.warn("Maximum number of targets excceded, forced reset.");
-      reset(null);
+      Logger.debug("Maximum number of targets exceeded; ignore additional target");
+      return -1;
     }
     for (int i = 0; i < MAX_TARGETS; i++) {
       if (targets[i] == null) {
