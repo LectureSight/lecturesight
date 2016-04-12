@@ -48,6 +48,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_CELLS_MIN = "object.cells.min";
   private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
   private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
+  private final static String PROPKEY_OBJECT_MOVE_THRESH = "object.move.threshold";
 
   @Reference
   Configuration config;       // configuration parameters
@@ -133,6 +134,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int object_min_cells;
   int object_max_cells;
   int object_max_dormant;
+  double object_move_threshold;
 
   /**
    * GPU Main Program implementing the video analysis.
@@ -426,7 +428,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         t.vy = -(t.y - y);
         t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
         
-        if (t.vt > 0.0) {
+        if (t.vt > object_move_threshold) {
           t.last_move = System.currentTimeMillis();
         }
         
@@ -530,6 +532,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
     object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
     object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+    object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
   }
 
   /**
@@ -628,6 +631,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     if (object_max_dormant != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
       object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
       Logger.info("Setting max number of frames of inactivity before discarding a target to " + object_max_dormant);
+    }
+
+    if (object_move_threshold != config.getDouble(PROPKEY_OBJECT_MOVE_THRESH)) {
+      object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
+      Logger.info("Setting target movement threshold to " + object_move_threshold);
     }
   }
 
