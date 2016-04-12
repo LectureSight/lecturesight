@@ -54,6 +54,7 @@ public class ConfigCommands {
       String val = args[1];
       try {
         config.config.setProperty(key, val);
+        config.notifyListeners();
       } catch (Exception e) {
         println("Unable to set property " + key + " to " + val);
       }
