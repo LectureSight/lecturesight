@@ -208,7 +208,11 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
   protected void activate(ComponentContext cc) throws Exception {
 
-    model = initModel();   // init camera model
+    // get service configuration
+    setConfiguration();
+
+    // Camera model
+    model = new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
 
     // get camera parameters
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
@@ -216,9 +220,6 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     maxspeed_zoom = camera.getProfile().getZoomMaxSpeed();
     zoom_min = camera.getProfile().getZoomMin();
     zoom_max = camera.getProfile().getZoomMax();
-
-    // get service configuration
-    setConfiguration();
 
     // initialize worker
     worker = new SteeringWorker();
@@ -249,6 +250,13 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     Logger.info("Deactivated");
   }
 
+  @Override
+  public void configurationChanged() {
+    Logger.debug("Refreshing configuration");
+    setConfiguration();
+    model.update(pan_min, pan_max, tilt_min, tilt_max);
+  }
+
   /*
    ** Set configuration values
    */
@@ -269,15 +277,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     }
     initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
     focus_fixed = config.getBoolean(Constants.PROPKEY_FOCUS_FIXED);
-  }
 
-  @Override
-  public void configurationChanged() {
-    Logger.debug("Refreshing configuration");
-    setConfiguration();
-  }
-
-  private CameraPositionModel initModel() {
     // initialize limits for pan and tilt, if not configured by camera calibration
     // the limits from the camera profile are taken
     String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
@@ -315,7 +315,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
     Logger.debug("Camera co-ordinates: xflip=" + xflip + " yflip=" + yflip);
 
-    return new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
+    return;
   }
 
   public void stopMoving() {

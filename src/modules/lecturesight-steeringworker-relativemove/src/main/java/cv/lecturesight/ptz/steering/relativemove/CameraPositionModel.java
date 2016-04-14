@@ -23,10 +23,10 @@ import cv.lecturesight.util.geometry.Position;
 public class CameraPositionModel {
 
   // scene limits for normalization
-  private final int pan_min;
-  private final int pan_max;
-  private final int tilt_min;
-  private final int tilt_max;
+  private int pan_min;
+  private int pan_max;
+  private int tilt_min;
+  private int tilt_max;
 
   // target position
   boolean target_set = false;
@@ -36,10 +36,18 @@ public class CameraPositionModel {
   private NormalizedPosition camera_posn = new NormalizedPosition(0.0f, 0.0f);  // target position in normalized coordinates
 
   public CameraPositionModel(int pan_min, int pan_max, int tilt_min, int tilt_max) {
+    update(pan_min, pan_max, tilt_min, tilt_max);
+  }
+
+  /**
+   * Update camera model
+   */
+  public void update(int pan_min, int pan_max, int tilt_min, int tilt_max) {
     this.pan_max = pan_max;
     this.pan_min = pan_min;
     this.tilt_max = tilt_max;
     this.tilt_min = tilt_min;
+    return;
   }
 
   /**
