@@ -49,6 +49,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
   private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
   private final static String PROPKEY_OBJECT_MOVE_THRESH = "object.move.threshold";
+  private final static String PROPKEY_OBJECT_ACTIVE_MINTIME = "object.active.min";
 
   @Reference
   Configuration config;       // configuration parameters
@@ -134,6 +135,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int object_min_cells;
   int object_max_cells;
   int object_max_dormant;
+  int object_min_active;
   double object_move_threshold;
 
   /**
@@ -532,6 +534,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
     object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
     object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+    object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
     object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
   }
 
@@ -630,7 +633,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     
     if (object_max_dormant != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
       object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
-      Logger.info("Setting max number of frames of inactivity before discarding a target to " + object_max_dormant);
+      Logger.info("Setting max time in milliseconds before discarding a target to " + object_max_dormant);
+    }
+
+    if (object_min_active != config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME)) {
+      object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
+      Logger.info("Setting minimum time in milliseconds before an object is recognized for tracking to " + object_min_active);
     }
 
     if (object_move_threshold != config.getDouble(PROPKEY_OBJECT_MOVE_THRESH)) {
@@ -687,9 +695,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   @Override
   public List<TrackerObject> getCurrentlyTracked() {
+    // return trackable objects which are older than object_min_active milliseconds
+    long seen_before = System.currentTimeMillis() - object_min_active;
     List l = new LinkedList<TrackerObject>();
     for (Target t : targets) {
-      if (t != null) {
+      if ((t != null) && (t.first_seen < seen_before)) {
         l.add(t.to);
       }
     }
