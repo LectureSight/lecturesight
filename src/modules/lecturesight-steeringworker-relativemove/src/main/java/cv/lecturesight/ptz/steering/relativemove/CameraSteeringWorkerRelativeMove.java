@@ -23,6 +23,7 @@ import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import java.util.Dictionary;
@@ -41,7 +42,7 @@ import org.pmw.tinylog.Logger;
  */
 @Component(name = "lecturesight.ptz.steering.worker.relativemove", immediate = true)
 @Service
-public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
+public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, ConfigurationListener {
 
   @Reference
   Configuration config;        // service configuration
@@ -217,23 +218,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     zoom_max = camera.getProfile().getZoomMax();
 
     // get service configuration
-    alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
-    alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
-    stop_x = config.getInt(Constants.PROPKEY_STOPX);
-    stop_y = config.getInt(Constants.PROPKEY_STOPY);
-    damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
-    if (damp_pan > 1.0 || damp_pan < 0.0) {
-      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
-      damp_pan = 1.0f;
-    }
-    damp_tilt = config.getFloat(Constants.PROPKEY_DAMP_TILT);
-    if (damp_tilt > 1.0 || damp_tilt < 0.0) {
-      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
-      damp_tilt = 1.0f;
-    }
-    initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
-
-    focus_fixed = config.getBoolean(Constants.PROPKEY_FOCUS_FIXED);
+    setConfiguration();
 
     // initialize worker
     worker = new SteeringWorker();
@@ -262,6 +247,34 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
     camera.stopMove();
     Logger.info("Deactivated");
+  }
+
+  /*
+   ** Set configuration values
+   */
+  private void setConfiguration() {
+    alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
+    alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
+    stop_x = config.getInt(Constants.PROPKEY_STOPX);
+    stop_y = config.getInt(Constants.PROPKEY_STOPY);
+    damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
+    if (damp_pan > 1.0 || damp_pan < 0.0) {
+      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      damp_pan = 1.0f;
+    }
+    damp_tilt = config.getFloat(Constants.PROPKEY_DAMP_TILT);
+    if (damp_tilt > 1.0 || damp_tilt < 0.0) {
+      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      damp_tilt = 1.0f;
+    }
+    initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
+    focus_fixed = config.getBoolean(Constants.PROPKEY_FOCUS_FIXED);
+  }
+
+  @Override
+  public void configurationChanged() {
+    Logger.debug("Refreshing configuration");
+    setConfiguration();
   }
 
   private CameraPositionModel initModel() {
