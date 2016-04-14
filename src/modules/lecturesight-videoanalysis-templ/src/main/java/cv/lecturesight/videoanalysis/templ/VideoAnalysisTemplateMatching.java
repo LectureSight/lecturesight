@@ -43,7 +43,7 @@ import org.pmw.tinylog.Logger;
 public class VideoAnalysisTemplateMatching implements ObjectTracker, ConfigurationListener {
 
   // -- configuration properties --
-  private final static String PROKEY_CHANGE_THRESH = "change.threshold";
+  private final static String PROPKEY_CHANGE_THRESH = "change.threshold";
   private final static String PROPKEY_CELL_THRESH = "cell.activation.threshold";
   private final static String PROPKEY_OBJECT_CELLS_MIN = "object.cells.min";
   private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
@@ -527,7 +527,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
    *
    */
   private void mapParameters() {
-    change_threshold = config.getInt(PROKEY_CHANGE_THRESH);
+    change_threshold = config.getInt(PROPKEY_CHANGE_THRESH);
     cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
     object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
     object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
@@ -608,8 +608,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   @Override
   public void configurationChanged() {
-    if (change_threshold != config.getInt(PROKEY_CHANGE_THRESH)) {
-      change_threshold = config.getInt(PROKEY_CHANGE_THRESH);
+    if (change_threshold != config.getInt(PROPKEY_CHANGE_THRESH)) {
+      change_threshold = config.getInt(PROPKEY_CHANGE_THRESH);
       Logger.info("Setting change threshold to " + change_threshold);
     }
 
