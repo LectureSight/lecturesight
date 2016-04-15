@@ -47,7 +47,9 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_CELL_THRESH = "cell.activation.threshold";
   private final static String PROPKEY_OBJECT_CELLS_MIN = "object.cells.min";
   private final static String PROPKEY_OBJECT_CELLS_MAX = "object.cells.max";
+  private final static String PROPKEY_OBJECT_DORMANT_MINTIME = "object.dormant.min";
   private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
+  private final static String PROPKEY_OBJECT_DORMANT_AGE_FACTOR = "object.dormant.age.factor";
   private final static String PROPKEY_OBJECT_MOVE_THRESH = "object.move.threshold";
   private final static String PROPKEY_OBJECT_ACTIVE_MINTIME = "object.active.min";
 
@@ -134,7 +136,9 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int cell_activation_threshold;
   int object_min_cells;
   int object_max_cells;
-  int object_max_dormant;
+  int object_dormant_min;
+  int object_dormant_max;
+  float object_dormant_age_factor;
   int object_min_active;
   double object_move_threshold;
 
@@ -326,6 +330,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       this.searchbox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
       this.updatebox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
       first_seen = System.currentTimeMillis();
+      last_move = first_seen;
       to = new TrackerObject(first_seen);
     }
   }
@@ -463,12 +468,24 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       }
     }
   }
-  
+
+  /**
+   * Discard targets which have been inactive for between the min and max dormant limits.
+   * Longer-lived objects are allowed to be dormant for longer before being discarded.
+   */
   void discardInactiveTargets() {
     long now = System.currentTimeMillis();
     for (Target t : targets) {
-      if (t != null && now - t.last_move > object_max_dormant) {
-        discardTarget(t);
+      if (t != null) {
+         long target_age = now - t.first_seen;
+         long target_dormant = now - t.last_move;
+         int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max( Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
+         Logger.trace("discard? id=" + t.id + " vt=" + t.vt + " match=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+
+         if (target_dormant > dormant_scaled) {
+           Logger.debug("Discarding dormant target id=" + t.id + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+           discardTarget(t);
+         }
       }
     }
   }
@@ -533,7 +550,9 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
     object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
     object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
-    object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+    object_dormant_min = config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME);
+    object_dormant_max = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+    object_dormant_age_factor = config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR);
     object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
     object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
   }
@@ -631,9 +650,19 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       Logger.info("Setting max number of cells in objects to " + object_max_cells);
     }
     
-    if (object_max_dormant != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
-      object_max_dormant = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
-      Logger.info("Setting max time in milliseconds before discarding a target to " + object_max_dormant);
+    if (object_dormant_min != config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME)) {
+      object_dormant_min = config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME);
+      Logger.info("Setting min time in milliseconds before discarding a target to " + object_dormant_min);
+    }
+
+    if (object_dormant_max != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
+      object_dormant_max = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
+      Logger.info("Setting max time in milliseconds before discarding a target to " + object_dormant_max);
+    }
+
+    if (object_dormant_age_factor != config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR)) {
+      object_dormant_age_factor = config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR);
+      Logger.info("Setting age factor for discarding a target to " + object_dormant_age_factor);
     }
 
     if (object_min_active != config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME)) {
