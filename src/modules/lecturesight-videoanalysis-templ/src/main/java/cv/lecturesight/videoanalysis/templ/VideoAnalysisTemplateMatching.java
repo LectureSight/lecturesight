@@ -51,6 +51,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_DORMANT_MAXTIME = "object.dormant.max";
   private final static String PROPKEY_OBJECT_DORMANT_AGE_FACTOR = "object.dormant.age.factor";
   private final static String PROPKEY_OBJECT_MOVE_THRESH = "object.move.threshold";
+  private final static String PROPKEY_OBJECT_MATCH_THRESH = "object.match.threshold";
   private final static String PROPKEY_OBJECT_ACTIVE_MINTIME = "object.active.min";
 
   @Reference
@@ -138,6 +139,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int object_max_cells;
   int object_dormant_min;
   int object_dormant_max;
+  int object_match_threshold;
   float object_dormant_age_factor;
   int object_min_active;
   double object_move_threshold;
@@ -435,7 +437,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         t.vy = -(t.y - y);
         t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
         
-        if (t.vt > object_move_threshold) {
+        if ((t.vt > object_move_threshold) && (match > object_match_threshold)) {
           t.last_move = System.currentTimeMillis();
         }
         
@@ -555,6 +557,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     object_dormant_age_factor = config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR);
     object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
     object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
+    object_match_threshold = config.getInt(PROPKEY_OBJECT_MATCH_THRESH);
   }
 
   /**
@@ -673,6 +676,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     if (object_move_threshold != config.getDouble(PROPKEY_OBJECT_MOVE_THRESH)) {
       object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
       Logger.info("Setting target movement threshold to " + object_move_threshold);
+    }
+
+    if (object_match_threshold != config.getInt(PROPKEY_OBJECT_MATCH_THRESH)) {
+      object_match_threshold = config.getInt(PROPKEY_OBJECT_MATCH_THRESH);
+      Logger.info("Setting target template match threshold to " + object_match_threshold);
     }
   }
 
