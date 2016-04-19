@@ -88,6 +88,13 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
       Position new_pos = new_pos_camera.flip(xflip, yflip);
 
+      // If no target has been set yet, do nothing except record position
+      if (!model.isTargetSet()) {
+         model.setCameraPosition(new_pos);
+         camera_pos = new_pos;
+         return;
+      }
+
       Position target_pos = model.getTargetPosition();
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
@@ -153,7 +160,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
         }
 
         // apply computed speeds if speeds or target have changed
-        if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0))) {
+        if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0) && (ts == 0))) {
 
           Logger.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
 
@@ -246,6 +253,10 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
 
   protected void deactivate(ComponentContext cc) throws Exception {
     camera.removeCameraListener(worker);
+
+    // Wait for any camera movements to complete (e.g. move to home / preset)  
+    Thread.sleep(1000);
+
     camera.stopMove();
     Logger.info("Deactivated");
   }
@@ -327,16 +338,13 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker {
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
 
     // Implemented using an absolute move
-    int ps = (int) (maxspeed_pan * damp_pan);
-    int ts = (int) (maxspeed_tilt * damp_tilt);
-
     boolean s = steering;
     setSteering(false);
 
     model.setTargetPositionNorm(pos);
     Position target_pos = model.getTargetPosition();
 
-    camera.moveAbsolute(ps, ts, target_pos.flip(xflip, yflip));
+    camera.moveAbsolute(maxspeed_pan, maxspeed_tilt, target_pos.flip(xflip, yflip));
 
     // Allow the camera to reach the target absolute position before sending it any other movement commands
     try {

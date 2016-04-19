@@ -28,6 +28,8 @@ public class CameraPositionModel {
   private final int tilt_min;
   private final int tilt_max;
 
+  // target position
+  boolean target_set = false;
   private Position camera_pos = new Position(0, 0);   // camera position in camera coordinates
   private Position target_pos = new Position(0, 0);   // target position in camera coordinates
   private NormalizedPosition target_posn = new NormalizedPosition(0.0f, 0.0f);  // camera position in normalized coordinates
@@ -85,11 +87,13 @@ public class CameraPositionModel {
   }
 
   public synchronized void setTargetPositionNorm(NormalizedPosition posn) {
+    target_set = true;
     target_posn = posn;
     target_pos = toCameraCoordinates(posn);
   }
 
   public synchronized void setTargetPosition(Position pos) {
+    target_set = true;
     target_posn = toNormalizedCoordinates(pos);
     target_pos = pos;
   }
@@ -108,5 +112,9 @@ public class CameraPositionModel {
 
   public synchronized NormalizedPosition getTargetPositionNorm() {
     return target_posn.clone();
+  }
+  
+  public boolean isTargetSet() {
+    return target_set;
   }
 }
