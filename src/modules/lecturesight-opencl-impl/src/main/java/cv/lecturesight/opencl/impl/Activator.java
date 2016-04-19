@@ -20,6 +20,9 @@ package cv.lecturesight.opencl.impl;
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
+import com.nativelibs4java.opencl.CLImageFormat;
+import com.nativelibs4java.opencl.CLMem.Flags;
+import com.nativelibs4java.opencl.CLMem.ObjectType;
 import com.nativelibs4java.opencl.CLPlatform;
 import com.nativelibs4java.opencl.CLPlatform.DeviceComparator;
 import com.nativelibs4java.opencl.CLProgram;
@@ -47,6 +50,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator, ServiceFactory {
@@ -65,9 +69,31 @@ public final class Activator implements BundleActivator, ServiceFactory {
   public void start(BundleContext context) throws Exception {
     bundleContext = context;
 
-    // initialize OpenCL and print device report
+    // initialize OpenCL
     oclContext = initOpenCL();
-    Logger.info(generateDeviceReport(oclContext.getPlatform().getBestDevice()));
+
+    // Device report for all available devices
+    CLDevice[] devices = oclContext.getPlatform().listAllDevices(true);
+    for (CLDevice device : devices) {
+        Logger.info(generateDeviceReport(device));
+    }
+
+    // Device which will be used
+    devices = oclContext.getDevices();
+    for (CLDevice device : devices) {
+        Logger.info("Selected OpenCL device: " + device.getVendor() + " " + device.getName());
+    }
+
+    // Check supported image formats for the selected device
+    if (Logger.getLevel() == Level.TRACE) {
+        StringBuilder formatlist = new StringBuilder();
+        CLImageFormat[] supportedImageFormats = oclContext.getSupportedImageFormats(Flags.ReadWrite, ObjectType.Image2D);
+        for (CLImageFormat format : supportedImageFormats) {
+            formatlist.append(format);
+            formatlist.append("\n");
+        }
+        Logger.trace("Supported image formats ({}):\n\n{}", supportedImageFormats.length, formatlist);
+    }
 
     // set up CL Command Queue
     oclQueue = oclContext.createDefaultQueue();
@@ -140,7 +166,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
         CLPlatform[] platforms = JavaCL.listPlatforms();
         List<CLDevice> devices = new LinkedList();
         
-        // find all availabel devices of configured type
+        // find all available devices of configured type
         for (CLPlatform platform : platforms) {
           devices.addAll(Arrays.asList(platform.listDevices(type, true)));
         }
@@ -183,7 +209,8 @@ public final class Activator implements BundleActivator, ServiceFactory {
   private String generateDeviceReport(CLDevice device) {
     final float KILOBYTE = 1024;
     final float MEGABYTE = 1024 * KILOBYTE;
-    String out = "Device report:\n\n";
+    String out = "OpenCL device report:\n\n";
+
     out += " " + device.getVendor() + " " + device.getName() + " (driver version: " + device.getDriverVersion() + ")\n\n";
     out += " Compute units :  " + device.getMaxComputeUnits() + " at " + device.getMaxClockFrequency() + " MHz max\n\n";
     out += "      Memories :  global   : " + (device.getGlobalMemSize() / MEGABYTE) + " MB\n";
@@ -191,6 +218,15 @@ public final class Activator implements BundleActivator, ServiceFactory {
     out += "                  local    : " + (device.getLocalMemSize() / KILOBYTE) + " KB\n\n";
     out += "    Workgroups :  " + device.getMaxWorkGroupSize() + " threads max in " + device.getMaxWorkItemDimensions() + " dimensions\n";
     out += " 2D Image size :  " + device.getImage2DMaxWidth() + "x" + device.getImage2DMaxHeight() + " max\n";
+
+    long[] workItemSizes = device.getMaxWorkItemSizes();
+    out += "Work item sizes:  ";
+
+    for (long size : workItemSizes) {
+	out += size + " ";
+    }
+    out += "\n";
+
     return out;
   }
 
