@@ -20,7 +20,7 @@ import org.osgi.framework.BundleListener;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.cameracalibration", immediate = true)
+@Component(name = "lecturesight.manpages", immediate = true)
 @Service
 @Properties({
   @Property(name = "osgi.command.scope", value = "man"),
@@ -104,7 +104,7 @@ public class ManualPagesUI implements UserInterface, BundleListener {
   String urlReadClose(URL url) {
     String out = "";
     try {
-      BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
+      BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
       String line;
       StringBuilder sb = new StringBuilder();
       while ((line = r.readLine()) != null) {
