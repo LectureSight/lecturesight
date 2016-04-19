@@ -5,7 +5,6 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraException;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.geometry.Position;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 
 import de.onvif.soap.OnvifDevice;

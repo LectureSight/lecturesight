@@ -26,7 +26,6 @@ import cv.lecturesight.ptz.api.PTZCameraException;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.vapix.service.VAPIXCameraImpl.MyAuthenticator;
-import cv.lecturesight.util.Log;
 import cv.lecturesight.util.conf.Configuration;
 
 import org.apache.felix.scr.annotations.Component;
