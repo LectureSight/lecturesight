@@ -20,7 +20,11 @@ package cv.lecturesight.ptz.api;
 import cv.lecturesight.util.geometry.Position;
 
 public interface PTZCamera {
-  
+ 
+ public static enum FocusMode {
+    STOP, NEAR, FAR, MANUAL, AUTO
+  }
+ 
   String getName();
   
   PTZCameraProfile getProfile();
@@ -72,6 +76,12 @@ public interface PTZCamera {
   void zoom(int zoom);
   
   int getZoom();
+
+  void focus(int focus);
+
+  int getFocus();
+
+  void focusMode(FocusMode mode);
   
   void addCameraListener(CameraListener l);
   

@@ -44,6 +44,7 @@ public class SimulatedCamera implements PTZCamera {
   Position current_pos = HOME_POS.clone();
   Position target_pos = HOME_POS.clone();
   int current_zoom = 0;
+  int current_focus = 0;
   int target_zoom;
   int speedPan = 0;
   int speedTilt = 0;
@@ -343,6 +344,22 @@ public class SimulatedCamera implements PTZCamera {
   @Override
   public int getZoom() {
     return current_zoom;
+  }
+
+  @Override
+  public void focus(int focus) {
+    synchronized(mutex) {
+      current_focus = focus;
+    }
+  }
+
+  @Override
+  public int getFocus() {
+    return current_focus;
+  }
+
+  @Override
+  public void focusMode(FocusMode mode) {
   }
 
   @Override

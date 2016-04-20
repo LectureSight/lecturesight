@@ -836,21 +836,31 @@ public class ONVIFCameraImpl implements PTZCamera {
 	/**
 	 * TODO: http://www.onvif.org/ver20/imaging/wsdl
 	 */
+	@Override
 	public void focus(int new_focus) {
 		Logger.trace("Not Implemented: set focus to " + new_focus);
 	}
 
 	/**
 	 * Return the focus of the camera
-	 * 
+	 * TODO
 	 * @return focus level of camera
 	 */
+	@Override
 	public int getFocus() {
 		int focus = 0;
 
 		Logger.trace("get focus" + focus);
 		return focus;
 	}
+
+       /**
+         * TODO Focus mode
+         */
+        @Override
+        public void focusMode(FocusMode mode) {
+		Logger.trace("Not Implemented: set focus mode to " + mode);
+        }
 
 	/**
 	 * Add camera listener to list of observers

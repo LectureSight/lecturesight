@@ -16,4 +16,5 @@ public class Constants {
   static final String PROPKEY_LIMIT_RIGHT = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.right";
   static final String PROPKEY_LIMIT_TOP = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.top";
   static final String PROPKEY_LIMIT_BOTTOM = "cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.bottom";
+  static final String PROPKEY_FOCUS_FIXED = "cv.lecturesight.ptz.steering.worker.relativemove.focus.fixed";
 }

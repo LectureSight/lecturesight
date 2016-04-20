@@ -59,6 +59,8 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   int senderInterval = 20;
   int config_timeout = 3000;  // ms within which camera must reply to initial inquiry
 
+  boolean updatePollFocus = false;
+
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
   ScheduledFuture updaterHandle;
   ScheduledFuture senderHandle;
@@ -83,6 +85,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     String stopbits = config.get(Constants.PROPKEY_PORT_STOPBITS);
     String parity = config.get(Constants.PROPKEY_PORT_PARITY);
     updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
+    updatePollFocus = config.getBoolean(Constants.PROPKEY_UPDATER_POLL_FOCUS);
 
     // open serial port
     initPort(devicename, speed, databits, stopbits, parity);
@@ -383,8 +386,10 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
       } // did we receive a CAM_VersionInq reply?
       else if (buffer[1] == (byte) 0x50 && buffer[2] == (byte) 0x00 && len == 10) {
         handleCameraInfoReply(buffer);
+      } // did we receive a Focus inquiry reply?
+      else if (buffer[1] == (byte) 0x50 && len == 7) {
+        handleCameraFocusReply(buffer);
       }
-
     } catch (IOException e) {
       Logger.error("Error while receiving data. ", e);
     }
@@ -488,6 +493,17 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
     }
   }
 
+  private void handleCameraFocusReply(byte[] msg) {
+
+    int adr = getAddress(buffer);
+    int focus = ((buffer[2] & 0x0f) << 12) + ((buffer[3] & 0x0f) << 8) + ((buffer[4] & 0x0f) << 4) + (buffer[5] & 0x0f);
+
+    cameras[adr-1].state.focus = focus;
+
+    Logger.trace("Received camera focus position update: camera " + adr + " focus " + focus);
+
+  }
+
   private void handleDiscoveryReply(byte[] msg) {
     int adr = buffer[2] - 1;
     Logger.info("Camera discovered on address " + adr);
@@ -507,6 +523,7 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   class CameraStateUpdater implements Runnable {
 
     Message inq_msg = VISCA.INQ_PAN_TILT_POS.clone();
+    Message inq_focus = VISCA.INQ_FOCUS_POS.clone();
 
     @Override
     public void run() {
@@ -517,6 +534,12 @@ public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
 		  Logger.trace("Requesting camera position update");
 		  inq_msg.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + cam.address);
 		  send(inq_msg.getBytes());
+
+		  if (updatePollFocus) {
+			Logger.trace("Requesting camera focus update");
+			inq_focus.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + cam.address);
+			send(inq_focus.getBytes());
+                  }
 		}
 	      }
       } catch (Exception e) {
