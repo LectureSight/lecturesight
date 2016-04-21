@@ -228,7 +228,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 					this.observers = new LinkedList<CameraListener>();
 
 					// start update thread
-					updaterHandle = executor.scheduleAtFixedRate(new CameraStateUpdater(), updateInterval,
+					updaterHandle = executor.scheduleWithFixedDelay(new CameraStateUpdater(), updateInterval,
 							updateInterval, TimeUnit.MILLISECONDS);
 				} else {
 					String msg = "Camera not responding to HTTPRequest - group=PTZ.";
