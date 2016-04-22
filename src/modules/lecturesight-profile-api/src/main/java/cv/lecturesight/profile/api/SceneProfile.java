@@ -147,6 +147,21 @@ public class SceneProfile {
     return list;
   }
 
+  /** Returns a List of deep copies of all Zones of Type CALIBRATION.
+   *
+   * @return List of CALIBRATION Zones
+   */
+  public synchronized List<Zone> getCalibrationZones() {
+    ArrayList<Zone> list = new ArrayList<Zone>();
+    for (Zone z : zones) {
+      if (z.type == Zone.Type.CALIBRATION) {
+        list.add(z.clone());
+      }
+    }
+    return list;
+  }
+
+
   @Override
   public synchronized SceneProfile clone() {
     SceneProfile clone = new SceneProfile(this.name, this.description, this.width, this.height);
