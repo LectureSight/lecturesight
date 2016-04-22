@@ -714,6 +714,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
 
   private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
     if (!currentProfileIsDefault()) {
+      profile.width = imageDim.width;
+      profile.height = imageDim.height;
       parent.spm.setActiveProfile(profile);
       parent.spm.saveProfile(profile);
     }
@@ -802,7 +804,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     try {
       FileOutputStream os = new FileOutputStream(file);
       Logger.info("Writing new scene profile to " + file.getAbsolutePath());
-      SceneProfile newProfile = new SceneProfile(name, "");
+      SceneProfile newProfile = new SceneProfile(name, "", imageDim.width, imageDim.height);
       SceneProfileSerializer.serialize(newProfile, os);
       os.close();
       

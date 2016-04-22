@@ -27,16 +27,24 @@ public class SceneProfile {
 
   public String description;  // human-readable description of profile
 
+  public int width;    // width of the scene in pixels
+
+  public int height;   // height of the scene in pixels
+
   public LinkedList<Zone> zones = new LinkedList<Zone>();  // profile's zones
 
   public SceneProfile() {
     this.name = "empty";
     this.description = "";
+    this.width = 0;
+    this.height = 0;
   }
 
-  public SceneProfile(String name, String description) {
+  public SceneProfile(String name, String description, int width, int height) {
     this.name = name;
     this.description = description;
+    this.width = width;
+    this.height = height;
   }
 
   /** Returns true if this profile contains a Zone that is equal to <code>zone</code>.
@@ -141,7 +149,7 @@ public class SceneProfile {
 
   @Override
   public synchronized SceneProfile clone() {
-    SceneProfile clone = new SceneProfile(this.name, this.description);
+    SceneProfile clone = new SceneProfile(this.name, this.description, this.width, this.height);
     for (Zone zone : this.zones) {
       clone.zones.add(zone.clone());
     }

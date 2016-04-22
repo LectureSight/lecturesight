@@ -63,7 +63,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     }
     
     // create system default profile
-    defaultProfile = new SceneProfile("default", "System default profile");
+    defaultProfile = new SceneProfile("default", "System default profile", 640, 360);
     defaultProfile.name = "default";
     profiles.put(defaultProfile);
     
