@@ -49,6 +49,8 @@ import org.pmw.tinylog.Logger;
 public class SceneProfileEditorPanel extends javax.swing.JPanel implements CustomRenderer {
 
   final static int NEW_AREA_SIZE = 5;
+  final static int NEW_MARKER_SIZE = 12;
+
   private SceneProfileUI parent;
   private Display cameraDisplay;
   private DisplayPanel cameraDisplayPanel;
@@ -64,14 +66,15 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
 
   // Stuff for drawing
   private final static Font font = new Font("Monospaced", Font.PLAIN, 10);
-  private Color red_solid = new Color(255, 80, 80, 255);
-  private Color red_transparent = new Color(255, 0, 0, 100);
-  private Color green_solid = new Color(0, 255, 0, 255);
-  private Color green_transparent = new Color(0, 255, 0, 100);
-  private Color yellow_solid = new Color(255, 255, 0, 255);
-  private Color yellow_transparent = new Color(255, 255, 0, 180);
-  private Color blue_solid = new Color(0, 0, 255, 255);
-  private Color blue_transparent = new Color(0, 0, 255, 180);
+  private final Color red_solid = new Color(255, 80, 80, 255);
+  private final Color red_transparent = new Color(255, 0, 0, 100);
+  private final Color green_solid = new Color(0, 255, 0, 255);
+  private final Color green_transparent = new Color(0, 255, 0, 100);
+  private final Color yellow_solid = new Color(255, 255, 0, 255);
+  private final Color yellow_transparent = new Color(255, 255, 0, 180);
+  private final Color blue_solid = new Color(0, 0, 255, 255);
+  private final Color blue_transparent = new Color(0, 0, 255, 180);
+  private final Color black_solid = new Color(0, 0, 0, 255);
 
   /**
    * Creates new form SceneProfileEditorPanel
@@ -199,6 +202,10 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         case PERSON:
           drawTriggerZone(g, z, blue_transparent, (selection != null && z == selection.zone));
           break;
+        case CALIBRATION:
+          drawMarkerZone(g, z, black_solid, red_solid, (selection != null && z == selection.zone));
+          break;
+
       }
     }
   }
@@ -240,6 +247,15 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     }
   }
 
+   /**
+   * Draws the representation of an <code>Area</code> with the given Graphics
+   * context, without a fill color.
+   *
+   * @param g
+   * @param a
+   * @param borderColor
+   * @param selected
+   */
   private void drawTriggerZone(Graphics g, Zone a, Color borderColor, boolean selected) {
     // draw area
     g.setColor(borderColor);
@@ -262,6 +278,43 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     }
   }
 
+    /**
+   * Draws the representation of an <code>Area</code> with the given Graphics
+   * context, without a fill color.
+   *
+   * @param g
+   * @param a
+   * @param borderColor
+   * @param selected
+   */
+  private void drawMarkerZone(Graphics g, Zone a, Color borderColor, Color lineColor, boolean selected) {
+    // draw area
+    g.setColor(borderColor);
+    g.drawRect(a.x, a.y, a.width, a.height);
+
+    // draw cross-hairs
+    g.setColor(lineColor);
+    g.drawLine(a.x + a.width/2, a.y, a.x + a.width/2, a.y + a.height);
+    g.drawLine(a.x, a.y + a.height/2, a.x + a.width, a.y + a.height/2);
+    
+    // draw area name if existing
+    if (!a.name.trim().isEmpty()) {
+      g.setColor(borderColor);
+      g.setFont(font);
+      g.drawString(a.name, a.x, a.y -5);
+    }
+
+    // draw handles if selected
+    if (selected) {
+      g.setColor(borderColor);
+      g.drawRect(a.x - 3, a.y - 3, 5, 5);
+      g.drawRect(a.x + a.width - 3, a.y - 3, 5, 5);
+      g.drawRect(a.x - 3, a.y + a.height - 3, 5, 5);
+      g.drawRect(a.x + a.width - 3, a.y + a.height - 3, 5, 5);
+    }
+  }
+
+ 
   /**
    * Returns true if <code>p</code> is inside a given rectangle
    *
@@ -314,6 +367,12 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
                 DraggingType.DOWN_RIGHT);
         resetToolSelection();
         return;
+      } else if (toolButtonCalibration.isSelected()) {
+        selection = new ObjectSelection(
+                addZone("marker", Zone.Type.CALIBRATION, pos.x, pos.y, NEW_MARKER_SIZE, NEW_MARKER_SIZE),
+                DraggingType.NONE);
+        resetToolSelection();
+        return;
       }
 
       // or are we dragging area or handle?
@@ -323,6 +382,14 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         int aw = selection.zone.width;
         int ah = selection.zone.height;
 
+        // markers can only be moved, not resized
+        if ((selection.zone.getType() == Zone.Type.CALIBRATION) &&
+                isInside(pos, ax-5, ay-5, aw+10, ah+10)){
+          selection.dragging = DraggingType.WHOLE;
+          setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+          return;        
+        }
+        
         if (isInside(pos, ax - 3, ay - 3, 5, 5)) {                  // upper left handle
           selection.dragging = DraggingType.UP_LEFT;
           setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
@@ -502,215 +569,230 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
    * regenerated by the Form Editor.
    */
   @SuppressWarnings("unchecked")
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
 
-    typeButtonGroup = new javax.swing.ButtonGroup();
-    toolBar = new javax.swing.JToolBar();
-    ProfileChooserLabel = new javax.swing.JLabel();
-    profileChooser = new javax.swing.JComboBox();
-    newProfileButton = new javax.swing.JButton();
-    saveButton = new javax.swing.JButton();
-    jSeparator1 = new javax.swing.JToolBar.Separator();
-    propertiesButton = new javax.swing.JButton();
-    defaultProfileNotification = new javax.swing.JLabel();
-    cameraDisplayHolder = new javax.swing.JPanel();
-    typeButtonContainer = new javax.swing.JPanel();
-    toolButtonIgnore = new javax.swing.JToggleButton();
-    toolButtonTracking = new javax.swing.JToggleButton();
-    toolButtonTrigger = new javax.swing.JToggleButton();
-    toolButtonMeasure = new javax.swing.JToggleButton();
-    toolButtonPointer = new javax.swing.JToggleButton();
-    editButton = new javax.swing.JButton();
-    deleteButton = new javax.swing.JButton();
+        typeButtonGroup = new javax.swing.ButtonGroup();
+        toolBar = new javax.swing.JToolBar();
+        ProfileChooserLabel = new javax.swing.JLabel();
+        profileChooser = new javax.swing.JComboBox();
+        newProfileButton = new javax.swing.JButton();
+        saveButton = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JToolBar.Separator();
+        propertiesButton = new javax.swing.JButton();
+        defaultProfileNotification = new javax.swing.JLabel();
+        cameraDisplayHolder = new javax.swing.JPanel();
+        typeButtonContainer = new javax.swing.JPanel();
+        toolButtonIgnore = new javax.swing.JToggleButton();
+        toolButtonTracking = new javax.swing.JToggleButton();
+        toolButtonTrigger = new javax.swing.JToggleButton();
+        toolButtonMeasure = new javax.swing.JToggleButton();
+        toolButtonPointer = new javax.swing.JToggleButton();
+        editButton = new javax.swing.JButton();
+        toolButtonCalibration = new javax.swing.JToggleButton();
+        deleteButton = new javax.swing.JButton();
 
-    toolBar.setRollover(true);
-    toolBar.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        toolBar.setRollover(true);
+        toolBar.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-    ProfileChooserLabel.setText("Profile:");
-    toolBar.add(ProfileChooserLabel);
+        ProfileChooserLabel.setText("Profile:");
+        toolBar.add(ProfileChooserLabel);
 
-    profileChooser.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        profileChooserActionPerformed(evt);
-      }
-    });
-    toolBar.add(profileChooser);
+        profileChooser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                profileChooserActionPerformed(evt);
+            }
+        });
+        toolBar.add(profileChooser);
 
-    newProfileButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/map--plus.png"))); // NOI18N
-    newProfileButton.setFocusable(false);
-    newProfileButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-    newProfileButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-    newProfileButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        newProfileButtonActionPerformed(evt);
-      }
-    });
-    toolBar.add(newProfileButton);
+        newProfileButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/map--plus.png"))); // NOI18N
+        newProfileButton.setFocusable(false);
+        newProfileButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        newProfileButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        newProfileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newProfileButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(newProfileButton);
 
-    saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/disk.png"))); // NOI18N
-    saveButton.setToolTipText("Save current profile");
-    saveButton.setFocusable(false);
-    saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-    saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-    saveButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        saveButtonActionPerformed(evt);
-      }
-    });
-    toolBar.add(saveButton);
-    toolBar.add(jSeparator1);
+        saveButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/disk.png"))); // NOI18N
+        saveButton.setToolTipText("Save current profile");
+        saveButton.setFocusable(false);
+        saveButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        saveButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(saveButton);
+        toolBar.add(jSeparator1);
 
-    propertiesButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/property.png"))); // NOI18N
-    propertiesButton.setToolTipText("Edit profile properties (disbaled, not stale yet)");
-    propertiesButton.setEnabled(false);
-    propertiesButton.setFocusable(false);
-    propertiesButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-    propertiesButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-    propertiesButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        propertiesButtonActionPerformed(evt);
-      }
-    });
-    toolBar.add(propertiesButton);
+        propertiesButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/property.png"))); // NOI18N
+        propertiesButton.setToolTipText("Edit profile properties (disbaled, not stale yet)");
+        propertiesButton.setEnabled(false);
+        propertiesButton.setFocusable(false);
+        propertiesButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        propertiesButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        propertiesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                propertiesButtonActionPerformed(evt);
+            }
+        });
+        toolBar.add(propertiesButton);
 
-    defaultProfileNotification.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-    defaultProfileNotification.setIcon(new javax.swing.ImageIcon(getClass().getResource("/exclamation-small.png"))); // NOI18N
-    defaultProfileNotification.setText("System default profile cannot be saved!");
-    toolBar.add(defaultProfileNotification);
+        defaultProfileNotification.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        defaultProfileNotification.setIcon(new javax.swing.ImageIcon(getClass().getResource("/exclamation-small.png"))); // NOI18N
+        defaultProfileNotification.setText("System default profile cannot be saved!");
+        toolBar.add(defaultProfileNotification);
 
-    cameraDisplayHolder.setBackground(new java.awt.Color(1, 1, 1));
+        cameraDisplayHolder.setBackground(new java.awt.Color(1, 1, 1));
 
-    javax.swing.GroupLayout cameraDisplayHolderLayout = new javax.swing.GroupLayout(cameraDisplayHolder);
-    cameraDisplayHolder.setLayout(cameraDisplayHolderLayout);
-    cameraDisplayHolderLayout.setHorizontalGroup(
-      cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 0, Short.MAX_VALUE)
-    );
-    cameraDisplayHolderLayout.setVerticalGroup(
-      cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 0, Short.MAX_VALUE)
-    );
+        javax.swing.GroupLayout cameraDisplayHolderLayout = new javax.swing.GroupLayout(cameraDisplayHolder);
+        cameraDisplayHolder.setLayout(cameraDisplayHolderLayout);
+        cameraDisplayHolderLayout.setHorizontalGroup(
+            cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        cameraDisplayHolderLayout.setVerticalGroup(
+            cameraDisplayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 564, Short.MAX_VALUE)
+        );
 
-    typeButtonGroup.add(toolButtonIgnore);
-    toolButtonIgnore.setIcon(new javax.swing.ImageIcon(getClass().getResource("/cross-circle-frame.png"))); // NOI18N
-    toolButtonIgnore.setToolTipText("Create Ignore Zone");
-    toolButtonIgnore.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        toolButtonIgnoreActionPerformed(evt);
-      }
-    });
+        typeButtonGroup.add(toolButtonIgnore);
+        toolButtonIgnore.setIcon(new javax.swing.ImageIcon(getClass().getResource("/cross-circle-frame.png"))); // NOI18N
+        toolButtonIgnore.setToolTipText("Create Ignore Zone");
+        toolButtonIgnore.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolButtonIgnoreActionPerformed(evt);
+            }
+        });
 
-    typeButtonGroup.add(toolButtonTracking);
-    toolButtonTracking.setIcon(new javax.swing.ImageIcon(getClass().getResource("/plus-circle-frame.png"))); // NOI18N
-    toolButtonTracking.setToolTipText("Create Tracking Zone");
-    toolButtonTracking.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        toolButtonTrackingActionPerformed(evt);
-      }
-    });
+        typeButtonGroup.add(toolButtonTracking);
+        toolButtonTracking.setIcon(new javax.swing.ImageIcon(getClass().getResource("/plus-circle-frame.png"))); // NOI18N
+        toolButtonTracking.setToolTipText("Create Tracking Zone");
+        toolButtonTracking.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolButtonTrackingActionPerformed(evt);
+            }
+        });
 
-    typeButtonGroup.add(toolButtonTrigger);
-    toolButtonTrigger.setIcon(new javax.swing.ImageIcon(getClass().getResource("/switch.png"))); // NOI18N
-    toolButtonTrigger.setToolTipText("Create Trigger Zone");
-    toolButtonTrigger.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        toolButtonTriggerActionPerformed(evt);
-      }
-    });
+        typeButtonGroup.add(toolButtonTrigger);
+        toolButtonTrigger.setIcon(new javax.swing.ImageIcon(getClass().getResource("/switch.png"))); // NOI18N
+        toolButtonTrigger.setToolTipText("Create Trigger Zone");
+        toolButtonTrigger.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolButtonTriggerActionPerformed(evt);
+            }
+        });
 
-    typeButtonGroup.add(toolButtonMeasure);
-    toolButtonMeasure.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ruler-triangle.png"))); // NOI18N
-    toolButtonMeasure.setToolTipText("Create Measure Zone");
-    toolButtonMeasure.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        toolButtonMeasureActionPerformed(evt);
-      }
-    });
+        typeButtonGroup.add(toolButtonMeasure);
+        toolButtonMeasure.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ruler-triangle.png"))); // NOI18N
+        toolButtonMeasure.setToolTipText("Create Measure Zone");
+        toolButtonMeasure.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolButtonMeasureActionPerformed(evt);
+            }
+        });
 
-    typeButtonGroup.add(toolButtonPointer);
-    toolButtonPointer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/cursor.png"))); // NOI18N
-    toolButtonPointer.setSelected(true);
-    toolButtonPointer.setToolTipText("Pointer Tool");
+        typeButtonGroup.add(toolButtonPointer);
+        toolButtonPointer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/cursor.png"))); // NOI18N
+        toolButtonPointer.setSelected(true);
+        toolButtonPointer.setToolTipText("Pointer Tool");
 
-    editButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/tag--pencil.png"))); // NOI18N
-    editButton.setToolTipText("Edit Zone Name");
-    editButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        editButtonActionPerformed(evt);
-      }
-    });
+        editButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/tag--pencil.png"))); // NOI18N
+        editButton.setToolTipText("Edit Zone Name");
+        editButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editButtonActionPerformed(evt);
+            }
+        });
 
-    javax.swing.GroupLayout typeButtonContainerLayout = new javax.swing.GroupLayout(typeButtonContainer);
-    typeButtonContainer.setLayout(typeButtonContainerLayout);
-    typeButtonContainerLayout.setHorizontalGroup(
-      typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(typeButtonContainerLayout.createSequentialGroup()
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGroup(typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(toolButtonPointer, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(toolButtonIgnore, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(toolButtonTrigger, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(toolButtonMeasure, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(toolButtonTracking, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(editButton, javax.swing.GroupLayout.Alignment.TRAILING))
-        .addContainerGap())
-    );
-    typeButtonContainerLayout.setVerticalGroup(
-      typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(typeButtonContainerLayout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(toolButtonPointer)
-        .addGap(18, 18, 18)
-        .addComponent(toolButtonIgnore)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(toolButtonTracking)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(toolButtonTrigger)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(toolButtonMeasure)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 300, Short.MAX_VALUE)
-        .addComponent(editButton))
-    );
+        typeButtonGroup.add(toolButtonCalibration);
+        toolButtonCalibration.setIcon(new javax.swing.ImageIcon(getClass().getResource("/geolocation.png"))); // NOI18N
+        toolButtonCalibration.setToolTipText("Add Calibration Marker");
+        toolButtonCalibration.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                toolButtonCalibrationActionPerformed(evt);
+            }
+        });
 
-    deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bin-metal.png"))); // NOI18N
-    deleteButton.setToolTipText("Delete Zone");
-    deleteButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        deleteButtonActionPerformed(evt);
-      }
-    });
+        deleteButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/bin-metal.png"))); // NOI18N
+        deleteButton.setToolTipText("Delete Zone");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
 
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-    this.setLayout(layout);
-    layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 880, Short.MAX_VALUE)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(typeButtonContainer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addGroup(layout.createSequentialGroup()
-            .addGap(12, 12, 12)
-            .addComponent(deleteButton)))
-        .addContainerGap())
-    );
-    layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(typeButtonContainer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(deleteButton))
-          .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        .addContainerGap())
-    );
-  }// </editor-fold>//GEN-END:initComponents
+        javax.swing.GroupLayout typeButtonContainerLayout = new javax.swing.GroupLayout(typeButtonContainer);
+        typeButtonContainer.setLayout(typeButtonContainerLayout);
+        typeButtonContainerLayout.setHorizontalGroup(
+            typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(typeButtonContainerLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(typeButtonContainerLayout.createSequentialGroup()
+                        .addComponent(deleteButton)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, typeButtonContainerLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(toolButtonPointer, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(toolButtonIgnore, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(toolButtonTrigger, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(toolButtonMeasure, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(toolButtonTracking, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(toolButtonCalibration, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(editButton, javax.swing.GroupLayout.Alignment.TRAILING))))
+                .addContainerGap())
+        );
+        typeButtonContainerLayout.setVerticalGroup(
+            typeButtonContainerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(typeButtonContainerLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(toolButtonPointer)
+                .addGap(18, 18, 18)
+                .addComponent(toolButtonIgnore)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(toolButtonTracking)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(toolButtonTrigger)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(toolButtonMeasure)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(toolButtonCalibration)
+                .addGap(34, 34, 34)
+                .addComponent(editButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(deleteButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 880, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(typeButtonContainer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cameraDisplayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(typeButtonContainer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+    }// </editor-fold>//GEN-END:initComponents
 
   private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
     if (!currentProfileIsDefault()) {
@@ -820,26 +902,31 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     }
   }//GEN-LAST:event_newProfileButtonActionPerformed
 
+    private void toolButtonCalibrationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_toolButtonCalibrationActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_toolButtonCalibrationActionPerformed
 
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel ProfileChooserLabel;
-  private javax.swing.JPanel cameraDisplayHolder;
-  private javax.swing.JLabel defaultProfileNotification;
-  private javax.swing.JButton deleteButton;
-  private javax.swing.JButton editButton;
-  private javax.swing.JToolBar.Separator jSeparator1;
-  private javax.swing.JButton newProfileButton;
-  private javax.swing.JComboBox profileChooser;
-  private javax.swing.JButton propertiesButton;
-  private javax.swing.JButton saveButton;
-  private javax.swing.JToolBar toolBar;
-  private javax.swing.JToggleButton toolButtonIgnore;
-  private javax.swing.JToggleButton toolButtonMeasure;
-  private javax.swing.JToggleButton toolButtonPointer;
-  private javax.swing.JToggleButton toolButtonTracking;
-  private javax.swing.JToggleButton toolButtonTrigger;
-  private javax.swing.JPanel typeButtonContainer;
-  private javax.swing.ButtonGroup typeButtonGroup;
-  // End of variables declaration//GEN-END:variables
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel ProfileChooserLabel;
+    private javax.swing.JPanel cameraDisplayHolder;
+    private javax.swing.JLabel defaultProfileNotification;
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JButton editButton;
+    private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JButton newProfileButton;
+    private javax.swing.JComboBox profileChooser;
+    private javax.swing.JButton propertiesButton;
+    private javax.swing.JButton saveButton;
+    private javax.swing.JToolBar toolBar;
+    private javax.swing.JToggleButton toolButtonCalibration;
+    private javax.swing.JToggleButton toolButtonIgnore;
+    private javax.swing.JToggleButton toolButtonMeasure;
+    private javax.swing.JToggleButton toolButtonPointer;
+    private javax.swing.JToggleButton toolButtonTracking;
+    private javax.swing.JToggleButton toolButtonTrigger;
+    private javax.swing.JPanel typeButtonContainer;
+    private javax.swing.ButtonGroup typeButtonGroup;
+    // End of variables declaration//GEN-END:variables
 
 }
