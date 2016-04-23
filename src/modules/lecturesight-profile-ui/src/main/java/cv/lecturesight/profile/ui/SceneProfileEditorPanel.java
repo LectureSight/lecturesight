@@ -49,8 +49,8 @@ import org.pmw.tinylog.Logger;
 public class SceneProfileEditorPanel extends javax.swing.JPanel implements CustomRenderer {
 
   final static int NEW_AREA_SIZE = 5;
-  final static int NEW_MARKER_SIZE = 12;
-
+  final static int NEW_MARKER_SIZE = 15;
+  
   private SceneProfileUI parent;
   private Display cameraDisplay;
   private DisplayPanel cameraDisplayPanel;
@@ -203,7 +203,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
           drawTriggerZone(g, z, blue_transparent, (selection != null && z == selection.zone));
           break;
         case CALIBRATION:
-          drawMarkerZone(g, z, black_solid, red_solid, (selection != null && z == selection.zone));
+          drawMarkerZone(g, z, black_solid, red_transparent, (selection != null && z == selection.zone));
           break;
 
       }
@@ -279,8 +279,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   }
 
     /**
-   * Draws the representation of an <code>Area</code> with the given Graphics
-   * context, without a fill color.
+   * Draws a marker with the given Graphics context, with cross-hairs.
    *
    * @param g
    * @param a
@@ -290,12 +289,12 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
   private void drawMarkerZone(Graphics g, Zone a, Color borderColor, Color lineColor, boolean selected) {
     // draw area
     g.setColor(borderColor);
-    g.drawRect(a.x, a.y, a.width, a.height);
+    g.drawOval(a.x, a.y, a.width, a.height);
 
     // draw cross-hairs
     g.setColor(lineColor);
-    g.drawLine(a.x + a.width/2, a.y, a.x + a.width/2, a.y + a.height);
-    g.drawLine(a.x, a.y + a.height/2, a.x + a.width, a.y + a.height/2);
+    g.fillRect(a.x + a.width/2, a.y+1, 2, a.height-1);
+    g.fillRect(a.x + 1, a.y + a.height/2, a.width-1, 2);
     
     // draw area name if existing
     if (!a.name.trim().isEmpty()) {
