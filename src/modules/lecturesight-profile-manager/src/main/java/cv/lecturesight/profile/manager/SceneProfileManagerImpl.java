@@ -67,18 +67,24 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     defaultProfile.name = "default";
     profiles.put(defaultProfile);
     
-    // setting defaultProfile as default profile 
-    // as long as profile artifacts have not been loaded
-    activeProfile = defaultProfile;   
-    
     // get name of configured profile
     configuredProfile = config.get(PROPKEY_PROFILE);
-    if (configuredProfile != null){
-        loadProfile = profiles.getByName(configuredProfile);
-        if (loadProfile != null) {
-            activeProfile = loadProfile;
+
+    // load all the profiles
+    File[] files = profileDir.listFiles();
+
+    for (File file : files) {
+        if (file.isFile()) {
+            install(file);
         }
     }
+
+    // setting defaultProfile as active profile
+    // if the configured profile has not been specified or is not available
+    if (activeProfile == null) {
+        activeProfile = defaultProfile;
+    }
+
     Logger.info("Activated. Configured scene profile is: " + activeProfile.name );
   }
 
