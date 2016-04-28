@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.util.conf;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
@@ -25,6 +26,8 @@ public interface ConfigurationService {
 
   Properties getSystemConfiguration();
   Properties getSystemDefaults();
+  void setConfigurationFile(File configFile);
+  File getConfigurationFile();
   void loadSystemConfiguration(InputStream is);
   void saveSystemConfiguration(OutputStream os);
   void notifyListeners();

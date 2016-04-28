@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.util.conf;
 
+import java.io.File;
 import org.pmw.tinylog.Logger;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
   private BundleContext bcontext;
   Properties config;
   Properties defaults;
+  File configFile;
   List<ConfigurationListener> listeners = new LinkedList<ConfigurationListener>();
   
   public ConfigurationServiceImpl(BundleContext bcontext, Properties config, Properties defaults) {
@@ -124,4 +126,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
       }
     }
   }
+
+    @Override
+    public void setConfigurationFile(File configFile) {
+        this.configFile = configFile;
+    }
+
+    @Override
+    public File getConfigurationFile() {
+        return configFile;
+    }
 }
