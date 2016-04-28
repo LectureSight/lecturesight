@@ -186,7 +186,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
   }// </editor-fold>//GEN-END:initComponents
 
   private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadButtonActionPerformed
-    JFileChooser chooser = new JFileChooser();
+    File configFile = config.getConfigurationFile();
+    JFileChooser chooser = new JFileChooser(configFile.getAbsolutePath());
     if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       try {
@@ -199,7 +200,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
   }//GEN-LAST:event_loadButtonActionPerformed
 
   private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-    JFileChooser chooser = new JFileChooser();
+    File configFile = config.getConfigurationFile();
+    JFileChooser chooser = new JFileChooser(configFile.getAbsolutePath());
     if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       if (file.exists() && JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
