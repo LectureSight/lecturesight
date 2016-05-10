@@ -74,6 +74,9 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   boolean yflip = false;
   boolean focus_fixed = false;        // Switch off auto-focus when in tracking position
 
+  public enum CameraCmd { STOP, MOVE };
+  CameraCmd last_cmd;
+
   // lists of listeners
   List<UISlave> uiListeners = new LinkedList<UISlave>();
   List<MovementListener> moveListeners = new LinkedList<MovementListener>();
@@ -84,6 +87,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     Position last_target = new Position(0, 0);
     int last_ps = 0;
     int last_ts = 0;
+    int stopped_time = 500;
+    long first_stop = 0;
 
     @Override
     public void positionUpdated(Position new_pos_camera) {
@@ -101,7 +106,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
 
       // update camera position model, notify movement listeners
-      if (new_pos.getX() != camera_pos.getX() || new_pos.getY() != camera_pos.getY()) {
+      if (!new_pos.equals(camera_pos)) {
         if (!moving) {
           informMoveListenersStart(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
           Logger.debug("Camera started moving");
@@ -109,12 +114,18 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
         moving = true;
         model.setCameraPosition(new_pos);
         camera_pos = new_pos;
+        first_stop = 0;
       } else {
-        if (moving) {
-          informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
-          Logger.debug("Camera stopped moving");
+        long now = System.currentTimeMillis();
+        if (first_stop > 0) {
+          if (moving && (now - first_stop > stopped_time)) {
+            informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
+            Logger.debug("Camera stopped moving");
+            moving = false;
+          }
+        } else {
+          first_stop = now;
         }
-        moving = false;
       }
 
       // update pan/tilt speeds, if steering is active
@@ -168,33 +179,33 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
-          
+         
           if (ps == 0 && ts == 0) {
-            camera.stopMove();
+            if (last_cmd != CameraCmd.STOP) {
+              camera.stopMove();
+              last_cmd = CameraCmd.STOP;
+            }
+          } else {
 
-          } else if (dx < 0 && dy == 0) {
-            camera.moveRight(ps);
+            if (dx < 0 && dy == 0) {
+              camera.moveRight(ps);
+            } else if (dx > 0 && dy == 0) {
+              camera.moveLeft(ps);
+            } else if (dx == 0 && dy < 0) {
+              camera.moveUp(ts);
+            } else if (dx == 0 && dy > 0) {
+              camera.moveDown(ts);
+            } else if (dx < 0 && dy < 0) {
+              camera.moveUpRight(ps, ts);
+            } else if (dx < 0 && dy > 0) {
+              camera.moveDownRight(ps, ts);
+            } else if (dx > 0 && dy < 0) {
+              camera.moveUpLeft(ps, ts);
+            } else if (dx > 0 && dy > 0) {
+              camera.moveDownLeft(ps, ts);
+            }
+            last_cmd = CameraCmd.MOVE;
 
-          } else if (dx > 0 && dy == 0) {
-            camera.moveLeft(ps);
-
-          } else if (dx == 0 && dy < 0) {
-            camera.moveUp(ts);
-
-          } else if (dx == 0 && dy > 0) {
-            camera.moveDown(ts);
-
-          } else if (dx < 0 && dy < 0) {
-            camera.moveUpRight(ps, ts);
-
-          } else if (dx < 0 && dy > 0) {
-            camera.moveDownRight(ps, ts);
-
-          } else if (dx > 0 && dy < 0) {
-            camera.moveUpLeft(ps, ts);
-
-          } else if (dx > 0 && dy > 0) {
-            camera.moveDownLeft(ps, ts);
           }
 
           last_ps = ps;
