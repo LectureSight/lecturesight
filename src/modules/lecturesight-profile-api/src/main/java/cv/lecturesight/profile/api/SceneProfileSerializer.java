@@ -49,6 +49,10 @@ public class SceneProfileSerializer {
       // write name and description in second line
       out.append(sanitize(profile.name)).append(TAB).append(sanitize(profile.description)).append(NEWLINE);
 
+      // write dimensions
+      out.append(Zone.Type.SIZE.name()).append(TAB).append("size").append(TAB).append("0").append(TAB).append("0").append(TAB)
+         .append(Integer.toString(profile.width)).append(TAB).append(Integer.toString(profile.height)).append(NEWLINE);
+
       // write zones
       for (Zone zone : profile.zones) {
         out.append(zone.type.name()).append(TAB).append(sanitize(zone.name)).append(TAB)
@@ -81,7 +85,7 @@ public class SceneProfileSerializer {
   }
 
   public static SceneProfile deserialize(InputStream is) throws ProfileSerializerException {
-    SceneProfile profile = new SceneProfile("no title", "");
+    SceneProfile profile = new SceneProfile("no title", "", 0, 0);
     BufferedReader in = new BufferedReader(new InputStreamReader(is));
 
     int line_num = 0;
@@ -125,8 +129,15 @@ public class SceneProfileSerializer {
             int w = Integer.parseInt(token[4]);
             int h = Integer.parseInt(token[5]);
 
-            Zone new_zone = new Zone(name, type, x, y, w, h);
-            profile.putZone(new_zone);
+            if (type == Zone.Type.SIZE) {
+              // Profile dimensions
+              profile.width = w;
+              profile.height = h;
+            } else {
+              // Add a zone
+              Zone new_zone = new Zone(name, type, x, y, w, h);
+              profile.putZone(new_zone);
+            }
           }
         }
       }
