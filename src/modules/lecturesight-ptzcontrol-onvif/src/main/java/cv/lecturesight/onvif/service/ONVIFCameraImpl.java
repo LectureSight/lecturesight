@@ -211,7 +211,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 					this.observers = new LinkedList<CameraListener>();
 
 					// Start update thread
-					updaterHandle = executor.scheduleAtFixedRate(new CameraStateUpdater(), updateInterval,
+					updaterHandle = executor.scheduleWithFixedDelay(new CameraStateUpdater(), updateInterval,
 							updateInterval, TimeUnit.MILLISECONDS);
 
 				} else {

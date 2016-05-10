@@ -228,7 +228,7 @@ public class VAPIXCameraImpl implements PTZCamera {
 					this.observers = new LinkedList<CameraListener>();
 
 					// start update thread
-					updaterHandle = executor.scheduleAtFixedRate(new CameraStateUpdater(), updateInterval,
+					updaterHandle = executor.scheduleWithFixedDelay(new CameraStateUpdater(), updateInterval,
 							updateInterval, TimeUnit.MILLISECONDS);
 				} else {
 					String msg = "Camera not responding to HTTPRequest - group=PTZ.";
@@ -446,10 +446,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 
 		Logger.debug("Move preset index " + preset_index);
 
-		if (presets == null) {
-
+		if (presets != null) {
 			if (presets.length <= (preset_index + 1) && (preset_index >= 0)) {
-
 				try {
 					String result = this.doCommand("/axis-cgi/com/ptz.cgi?gotoserverpresetno=" + (preset_index + 1));
 					Logger.trace("Move preset index[" + preset_index + "] (" + result + ")");
@@ -460,9 +458,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 			} else {
 				Logger.debug("Preset index not found: " + preset_index);
 			}
-
 		} else {
-			Logger.debug("Preset not found: " + preset_index);
+			Logger.debug("No presets configured");
 		}
 	}
 
