@@ -67,18 +67,24 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     defaultProfile.name = "default";
     profiles.put(defaultProfile);
     
-    // setting defaultProfile as default profile 
-    // as long as profile artifacts have not been loaded
-    activeProfile = defaultProfile;   
-    
     // get name of configured profile
     configuredProfile = config.get(PROPKEY_PROFILE);
-    if (configuredProfile != null){
-        loadProfile = profiles.getByName(configuredProfile);
-        if (loadProfile != null) {
-            activeProfile = loadProfile;
+
+    // load all the profiles
+    File[] files = profileDir.listFiles();
+
+    for (File file : files) {
+        if (file.isFile() && canHandle(file)) {
+            install(file);
         }
     }
+
+    // setting defaultProfile as active profile
+    // if the configured profile has not been specified or is not available
+    if (activeProfile == null) {
+        activeProfile = defaultProfile;
+    }
+
     Logger.info("Activated. Configured scene profile is: " + activeProfile.name );
   }
 
@@ -258,14 +264,18 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (!active) return;
 
     String filename = file.getAbsolutePath();
-    SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-    profiles.putWithFilename(filename, profile);
-    Logger.info("Installed scene profile \"" + profile.name + "\" from " + filename);
-    notifySubscribersInstalled(profile);
+    try {
+        SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
+        profiles.putWithFilename(filename, profile);
+        Logger.info("Installed scene profile \"" + profile.name + "\" from " + filename);
+        notifySubscribersInstalled(profile);
     
-    // test if the installed artifact contains the active profile, activate it if so
-    if (configuredProfile.equals(profile.name)) {
-      setActiveProfile(profile);
+        // test if the installed artifact contains the active profile, activate it if so
+        if (configuredProfile.equals(profile.name)) {
+          setActiveProfile(profile);
+        }
+    } catch (Exception e) {
+        Logger.warn("Ignoring invalid scene profile in " + filename + ": " + e.getMessage());
     }
   }
 
