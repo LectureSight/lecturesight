@@ -174,7 +174,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
       if (target == null) {
         List<TrackerObject> objs = tracker.getCurrentlyTracked();
         if ((objs.size() > 0) && (objs.size() <= target_limit)) {
-          target = findBiggestTrackedObject(objs);
+          // only track one target at a time
+          target = findBestTrackedObject(objs);
         }
       } else {
 
@@ -216,18 +217,20 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
       }
     }
 
-    private TrackerObject findBiggestTrackedObject(List<TrackerObject> objects) {
-      return objects.get(0);
-//      TrackerObject out = null;
-//      int maxWeight = 0;
-//      for (TrackerObject obj : objects) {
-//        Integer weight = (Integer) obj.getProperty(ObjectTracker.OBJ_PROPKEY_WEIGHT);
-//        if (weight > maxWeight) {
-//          maxWeight = weight;
-//          out = obj;
-//        }
-//      }
-//      return out;
+    private TrackerObject findBestTrackedObject(List<TrackerObject> objects) {
+
+      // Track the oldest object
+
+      TrackerObject out = null;
+      long oldest = System.currentTimeMillis();
+
+      for (TrackerObject obj : objects) {
+        if (obj.firstSeen() < oldest) {
+          oldest = obj.firstSeen();
+          out = obj;
+        }
+      }
+      return out;
     }
   }
 }
