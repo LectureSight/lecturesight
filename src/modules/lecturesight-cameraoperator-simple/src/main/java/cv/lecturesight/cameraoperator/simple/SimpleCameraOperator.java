@@ -25,6 +25,7 @@ import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
@@ -39,7 +40,7 @@ import org.osgi.service.component.ComponentContext;
 
 @Component(name = "lecturesight.cameraoperator.panonly", immediate = true)
 @Service
-public class SimpleCameraOperator implements CameraOperator {
+public class SimpleCameraOperator implements CameraOperator, ConfigurationListener {
 
   @Reference
   Configuration config;
@@ -69,15 +70,9 @@ public class SimpleCameraOperator implements CameraOperator {
   float frame_width = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
-    timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
-    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
-    start_pan = config.getFloat(Constants.PROPKEY_PAN);
-    start_tilt = config.getFloat(Constants.PROPKEY_TILT);
-    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
-    frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
-    target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
-    Logger.info("Activated. Timeout is " + timeout + " ms, pan is " + start_pan + ", tilt is " + start_tilt + ",  zoom is " + start_zoom);
+    setConfiguration();
+    Logger.info("Activated");
 
     fsrc = fsp.getFrameSource();
     normalizer = new CoordinatesNormalization(fsrc.getWidth(), fsrc.getHeight());
@@ -87,6 +82,29 @@ public class SimpleCameraOperator implements CameraOperator {
   protected void deactivate(ComponentContext cc) {
     stop();
     Logger.info("Deactivated");
+  }
+
+  /*
+   ** Set configuration values
+   */
+  private void setConfiguration() {
+    timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
+    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
+    start_pan = config.getFloat(Constants.PROPKEY_PAN);
+    start_tilt = config.getFloat(Constants.PROPKEY_TILT);
+    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
+    frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
+    target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
+
+    Logger.debug("Timeout: " + timeout + " ms, idle.preset: " + idle_preset + 
+                 ", initial pan: " + start_pan + ", tilt: " + start_tilt + ", zoom: " + start_zoom + 
+                 ", frame.width: " + frame_width + ", target.limit: " + target_limit);
+  }
+
+  @Override
+  public void configurationChanged() {
+    Logger.debug("Refreshing configuration");
+    setConfiguration();
   }
 
   @Override
