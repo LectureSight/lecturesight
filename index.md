@@ -1,1 +1,1 @@
-# Welcome to the LectureSight Documentation
+# LectureSight Version 0.3 Manual

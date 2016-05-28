@@ -1,1 +1,1 @@
-# Pan-only Camera Operator - Module Overview
+# Pan-only Camera Operator
