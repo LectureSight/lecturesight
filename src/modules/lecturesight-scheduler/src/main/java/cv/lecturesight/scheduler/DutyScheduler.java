@@ -71,6 +71,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     }
 
     // Tracking and camera operator are initially stopped
+    Logger.info("Stopping object tracking and camera operator");
     stop();
 
     // activate the event executor
@@ -177,12 +178,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
    */
   public void stopTracking() {
     try {
-      if (heart.isRunning()) {
-        heart.stop();
-        Logger.info("Stopped Object Tracking");
-      } else {
-        Logger.info("Object Tracking is already deactivated.");
-      }
+      heart.stop();
+      Logger.info("Stopped Object Tracking");
     } catch (Exception e) {
       Logger.error("Unexpected error in stopTracking.", e);
     }
