@@ -52,6 +52,7 @@ public class HeartBeatImpl implements HeartBeat {
   private OCLSignalBarrier barrier;
   private OCLSignal sig_BEGINFRAME;
   private boolean ready = false;
+  private boolean stopped = false;
   private int iterationsToRun = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
@@ -71,8 +72,13 @@ public class HeartBeatImpl implements HeartBeat {
           } catch (InterruptedException e) {
             // interrupted
           }
-          iterationsToRun = -1;
-          nextFrame();
+          // Auto-start if not already stopped by the scheduler
+          if (!stopped) {
+            iterationsToRun = -1;
+            nextFrame();
+          } else {
+            Logger.info("Autostart disabled");
+          }
         }
         
       }).start();
@@ -169,6 +175,8 @@ public class HeartBeatImpl implements HeartBeat {
   @Override
   public void stop() {
     iterationsToRun = 0;
+    stopped = true;
+    Logger.debug("Stopped from stop()");
   }
 
   @Override
