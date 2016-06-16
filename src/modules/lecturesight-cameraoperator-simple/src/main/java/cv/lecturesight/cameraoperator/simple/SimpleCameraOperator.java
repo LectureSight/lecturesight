@@ -56,7 +56,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   FrameSource fsrc;
   
   int interval = 200;
-  int timeout;
+  int target_timeout;
+  int tracking_timeout;
   int idle_preset = -1;
   int target_limit = 10;
 
@@ -88,7 +89,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    ** Set configuration values
    */
   private void setConfiguration() {
-    timeout = config.getInt(Constants.PROPKEY_TIMEOUT);
+    target_timeout = config.getInt(Constants.PROPKEY_TARGET_TIMEOUT);
+    tracking_timeout = config.getInt(Constants.PROPKEY_TRACKING_TIMEOUT);
     idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
     start_pan = config.getFloat(Constants.PROPKEY_PAN);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
@@ -96,7 +98,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
     target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Timeout: " + timeout + " ms, idle.preset: " + idle_preset + 
+    Logger.debug("Target timeout: " + target_timeout + " ms, tracking timeout: " + tracking_timeout + " ms" +
+                 ", idle.preset: " + idle_preset +
                  ", initial pan: " + start_pan + ", tilt: " + start_tilt + ", zoom: " + start_zoom + 
                  ", frame.width: " + frame_width + ", target.limit: " + target_limit);
   }
@@ -145,16 +148,26 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
       return steerer.isSteering();
   }
 
-  /* 
+  /*
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
   private void setInitialTrackingPosition() {
+      Logger.debug("Set initial tracking position");
       NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
       steerer.setZoom(start_zoom);  
       steerer.setInitialPosition(neutral);
   }
 
   /* 
+   * Return the camera to the start pan/tilt position
+   */
+  private void returnInitialTrackingPosition() {
+      Logger.debug("Return to initial tracking position");
+      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
+      steerer.setTargetPosition(neutral);
+  }
+
+  /*
    * Move the camera to the idle position (not tracking)
    */
   private void setIdlePosition() {
@@ -168,20 +181,36 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   private class CameraOperatorWorker implements Runnable {
 
     TrackerObject target = null;
+    long last_tracked_time;
 
     @Override
     public void run() {
+
+      long now = System.currentTimeMillis();
+
       if (target == null) {
+
+        // Get the list of available targets
         List<TrackerObject> objs = tracker.getCurrentlyTracked();
+
+        // Find the best target if more than one is available
         if ((objs.size() > 0) && (objs.size() <= target_limit)) {
           // only track one target at a time
           target = findBestTrackedObject(objs);
         }
+
+        // Return to the initial position if no targets have been visible for a while
+        if ((objs.isEmpty() || target == null) && (tracking_timeout > 0) && (last_tracked_time > 0) && (now - last_tracked_time > tracking_timeout)) {
+	  returnInitialTrackingPosition();
+          last_tracked_time = 0;
+        }
+
       } else {
 
-        if (System.currentTimeMillis() - target.lastSeen() < timeout) {
+        if (now - target.lastSeen() < target_timeout) {
 
 	  boolean move = true;
+          last_tracked_time = now;
 
           // Target position
 	  Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
