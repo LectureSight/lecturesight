@@ -41,6 +41,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   final static String PROPKEY_FILENAME = "schedule.file";
   final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String PROPKEY_AGENTNAME = "agent.name";
+  final static String PROPKEY_ENABLE = "enable";
   @Reference
   Configuration config;
   @Reference
@@ -48,6 +49,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   @Reference
   CameraOperator operator;
 
+  boolean enable = true;
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
   private EventExecutor eventExecutor = new EventExecutor();
   private EventList events = new EventList();
@@ -61,11 +63,16 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     File scheduleFile = new File(scheduleFileName);
     scheduleFileAbsolutePath = scheduleFile.getAbsolutePath();
 
+    // Is the scheduler enabled?
+    enable = config.getBoolean(PROPKEY_ENABLE);
+    if (!enable) {
+       Logger.info("Activated. Scheduler is not enabled.");
+       return;
+    }
+
     // Tracking and camera operator are initially stopped
-    Event stopTracker = new Event(0, Event.Action.STOP_TRACKING);
-    events.add(stopTracker);
-    Event stopOperator = new Event(0, Event.Action.STOP_OPERATOR);
-    events.add(stopOperator);
+    Logger.info("Stopping object tracking and camera operator");
+    stop();
 
     // activate the event executor
     executor.scheduleAtFixedRate(eventExecutor, 5, 1, TimeUnit.SECONDS);
@@ -171,12 +178,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
    */
   public void stopTracking() {
     try {
-      if (heart.isRunning()) {
-        heart.stop();
-        Logger.info("Stopped Object Tracking");
-      } else {
-        Logger.info("Object Tracking is already deactivated.");
-      }
+      heart.stop();
+      Logger.info("Stopped Object Tracking");
     } catch (Exception e) {
       Logger.error("Unexpected error in stopTracking.", e);
     }
@@ -195,24 +198,30 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
   @Override
   public void install(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
     loadEvents(file);
   }
 
   @Override
   public void update(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
     loadEvents(file);
   }
 
   @Override
   public void uninstall(File file) throws Exception {
+    if (!enable) return;
+
     clearSchedule();
   }
 
   @Override
   public boolean canHandle(File file) {
-    return file.getAbsolutePath().equals(scheduleFileAbsolutePath);
+    return enable ? file.getAbsolutePath().equals(scheduleFileAbsolutePath) : false;
   }
 
   /*
