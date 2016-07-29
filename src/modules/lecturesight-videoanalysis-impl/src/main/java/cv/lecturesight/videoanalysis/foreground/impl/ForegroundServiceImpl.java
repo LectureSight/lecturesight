@@ -130,7 +130,7 @@ public class ForegroundServiceImpl implements ForegroundService {
     workDim = new int[]{(int) change.getWidth(), (int) change.getHeight()};       
 
     // allocate working buffers
-    updateMap = ocl.context().createImage2D(Usage.InputOutput, Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    updateMap = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     fgUpdated = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     fgBuffer = new CLImageDoubleBuffer(
             ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]),

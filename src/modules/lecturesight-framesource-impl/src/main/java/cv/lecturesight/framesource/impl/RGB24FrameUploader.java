@@ -66,14 +66,14 @@ public class RGB24FrameUploader implements FrameUploader {
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
     gpuRawBuffer = ocl.context().createByteBuffer(Usage.InputOutput, bufferSize);
     gpuBuffer = ocl.context().createImage2D(Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
     last = ocl.context().createImage2D(Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
     ocl.utils().setValues(0, 0, grabber.getWidth(), grabber.getHeight(), last, 0, 0, 0, 0);
     tempBuffer = ocl.context().createImage2D(Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+            new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.UnsignedInt8),
             grabber.getWidth(), grabber.getHeight());
     
     // set up conversion kernel

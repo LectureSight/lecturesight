@@ -22,9 +22,9 @@ __kernel void RGB24_RGBAUint8
 	uchar blue = src[src_idx+2];
 
 	uint4 pixel = (uint4)(			// compose BGRA pixel
-		(uint)red,
-		(uint)green,
 		(uint)blue,
+		(uint)green,
+		(uint)red,
 		255
 	);
 

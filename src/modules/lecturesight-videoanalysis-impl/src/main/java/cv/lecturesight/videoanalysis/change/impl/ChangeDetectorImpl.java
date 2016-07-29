@@ -74,8 +74,8 @@ public class ChangeDetectorImpl implements ChangeDetector {
     workDim = new int[]{fsrc.getWidth(), fsrc.getHeight()};
 
     // allocate gpu buffers
-    twoback = ocl.context().createImage2D(Usage.InputOutput, Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    last = ocl.context().createImage2D(Usage.InputOutput, Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    twoback = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    last = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     changeMapRaw12 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     changeMapRaw23 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     changeMapRaw13 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
