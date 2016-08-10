@@ -38,7 +38,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
   Properties defaults;
   File configFile;
   List<ConfigurationListener> listeners = new LinkedList<ConfigurationListener>();
-  
+ 
   public ConfigurationServiceImpl(BundleContext bcontext, Properties config, Properties defaults) {
     this.bcontext = bcontext;
     this.config = config;
@@ -136,4 +136,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
     public File getConfigurationFile() {
         return configFile;
     }
+
+    @Override
+    public String getVersion() {
+	return config.getProperty(ConfigurationService.LS_VERSION_PROPERTY);
+    }
+
+    @Override
+    public String getBuildInfo() {
+	return config.getProperty(ConfigurationService.LS_BUILDINFO_PROPERTY);
+    }
+
 }

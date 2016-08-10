@@ -29,11 +29,19 @@ import java.util.TreeSet;
 
 public class ConfigCommands {
 
-  public static final String[] commands = {"show", "set", "load", "save", "defaults"};
+  public static final String[] commands = {"show", "set", "load", "save", "defaults", "version", "buildinfo"};
   ConfigurationServiceImpl config;
 
   public ConfigCommands(ConfigurationServiceImpl config) {
     this.config = config;
+  }
+
+  public void version(String[] args) {
+    println(config.getVersion());
+  }
+
+  public void buildinfo(String[] args) {
+    println(config.getBuildInfo());
   }
 
   public void show(String[] args) {
