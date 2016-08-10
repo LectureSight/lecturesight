@@ -22,6 +22,7 @@ import org.pmw.tinylog.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,11 +39,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
   Properties defaults;
   File configFile;
   List<ConfigurationListener> listeners = new LinkedList<ConfigurationListener>();
+
+  String version;
+  String buildinfo;
  
   public ConfigurationServiceImpl(BundleContext bcontext, Properties config, Properties defaults) {
     this.bcontext = bcontext;
     this.config = config;
     this.defaults = defaults;
+
+    // Set the version string
+    version = config.getProperty(ConfigurationService.LS_VERSION_PROPERTY);
+    if (version == null || version.isEmpty()) {
+             Dictionary<String,String> manifest = bcontext.getBundle().getHeaders();
+             version = manifest.get("Bundle-Version");
+    }
+    Logger.info("LectureSight version " + version);
+
+    // Set the build info string
+    buildinfo = config.getProperty(ConfigurationService.LS_BUILDINFO_PROPERTY);
+    if (buildinfo != null && !buildinfo.isEmpty()) {
+        Logger.info("LectureSight build " + buildinfo);
+    }
+
   }
   
   @Override
@@ -139,12 +158,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
 
     @Override
     public String getVersion() {
-	return config.getProperty(ConfigurationService.LS_VERSION_PROPERTY);
+	return version;
     }
 
     @Override
     public String getBuildInfo() {
-	return config.getProperty(ConfigurationService.LS_BUILDINFO_PROPERTY);
+	return buildinfo;
     }
 
 }
