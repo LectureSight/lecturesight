@@ -33,6 +33,7 @@ import org.pmw.tinylog.Logger;
 public final class Activator implements BundleActivator {
 
   final static String CONFIG_NAME = "lecturesight.properties";
+  final static String BUILD_CONFIG_NAME = "build.properties";
   final static String CONFIG_PATH_PROPERTY = "cv.lecturesight.config.path";
   private ServiceRegistration confFactoryReg;
   private File configFile;
@@ -53,6 +54,15 @@ public final class Activator implements BundleActivator {
       Logger.debug("Loaded config properties from " + configFile.getAbsolutePath());
     } catch (IOException e) {
       Logger.warn("Failed to load config from " + configFile.getAbsolutePath());
+    }
+
+    // load build properties
+    File buildConfigFile = new File(configPath.getAbsolutePath() + File.separator + BUILD_CONFIG_NAME);
+    try {
+      systemProperties.load(new FileInputStream(buildConfigFile));
+      Logger.debug("Loaded build config properties from " + buildConfigFile.getAbsolutePath());
+    } catch (IOException e) {
+      Logger.debug("Failed to load build config from " + buildConfigFile.getAbsolutePath());
     }
     
     // register config service

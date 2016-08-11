@@ -18,6 +18,8 @@
 package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.gui.api.UserInterface;
+import cv.lecturesight.util.conf.ConfigurationService;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,9 +44,11 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
 
   private int menuItems = 0;
   private BundleContext bundleContext;
+  private ConfigurationService configService;
   
-  public MainGUIFrame(BundleContext bc) {
+  public MainGUIFrame(BundleContext bc, ConfigurationService cs) {
     bundleContext = bc;
+    configService = cs;
 
     // set operating system look-and-feel
     try {
@@ -110,7 +114,12 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
     mainMenu = new javax.swing.JMenuBar();
     servicesMenu = new javax.swing.JMenu();
 
-    setTitle("LectureSight 0.3");
+    String buildInfo = configService.getBuildInfo();
+    if (buildInfo != null && !buildInfo.isEmpty()) {
+       setTitle("LectureSight " + configService.getVersion() + " (" + configService.getBuildInfo() + ")");
+    } else {
+       setTitle("LectureSight " + configService.getVersion());
+    }
 
     desktop.setDesktopManager(null);
 

@@ -17,8 +17,10 @@
  */
 package cv.lecturesight.gui.impl;
 
+import cv.lecturesight.util.conf.ConfigurationService;
 import cv.lecturesight.gui.api.UserInterface;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -32,13 +34,16 @@ import org.pmw.tinylog.Logger;
 @Service
 public class MainGUI implements DummyInterface {
   
+  @Reference
+  private ConfigurationService configService;
+
   UserInterfaceTracker uiTracker;
   MainGUIFrame window;
   
   protected void activate(ComponentContext cc) {
     Logger.info("Activated");
     try {
-      window = new MainGUIFrame(cc.getBundleContext());
+      window = new MainGUIFrame(cc.getBundleContext(), configService);
       window.setVisible(true);
     } catch (HeadlessException he) {
       Logger.warn("No X11 environment present. Starting LectureSight in HEADLESS MODE.");
