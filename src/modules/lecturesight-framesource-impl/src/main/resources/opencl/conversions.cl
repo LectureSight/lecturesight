@@ -31,6 +31,32 @@ __kernel void RGB24_RGBAUint8
 	write_imageui(dest, pos, pixel);	// write pixel
 }
 
+__kernel void RGB24_RGBAUint8_Inverted
+(
+	int width,
+	int height,
+	__global uchar* src,
+	write_only image2d_t dest
+)
+{
+	int2 pos = (int2)(get_global_id(0), get_global_id(1));
+	int2 newpos = (int2)(width - 1 - pos.x, height - 1 - pos.y);
+	ulong src_idx = (pos.y * width * 3) + (pos.x * 3);
+
+	uchar red = src[src_idx];		// get pixel data
+	uchar green = src[src_idx+1];
+	uchar blue = src[src_idx+2];
+
+	uint4 pixel = (uint4)(			// compose BGRA pixel
+		(uint)blue,
+		(uint)green,
+		(uint)red,
+		255
+	);
+
+	write_imageui(dest, newpos, pixel);	// write pixel
+}
+
 __kernel void Intensity8_RGBAUint8
 (
 	int width,
