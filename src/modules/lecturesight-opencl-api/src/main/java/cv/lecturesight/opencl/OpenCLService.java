@@ -32,8 +32,7 @@ public interface OpenCLService {
 
   // Image formats
   enum Format {
-    BGRA_UINT8(new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8)), 
-    INTENSITY_UINT8(new CLImageFormat(CLImageFormat.ChannelOrder.INTENSITY, CLImageFormat.ChannelDataType.UnsignedInt8));
+    RGBA_UINT8(new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.UnsignedInt8));
     
     //<editor-fold defaultstate="collapsed" desc="Enums gutts">
     private CLImageFormat clFormat;

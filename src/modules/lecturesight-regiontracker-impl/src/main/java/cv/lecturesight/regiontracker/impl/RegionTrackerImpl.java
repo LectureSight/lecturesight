@@ -118,10 +118,10 @@ public class RegionTrackerImpl implements RegionTracker {
     // init overlap image
     current_fg = fgs.getForegroundMap();
     last_fg = ocl.context().createImage2D(Usage.InputOutput,
-            Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+            Format.INTENSITY_UNINT8.getCLImageFormat(), workDim[0], workDim[1]);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], last_fg, 0);
     overlap = ocl.context().createImage2D(Usage.InputOutput,
-            Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+            Format.INTENSITY_UNINT8.getCLImageFormat(), workDim[0], workDim[1]);
 
     // init buffer for label pairs
     label_pairs = ocl.context().createIntBuffer(Usage.InputOutput, Constants.pairsBufferLength);

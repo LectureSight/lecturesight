@@ -5,9 +5,6 @@ const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK
 
 #define BLACK (uint4)(0,0,0,255)
 #define WHITE (uint4)(255,255,255,255)
-#define GRAY  (uint4)(196,196,196,255)
-#define GREEN (uint4)(0,255,0,255)
-#define RED   (uint4)(255,0,0,255)
 
 __kernel __attribute__ (( reqd_work_group_size (8, 8, 1)))
 void cells_max_8
@@ -71,11 +68,11 @@ __kernel void viz_cells
   uint4 input_pxl = read_imageui(input, sampler, pos);
   uint4 cells_pxl = read_imageui(cells, sampler, cpos);
   uint4 change_pxl = read_imageui(change, sampler, pos);
-  uint4 out_pxl   = (uint4)(255, input_pxl.s1, input_pxl.s2, 255);
+  uint4 out_pxl   = (uint4)(input_pxl.s0, input_pxl.s1, 255, 255);
 
-  if (cells_pxl.s0 > 0 || (pos.x % 8 == 0 && pos.y % 8 == 0))
+  if (cells_pxl.s2 > 0 || (pos.x % 8 == 0 && pos.y % 8 == 0))
   {
-    out_pxl = (uint4)(255, input_pxl.s1+50, input_pxl.s2+50, 255);
+    out_pxl = (uint4)(input_pxl.s0+50, input_pxl.s1+50, 255, 255);
   }
 
   barrier( CLK_GLOBAL_MEM_FENCE );

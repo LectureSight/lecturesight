@@ -70,7 +70,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     changed = ocl.context().createIntBuffer(Usage.InputOutput, 1);
     ids = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs+1);   // +1 -> [0] = numBlobs
     sizes = ocl.context().createIntBuffer(Usage.InputOutput, maxBlobs);
-    labelImage = ocl.context().createImage2D(Usage.InputOutput, OpenCLService.Format.INTENSITY_UINT8.getCLImageFormat(), imageDim[0], imageDim[1]);
+    labelImage = ocl.context().createImage2D(Usage.InputOutput, OpenCLService.Format.RGBA_UINT8.getCLImageFormat(), imageDim[0], imageDim[1]);
 
     // instantiate ComputationRuns
     initRun = new InitRun();

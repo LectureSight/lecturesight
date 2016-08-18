@@ -60,7 +60,7 @@ public class VisualizationImpl implements Visualization, UserInterface {
     workDim = new int[]{fsource.getWidth(), fsource.getHeight()};
 
     visual = ocl.context().createImage2D(Usage.InputOutput,
-            Format.BGRA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+            Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     ocl.registerLaunch(rTracker.getSignal(RegionTracker.Signal.DONE_CORRELATION), new VisualizationRun());
     dsps.registerDisplay(WINDOWNAME_VISUAL, visual, sig_DONE);
     panel = new ObjectTrackerUIPanel(dsps.getDisplayBySID("visual"), rTracker, oTracker);

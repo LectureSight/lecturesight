@@ -1,6 +1,7 @@
 package cv.lecturesight.videoanalysis.templ;
 
 import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLDevice;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLKernel;
@@ -131,6 +132,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int[] numCells;             // number of cells in x and y dimension
   int[] templateDim;
   int[] templateBufferDim;
+  long templateWorkgroupSize;
 
   // computation parameters
   int change_threshold;
@@ -143,6 +145,9 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   float object_dormant_age_factor;
   int object_min_active;
   double object_move_threshold;
+
+  // GPU max workgroup size
+  long gpu_maxworkgroupsize;
 
   /**
    * GPU Main Program implementing the video analysis.
@@ -277,7 +282,18 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         updateDim[0] = TARGET_SIZE * numTemplMatches;
         CLEvent uploaded = updateBuffer_gpu.write(queue, updateBuffer_host, true);
         match_templates_K.setArgs(input_rgb, templates, updateBuffer_gpu);
-        CLEvent matched = match_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+        CLEvent matched;
+
+        // Workaround for LS-165 (support Intel GPUs).
+        // Not totally sure whether this is size-related, or
+        // a difference between NVidia and Intel GPUs or OpenCL drivers.
+
+        if (gpu_maxworkgroupsize >= templateWorkgroupSize) {
+            matched = match_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+        } else {
+            matched = match_templates_K.enqueueNDRange(queue, updateDim, uploaded);
+        }
+
         output_host = updateBuffer_gpu.read(queue, matched);
       }
 
@@ -287,7 +303,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         updateDim[0] = TARGET_SIZE * numTemplUpdates;
         CLEvent uploaded = updateBuffer_gpu.write(queue, updateBuffer_host, false);
         update_templates_K.setArgs(input_rgb, cells, templates, updateBuffer_gpu);
-        update_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+        if (gpu_maxworkgroupsize >= templateWorkgroupSize) {
+            update_templates_K.enqueueNDRange(queue, updateDim, templateDim, uploaded);
+        } else {
+            update_templates_K.enqueueNDRange(queue, updateDim, uploaded);
+        }
       }
     }
 
@@ -375,6 +395,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     cellWorkDim = new int[]{CELL_SIZE, CELL_SIZE};
     numCells = new int[]{imageWorkDim[0] / CELL_SIZE, imageWorkDim[1] / CELL_SIZE};
     templateDim = new int[]{TARGET_SIZE, TARGET_SIZE};
+    templateWorkgroupSize = TARGET_SIZE * TARGET_SIZE;
     templateBufferDim = new int[]{MAX_SAMPLES * TARGET_SIZE, MAX_TARGETS * TARGET_SIZE};
 
     mapParameters();      // get computation parameters from configuration
@@ -400,6 +421,13 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     ocl_main = new DetectionRun();
     ocl.registerLaunch(sig_START, ocl_main);
+
+    // check the max workgroup size for the selected GPU
+    CLDevice[] devices = ocl.context().getDevices();
+    for (CLDevice device : devices) {
+        gpu_maxworkgroupsize = device.getMaxWorkGroupSize();
+        Logger.info("Max workgroup size for OpenCL device: " + device.getVendor() + " " + device.getName() + " is " + gpu_maxworkgroupsize);
+    }
 
     Logger.info("Activated.");
   }
@@ -587,17 +615,17 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     input_rgb_last = fsrc.getLastImage();
 
     // allocate working buffers
-    change = allocImage2D(Format.INTENSITY_UINT8, imageWorkDim);
-    cells = allocImage2D(Format.INTENSITY_UINT8, numCells);
-    visual = allocImage2D(Format.BGRA_UINT8, imageWorkDim);
+    change = allocImage2D(Format.RGBA_UINT8, imageWorkDim);
+    cells = allocImage2D(Format.RGBA_UINT8, numCells);
+    visual = allocImage2D(Format.RGBA_UINT8, imageWorkDim);
 
     targets = new Target[MAX_TARGETS];
     updateBuffer = new int[MAX_TARGETS * 4];
     updateBuffer_host = IntBuffer.wrap(updateBuffer);
     updateBuffer_gpu = ocl.context().createBuffer(CLMem.Usage.InputOutput, updateBuffer_host);
 
-    templates = allocImage2D(Format.BGRA_UINT8, templateBufferDim);
-    match = allocImage2D(Format.INTENSITY_UINT8, imageWorkDim);
+    templates = allocImage2D(Format.RGBA_UINT8, templateBufferDim);
+    match = allocImage2D(Format.RGBA_UINT8, imageWorkDim);
 
     // allocate buffers and arrays for object data
     weights_gpu = ocl.context().createIntBuffer(CLMem.Usage.InputOutput, MAX_REGIONS);

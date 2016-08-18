@@ -19,7 +19,7 @@ __kernel void copy_red_tint
 
   uint4 input_pxl = read_imageui(input, sampler, pos);
   uint4 fgmap_pxl = read_imageui(fgmap, sampler, pos);
-  uint4 out_pxl = (uint4)(255, input_pxl.s1, input_pxl.s2, 255);  
+  uint4 out_pxl = (uint4)(input_pxl.s0, input_pxl.s1, 255, 255);
   
   if (fgmap_pxl.s0 != 0) 
   {
