@@ -17,32 +17,46 @@
  */
 package cv.lecturesight.util.metrics;
 
-import java.io.File;
-import org.pmw.tinylog.Logger;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Dictionary;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import com.codahale.metrics.*;
+import java.util.concurrent.TimeUnit;
+import java.util.SortedMap;
 import java.util.Properties;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
+import org.pmw.tinylog.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricsServiceImpl implements MetricsService {
-  
-  private BundleContext bcontext;
 
+  private static final MetricRegistry registry = new MetricRegistry();
+  
   public MetricsServiceImpl() {
     Logger.info("Metrics Service");
+
+    try {
+    // JMX reporting (if enabled)
+    final JmxReporter jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
+    jmx_reporter.start();
+
+    // Console reporting (if enabled)
+    final Slf4jReporter log_reporter = Slf4jReporter.forRegistry(registry)
+                                            .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
+                                            .convertRatesTo(TimeUnit.SECONDS)
+                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                            .build();
+    log_reporter.start(1, TimeUnit.MINUTES);
+
+    } catch (Throwable t) {
+      Logger.error(t, "Error starting metrics");
+    }
+
+    Logger.info("Started");
   } 
 
   @Override
   public void reset() {
     Logger.info("reset");
+
+    // To reset the metrics, remove all metrics (they will be re-created when next updated)
+    registry.removeMatching(MetricFilter.ALL);
   }
 
   @Override
@@ -63,7 +77,17 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void incCounter(String key) {
-    Logger.info("Increment counter: " + key);
+
+    SortedMap<String,Counter> counters = registry.getCounters(MetricFilter.ALL);
+    if (counters.containsKey(key)) {
+       Logger.info("Increment existing counter: " + key);
+       Counter counter = counters.get(key);
+       counter.inc();
+    } else {
+       Logger.info("Increment new counter: " + key);
+       Counter counter = registry.counter(key);
+       counter.inc();
+    }
 
   }
 
