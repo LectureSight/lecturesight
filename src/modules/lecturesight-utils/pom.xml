@@ -25,6 +25,19 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>maven-scr-plugin</artifactId>
+    </dependency>
+    <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
     </dependency>
@@ -42,6 +55,27 @@
   <build>
     <plugins>
 
+     <!-- Generate Declarative Service Descriptor -->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-scr-scrdescriptor</id>
+            <goals>
+              <goal>scr</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.0.4</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -51,7 +85,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+            <Embed-Dependency>metrics-core,slf4j-api,slf4j-binding</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
 		!org.slf4j.impl,*

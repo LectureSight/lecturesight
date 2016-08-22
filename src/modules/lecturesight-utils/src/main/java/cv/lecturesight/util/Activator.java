@@ -18,7 +18,6 @@
 package cv.lecturesight.util;
 
 import cv.lecturesight.util.conf.*;
-import cv.lecturesight.util.metrics.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -82,17 +81,6 @@ public final class Activator implements BundleActivator {
     commands.put("osgi.command.scope", "config");
     commands.put("osgi.command.function", ConfigCommands.commands);
     context.registerService(ConfigCommands.class.getName(), commandImpl, commands);
-
-    // register metrics service
-    MetricsService metricsService = new MetricsServiceImpl();
-    context.registerService(MetricsService.class.getName(), metricsService, null);
-
-    // register metrics commands
-    MetricsCommands m_commandImpl = new MetricsCommands((MetricsServiceImpl)metricsService);
-    Dictionary<String, Object> m_commands = new Hashtable<String, Object>();
-    m_commands.put("osgi.command.scope", "metrics");
-    m_commands.put("osgi.command.function", MetricsCommands.commands);
-    context.registerService(MetricsCommands.class.getName(), m_commandImpl, m_commands);
 
     Logger.info("Started");
   }

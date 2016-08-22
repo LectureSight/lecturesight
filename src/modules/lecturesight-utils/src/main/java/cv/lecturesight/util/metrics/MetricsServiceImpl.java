@@ -20,35 +20,66 @@ package cv.lecturesight.util.metrics;
 import com.codahale.metrics.*;
 import java.util.concurrent.TimeUnit;
 import java.util.SortedMap;
-import java.util.Properties;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 import org.slf4j.LoggerFactory;
+
+@Component(name="lecturesight.util.metrics", immediate=true)
+@Service
+@Properties({
+  @Property(name = "osgi.command.scope", value = "metrics"),
+  @Property(name = "osgi.command.function", value = {"show", "reset"})
+})
 
 public class MetricsServiceImpl implements MetricsService {
 
   private static final MetricRegistry registry = new MetricRegistry();
+
+  /* Time of last reset */
+  private long last_reset = 0;
+
+  private boolean report_jmx = true;
+  private boolean report_csv = false;
+  private boolean report_log = true;
   
-  public MetricsServiceImpl() {
+  protected void deactivate(ComponentContext cc) {
+      Logger.info("Deactivated");
+  }
+
+  protected void activate(ComponentContext cc) {
+
     Logger.info("Metrics Service");
 
     try {
+
     // JMX reporting (if enabled)
-    final JmxReporter jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
-    jmx_reporter.start();
+    if (report_jmx) {
+       final JmxReporter jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
+       jmx_reporter.start();
+    }
 
     // Console reporting (if enabled)
-    final Slf4jReporter log_reporter = Slf4jReporter.forRegistry(registry)
+    if (report_log) {
+       final Slf4jReporter log_reporter = Slf4jReporter.forRegistry(registry)
                                             .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
                                             .convertRatesTo(TimeUnit.SECONDS)
                                             .convertDurationsTo(TimeUnit.MILLISECONDS)
                                             .build();
-    log_reporter.start(1, TimeUnit.MINUTES);
+       log_reporter.start(30, TimeUnit.SECONDS);
+    }
 
     } catch (Throwable t) {
       Logger.error(t, "Error starting metrics");
     }
 
-    Logger.info("Started");
+    last_reset = System.currentTimeMillis();
+
+    Logger.info("Activated");
   } 
 
   @Override
@@ -57,6 +88,8 @@ public class MetricsServiceImpl implements MetricsService {
 
     // To reset the metrics, remove all metrics (they will be re-created when next updated)
     registry.removeMatching(MetricFilter.ALL);
+
+    last_reset = System.currentTimeMillis();
   }
 
   @Override
@@ -96,5 +129,13 @@ public class MetricsServiceImpl implements MetricsService {
     Logger.info("Set value for: " + key + " to " + value);
   }
 
+  // Console commands
+  public void show(String[] args) {
+    show();
+  }
+
+  public void reset(String[] args) {
+    reset();
+  }
 
 }
