@@ -100,8 +100,8 @@ public class MetricsServiceImpl implements MetricsService {
     if (report_csv && csv_reporter == null) {
         csv_reporter = CsvReporter.forRegistry(registry)
                                         .formatFor(Locale.US)
-                                        .convertRatesTo(TimeUnit.SECONDS)
-                                        .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                        .convertRatesTo(TimeUnit.MINUTES)
+                                        .convertDurationsTo(TimeUnit.SECONDS)
                                         .build(metricsDir);
         csv_reporter.start(csv_interval, TimeUnit.SECONDS);
     }
@@ -110,8 +110,8 @@ public class MetricsServiceImpl implements MetricsService {
     if (report_log && log_reporter == null) {
        log_reporter = Slf4jReporter.forRegistry(registry)
                                             .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
-                                            .convertRatesTo(TimeUnit.SECONDS)
-                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                            .convertRatesTo(TimeUnit.MINUTES)
+                                            .convertDurationsTo(TimeUnit.SECONDS)
                                             .build();
        log_reporter.start(log_interval, TimeUnit.SECONDS);
     }
@@ -170,31 +170,44 @@ public class MetricsServiceImpl implements MetricsService {
   public void incCounter(String key) {
 
     SortedMap<String,Counter> counters = registry.getCounters(MetricFilter.ALL);
+    Counter counter;
+
     if (counters.containsKey(key)) {
        Logger.info("Increment existing counter: " + key);
-       Counter counter = counters.get(key);
-       counter.inc();
+       counter = counters.get(key);
     } else {
        Logger.info("Increment new counter: " + key);
-       Counter counter = registry.counter(key);
-       counter.inc();
+       counter = registry.counter(key);
     }
+
+    counter.inc();
 
   }
 
   @Override
   public void timedEvent(String key, long duration_ms) {
 
+    // Timed events use both a histogram and a counter (for total elapsed time)
+
     SortedMap<String,Timer> timers = registry.getTimers(MetricFilter.ALL);
+    SortedMap<String,Counter> counters = registry.getCounters(MetricFilter.ALL);
+
+    Timer timer;
+    Counter counter;
+
     if (timers.containsKey(key)) {
        Logger.info("Adding duration to existing timer: " + key);
-       Timer timer = timers.get(key);
-       timer.update(duration_ms, TimeUnit.MILLISECONDS);
+       timer = timers.get(key);
+       counter = counters.get(MetricRegistry.name(key,"elapsed"));
     }  else {
        Logger.info("Adding duration to new timer: " + key);
-       Timer timer = registry.timer(key);
-       timer.update(duration_ms, TimeUnit.MILLISECONDS);
+       // TODO Use a sliding window reservoir
+       timer = registry.timer(key);
+       counter = registry.counter(MetricRegistry.name(key,"elapsed"));
     }
+
+    timer.update(duration_ms, TimeUnit.MILLISECONDS);
+    counter.inc(duration_ms);
 
   }
 
