@@ -18,8 +18,10 @@
 package cv.lecturesight.util.metrics;
 
 import com.codahale.metrics.*;
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.SortedMap;
+import java.util.Locale;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -43,10 +45,22 @@ public class MetricsServiceImpl implements MetricsService {
   /* Time of last reset */
   private long last_reset = 0;
 
+  /* Reporting options */
   private boolean report_jmx = true;
-  private boolean report_csv = false;
+  private boolean report_csv = true;
   private boolean report_log = true;
+
+  /* Reporters */
+  private CsvReporter   csv_reporter;
+  private JmxReporter   jmx_reporter;
+  private Slf4jReporter log_reporter;
   
+  /* Reporting interval */
+  private int csv_interval = 5;
+  private int log_interval = 60;
+
+  private File metricsDir;
+
   protected void deactivate(ComponentContext cc) {
       Logger.info("Deactivated");
   }
@@ -55,32 +69,68 @@ public class MetricsServiceImpl implements MetricsService {
 
     Logger.info("Metrics Service");
 
-    try {
-
-    // JMX reporting (if enabled)
-    if (report_jmx) {
-       final JmxReporter jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
-       jmx_reporter.start();
+    // make sure metrics directory exists
+    metricsDir = new File(System.getProperty("user.dir") + File.separator + "metrics");
+    if (!metricsDir.exists()) {
+      Logger.info("Creating new metrics directory at: " + metricsDir.getAbsolutePath());
+      try {
+        metricsDir.mkdir();
+      } catch (Exception e) {
+        Logger.error("Failed to create metrics directory", e);
+      }
     }
 
-    // Console reporting (if enabled)
-    if (report_log) {
-       final Slf4jReporter log_reporter = Slf4jReporter.forRegistry(registry)
-                                            .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
-                                            .convertRatesTo(TimeUnit.SECONDS)
-                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
-                                            .build();
-       log_reporter.start(30, TimeUnit.SECONDS);
-    }
-
-    } catch (Throwable t) {
-      Logger.error(t, "Error starting metrics");
-    }
+    start_reporting();
 
     last_reset = System.currentTimeMillis();
 
     Logger.info("Activated");
   } 
+
+  private void start_reporting() {
+
+    // JMX reporting (if enabled)
+    if (report_jmx && jmx_reporter == null) {
+       jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
+       jmx_reporter.start();
+    }
+
+    // CSV reporting (if enabled)
+    if (report_csv && csv_reporter == null) {
+        csv_reporter = CsvReporter.forRegistry(registry)
+                                        .formatFor(Locale.US)
+                                        .convertRatesTo(TimeUnit.SECONDS)
+                                        .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                        .build(metricsDir);
+        csv_reporter.start(csv_interval, TimeUnit.SECONDS);
+    }
+
+    // Console reporting (if enabled)
+    if (report_log && log_reporter == null) {
+       log_reporter = Slf4jReporter.forRegistry(registry)
+                                            .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
+                                            .convertRatesTo(TimeUnit.SECONDS)
+                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
+                                            .build();
+       log_reporter.start(log_interval, TimeUnit.SECONDS);
+    }
+
+  }
+
+  private void stop_reporting() {
+
+    // Shut down reporting threads
+    if (report_csv && csv_reporter != null) {
+	csv_reporter.stop();
+	csv_reporter = null;
+    }
+
+    if (report_log && log_reporter != null) {
+	log_reporter.stop();
+	log_reporter = null;
+    }
+
+  }
 
   @Override
   public void reset() {
@@ -88,6 +138,8 @@ public class MetricsServiceImpl implements MetricsService {
 
     // To reset the metrics, remove all metrics (they will be re-created when next updated)
     registry.removeMatching(MetricFilter.ALL);
+ 
+    start_reporting();
 
     last_reset = System.currentTimeMillis();
   }
@@ -102,6 +154,11 @@ public class MetricsServiceImpl implements MetricsService {
     Logger.info("show");
   }
 
+  @Override
+  public void pause() {
+    Logger.info("pause");
+    stop_reporting();
+  }
 
   @Override
   public void setDescription(String key, String desc) {

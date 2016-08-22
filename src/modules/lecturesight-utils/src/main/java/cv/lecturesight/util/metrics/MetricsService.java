@@ -19,8 +19,16 @@ package cv.lecturesight.util.metrics;
 
 public interface MetricsService {
 
+  /* Reset metrics */
   public void reset();
+
+  /* Pause metric reporting */
+  public void pause();
+
+  /* Save */
   public void save();
+
+  /* Show metrics */
   public void show();
 
   public void setDescription(String key, String desc);
