@@ -239,6 +239,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   public void stop() {
      stopOperator();
      stopTracking();
+     metrics.pause();
   }
   
   public void status() {
@@ -280,16 +281,21 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     void fireEvent(Event event) {
         Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
         switch (event.getAction()) {
+
           case START_TRACKING:
             metrics.reset();
             startTracking();
             break;
+
           case STOP_TRACKING:
             stopTracking();
+            metrics.pause();
             break;
+
           case START_OPERATOR:
             startOperator();
             break;
+
           case STOP_OPERATOR:
             stopOperator();
             break;
