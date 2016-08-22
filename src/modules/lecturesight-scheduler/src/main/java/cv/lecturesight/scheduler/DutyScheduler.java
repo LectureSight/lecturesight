@@ -5,6 +5,7 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.DummyInterface;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +49,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   HeartBeat heart;
   @Reference
   CameraOperator operator;
+  @Reference
+  MetricsService metrics;
 
   boolean enable = true;
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -228,6 +231,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
    * Commands
    */
   public void start() {
+     metrics.reset();
      startTracking();
      startOperator();
   }
@@ -277,6 +281,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
         Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
         switch (event.getAction()) {
           case START_TRACKING:
+            metrics.reset();
             startTracking();
             break;
           case STOP_TRACKING:
