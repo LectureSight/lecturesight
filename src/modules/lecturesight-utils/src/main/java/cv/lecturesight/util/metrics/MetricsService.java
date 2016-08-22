@@ -32,7 +32,14 @@ public interface MetricsService {
   public void show();
 
   public void setDescription(String key, String desc);
+
+  /* Counter */
   public void incCounter(String key);
+
+  /* Timed event (Timer) */
+  public void timedEvent(String key, long duration_ms);
+
+  /* Gauge */
   public void setValue(String key, long value);
 
 }

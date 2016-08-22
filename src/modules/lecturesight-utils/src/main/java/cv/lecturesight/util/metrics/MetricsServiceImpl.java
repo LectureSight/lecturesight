@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties({
   @Property(name = "osgi.command.scope", value = "metrics"),
-  @Property(name = "osgi.command.function", value = {"show", "reset"})
+  @Property(name = "osgi.command.function", value = {"show", "reset", "pause"})
 })
 
 public class MetricsServiceImpl implements MetricsService {
@@ -45,7 +45,7 @@ public class MetricsServiceImpl implements MetricsService {
   /* Time of last reset */
   private long last_reset = 0;
 
-  /* Reporting options */
+  /* Reporting options - TODO from config */
   private boolean report_jmx = true;
   private boolean report_csv = true;
   private boolean report_log = true;
@@ -55,10 +55,11 @@ public class MetricsServiceImpl implements MetricsService {
   private JmxReporter   jmx_reporter;
   private Slf4jReporter log_reporter;
   
-  /* Reporting interval */
+  /* Reporting interval - TODO from config*/
   private int csv_interval = 5;
   private int log_interval = 60;
 
+  /* CSV location */
   private File metricsDir;
 
   protected void deactivate(ComponentContext cc) {
@@ -182,6 +183,22 @@ public class MetricsServiceImpl implements MetricsService {
   }
 
   @Override
+  public void timedEvent(String key, long duration_ms) {
+
+    SortedMap<String,Timer> timers = registry.getTimers(MetricFilter.ALL);
+    if (timers.containsKey(key)) {
+       Logger.info("Adding duration to existing timer: " + key);
+       Timer timer = timers.get(key);
+       timer.update(duration_ms, TimeUnit.MILLISECONDS);
+    }  else {
+       Logger.info("Adding duration to new timer: " + key);
+       Timer timer = registry.timer(key);
+       timer.update(duration_ms, TimeUnit.MILLISECONDS);
+    }
+
+  }
+
+  @Override
   public void setValue(String key, long value) {
     Logger.info("Set value for: " + key + " to " + value);
   }
@@ -194,5 +211,10 @@ public class MetricsServiceImpl implements MetricsService {
   public void reset(String[] args) {
     reset();
   }
+
+  public void pause(String[] args) {
+    pause();
+  }
+
 
 }
