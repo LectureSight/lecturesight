@@ -240,6 +240,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
      stopOperator();
      stopTracking();
      metrics.pause();
+     metrics.save();
   }
   
   public void status() {
@@ -290,6 +291,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
           case STOP_TRACKING:
             stopTracking();
             metrics.pause();
+            metrics.save();
             break;
 
           case START_OPERATOR:
