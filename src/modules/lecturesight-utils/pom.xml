@@ -47,6 +47,21 @@
         <version>3.1.0</version>
     </dependency>
     <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-json</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-healthchecks</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-jvm</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>slf4j-binding</artifactId>
     </dependency>
@@ -86,10 +101,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Embed-Dependency>metrics-core,slf4j-api,slf4j-binding</Embed-Dependency>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!junit|maven-*|plexus-*|org.apache.felix.scr.*|tinylog</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>
-		!org.slf4j.impl,*
+		!org.codehaus.plexus.util,*
             </Import-Package>
             <Export-Package>
               cv.lecturesight.util,

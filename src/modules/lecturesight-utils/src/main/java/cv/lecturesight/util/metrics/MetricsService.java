@@ -27,18 +27,18 @@ public interface MetricsService {
   /* Pause metric reporting */
   public void pause();
 
-  /* Save */
+  /* Save JSON snapshot to file */
   public void save();
 
-  /* Show metrics */
-  public void show();
+  /* JSON snapshot of metrics */
+  public String json();
 
   public void setDescription(String key, String desc);
 
-  /* Counter */
+  /* Increment Counter */
   public void incCounter(String key);
 
-  /* Timed event (Timer) */
+  /* Add a timed event (Timer) */
   public void timedEvent(String key, long duration_ms);
 
   /* Gauge */

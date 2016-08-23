@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Benjamin Wulff
+/* Copyright (C) 2016 University of Cape Town
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +18,13 @@
 package cv.lecturesight.util.metrics;
 
 import com.codahale.metrics.*;
+import com.codahale.metrics.json.MetricsModule;
+import com.codahale.metrics.json.HealthCheckModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.SortedMap;
 import java.util.Locale;
@@ -35,12 +41,15 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties({
   @Property(name = "osgi.command.scope", value = "metrics"),
-  @Property(name = "osgi.command.function", value = {"show", "reset", "pause"})
+  @Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause"})
 })
 
 public class MetricsServiceImpl implements MetricsService {
 
   private static final MetricRegistry registry = new MetricRegistry();
+
+  // JSON serialization
+  private ObjectMapper objectMapper;
 
   /* Time of last reset */
   private long last_reset = 0;
@@ -59,8 +68,9 @@ public class MetricsServiceImpl implements MetricsService {
   private int csv_interval = 5;
   private int log_interval = 60;
 
-  /* CSV location */
+  /* CSV and JSON file location */
   private File metricsDir;
+  private File metricsJson;
 
   public MetricRegistry getRegistry() {
       return registry;
@@ -85,6 +95,15 @@ public class MetricsServiceImpl implements MetricsService {
       }
     }
 
+    // JSON output file
+    metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics.json");
+
+    // Set up for JSON serialization
+    objectMapper = new ObjectMapper();
+    objectMapper.registerModule(new MetricsModule(TimeUnit.MINUTES, TimeUnit.MILLISECONDS, true));
+    objectMapper.registerModule(new HealthCheckModule());
+    objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
     // Set session start
     last_reset = System.currentTimeMillis();
 
@@ -97,6 +116,10 @@ public class MetricsServiceImpl implements MetricsService {
   /* Set up internal metrics */
   private void setup_metrics() {
 
+    // set up a counter for session start time
+    Counter counter = registry.counter("metrics.session.start");
+    counter.inc(last_reset);
+
     // set up a gauge for elapsed time
     registry.register(MetricRegistry.name("metrics.session.elapsed"),
                          new Gauge<Long>() {
@@ -105,6 +128,7 @@ public class MetricsServiceImpl implements MetricsService {
                                  return new Long(System.currentTimeMillis() - last_reset);
                              }
                          });
+
   }
 
   private void start_reporting() {
@@ -120,7 +144,7 @@ public class MetricsServiceImpl implements MetricsService {
         csv_reporter = CsvReporter.forRegistry(registry)
                                         .formatFor(Locale.US)
                                         .convertRatesTo(TimeUnit.MINUTES)
-                                        .convertDurationsTo(TimeUnit.SECONDS)
+                                        .convertDurationsTo(TimeUnit.MILLISECONDS)
                                         .build(metricsDir);
         csv_reporter.start(csv_interval, TimeUnit.SECONDS);
     }
@@ -130,7 +154,7 @@ public class MetricsServiceImpl implements MetricsService {
        log_reporter = Slf4jReporter.forRegistry(registry)
                                             .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
                                             .convertRatesTo(TimeUnit.MINUTES)
-                                            .convertDurationsTo(TimeUnit.SECONDS)
+                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
                                             .build();
        log_reporter.start(log_interval, TimeUnit.SECONDS);
     }
@@ -167,22 +191,38 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void save() {
-    Logger.info("save");
+    Logger.info("Saving metrics data to " + metricsJson.getAbsolutePath());
+    
+    FileOutputStream os = null;
+    try {
+        os = new FileOutputStream(metricsJson);
+        objectMapper.writer().writeValue(os, registry); 
+    } catch (Exception e) {
+	Logger.error(e, "Unable to write JSON metrics data to file");
+    } finally {
+	if (os != null) {
+	   try { os.close(); } catch (Exception ef) { }
+	}
+    }
   }
 
   @Override
-  public void show() {
+  public String json() {
 
-    // List all the metrics -- TODO get values (like log output)
-    for (String metrickey : registry.getNames()) {
-       System.out.println(metrickey);
+    String json = "{}";
+
+    try {
+      json = objectMapper.writer().writeValueAsString(registry);
+    } catch (JsonProcessingException jpe) {
+      Logger.error(jpe, "Unable to process metrics JSON");
     }
 
+    return json;
   }
 
   @Override
   public void pause() {
-    Logger.info("Reporting paused");
+    Logger.info("CSV and log reporting paused (metrics will continue to be updated)");
     stop_reporting();
   }
 
@@ -243,8 +283,19 @@ public class MetricsServiceImpl implements MetricsService {
 
   // Console commands
 
+  public void list(String[] args) {
+    // List all the metrics
+    for (String metrickey : registry.getNames()) {
+       System.out.println(metrickey);
+    }
+  }
+
   public void show(String[] args) {
-    show();
+    System.out.println(json());
+  }
+
+  public void save(String[] args) {
+    save();
   }
 
   public void reset(String[] args) {
@@ -254,6 +305,5 @@ public class MetricsServiceImpl implements MetricsService {
   public void pause(String[] args) {
     pause();
   }
-
 
 }
