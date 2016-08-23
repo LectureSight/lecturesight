@@ -85,12 +85,27 @@ public class MetricsServiceImpl implements MetricsService {
       }
     }
 
-    start_reporting();
-
+    // Set session start
     last_reset = System.currentTimeMillis();
+
+    setup_metrics();
+    start_reporting();
 
     Logger.info("Activated");
   } 
+
+  /* Set up internal metrics */
+  private void setup_metrics() {
+
+    // set up a gauge for elapsed time
+    registry.register(MetricRegistry.name("metrics.session.elapsed"),
+                         new Gauge<Long>() {
+                             @Override
+                             public Long getValue() {
+                                 return new Long(System.currentTimeMillis() - last_reset);
+                             }
+                         });
+  }
 
   private void start_reporting() {
 
@@ -143,10 +158,11 @@ public class MetricsServiceImpl implements MetricsService {
 
     // To reset the metrics, remove all metrics (they will be re-created when next updated)
     registry.removeMatching(MetricFilter.ALL);
- 
-    start_reporting();
 
     last_reset = System.currentTimeMillis();
+
+    setup_metrics();
+    start_reporting();
   }
 
   @Override
