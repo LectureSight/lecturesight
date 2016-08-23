@@ -26,6 +26,7 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
+import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
@@ -44,7 +45,10 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
 
   @Reference
   Configuration config;
-  
+
+  @Reference
+  MetricsService metrics;
+
   @Reference
   ObjectTracker tracker;
   
@@ -181,6 +185,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   private class CameraOperatorWorker implements Runnable {
 
     TrackerObject target = null;
+    long first_tracked_time;
     long last_tracked_time;
 
     @Override
@@ -197,11 +202,16 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
         if ((objs.size() > 0) && (objs.size() <= target_limit)) {
           // only track one target at a time
           target = findBestTrackedObject(objs);
+          if (target != null) {
+             metrics.incCounter("camera.operator.target.new");
+             first_tracked_time = now;
+          }
         }
 
         // Return to the initial position if no targets have been visible for a while
         if ((objs.isEmpty() || target == null) && (tracking_timeout > 0) && (last_tracked_time > 0) && (now - last_tracked_time > tracking_timeout)) {
 	  returnInitialTrackingPosition();
+          metrics.incCounter("camera.operator.move.home");
           last_tracked_time = 0;
         }
 
@@ -241,7 +251,9 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           }
 
         } else {
+          // Target has timed out
           target = null;
+          metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
         }
       }
     }
