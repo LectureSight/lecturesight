@@ -17,6 +17,8 @@
  */
 package cv.lecturesight.util.metrics;
 
+import com.codahale.metrics.MetricRegistry;
+
 public interface MetricsService {
 
   /* Reset metrics */
@@ -40,7 +42,10 @@ public interface MetricsService {
   public void timedEvent(String key, long duration_ms);
 
   /* Gauge */
-  public void setValue(String key, long value);
+  public void setGauge(String key, long value);
+
+  /* Access to the MetricsRegistry */
+  public MetricRegistry getRegistry();
 
 }
 

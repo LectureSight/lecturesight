@@ -62,6 +62,10 @@ public class MetricsServiceImpl implements MetricsService {
   /* CSV location */
   private File metricsDir;
 
+  public MetricRegistry getRegistry() {
+      return registry;
+  }
+
   protected void deactivate(ComponentContext cc) {
       Logger.info("Deactivated");
   }
@@ -152,18 +156,23 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void show() {
-    Logger.info("show");
+
+    // List all the metrics -- TODO get values (like log output)
+    for (String metrickey : registry.getNames()) {
+       System.out.println(metrickey);
+    }
+
   }
 
   @Override
   public void pause() {
-    Logger.info("pause");
+    Logger.info("Reporting paused");
     stop_reporting();
   }
 
   @Override
   public void setDescription(String key, String desc) {
-    Logger.info("Set description for: " + key + " to: " + desc);
+    Logger.debug("Set description for: " + key + " to: " + desc);
   }
 
   @Override
@@ -173,10 +182,10 @@ public class MetricsServiceImpl implements MetricsService {
     Counter counter;
 
     if (counters.containsKey(key)) {
-       Logger.info("Increment existing counter: " + key);
+       Logger.debug("Increment existing counter: " + key);
        counter = counters.get(key);
     } else {
-       Logger.info("Increment new counter: " + key);
+       Logger.debug("Increment new counter: " + key);
        counter = registry.counter(key);
     }
 
@@ -196,11 +205,11 @@ public class MetricsServiceImpl implements MetricsService {
     Counter counter;
 
     if (timers.containsKey(key)) {
-       Logger.info("Adding duration to existing timer: " + key);
+       Logger.debug("Adding duration to existing timer: " + key);
        timer = timers.get(key);
        counter = counters.get(MetricRegistry.name(key,"elapsed"));
     }  else {
-       Logger.info("Adding duration to new timer: " + key);
+       Logger.debug("Adding duration to new timer: " + key);
        // TODO Use a sliding window reservoir
        timer = registry.timer(key);
        counter = registry.counter(MetricRegistry.name(key,"elapsed"));
@@ -212,11 +221,12 @@ public class MetricsServiceImpl implements MetricsService {
   }
 
   @Override
-  public void setValue(String key, long value) {
-    Logger.info("Set value for: " + key + " to " + value);
+  public void setGauge(String key, long value) {
+    Logger.debug("Set value for: " + key + " to " + value);
   }
 
   // Console commands
+
   public void show(String[] args) {
     show();
   }
