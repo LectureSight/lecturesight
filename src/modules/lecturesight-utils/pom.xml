@@ -100,7 +100,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.util</Bundle-SymbolicName>
             <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!junit|maven-*|plexus-*|org.apache.felix.scr.*|tinylog</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>

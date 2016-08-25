@@ -27,6 +27,9 @@ public interface MetricsService {
   /* Pause metric reporting */
   public void pause();
 
+  /* Resume metric reporting */
+  public void resume();
+
   /* Save JSON snapshot to file */
   public void save();
 

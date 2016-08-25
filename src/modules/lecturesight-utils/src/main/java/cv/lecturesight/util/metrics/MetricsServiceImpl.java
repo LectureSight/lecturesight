@@ -17,6 +17,9 @@
  */
 package cv.lecturesight.util.metrics;
 
+import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationListener;
+
 import com.codahale.metrics.*;
 import com.codahale.metrics.json.MetricsModule;
 import com.codahale.metrics.json.HealthCheckModule;
@@ -41,10 +44,23 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties({
   @Property(name = "osgi.command.scope", value = "metrics"),
-  @Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause"})
+  @Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause", "resume"})
 })
 
-public class MetricsServiceImpl implements MetricsService {
+public class MetricsServiceImpl implements MetricsService, ConfigurationListener {
+
+  @Reference
+  private Configuration config;
+
+  public static final String PROPKEY_ENABLE = "metrics.enable";
+  public static final String PROPKEY_CSV_ENABLE = "metrics.csv.enable";
+  public static final String PROPKEY_JMX_ENABLE = "metrics.jmx.enable";
+  public static final String PROPKEY_LOG_ENABLE = "metrics.log.enable";
+  public static final String PROPKEY_CSV_INTERVAL = "metrics.csv.interval";
+  public static final String PROPKEY_LOG_INTERVAL = "metrics.log.interval";
+
+  // Enabled by default
+  private boolean enable = true;
 
   private static final MetricRegistry registry = new MetricRegistry();
 
@@ -54,9 +70,9 @@ public class MetricsServiceImpl implements MetricsService {
   /* Time of last reset */
   private long last_reset = 0;
 
-  /* Reporting options - TODO from config */
-  private boolean report_jmx = true;
+  /* Reporting options */
   private boolean report_csv = true;
+  private boolean report_jmx = true;
   private boolean report_log = true;
 
   /* Reporters */
@@ -64,25 +80,23 @@ public class MetricsServiceImpl implements MetricsService {
   private JmxReporter   jmx_reporter;
   private Slf4jReporter log_reporter;
   
-  /* Reporting interval - TODO from config*/
-  private int csv_interval = 5;
-  private int log_interval = 60;
+  /* Reporting interval */
+  private int csv_interval = 30;
+  private int log_interval = 300;
 
   /* CSV and JSON file location */
   private File metricsDir;
   private File metricsJson;
 
-  public MetricRegistry getRegistry() {
-      return registry;
-  }
-
-  protected void deactivate(ComponentContext cc) {
-      Logger.info("Deactivated");
-  }
-
   protected void activate(ComponentContext cc) {
 
-    Logger.info("Metrics Service");
+    setConfiguration();
+
+    if (enable) {
+       Logger.info("Metrics Enabled (CSV=" + report_csv + " JMX=" + report_jmx + " LOG=" + report_log + ")");
+    } else {
+       Logger.info("Metrics Disabled");
+    }
 
     // make sure metrics directory exists
     metricsDir = new File(System.getProperty("user.dir") + File.separator + "metrics");
@@ -108,10 +122,77 @@ public class MetricsServiceImpl implements MetricsService {
     last_reset = System.currentTimeMillis();
 
     setup_metrics();
-    start_reporting();
 
-    Logger.info("Activated");
+    if (enable) {
+       start_reporting();
+    }
+
+    Logger.debug("Activated");
   } 
+
+  protected void deactivate(ComponentContext cc) {
+      Logger.debug("Deactivated");
+  }
+
+  @Override
+  public void configurationChanged() {
+    Logger.debug("Refreshing configuration");
+
+    if (updateConfiguration()) {
+       Logger.debug("Configuration updated");
+       stop_reporting();
+       start_reporting();
+    }
+  }
+
+  private void setConfiguration() {
+    enable = config.getBoolean(PROPKEY_ENABLE);
+    report_csv = config.getBoolean(PROPKEY_CSV_ENABLE);
+    report_jmx = config.getBoolean(PROPKEY_JMX_ENABLE);
+    report_log = config.getBoolean(PROPKEY_LOG_ENABLE);
+    csv_interval = config.getInt(PROPKEY_CSV_INTERVAL);
+    log_interval = config.getInt(PROPKEY_LOG_INTERVAL);
+  }
+
+  private boolean updateConfiguration() {
+
+    // Ideally we would only get configurationChanged() events for this service, but
+    // as it's called for any config change, we need to see what's changed.
+
+    boolean changed = false;
+
+    if (enable != config.getBoolean(PROPKEY_ENABLE)) {
+        enable = !enable;
+	changed = true;
+    }
+
+    if (report_csv != config.getBoolean(PROPKEY_CSV_ENABLE)) {
+	report_csv = !report_csv;
+	changed = true;
+    }
+
+    if (report_jmx != config.getBoolean(PROPKEY_JMX_ENABLE)) {
+	report_jmx = !report_jmx;
+	changed = true;
+    }
+
+    if (report_log != config.getBoolean(PROPKEY_LOG_ENABLE)) {
+	report_log = !report_log;
+	changed = true;
+    }
+
+    if (csv_interval != config.getInt(PROPKEY_CSV_INTERVAL)) {
+	csv_interval = config.getInt(PROPKEY_CSV_INTERVAL);
+	changed = true;
+    }
+
+    if (log_interval != config.getInt(PROPKEY_LOG_INTERVAL)) {
+	log_interval = config.getInt(PROPKEY_LOG_INTERVAL);
+	changed = true;
+    }
+
+    return changed;
+  }
 
   /* Set up internal metrics */
   private void setup_metrics() {
@@ -133,11 +214,7 @@ public class MetricsServiceImpl implements MetricsService {
 
   private void start_reporting() {
 
-    // JMX reporting (if enabled)
-    if (report_jmx && jmx_reporter == null) {
-       jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
-       jmx_reporter.start();
-    }
+    if (!enable) return;
 
     // CSV reporting (if enabled)
     if (report_csv && csv_reporter == null) {
@@ -147,6 +224,12 @@ public class MetricsServiceImpl implements MetricsService {
                                         .convertDurationsTo(TimeUnit.MILLISECONDS)
                                         .build(metricsDir);
         csv_reporter.start(csv_interval, TimeUnit.SECONDS);
+    }
+
+    // JMX reporting (if enabled)
+    if (report_jmx && jmx_reporter == null) {
+       jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
+       jmx_reporter.start();
     }
 
     // Console reporting (if enabled)
@@ -164,12 +247,17 @@ public class MetricsServiceImpl implements MetricsService {
   private void stop_reporting() {
 
     // Shut down reporting threads
-    if (report_csv && csv_reporter != null) {
+    if (csv_reporter != null) {
 	csv_reporter.stop();
 	csv_reporter = null;
     }
 
-    if (report_log && log_reporter != null) {
+    if (jmx_reporter != null) {
+	jmx_reporter.stop();
+	jmx_reporter = null;
+    }
+
+    if (log_reporter != null) {
 	log_reporter.stop();
 	log_reporter = null;
     }
@@ -177,7 +265,15 @@ public class MetricsServiceImpl implements MetricsService {
   }
 
   @Override
+  public MetricRegistry getRegistry() {
+      return registry;
+  }
+
+  @Override
   public void reset() {
+
+    if (!enable) return;
+
     Logger.info("reset");
 
     // To reset the metrics, remove all metrics (they will be re-created when next updated)
@@ -191,6 +287,9 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void save() {
+
+    if (!enable) return;
+
     Logger.info("Saving metrics data to " + metricsJson.getAbsolutePath());
     
     FileOutputStream os = null;
@@ -222,17 +321,34 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void pause() {
-    Logger.info("CSV and log reporting paused (metrics will continue to be updated)");
+
+    if (!enable) return;
+
+    Logger.info("Reporting paused (metrics will continue to be updated)");
     stop_reporting();
   }
 
   @Override
+  public void resume() {
+
+    if (!enable) return;
+
+    Logger.info("Reporting resumed");
+    start_reporting();
+  }
+
+  @Override
   public void setDescription(String key, String desc) {
+
+    if (!enable) return;
+
     Logger.debug("Set description for: " + key + " to: " + desc);
   }
 
   @Override
   public void incCounter(String key) {
+
+    if (!enable) return;
 
     SortedMap<String,Counter> counters = registry.getCounters(MetricFilter.ALL);
     Counter counter;
@@ -252,6 +368,8 @@ public class MetricsServiceImpl implements MetricsService {
   @Override
   public void timedEvent(String key, long duration_ms) {
 
+    if (!enable) return;
+
     // Timed events use both a histogram and a counter (for total elapsed time)
 
     SortedMap<String,Timer> timers = registry.getTimers(MetricFilter.ALL);
@@ -266,7 +384,7 @@ public class MetricsServiceImpl implements MetricsService {
        counter = counters.get(MetricRegistry.name(key,"elapsed"));
     }  else {
        Logger.debug("Adding duration to new timer: " + key);
-       // TODO Use a sliding window reservoir
+       // TODO Use a sliding window reservoir?
        timer = registry.timer(key);
        counter = registry.counter(MetricRegistry.name(key,"elapsed"));
     }
@@ -278,32 +396,27 @@ public class MetricsServiceImpl implements MetricsService {
 
   @Override
   public void setGauge(String key, long value) {
+
+    if (!enable) return;
+
     Logger.debug("Set value for: " + key + " to " + value);
   }
 
   // Console commands
 
   public void list(String[] args) {
-    // List all the metrics
-    for (String metrickey : registry.getNames()) {
-       System.out.println(metrickey);
+    if (enable) {
+       // List all the metrics
+       for (String metrickey : registry.getNames()) {
+          System.out.println(metrickey);
+       }
+    } else {
+       System.out.println("disabled");
     }
   }
 
   public void show(String[] args) {
-    System.out.println(json());
-  }
-
-  public void save(String[] args) {
-    save();
-  }
-
-  public void reset(String[] args) {
-    reset();
-  }
-
-  public void pause(String[] args) {
-    pause();
+    System.out.println(enable ? json() : "disabled");
   }
 
 }
