@@ -13,6 +13,7 @@ public class VEvent {
   Date end = null;          // end time of event
   String summary = "";      // summary of event, here title of the Recording
   String location = "";     // location of event, here name of Capture Agent
+  String uid = "";          // unique identifier of event
 
   public Date getStart() {
     return start;
@@ -32,5 +33,9 @@ public class VEvent {
 
   public String getLocation() {
     return location;
+  }
+
+  public String getUID() {
+    return uid;
   }
 }

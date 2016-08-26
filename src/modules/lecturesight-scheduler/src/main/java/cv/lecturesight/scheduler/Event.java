@@ -16,6 +16,7 @@ public class Event implements Comparable {
   
   Long time;        // time of the event
   Action action;    // action that should be executed
+  String uid;       // event id for which the action is being executed
 
   /** 
    * Returns new Event instance, sets time and action
@@ -23,9 +24,10 @@ public class Event implements Comparable {
    * @param time time of the event
    * @param action action that should be executed
    */
-  public Event(long time, Action action) {
+  public Event(long time, Action action, String uid) {
     this.time = time;
     this.action = action;
+    this.uid = uid;
   }
 
   public long getTime() {
@@ -34,6 +36,10 @@ public class Event implements Comparable {
 
   public Action getAction() {
     return action;
+  }
+
+  public String getUID() {
+    return uid;
   }
 
   @Override

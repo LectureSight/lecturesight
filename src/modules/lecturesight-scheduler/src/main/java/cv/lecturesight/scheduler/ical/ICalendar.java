@@ -23,6 +23,7 @@ public class ICalendar {
   static final String DTEND = "DTEND:";
   static final String SUMMARY = "SUMMARY:";
   static final String LOCATION = "LOCATION:";
+  static final String UID = "UID:";
   
   // Date format used in Matterhorn ICal files
   static DateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
@@ -89,6 +90,13 @@ public class ICalendar {
           throw new ICalendarException("Location without event at line " + lineNumber);
         }
         current.location = line.substring(LOCATION.length());
+
+        // UID
+      } else if (line.startsWith(UID)) {
+        if (current == null) {
+          throw new ICalendarException("UID without event at line " + lineNumber);
+        }
+        current.uid = line.substring(UID.length());
 
         // VEVENT:END
       } else if (line.startsWith(VEVENT_END)) {
