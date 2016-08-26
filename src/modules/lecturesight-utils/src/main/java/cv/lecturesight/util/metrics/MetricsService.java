@@ -33,6 +33,9 @@ public interface MetricsService {
   /* Save JSON snapshot to file */
   public void save();
 
+  /* Save JSON snapshot, with the eventId in the filename */
+  public void save(String eventId);
+
   /* JSON snapshot of metrics */
   public String json();
 

@@ -86,7 +86,6 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
 
   /* CSV and JSON file location */
   private File metricsDir;
-  private File metricsJson;
 
   protected void activate(ComponentContext cc) {
 
@@ -108,9 +107,6 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
         Logger.error("Failed to create metrics directory", e);
       }
     }
-
-    // JSON output file
-    metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics.json");
 
     // Set up for JSON serialization
     objectMapper = new ObjectMapper();
@@ -287,8 +283,22 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
 
   @Override
   public void save() {
+    save(null);
+  }
+
+  @Override
+  public void save(String eventId) {
 
     if (!enable) return;
+
+    // JSON output file
+    File metricsJson;
+
+    if (eventId != null) {
+        metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics-" + eventId + ".json");
+    } else {
+        metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics.json");
+    }
 
     Logger.info("Saving metrics data to " + metricsJson.getAbsolutePath());
     
