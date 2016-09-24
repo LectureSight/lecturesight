@@ -572,7 +572,7 @@ public class VISCACameraImpl implements PTZCamera {
 
   @Override
   public void cancel() {
-    parent.cancelMovement(1);
+    parent.cancelMovement(this);
   }
 
   @Override

@@ -3,7 +3,23 @@ package com.wulff.lecturesight.viscaoverip.protocol;
 public class VISCA {
 
   public static enum MessageType {
-    INQUIRY, MOVEMENT, ZOOM, FOCUS, CAM_COMMAND, CAM_ADMIN, NET
+    INQUIRY(0x01, 0x10), 
+    MOVEMENT(0x01, 0x00), 
+    ZOOM(0x01, 0x00), 
+    FOCUS(0x01, 0x00), 
+    CAM_COMMAND(0x01, 0x00), 
+    CAM_ADMIN(0x01, 0x00), 
+    NET(0x01, 0x00);            // TODO correct code?
+    
+    private int[] code;
+    MessageType(int one, int two) {
+        code = new int[2];
+        code[0] = one;
+        code[1] = two;
+    }
+    public int[] getCode() {
+        return code;
+    }
   }
 
   /**

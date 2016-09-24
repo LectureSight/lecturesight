@@ -4,7 +4,6 @@ import com.wulff.lecturesight.viscaoverip.protocol.VISCA.MessageType;
 
 public class Message implements Cloneable {
 
-  
   MessageType type;
   byte[] data;   // message template
 

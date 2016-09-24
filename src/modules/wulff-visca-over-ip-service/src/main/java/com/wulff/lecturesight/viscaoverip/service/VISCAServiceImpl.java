@@ -6,24 +6,18 @@ import com.wulff.lecturesight.visca.api.VISCAService;
 import com.wulff.lecturesight.viscaoverip.protocol.VISCA.MessageType;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.util.conf.Configuration;
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
@@ -43,21 +37,26 @@ public class VISCAServiceImpl implements VISCAService {
    
   ComponentContext cc;
   
-  final int VISCAPort = 52381;
+  final int VISCAPort = 52381;      // set by spec 
 
   boolean camera_alive = false;
 
   @Reference
-  Configuration config;   // service configuration
+  Configuration config;     // service configuration
 
   // Camera profiles
   Properties defaultProfile;
   Map<String, Properties> cameraProfiles = new HashMap<String, Properties>();
 
   DatagramSocket UDPSocket;
+  MessageReciever UDPlistener;
+  Thread UDPlistenerThread;
   InetAddress broadcastAdr = null;
+  
+  int next_seq_num = 0;    // sequence number for next package send
+  ByteBuffer seq_num_buf;
 
-  private byte[] buffer = new byte[1024];
+  private byte[] buffer = new byte[1024];   
 
   HashMap<InetAddress,VISCACameraImpl> cameras = new HashMap<InetAddress,VISCACameraImpl>();
 
@@ -82,6 +81,9 @@ public class VISCAServiceImpl implements VISCAService {
     Logger.debug("Activated");
     
     broadcastAdr = InetAddress.getByName("255.255.255.255");
+    
+    seq_num_buf = ByteBuffer.allocate(4);
+    seq_num_buf.order(ByteOrder.BIG_ENDIAN);
 
     // load device profiles
     loadProfiles(cc);
@@ -92,6 +94,11 @@ public class VISCAServiceImpl implements VISCAService {
     // start with sending the network discovery command
     send_Discovery();
 
+    // start UDP listener thread
+    UDPlistener = new MessageReciever();
+    UDPlistenerThread = new Thread(UDPlistener);
+    UDPlistenerThread.start();
+    
     // start update thread
     updaterHandle = executor.scheduleAtFixedRate(new CameraStateUpdater(),
             updateInterval, updateInterval, TimeUnit.MILLISECONDS);
@@ -101,14 +108,13 @@ public class VISCAServiceImpl implements VISCAService {
             senderInterval, senderInterval, TimeUnit.MILLISECONDS);
 
     try {
-	    Thread.sleep(config_timeout);
+        Thread.sleep(config_timeout);
 
-	    if (camera_alive) {
-		Logger.info("Completed VISCA camera initialization");
-	    } else {
-		Logger.error("Unable to initialize VISCA camera (no response within " + config_timeout + "ms)");
-		// cc.getBundleContext().getBundle(0).stop(); 
-	    }
+        if (camera_alive) {
+            Logger.info("Completed VISCA camera initialization");
+        } else {
+            Logger.error("Unable to initialize VISCA camera (no response within " + config_timeout + "ms)");
+        }
     } catch (Exception e) {
 	Logger.warn("Exception testing for camera startup" + e.getMessage());
     }
@@ -119,9 +125,11 @@ public class VISCAServiceImpl implements VISCAService {
    *
    * @param cc
    */
-  protected void deactivate(ComponentContext cc) {
+  protected void deactivate(ComponentContext cc) {  
     try {
+      UDPlistener.running = false;
       Thread.sleep(500);
+      if (UDPlistenerThread.isAlive()) UDPlistenerThread.interrupt();
       executor.shutdown();
       executor.awaitTermination(1, TimeUnit.SECONDS);
       Thread.sleep(1500);
@@ -177,19 +185,42 @@ public class VISCAServiceImpl implements VISCAService {
     }
   }
 
+  /** Increments the sequence number and returns a big endian representation of
+   * of the current sequence number. 
+   * 
+   * @return big endian representation of current sequence number
+   */
+  private byte[] getNextSequenceNumber() {
+      seq_num_buf.putInt(next_seq_num++);
+      seq_num_buf.flip();
+      return seq_num_buf.array();
+  }
+  
   /**
    * Sends the content of <code>b</code> over the serial port. Method is
    * synchronized so that competing calls are enqueued.
    *
    * @param a
    */
-  synchronized void send(byte[] b, InetAddress adr) {
-    Logger.trace(" >>" + ByteUtils.byteArrayToHex(b, -1));
+  synchronized void send(Message m, InetAddress adr) {
+    int packet_len = m.getBytes().length+8;
+    // build header 
+    System.arraycopy(m.getMessageType().getCode(), 0, buffer, 0, 2);    // 0-1: message type
+    // payload length
+    buffer[2] = 0x00;
+    buffer[3] = (byte) m.getBytes().length;
+    // sequence number
+    System.arraycopy(getNextSequenceNumber(), 0, buffer, 4, 4);
+    // payload
+    System.arraycopy(m.getBytes(), 0, buffer, 8, m.getBytes().length);
+    Logger.trace(" >>" + ByteUtils.byteArrayToHex(buffer, packet_len));
+    
+    // send UDP packet
     try {
-      DatagramPacket sendPacket = new DatagramPacket(b, b.length, adr, VISCAPort);
+      DatagramPacket sendPacket = new DatagramPacket(buffer, packet_len, adr, VISCAPort);
       UDPSocket.send(sendPacket);
     } catch (Exception e) {
-      Logger.error("Error while sending data: " + ByteUtils.byteArrayToHex(b, -1), e);
+      Logger.error("Error while sending data: " + ByteUtils.byteArrayToHex(buffer, packet_len), e);
     }
   }
 
@@ -200,7 +231,7 @@ public class VISCAServiceImpl implements VISCAService {
    */
   void send_Discovery() {
     Logger.info("Sending network discovery broadcast message.");
-    send(VISCA.NET_ADDRESS_SET.getBytes(), broadcastAdr);
+    send(VISCA.NET_ADDRESS_SET, broadcastAdr);
   }
 
   /**
@@ -208,40 +239,37 @@ public class VISCAServiceImpl implements VISCAService {
    *
    * @param adr address of the camera to be queried
    */
-  void send_CamInfo(InetAddress adr) {
+  void send_CamInfoInquiry(InetAddress adr) {
     Logger.info("Sending camera info inquiry command to " + adr.getHostAddress());
     Message msg = VISCA.INQ_CAM_VERSION.clone();
     msg.getBytes()[0] += 1;
-    send(msg.getBytes(), adr);
+    send(msg, adr);
   }
 
-  void cancelMovement(int cidx) {
-    
-    // TODO remove movement commands from pendingMsg!
-    // TODO what to do with commands in issuedMsg (that did not receive ACK yet)
+    void cancelMovement(VISCACameraImpl camera) {
 
-    Logger.debug("Cancel movement");
-    
-    VISCACameraImpl camera;
-    if ((camera = cameras[cidx-1]) != null) {
-      for (int i=1; i < camera.sockets.length; i++) {   // start with index 1 since 0 is a pseudo-socket (for inquiries)
-        Message m = camera.sockets[i];
-        if (m != null && m.getMessageType() == MessageType.MOVEMENT) {
-          Message cancel = VISCA.NET_COMMAND_CANCEL.clone();
-          byte[] pkg = cancel.getBytes();
-          pkg[0] += 1;
-          pkg[1] += i;
-          send(pkg, camera.address);
+        // TODO remove movement commands from pendingMsg!
+        // TODO what to do with commands in issuedMsg (that did not receive ACK yet)
+
+        Logger.debug("Cancel movement");
+
+        for (int i=1; i < camera.sockets.length; i++) {   // start with index 1 since 0 is a pseudo-socket (for inquiries)
+            Message m = camera.sockets[i];
+            if (m != null && m.getMessageType() == MessageType.MOVEMENT) {
+                Message cancel = VISCA.NET_COMMAND_CANCEL.clone();
+                byte[] pkg = cancel.getBytes();
+                pkg[0] += 1;
+                pkg[1] += i;
+                send(cancel, camera.address);
+            }
         }
-      }
     }
-  }
   
   void clearInterface(InetAddress adr) {
     Logger.debug("Clear interface");
     Message msg = VISCA.NET_IF_CLEAR.clone();
     msg.getBytes()[0] += 1;
-    send(msg.getBytes(), adr);
+    send(msg, adr);
   }
   
   /**
@@ -286,6 +314,7 @@ public class VISCAServiceImpl implements VISCAService {
     camera_alive = true;
   }
 
+  // TODO replace with System.arrayCopy (?)
   void copyPart(byte[] src, byte[] dest, int offset, int length) {
       int glength = offset + length;
       int dp = 0;
@@ -295,7 +324,7 @@ public class VISCAServiceImpl implements VISCAService {
   }
   
   /**
-   * Called in the event of serial input. Parses the message and acts accordingly.
+   * Called when a UDP message was received. Parses the message and acts accordingly.
    *
    * @param arg0
    */
@@ -309,20 +338,30 @@ public class VISCAServiceImpl implements VISCAService {
       // did we receive an error?
       if (ByteUtils.high(buffer[1]) == 6) {
         handleError(packet.getAddress(), buffer);
-      } // did we receive ACK/Completion message?
-      else if (len == 3) {
+      } 
+
+      // did we receive ACK/Completion message?
+      else if (packet.getLength() == 3) {
         handleACKCompletion(packet.getAddress(), buffer);
-      } // did we receive a position update?
-      else if (len == 11 && buffer[1] == (byte) 0x50) {
+      } 
+      
+      // did we receive a position update?
+      else if (packet.getLength() == 11 && buffer[1] == (byte) 0x50) {
         handlePositionUpdate(packet.getAddress(), buffer);
-      } // did we receive an ADDRESS_SET reply?
+      } 
+
+      // did we receive an ADDRESS_SET reply?
       else if (buffer[0] == (byte) 0x88 && buffer[1] == (byte) 0x30) {
         handleDiscoveryReply(packet.getAddress(), buffer);
-      } // did we receive a CAM_VersionInq reply?
-      else if (buffer[1] == (byte) 0x50 && buffer[2] == (byte) 0x00 && len == 10) {
+      } 
+
+      // did we receive a CAM_VersionInq reply?
+      else if (buffer[1] == (byte) 0x50 && buffer[2] == (byte) 0x00 && packet.getLength() == 10) {
         handleCameraInfoReply(packet.getAddress(), buffer);
-      } // did we receive a Focus inquiry reply?
-      else if (buffer[1] == (byte) 0x50 && len == 7) {
+      } 
+
+      // did we receive a Focus inquiry reply?
+      else if (buffer[1] == (byte) 0x50 && packet.getLength() == 7) {
         handleCameraFocusReply(packet.getAddress(), buffer);
       }
   }
@@ -436,7 +475,7 @@ public class VISCAServiceImpl implements VISCAService {
 
   private void handleDiscoveryReply(InetAddress adr, byte[] msg) {
     Logger.info("Camera discovered on address " + adr);
-    send_CamInfo(adr);
+    send_CamInfoInquiry(adr);
   }
 
   private void handleCameraInfoReply(InetAddress adr, byte[] msg) {
@@ -463,12 +502,12 @@ public class VISCAServiceImpl implements VISCAService {
               
               Logger.trace("Requesting camera position update");
               inq_msg.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + 1);
-              send(inq_msg.getBytes(), adr);
+              send(inq_msg, adr);
               
               if (updatePollFocus) {
                   Logger.trace("Requesting camera focus update");
                   inq_focus.getBytes()[0] = (byte) (VISCA.ADR_CAMERA_N + 1);
-                  send(inq_focus.getBytes(), adr);
+                  send(inq_focus, adr);
               }
           }
       } catch (Exception e) {
@@ -490,10 +529,29 @@ public class VISCAServiceImpl implements VISCAService {
             Message msg;
             if (camera != null && camera.interfaceReady() && (msg = camera.pendingMsg.poll()) != null) {
                 camera.issuedMsg.add(msg);
-                send(msg.getBytes(), adr);
+                send(msg, adr);
             }
         }
     }
+  }
+  
+  class MessageReciever implements Runnable {
+      
+      public boolean running = true;
+      private byte[] buf = new byte[256];
+      
+      @Override
+      public void run() {
+          while (running) {
+              try {
+                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                UDPSocket.receive(packet);
+                packetReceived(packet);
+              } catch(IOException ex) {
+                Logger.error(ex, "Exception in UDP listener thread. Listener exiting. The service will not read network messages anymore!");
+              }
+          }
+      }
   }
 
 }
