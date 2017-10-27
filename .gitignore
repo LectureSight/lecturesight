@@ -23,3 +23,6 @@ nb-configuration.xml
 # Ignore all temporary editor files
 .*.swp
 
+# Ignore files created at runtime
+runtime/metrics
+
