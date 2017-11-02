@@ -46,6 +46,9 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
   private static final int DEFAULT_WIDTH = 640;
   private static final int DEFAULT_HEIGHT = 360;
+  private static final int FONT_SIZE = 10;
+  private static final int FONT_PAD = 2;
+  private static final int TICK_SIZE = 3;
 
   private CoordinatesNormalization normalizer = new CoordinatesNormalization(DEFAULT_WIDTH, DEFAULT_HEIGHT);
   private CameraSteeringWorker camera;
@@ -56,11 +59,13 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
   private CameraMovementUI parent;
 
   // graphics stuff
+  private final Color backgroundColor = Color.black;
+  private final Color axesColor = Color.green;
   private final Color targetColor = Color.yellow;
   private final Color trackedColor = Color.orange;
   private final Color positionColor = Color.cyan;
   private final Color frameColor = Color.cyan;
-  private final Font font = new Font("Monospaced", Font.PLAIN, 10);
+  private final Font font = new Font("Monospaced", Font.PLAIN, FONT_SIZE);
 
   public CameraControlPanel(CameraMovementUI parent, CameraSteeringWorker camera, CameraOperator operator) {
     this.parent = parent;
@@ -97,8 +102,23 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
     int width = getWidth();
     int height = getHeight();
-    int rootX = getWidth() / 2;
-    int rootY = getHeight() / 2;
+
+    // scale LS coords to panel size
+    float scaleX = (float)width/(camera.getPanMax() - camera.getPanMin());
+    float scaleY = (float)height/(camera.getTiltMax() - camera.getTiltMin());
+
+    int rootX;
+    int rootY;
+
+    // If coord origin on screen center X/Y axes on that
+    if ((camera.getPanMin() < 0 && camera.getPanMax() > 0)
+            && (camera.getTiltMin() < 0 && camera.getTiltMax() > 0)) {
+      rootX = (int) (scaleX * -camera.getPanMin());
+      rootY = (int) (scaleY * camera.getTiltMax());
+    } else {
+      rootX = width / 2;
+      rootY = height / 2;
+    }
 
     float frameWidth = camera.getFrameWidth();
 
@@ -106,38 +126,38 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
     if(cameraDisplay == null) {
       // clear panel
-      g.setColor(Color.black);
+      g.setColor(backgroundColor);
       g.fillRect(0, 0, width, height);
     }
 
     // draw movement indicator
-    g.drawRect(1, 1, 20, 10);
-    g.setColor(camera.isMoving() ? Color.green : Color.black);
-    g.fillRect(2, 2, 19, 9);
-    g.setColor(camera.isMoving() ? Color.black : Color.green);
-    g.drawString(camera.isMoving() ? "MOV" : "STL", 2, 10);
+    g.drawRect(1, 1, 20, FONT_SIZE);
+    g.setColor(camera.isMoving() ? axesColor : backgroundColor);
+    g.fillRect(2, 2, 19, FONT_SIZE-1);
+    g.setColor(camera.isMoving() ? backgroundColor : axesColor);
+    g.drawString(camera.isMoving() ? "MOV" : "STL", 2, FONT_SIZE);
 
     // coordinate cross
     // x axis
-    g.setColor(Color.green);
-    g.drawLine(1, rootY, getWidth()-2, rootY);
+    g.setColor(axesColor);
+    g.drawLine(1, rootY, width-2, rootY);
 
-    g.drawLine(1, rootY-3, 1, rootY + 3);
-    g.drawLine(rootX/2, rootY-3, rootX/2, rootY + 3);
-    g.drawString(Integer.toString(camera.getPanMin()), 2, rootY - 2);
-    g.drawLine(getWidth()-2, rootY-3, getWidth()-2, rootY + 3);
-    g.drawLine(rootX + (rootX/2), rootY-3, rootX + (rootX/2), rootY + 3);
-    g.drawString(Integer.toString(camera.getPanMax()), getWidth() - 30, rootY + 11);
+    g.drawLine(1, rootY-TICK_SIZE, 1, rootY + TICK_SIZE);
+    g.drawLine(rootX/2, rootY-TICK_SIZE, rootX/2, rootY + TICK_SIZE);
+    g.drawString(Integer.toString(camera.getPanMin()), FONT_PAD, rootY - FONT_PAD);
+    g.drawLine(width-2, rootY-TICK_SIZE, width-2, rootY + TICK_SIZE);
+    g.drawLine(rootX + (rootX/2), rootY-TICK_SIZE, rootX + (rootX/2), rootY + TICK_SIZE);
+    g.drawString(Integer.toString(camera.getPanMax()), width - 30, rootY - FONT_PAD);
 
     // y axis
-    g.drawLine(rootX, 1, rootX, getHeight()-2);
+    g.drawLine(rootX, 1, rootX, height-2);
 
-    g.drawLine(rootX - 3, 1, rootX + 3, 1);
-    g.drawLine(rootX - 3, rootY/2, rootX + 3, rootY/2);
-    g.drawString(Integer.toString(camera.getTiltMax()), rootX + 2, 12);
-    g.drawLine(rootX - 3, getHeight()-2, rootX + 3, getHeight()-2);
-    g.drawLine(rootX - 3, rootY + (rootY/2), rootX + 3, rootY + (rootY/2));
-    g.drawString(Integer.toString(camera.getTiltMin()), rootX + 2, getHeight() - 3);
+    g.drawLine(rootX - TICK_SIZE, 1, rootX + TICK_SIZE, 1);
+    g.drawLine(rootX - TICK_SIZE, rootY/2, rootX + TICK_SIZE, rootY/2);
+    g.drawString(Integer.toString(camera.getTiltMax()), rootX + FONT_PAD, FONT_SIZE + FONT_PAD);
+    g.drawLine(rootX - TICK_SIZE, height-2, rootX + TICK_SIZE, height-2);
+    g.drawLine(rootX - TICK_SIZE, rootY + (rootY/2), rootX + TICK_SIZE, rootY + (rootY/2));
+    g.drawString(Integer.toString(camera.getTiltMin()), rootX + FONT_PAD, height - FONT_PAD);
 
     // get camera and target position
     NormalizedPosition tposn = camera.getTargetPosition();
@@ -162,7 +182,7 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
     g.setColor(positionColor);
     drawCursor(g, apos.getX(), apos.getY(), positionColor);
-    g.drawString(cameraPosStr, apos.getX() + 5, apos.getY() + 10);
+    g.drawString(cameraPosStr, apos.getX() + 5, apos.getY() + FONT_SIZE);
 
     // Draw left and right frame boundaries
     g.setColor(frameColor);
@@ -189,7 +209,6 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
       Position fpos = (Position) t.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
       drawTarget(g, fpos.getX(), fpos.getY(), trackedColor);
     }
-
   }
 
   private void drawCursor(Graphics g, int x, int y, Color color) {
