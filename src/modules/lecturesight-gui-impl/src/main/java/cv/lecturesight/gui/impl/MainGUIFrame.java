@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -45,13 +46,14 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
   private int menuItems = 0;
   private BundleContext bundleContext;
   private ConfigurationService configService;
-  
+
   public MainGUIFrame(BundleContext bc, ConfigurationService cs) {
     bundleContext = bc;
     configService = cs;
 
     // set operating system look-and-feel
     try {
+      setIconImage(new ImageIcon(getClass().getResource("/lecturesight.png")).getImage());
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     } catch (Exception e) {
@@ -80,7 +82,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
       servicesMenu.remove(item);
     }
   }
-  
+
   @Override
   public void actionPerformed(ActionEvent e) {
     JMenuItem source = (JMenuItem)e.getSource();
