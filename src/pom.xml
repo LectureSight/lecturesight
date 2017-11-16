@@ -283,7 +283,7 @@
     </repository>
     
     <!-- Fraunhofer IAIS Repository -->
-    <repository>
+    <!-- repository>
       <id>iais.fraunhofer.de</id>
       <name>Fraunhofer IAIS</name>
       <url>http://mp-devel.iais.fraunhofer.de:8081/nexus/content/repositories/lecturesight/</url>
@@ -293,7 +293,7 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository>
+    </repository -->
 
     <repository>
       <id>maven2-repository.dev.java.net</id>

@@ -57,6 +57,7 @@ import org.pmw.tinylog.Logger;
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
+  final static String PROPKEY_INVERTED = "inverted";
   final static String DISPLAYNAME_INPUT = "cam.overview.input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
@@ -73,11 +74,17 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
+  private boolean inverted = false;
 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
 
     Logger.info("Starting....");
+
+    inverted = config.getBoolean(PROPKEY_INVERTED);
+    if (inverted) {
+      Logger.info("Framesource is inverted, and will be rotated 180 degrees");
+    }
 
     // scan for plugins already installed
     try {
@@ -156,7 +163,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     FrameUploader uploader = null;
     switch (grabber.getPixelFormat()) {     // TODO replace this implementation with a plugin mechanism!
       case RGB_8BIT:
-        uploader = new RGB24FrameUploader(ocl, grabber);
+        uploader = new RGB24FrameUploader(ocl, grabber, inverted);
         break;
       case INTENSITY_8BIT:
         uploader = new IntensityFrameUploader(ocl, grabber);
@@ -220,7 +227,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {
-      Logger.error("Failed to activate FrameSourceProvider with source " + mrl, e);
+      Logger.error(e, "Failed to activate FrameSourceProvider with source " + mrl);
     }
   }
 

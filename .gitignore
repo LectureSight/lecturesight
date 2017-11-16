@@ -24,5 +24,6 @@ nb-configuration.xml
 .*.swp
 
 # Ignore files created at runtime
-runtime/metrics
-
+runtime/log/
+runtime/felix-cache/
+runtime/metrics/

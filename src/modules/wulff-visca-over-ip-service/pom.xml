@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>lecturesight-framesource-rtph264</artifactId>
-  <name>LectureSight RTP h.264 FrameSource</name>
-  <groupId>cv.lecturesight</groupId>
+  <artifactId>visca-over-ip-service</artifactId>
+  <name>VISCAoverIP Service</name>
+  <groupId>com.wulff</groupId>
   <packaging>bundle</packaging>
-
-  <version>0.3</version>
 
   <parent>
     <groupId>cv.lecturesight</groupId>
@@ -18,14 +18,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-framesource-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-util</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.wulff</groupId>
+      <artifactId>visca-api</artifactId>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -36,16 +31,6 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.freedesktop.gstreamer</groupId>
-      <artifactId>gst1-java-core</artifactId>
-      <version>0.9.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
@@ -54,10 +39,24 @@
       <artifactId>maven-scr-plugin</artifactId>
     </dependency>
     <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-util</artifactId>
+      <version>0.3</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-ptzcontrol-api</artifactId>
+      <version>0.3</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
     </dependency>
   </dependencies>
+
+  <version>0.1</version>
 
   <build>
     <plugins>
@@ -92,15 +91,22 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>cv.lecturesight.framesource.rtph264;version=${project.version}</Export-Package>
-            <Import-Package>
-              *;resolution:=optional
-            </Import-Package>
-            <Embed-Dependency>
-              gst1-java-core;inline=true,
-            </Embed-Dependency>
+            <Bundle-SymbolicName>com.wulff.lecturesight.viscaoverip</Bundle-SymbolicName>
+            <Export-Package>
+              com.wulff.lecturesight.viscaoverip.protocol,
+              com.wulff.lecturesight.viscaoverip.service
+              ;version=${project.version}
+            </Export-Package>
           </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>

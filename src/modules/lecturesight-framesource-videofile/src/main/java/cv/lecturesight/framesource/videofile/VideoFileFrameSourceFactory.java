@@ -29,7 +29,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
-import org.gstreamer.Gst;
+import org.freedesktop.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
