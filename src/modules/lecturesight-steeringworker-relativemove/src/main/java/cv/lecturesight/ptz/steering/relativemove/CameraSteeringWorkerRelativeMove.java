@@ -24,6 +24,7 @@ import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
+import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import java.util.Dictionary;
@@ -46,6 +47,9 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
   @Reference
   Configuration config;        // service configuration
+
+  @Reference
+  MetricsService metrics;      // metrics
 
   @Reference
   PTZCamera camera;            // PTZCamera implementation
@@ -89,6 +93,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     int last_ts = 0;
     int stopped_time = 500;
     long first_stop = 0;
+    long move_start = 0;
 
     @Override
     public void positionUpdated(Position new_pos_camera) {
@@ -110,6 +115,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
         if (!moving) {
           informMoveListenersStart(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
           Logger.debug("Camera started moving");
+          metrics.incCounter("camera.worker.move.start");
+          move_start = System.currentTimeMillis();
         }
         moving = true;
         model.setCameraPosition(new_pos);
@@ -122,6 +129,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
             informMoveListenersStop(model.toNormalizedCoordinates(new_pos), model.toNormalizedCoordinates(target_pos));
             Logger.debug("Camera stopped moving");
             moving = false;
+            metrics.timedEvent("camera.worker.movement", now - move_start);
           }
         } else {
           first_stop = now;

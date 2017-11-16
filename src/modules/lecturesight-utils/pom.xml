@@ -25,13 +25,72 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.scr.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>maven-scr-plugin</artifactId>
+    </dependency>
+    <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-json</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-healthchecks</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-jvm</artifactId>
+        <version>3.1.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.tinylog</groupId>
+        <artifactId>slf4j-binding</artifactId>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+
+     <!-- Generate Declarative Service Descriptor -->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-scr-plugin</artifactId>
+        <version>1.21.0</version>
+        <executions>
+          <execution>
+            <id>generate-scr-scrdescriptor</id>
+            <goals>
+              <goal>scr</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.0.4</version>
+          </dependency>
+        </dependencies>
+      </plugin>
 
       <!-- Generate OSGi Bundle -->
       <plugin>
@@ -41,13 +100,16 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <!-- Export-Package>
-	            cv.lecturesight.util.*;version=${project.version}
-            </Export-Package -->
+            <Bundle-SymbolicName>cv.lecturesight.util</Bundle-SymbolicName>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!junit|maven-*|plexus-*|org.apache.felix.scr.*|tinylog</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Import-Package>
+		!org.codehaus.plexus.util,*
+            </Import-Package>
             <Export-Package>
-	            cv.lecturesight.util,
+              cv.lecturesight.util,
               cv.lecturesight.util.conf,
+              cv.lecturesight.util.metrics,
               cv.lecturesight.util.geometry
             </Export-Package>
             <Bundle-Activator>cv.lecturesight.util.Activator</Bundle-Activator>

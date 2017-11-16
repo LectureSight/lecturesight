@@ -5,6 +5,7 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.DummyInterface;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +49,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   HeartBeat heart;
   @Reference
   CameraOperator operator;
+  @Reference
+  MetricsService metrics;
 
   boolean enable = true;
   private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
@@ -127,19 +130,20 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
             // create start events, apply configured time zone offset to UTC dates from iCal
             Date startDate = new Date(vevent.getStart().getTime() + timeZoneOffset);
-            Event startTracker = new Event(startDate.getTime(), Event.Action.START_TRACKING);
+            Event startTracker = new Event(startDate.getTime(), Event.Action.START_TRACKING, vevent.getUID());
             newEvents.add(startTracker);
-            Event startOperator = new Event(startDate.getTime() + trackerLeadTime, Event.Action.START_OPERATOR);
+            Event startOperator = new Event(startDate.getTime() + trackerLeadTime, Event.Action.START_OPERATOR, vevent.getUID());
             newEvents.add(startOperator);
 
             // create stop events, apply configured time zone offset to UTC dates from iCal
             Date stopDate = new Date(vevent.getEnd().getTime() + timeZoneOffset);
-            Event stopTracker = new Event(stopDate.getTime(), Event.Action.STOP_TRACKING);
+            Event stopTracker = new Event(stopDate.getTime(), Event.Action.STOP_TRACKING, vevent.getUID());
             newEvents.add(stopTracker);
-            Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR);
+            Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR, vevent.getUID());
             newEvents.add(stopOperator);
 
-            Logger.info("Created recording event:  Start: " + startDate.toString() + "  End: " + stopDate.toString());
+            Logger.info("Created recording event:  Start: " + startDate.toString() +
+                        "  End: " + stopDate.toString() + "  UID: " + vevent.getUID());
           }
         }
         events.clear();                             // clear schedule 
@@ -228,6 +232,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
    * Commands
    */
   public void start() {
+     metrics.reset();
      startTracking();
      startOperator();
   }
@@ -235,6 +240,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   public void stop() {
      stopOperator();
      stopTracking();
+     metrics.pause();
+     metrics.save();
   }
   
   public void status() {
@@ -276,15 +283,22 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     void fireEvent(Event event) {
         Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
         switch (event.getAction()) {
+
           case START_TRACKING:
+            metrics.reset();
             startTracking();
             break;
+
           case STOP_TRACKING:
             stopTracking();
+            metrics.pause();
+            metrics.save(event.getUID());
             break;
+
           case START_OPERATOR:
             startOperator();
             break;
+
           case STOP_OPERATOR:
             stopOperator();
             break;

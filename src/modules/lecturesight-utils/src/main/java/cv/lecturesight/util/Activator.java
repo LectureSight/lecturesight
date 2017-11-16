@@ -81,6 +81,8 @@ public final class Activator implements BundleActivator {
     commands.put("osgi.command.scope", "config");
     commands.put("osgi.command.function", ConfigCommands.commands);
     context.registerService(ConfigCommands.class.getName(), commandImpl, commands);
+
+    Logger.info("Started");
   }
 
   @Override
