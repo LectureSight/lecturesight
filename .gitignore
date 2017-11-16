@@ -23,3 +23,5 @@ nb-configuration.xml
 # Ignore all temporary editor files
 .*.swp
 
+runtime/log/
+runtime/felix-cache/
