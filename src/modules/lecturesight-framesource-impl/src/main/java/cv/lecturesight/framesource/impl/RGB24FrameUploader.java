@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+import org.pmw.tinylog.Logger;
 
 public class RGB24FrameUploader implements FrameUploader {
 
@@ -53,7 +54,7 @@ public class RGB24FrameUploader implements FrameUploader {
   private BufferedImage maskImage = null;
   private ComputationRun uploadRun;
 
-  public RGB24FrameUploader(OpenCLService clService, FrameGrabber grabber) {
+  public RGB24FrameUploader(OpenCLService clService, FrameGrabber grabber, boolean inverted) {
     this.ocl = clService;
     this.grabber = grabber;
 
@@ -77,7 +78,11 @@ public class RGB24FrameUploader implements FrameUploader {
             grabber.getWidth(), grabber.getHeight());
     
     // set up conversion kernel
-    conversionK = ocl.programs().getKernel("conversions", "RGB24_RGBAUint8");
+    if (inverted) {
+       conversionK = ocl.programs().getKernel("conversions", "RGB24_RGBAUint8_Inverted");
+    } else {
+       conversionK = ocl.programs().getKernel("conversions", "RGB24_RGBAUint8");
+    }
     
     // set up mask kernel
     maskK = ocl.programs().getKernel("conversions", "apply_mask");
