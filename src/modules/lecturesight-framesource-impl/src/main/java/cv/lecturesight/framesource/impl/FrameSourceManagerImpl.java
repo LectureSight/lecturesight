@@ -227,7 +227,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       FrameSourceProvider pro = new FrameSourceProviderImpl(fs);
       componentContext.getBundleContext().registerService(FrameSourceProvider.class.getName(), pro, null);
     } catch (Exception e) {
-      Logger.error("Failed to activate FrameSourceProvider with source " + mrl, e);
+      Logger.error(e, "Failed to activate FrameSourceProvider with source " + mrl);
     }
   }
 

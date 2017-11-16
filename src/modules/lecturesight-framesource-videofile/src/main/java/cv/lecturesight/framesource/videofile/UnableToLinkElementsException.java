@@ -21,7 +21,7 @@
  */
 package cv.lecturesight.framesource.videofile;
 
-import org.gstreamer.Element;
+import org.freedesktop.gstreamer.Element;
 
 public class UnableToLinkElementsException extends Exception {
     
