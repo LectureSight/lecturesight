@@ -97,7 +97,7 @@ public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,I
       iframe.setResizable(ui.isResizeable());
       iframe.setClosable(true);
       iframe.setIconifiable(true);
-      iframe.setMaximizable(true);
+      iframe.setMaximizable(ui.isResizeable());
       iframe.addInternalFrameListener(this);
       iframe.pack();
       iframe.setVisible(true);
