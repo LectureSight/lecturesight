@@ -26,48 +26,59 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>modules/lecturesight-utils</module>
-        <module>modules/lecturesight-opencl-api</module>
-        <module>modules/lecturesight-opencl-impl</module>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-scripted</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
+        <module>modules/lecturesight-connectedcomponent-api</module>
+        <module>modules/lecturesight-connectedcomponent-impl</module>
+        <module>modules/lecturesight-decorator-color</module>
+        <module>modules/lecturesight-decorator-head</module>
+        <module>modules/lecturesight-decorator-manager</module>
+        <!--module>modules/lecturesight-decorator-person</module-->
         <module>modules/lecturesight-display-api</module>
         <module>modules/lecturesight-display-impl</module>
         <module>modules/lecturesight-framesource-api</module>
         <module>modules/lecturesight-framesource-gst</module>
         <module>modules/lecturesight-framesource-impl</module>
-        <module>modules/lecturesight-framesource-kinect</module>
+        <!--module>modules/lecturesight-framesource-kinect</module-->
         <module>modules/lecturesight-framesource-rtph264</module>
         <module>modules/lecturesight-framesource-v4l</module>
-        <!-- module>modules/lecturesight-framesource-rtph264</module -->
-        <!-- module>modules/lecturesight-framesource-videofile</module -->
-        <module>modules/lecturesight-connectedcomponent-api</module>
-        <module>modules/lecturesight-connectedcomponent-impl</module>
-        <module>modules/lecturesight-videoanalysis-api</module>
-        <module>modules/lecturesight-videoanalysis-impl</module>
-        <module>modules/lecturesight-regiontracker-api</module>
-        <module>modules/lecturesight-regiontracker-impl</module>
-        <module>modules/lecturesight-objecttracker-api</module>
-        <module>modules/lecturesight-objecttracker-impl</module>
-        <!-- module>modules/lecturesight-objecttracker-clustering</module -->
-        <module>modules/lecturesight-decorator-manager</module>
+        <module>modules/lecturesight-framesource-videofile</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
         <module>modules/lecturesight-heartbeat</module>
-        <module>modules/lecturesight-visualization</module>
-        <!-- module>modules/lecturesight-decorator-head</module -->
-        <module>modules/lecturesight-ptzcontrol-api</module>
-        <module>modules/lecturesight-ptzcontrol-onvif</module>
-        <module>modules/lecturesight-ptzcontrol-vapix</module>
-        <module>modules/lecturesight-steeringworker-api</module>
-        <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-manualpages-ui</module>
+        <module>modules/lecturesight-objecttracker-api</module>
+        <module>modules/lecturesight-objecttracker-clustering</module>
+        <module>modules/lecturesight-objecttracker-impl</module>
+        <module>modules/lecturesight-opencl-api</module>
+        <module>modules/lecturesight-opencl-impl</module>
         <module>modules/lecturesight-profile-api</module>
         <module>modules/lecturesight-profile-manager</module>
         <module>modules/lecturesight-profile-ui</module>
-        <module>modules/lecturesight-cameraoperator-api</module>
-        <module>modules/lecturesight-cameraoperator-simple</module>
-        <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
-        <module>modules/lecturesight-decorator-color</module>
-        <module>modules/lecturesight-gui-api</module>
-        <module>modules/lecturesight-gui-impl</module>
-        <!-- module>modules/lecturesight-decorator-person</module -->
-        <!-- module>modules/lecturesight-cameraoperator-impl</module -->
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-dummy</module>
+        <module>modules/lecturesight-ptzcontrol-onvif</module>
+        <module>modules/lecturesight-ptzcontrol-vapix</module>
+        <module>modules/lecturesight-regiontracker-api</module>
+        <!--module>modules/lecturesight-regiontracker-impl</module-->
+        <module>modules/lecturesight-scheduler</module>
+        <module>modules/lecturesight-scripting-api</module>
+        <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-script-utils</module>
+        <!--module>modules/lecturesight-setup-ui</module-->
+        <module>modules/lecturesight-steeringworker-absolutemove</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-videoanalysis-api</module>
+        <!--module>modules/lecturesight-videoanalysis-impl</module-->
+        <module>modules/lecturesight-videoanalysis-templ</module>
+        <module>modules/lecturesight-visualization</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-over-ip-service</module>
+        <module>modules/wulff-visca-service</module>
       </modules>      
     </profile>
     
@@ -324,9 +335,21 @@
         <enabled>true</enabled>
       </releases>
     </repository>
-    
-    <!-- Manchesters own local Repo -->
+
     <repository>
+      <id>lecturesight</id>
+      <name>LectureSightRepo</name>
+      <url>http://nexus.virtuos.uos.de:8081/nexus/content/repositories/lecturesight-3rd-party/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+
+    <!-- Manchesters own local Repo -->
+    <!--repository>
       <id>man-mtt</id>
       <name>manchester-mtt</name>
       <url>http://garnier.rcs.manchester.ac.uk:8081/nexus/content/repositories/man-mtt</url>
@@ -336,7 +359,7 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository>
+    </repository-->
     
     <!-- blackpad often breaks build -->
     <repository>
