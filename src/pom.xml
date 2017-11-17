@@ -34,7 +34,7 @@
         <module>modules/lecturesight-decorator-color</module>
         <module>modules/lecturesight-decorator-head</module>
         <module>modules/lecturesight-decorator-manager</module>
-        <!--module>modules/lecturesight-decorator-person</module-->
+        <module>modules/lecturesight-decorator-person</module>
         <module>modules/lecturesight-display-api</module>
         <module>modules/lecturesight-display-impl</module>
         <module>modules/lecturesight-framesource-api</module>
