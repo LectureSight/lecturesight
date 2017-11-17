@@ -61,7 +61,7 @@
         <module>modules/lecturesight-ptzcontrol-onvif</module>
         <module>modules/lecturesight-ptzcontrol-vapix</module>
         <module>modules/lecturesight-regiontracker-api</module>
-        <!--module>modules/lecturesight-regiontracker-impl</module-->
+        <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-scheduler</module>
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-scripting-stub</module>
