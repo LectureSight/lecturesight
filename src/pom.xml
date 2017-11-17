@@ -336,20 +336,8 @@
       </releases>
     </repository>
 
-    <repository>
-      <id>lecturesight</id>
-      <name>LectureSightRepo</name>
-      <url>http://nexus.virtuos.uos.de:8081/nexus/content/repositories/lecturesight-3rd-party/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-
     <!-- Manchesters own local Repo -->
-    <!--repository>
+    <repository>
       <id>man-mtt</id>
       <name>manchester-mtt</name>
       <url>http://garnier.rcs.manchester.ac.uk:8081/nexus/content/repositories/man-mtt</url>
@@ -359,7 +347,7 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository-->
+    </repository>
     
     <!-- blackpad often breaks build -->
     <repository>
