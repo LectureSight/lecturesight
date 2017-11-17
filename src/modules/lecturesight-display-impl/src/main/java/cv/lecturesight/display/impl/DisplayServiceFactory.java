@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.display.impl;
 
+import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.opencl.OpenCLService;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -34,7 +35,8 @@ public class DisplayServiceFactory implements ServiceFactory {
 
   private OpenCLService ocl;
   BundleContext bundleContext;
-  
+  DisplayService displayService;
+
   Map<DisplayRegistrationImpl, DisplayImpl> displays = new HashMap<DisplayRegistrationImpl, DisplayImpl>();
 
   public DisplayServiceFactory(BundleContext bc) {
@@ -50,14 +52,17 @@ public class DisplayServiceFactory implements ServiceFactory {
     commands.put("osgi.command.function", DisplayCommands.commands);
     bundleContext.registerService(DisplayCommands.class.getName(), commandImpl, commands);
   }
-  
+
   public void deactivate() {
     Logger.info("Deactivated");
   }
 
   @Override
   public Object getService(Bundle bundle, ServiceRegistration registration) {
-    return new DisplayServiceImpl(ocl, this);
+    if (displayService == null) {
+      displayService = new DisplayServiceImpl(ocl, this);
+    }
+    return displayService;
   }
 
   @Override

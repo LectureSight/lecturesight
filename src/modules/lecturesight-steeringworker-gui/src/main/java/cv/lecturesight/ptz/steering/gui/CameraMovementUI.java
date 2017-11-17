@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.ptz.steering.gui;
 
+import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import javax.swing.JPanel;
@@ -31,18 +32,21 @@ public class CameraMovementUI implements UserInterface {
 
   @Reference
   CameraSteeringWorker worker;
-  
+  @Reference
+  DisplayService dsps;
+
   private CameraControlPanel controlPanel;
-  
+
   protected void activate(ComponentContext cc) {
-    controlPanel = new CameraControlPanel(worker);
+    controlPanel = new CameraControlPanel(this, worker);
+    dsps.addRegistrationListener(controlPanel);
     worker.addUISlave(controlPanel);
   }
 
   protected void deactivate(ComponentContext cc) {
     worker.removeUISlave(controlPanel);
   }
-  
+
   @Override
   public JPanel getPanel() {
     return controlPanel;
@@ -55,6 +59,6 @@ public class CameraMovementUI implements UserInterface {
 
   @Override
   public boolean isResizeable() {
-    return true;
+    return false;
   }
 }
