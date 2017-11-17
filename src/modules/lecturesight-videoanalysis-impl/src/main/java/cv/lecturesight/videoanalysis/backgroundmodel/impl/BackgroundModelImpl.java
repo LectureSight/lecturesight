@@ -47,7 +47,7 @@ import org.pmw.tinylog.Logger;
 @Service()
 @Properties({
 @Property(name="osgi.command.scope", value="bgmodel"),
-@Property(name="osgi.command.function", value={"reset"})  
+@Property(name="osgi.command.function", value={"reset"})
 })
 public class BackgroundModelImpl implements BackgroundModel {
 
@@ -83,7 +83,7 @@ public class BackgroundModelImpl implements BackgroundModel {
     // allocate gpu buffers
     background = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     diffMap = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    updateMap = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    updateMap = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     bgBuffer = new CLImageDoubleBuffer(
             ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]),
             ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1])
@@ -165,7 +165,7 @@ public class BackgroundModelImpl implements BackgroundModel {
     @Override
     public void launch(CLQueue queue) {
       bgBuffer.swap();
-      updateK.setArgs(input, bgBuffer.last(), updateMap, background, 
+      updateK.setArgs(input, bgBuffer.last(), updateMap, background,
               bgBuffer.current(), config.getFloat(Constants.PROPKEY_UPDATE_ALPHA));
       updateK.enqueueNDRange(queue, workDim);
     }
@@ -175,5 +175,5 @@ public class BackgroundModelImpl implements BackgroundModel {
       ocl.castSignal(SIG_done);
     }
   }
-  
+
 }

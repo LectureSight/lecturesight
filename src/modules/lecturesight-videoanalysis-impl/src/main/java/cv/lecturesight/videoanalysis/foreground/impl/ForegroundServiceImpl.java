@@ -50,13 +50,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.pmw.tinylog.Logger;
 
 /** Foreground Service Implementation
- * 
+ *
  * This foreground service constructs the foreground map by combining results
  * from the background subtraction and the inter-frame change detection. For
  * each pixel that changed since the last frame it is decided if it became fore-
  * ground or background, the corresponding pixel is added to or removed from the
- * foreground map accordingly. Foreground regions are labeled, small regions 
- * are removed. The number of pixels that changed in each blob is counted, if 
+ * foreground map accordingly. Foreground regions are labeled, small regions
+ * are removed. The number of pixels that changed in each blob is counted, if
  * this number is below a threshold the blob is 'aged'. This way inactive blobs
  * disappear after a certain period of time.
  *
@@ -65,36 +65,36 @@ import org.pmw.tinylog.Logger;
 @Service()
 @Properties({
 @Property(name="osgi.command.scope", value="fg"),
-@Property(name="osgi.command.function", value={"reset"})  
+@Property(name="osgi.command.function", value={"reset"})
 })
 public class ForegroundServiceImpl implements ForegroundService {
 
   // collection of this services signals
   private EnumMap<ForegroundService.Signal, OCLSignal> signals =
           new EnumMap<ForegroundService.Signal, OCLSignal>(ForegroundService.Signal.class);
-    
+
   @Reference
   private Configuration config;             // this services configuration
-  
+
   @Reference
   private OpenCLService ocl;                // OpenCL service
-  
+
   @Reference
   private DisplayService dsps;              // display service
-  
+
   @Reference
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
-  
+
   @Reference
   private BackgroundModel bgmodel;          // background model service
-  
+
   @Reference
   private ChangeDetector changedetect;      // change detection service
-  
+
   @Reference
   private ConnectedComponentService ccs;    // connected component analysis service
-  
+
   private CLImage2D change;                 // output of change detection
   private CLImage2D bgdiff;                 // output of background subtraction
   private CLImage2D updateMap;              // working buffer indicating pixels to add/remove
@@ -108,13 +108,13 @@ public class ForegroundServiceImpl implements ForegroundService {
   private int[] workDim;                    // dimensions of buffers
   private ConnectedComponentLabeler ccl;    // connected component analyzer
   private OCLSignal ccl_START, ccl_DONE;    // connected component analyzer signals
-  
+
 
   /** Activation method of this service. Sets up data structures, components
    *  and signals.
-   * 
+   *
    * @param ComponentContext
-   * @throws Exception 
+   * @throws Exception
    */
   protected void activate(ComponentContext cc) throws Exception {
     // create signals
@@ -125,24 +125,24 @@ public class ForegroundServiceImpl implements ForegroundService {
     fsrc = fsp.getFrameSource();
     change = changedetect.getChangeMapDilated();
     bgdiff = bgmodel.getDifferenceMap();
-    
+
     // input image dimensions
-    workDim = new int[]{(int) change.getWidth(), (int) change.getHeight()};       
+    workDim = new int[]{(int) change.getWidth(), (int) change.getHeight()};
 
     // allocate working buffers
     updateMap = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    fgUpdated = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    fgUpdated = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     fgBuffer = new CLImageDoubleBuffer(
-            ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]),
-            ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]));
+            ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]),
+            ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]));
     activity = ocl.context().createIntBuffer(Usage.InputOutput, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1);
     activity_ratio = ocl.context().createFloatBuffer(Usage.InputOutput, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1);
     activities = new int[config.getInt(Constants.PROPKEY_CCL_MAXBLOBS)+1];
 
     reset();    // initialize working buffers
-    
+
     // create connected component analyzer on foreground map
-    ccl = ccs.createLabeler(fgUpdated, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS), 
+    ccl = ccs.createLabeler(fgUpdated, config.getInt(Constants.PROPKEY_CCL_MAXBLOBS),
             config.getInt(Constants.PROPKEY_CCL_MINSIZE), config.getInt(Constants.PROPKEY_CCL_MAXSIZE));
     ccl_START = ccl.getSignal(ConnectedComponentLabeler.Signal.START);
     ccl_DONE  = ccl.getSignal(ConnectedComponentLabeler.Signal.DONE);
@@ -161,10 +161,10 @@ public class ForegroundServiceImpl implements ForegroundService {
   }
 
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
-  /** Register displays if configured 
-   * 
+  /** Register displays if configured
+   *
    */
-  private void registerDisplays() {    
+  private void registerDisplays() {
     dsps.registerDisplay(Constants.WINDOWNAME_UPDATEMAP, updateMap, signals.get(Signal.DONE_ADDSUB));
     dsps.registerDisplay(Constants.WINDOWNAME_FOREGROUNDMAP, fgUpdated, signals.get(Signal.DONE_CLEANING));
   }
@@ -185,7 +185,7 @@ public class ForegroundServiceImpl implements ForegroundService {
   public CLImage2D getForegroundMap() {
     return fgUpdated;
   }
-  
+
   @Override
   public CLImageDoubleBuffer getForegroundWorkingBuffer() {
     return fgBuffer;
@@ -195,22 +195,22 @@ public class ForegroundServiceImpl implements ForegroundService {
   public ConnectedComponentLabeler getLabeler() {
     return ccl;
   }
-  
+
   @Override
   public BufferedImage getForegroundMapHost() {
     return fgMapHost;
   }
-  
+
   public int getActivity(int id) {
-    return activities[id+1];              
+    return activities[id+1];
   }
   //</editor-fold>
-  
+
   /** Resets all working buffers of this service.
-   * 
+   *
    */
   public void reset() {
-    ocl.utils().setValues(0, 0, workDim[0], workDim[1], updateMap, 0);           
+    ocl.utils().setValues(0, 0, workDim[0], workDim[1], updateMap, 0);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], fgUpdated, 0);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], (CLImage2D) fgBuffer.current(), 0);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], (CLImage2D) fgBuffer.last(), 0);
@@ -219,8 +219,8 @@ public class ForegroundServiceImpl implements ForegroundService {
 
   /** Run that computes the update map and performs the update of the foreground
    *  map. This Run is launched by the signal barrier listening to the change
-   *  detection and background subtraction. Casts signal DONE_ADDSUB on completion. 
-   * 
+   *  detection and background subtraction. Casts signal DONE_ADDSUB on completion.
+   *
    */
   private class UpdateRun implements ComputationRun {
 
@@ -237,30 +237,30 @@ public class ForegroundServiceImpl implements ForegroundService {
     @Override
     public void launch(CLQueue queue) {
       fgBuffer.swap();                                          // swap working buffer pointers
-      
+
       computeAddSubMaskK.setArgs(change, bgdiff, updateMap);    // compute update map
       computeAddSubMaskK.enqueueNDRange(queue, workDim);
-      
+
       updateForegroundK.setArgs(updateMap, fgBuffer.last());    // perform foreground mask update
       updateForegroundK.enqueueNDRange(queue, workDim);
-      
+
       // horizontal phantom erosion left -> right
-      erode_FGBG_lr.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
+      erode_FGBG_lr.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(),
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
       erode_FGBG_lr.enqueueNDRange(queue, erodeDimHorizontal);
-      
+
       // horizontal phantom erosion right -> left
-      erode_FGBG_rl.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
+      erode_FGBG_rl.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(),
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getWidth());
       erode_FGBG_rl.enqueueNDRange(queue, erodeDimHorizontal);
-      
+
       // vertical phantom erosion top -> bottom
-      erode_FGBG_tb.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(), 
+      erode_FGBG_tb.setArgs(fsrc.getImage(), fgBuffer.last(), fgBuffer.current(),
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
       erode_FGBG_tb.enqueueNDRange(queue, erodeDimVertical);
-      
+
       // vertical phantom erosion bottom -> top
-      erode_FGBG_bt.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(), 
+      erode_FGBG_bt.setArgs(fsrc.getImage(), fgBuffer.current(), fgBuffer.last(),
               config.getInt(Constants.PROPKEY_PHANTOMDECAY_THRESH), fsrc.getHeight());
       erode_FGBG_bt.enqueueNDRange(queue, erodeDimVertical);
     }
@@ -268,15 +268,15 @@ public class ForegroundServiceImpl implements ForegroundService {
     @Override
     public void land() {
       ccl.setInput((CLImage2D) fgBuffer.last());                // update input pointer for CCA
-      ocl.castSignal(SIG_done);                                 // cast completion signal 
+      ocl.castSignal(SIG_done);                                 // cast completion signal
       ocl.castSignal(ccl_START);                                // trigger CCA
     }
   }
 
   /** Run that removes small blobs and ages inactive blobs in the foreground mask.
    *  This Run is launched when the connected component analysis is done. Casts
-   *  signal DONE_CLEANING on completion. 
-   * 
+   *  signal DONE_CLEANING on completion.
+   *
    */
   private class MaskCleanRun implements ComputationRun {
 
@@ -291,7 +291,7 @@ public class ForegroundServiceImpl implements ForegroundService {
     CLImage2D bgUpdateMask = bgmodel.getUpdateMap();
     IntBuffer activityH;
     FloatBuffer ratiosH;
-    
+
     {
       resetBuffer.setArgs(activity, 0);     // parameters for reset kernel can be set once
     }
@@ -306,7 +306,7 @@ public class ForegroundServiceImpl implements ForegroundService {
       fgActRatioK.setArgs(activity, ccl.getSizeBuffer(), activity_ratio);                                 // compute activity activity_ratio
       fgActRatioK.enqueueNDRange(queue, bufferDim);
       fgDecayK.setArgs(fgBuffer.last(), fgBuffer.current(), fgUpdated, ccl.getLabelBuffer(),              // refresh/age blobs
-              activity_ratio, config.getFloat(Constants.PROPKEY_DECAY_THRESHRATIO), 
+              activity_ratio, config.getFloat(Constants.PROPKEY_DECAY_THRESHRATIO),
               config.getInt(Constants.PROPKEY_DECAY_ALPHA), workDim[0]);
       fgDecayK.enqueueNDRange(queue, workDim);
       ocl.utils().copyImage(0, 0, workDim[0], workDim[1], fgUpdated, 0, 0, bgUpdateMask);
