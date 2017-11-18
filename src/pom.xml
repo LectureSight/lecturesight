@@ -325,11 +325,11 @@
       </releases>
     </repository>
     
-    <!-- Manchesters own local Repo -->
+    <!-- v4l4j -->
     <repository>
-      <id>man-mtt</id>
-      <name>manchester-mtt</name>
-      <url>http://garnier.rcs.manchester.ac.uk:8081/nexus/content/repositories/man-mtt</url>
+      <id>lecturesight-3rd-party</id>
+      <name>LectureSight 3rd Party</name>
+      <url>http://nexus.opencast.org/nexus/content/repositories/lecturesight-3rd-party</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
