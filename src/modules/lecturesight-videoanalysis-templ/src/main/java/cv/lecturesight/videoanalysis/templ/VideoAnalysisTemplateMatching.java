@@ -115,6 +115,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int[] region_headpos;
 
   int numTargets = 0;
+  int targetSeq = 1;
+
   Target[] targets;
 
   int[] updateBuffer;
@@ -333,21 +335,37 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   class Target {
 
     int id = -1;
+    int seq = -1;
+
+    // Initial position
+    int first_x, first_y;
+
+    // Current position
     int x, y;
     int vx, vy;
     double vt;
+
+    // Max distance moved
+    double max_vt = 0;
+
     long first_seen = 0;
     long time = 0;
-    long last_move = 0;
-    int matchscore = 0;
+
+    long last_move = 0;  // Time that the object last moved
+    long last_match = 0; // Time that the object last matched the template
+    int matchscore = 0;  // Last match score
+
     Box searchbox;
     Box updatebox;
     
     TrackerObject to;   // TrackerObject repreenting this target 
 
     public Target(int x, int y) {
+      this.seq = targetSeq++;
       this.x = x;
       this.y = y;
+      this.first_x = x;
+      this.first_y = y;
       int ht = TARGET_SIZE / 2;
       this.searchbox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
       this.updatebox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
@@ -449,6 +467,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   }
 
   void discardTarget(Target t) {
+    Logger.debug("Discarding target id=" + t.id);
     if (targets[t.id - 1] == t) {
       targets[t.id - 1] = null;
       t.id = -1;
@@ -464,9 +483,19 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         t.vx = -(t.x - x);
         t.vy = -(t.y - y);
         t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
+
+        // Maximum distance moved from point of origin
+        double vt_origin = Math.sqrt(Math.pow(x - t.first_x, 2) + Math.pow(y - t.first_y, 2));
+        if (vt_origin > t.max_vt) {
+          t.max_vt = vt_origin;
+        }
         
         if ((t.vt > object_move_threshold) && (match > object_match_threshold)) {
           t.last_move = System.currentTimeMillis();
+        }
+
+        if (match > object_match_threshold) {
+          t.last_match = System.currentTimeMillis();
         }
         
         t.x = x;
@@ -510,10 +539,15 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
          long target_age = now - t.first_seen;
          long target_dormant = now - t.last_move;
          int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max( Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
-         Logger.trace("discard? id=" + t.id + " vt=" + t.vt + " match=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+
+         if ((t.max_vt > 15) && (t.matchscore > object_match_threshold)) {
+           dormant_scaled = 60000;
+         }
+
+         Logger.debug("discard? seq=" + t.seq + " id=" + t.id + " vt=" + t.vt + " max_vt=" + t.max_vt + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
 
          if (target_dormant > dormant_scaled) {
-           Logger.debug("Discarding dormant target id=" + t.id + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " max_vt=" +  t.max_vt + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
            discardTarget(t);
          }
       }
@@ -772,8 +806,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   }
   
   void updateTrackerObject(Target t) {
-    t.to.setId(t.id);
-    t.to.setLastSeen(t.last_move);
+    t.to.setId(t.seq);
+    if (t.last_match > t.last_move) {
+      t.to.setLastSeen(t.last_match);
+    } else {
+      t.to.setLastSeen(t.last_move);
+    }
     t.to.setProperty(ObjectTracker.OBJ_PROPKEY_CENTROID, new Position(t.x, t.y));
   }
   

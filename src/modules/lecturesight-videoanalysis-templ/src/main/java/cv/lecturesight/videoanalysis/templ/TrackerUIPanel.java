@@ -97,7 +97,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
         
         // object data
         g.setColor(Color.white);
-        g.drawString(Integer.toString(t.id), t.x - halfTargetSize, t.y - halfTargetSize - 2);
+        g.drawString(Integer.toString(t.id) + ":" + Integer.toString(t.seq), t.x - halfTargetSize, t.y - halfTargetSize - 2);
       }
     }
   }
