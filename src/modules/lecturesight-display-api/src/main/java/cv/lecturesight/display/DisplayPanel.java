@@ -23,35 +23,39 @@ import java.io.File;
 import javax.swing.JLabel;
 
 public abstract class DisplayPanel extends JLabel {
-  
+
   private CustomRenderer renderer = null;
   protected boolean isRecording = false;
   protected File recordingDir = null;
-  
+
   public abstract Dimension getImageDimension();
-  
+
   public boolean hasCustomRenderer() {
     return renderer != null;
   }
-  
+
   public CustomRenderer getCustomRenderer() {
     return renderer;
   }
-  
+
   public void setCustomRenderer(CustomRenderer renderer) {
     this.renderer = renderer;
   }
-  
+
   public Point getPositionInImage(Point p) {
     Dimension iDim = getImageDimension();
     Dimension cDim = this.getSize();
-    
-    int x = p.x - ((cDim.width - iDim.width) / 2);
-    int y = p.y - ((cDim.height - iDim.height) / 2);
-    
-    return new Point(x, y);
+    Point pout = new Point(p);
+
+    // the image is centred if cDim.x|y > iDim.x|y otherwise origins are coincident
+    if ( cDim.width > iDim.width || cDim.height > iDim.height ) {
+      pout.x -= (cDim.width - iDim.width) / 2;
+      pout.y -= (cDim.height - iDim.height) / 2;
+    }
+
+    return pout;
   }
- 
+
   public void setRecordingDir(String path) {
     String prefix = System.getProperty("recording.dir");
     if (prefix != null) {
@@ -60,11 +64,11 @@ public abstract class DisplayPanel extends JLabel {
       recordingDir = new File("record" + File.separator + path);
     }
   }
-  
+
   public File getRecordingDir() {
     return recordingDir;
   }
-  
+
   public boolean isRecording() {
     return isRecording;
   }
