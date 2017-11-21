@@ -21,7 +21,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
   Font font = new Font("Monospaced", Font.PLAIN, 10);
   Font smallFont = new Font("Monospaced", Font.PLAIN, 8);
   long lastFrame;
-  DecimalFormat df = new DecimalFormat("#.00", DecimalFormatSymbols.getInstance(Locale.US));
+  DecimalFormat df = new DecimalFormat("#.0", DecimalFormatSymbols.getInstance(Locale.US));
   final int FPS_SAMPLES = 30;
   double[] frameTime = new double[FPS_SAMPLES];
   int sample_i = 0;
@@ -78,24 +78,24 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
         int pos_y = t.y;
         int halfTargetSize = parent.TARGET_SIZE / 2;
                 
-        // change 
+        // change (distance from previous position)
         g.setColor(Color.yellow);
         g.drawRect(t.updatebox.x, t.updatebox.y, t.updatebox.width(), t.updatebox.height());
         g.drawLine(pos_x, pos_y, pos_x+3*t.vx, pos_y+2*t.vy);
-        g.drawString(df.format(t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 13);
+        g.drawString(Integer.toString((int) t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 13);
         
         // search box
         g.setColor(Color.cyan);
         g.drawRect(t.searchbox.x, t.searchbox.y, t.searchbox.width(), t.searchbox.height());
         
-        // tempalte match
+        // template match
         g.setColor(Color.green);
         g.drawRect(pos_x - halfTargetSize, pos_y - halfTargetSize, parent.TARGET_SIZE, parent.TARGET_SIZE);
         g.drawString(Integer.toString(t.matchscore), t.x + halfTargetSize + 6, t.y - halfTargetSize + 6);
       
         drawDiamond(g, pos_x, pos_y);
         
-        // object data
+        // object data (id, sequence)
         g.setColor(Color.white);
         g.drawString(Integer.toString(t.id) + ":" + Integer.toString(t.seq), t.x - halfTargetSize, t.y - halfTargetSize - 2);
       }
