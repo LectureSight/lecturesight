@@ -345,20 +345,20 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     int vx, vy;
     double vt;
 
-    // Max distance moved
+    // Max distance moved from point of origin in the target's lifetime
     double max_vt = 0;
 
-    long first_seen = 0;
+    long first_seen = 0; // Time that the target was first seen
     long time = 0;
 
-    long last_move = 0;  // Time that the object last moved
-    long last_match = 0; // Time that the object last matched the template
+    long last_move = 0;  // Time that the target last moved
+    long last_match = 0; // Time that the target last matched the template
     int matchscore = 0;  // Last match score
 
     Box searchbox;
     Box updatebox;
     
-    TrackerObject to;   // TrackerObject repreenting this target 
+    TrackerObject to;    // TrackerObject repreenting this target
 
     public Target(int x, int y) {
       this.seq = targetSeq++;
@@ -544,10 +544,10 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
            dormant_scaled = 60000;
          }
 
-         Logger.debug("discard? seq=" + t.seq + " id=" + t.id + " vt=" + t.vt + " max_vt=" + t.max_vt + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+         Logger.debug("discard? seq=" + t.seq + " id=" + t.id + " vt=" + Integer.toString((int) t.vt) + " max_vt=" + Integer.toString((int) t.max_vt) + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
 
          if (target_dormant > dormant_scaled) {
-           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " max_vt=" +  t.max_vt + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " max_vt=" + Integer.toString((int) t.max_vt) + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
            discardTarget(t);
          }
       }
