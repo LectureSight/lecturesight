@@ -81,7 +81,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
         // change (distance from previous position)
         g.setColor(Color.yellow);
         g.drawRect(t.updatebox.x, t.updatebox.y, t.updatebox.width(), t.updatebox.height());
-        g.drawLine(pos_x, pos_y, pos_x+3*t.vx, pos_y+2*t.vy);
+        g.drawLine(pos_x, pos_y, pos_x + t.vx, pos_y + t.vy);
         g.drawString(Integer.toString((int) t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 13);
         
         // search box

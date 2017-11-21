@@ -342,11 +342,13 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     // Current position
     int x, y;
+
+    // Offset from last position
     int vx, vy;
     double vt;
 
     // Max distance moved from point of origin in the target's lifetime
-    double max_vt = 0;
+    double origin_vt = 0;
 
     long first_seen = 0; // Time that the target was first seen
     long time = 0;
@@ -450,6 +452,10 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     Logger.info("Activated.");
   }
 
+  protected void deactivate(ComponentContext cc) throws Exception {
+    Logger.info("Deactivated");
+  }
+
   int addTarget(Target t) {
     if (numTargets == MAX_TARGETS) {
       Logger.debug("Maximum number of targets exceeded; ignore additional target");
@@ -478,16 +484,27 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   }
 
   void updateTarget(int id, int x, int y, int match) {
+
     for (Target t : targets) {
       if (t != null && t.id == id) {
+
         t.vx = -(t.x - x);
         t.vy = -(t.y - y);
         t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
 
+        Logger.trace("Updating target id=" + id + " seq=" + t.seq + " time=" + t.time + " lastx=" + t.x + " lasty=" + t.y + " newx=" + x + " newy=" + y + " vt=" + t.vt + " match=" + match);
+
+        if (t.time == 3) {
+          t.first_x = x;
+          t.first_y = y;
+        }
+
         // Maximum distance moved from point of origin
-        double vt_origin = Math.sqrt(Math.pow(x - t.first_x, 2) + Math.pow(y - t.first_y, 2));
-        if (vt_origin > t.max_vt) {
-          t.max_vt = vt_origin;
+        if (t.time > 3) {
+          double vt_origin = Math.sqrt(Math.pow(x - t.first_x, 2) + Math.pow(y - t.first_y, 2));
+          if (vt_origin > t.origin_vt) {
+            t.origin_vt = vt_origin;
+          }
         }
         
         if ((t.vt > object_move_threshold) && (match > object_match_threshold)) {
@@ -507,11 +524,16 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         t.searchbox.y = y-ht-5;
         t.searchbox.max_x = x+ht+5;
         t.searchbox.max_y = y+ht+5;
-        double vfactor = 3.0;
-        if (t.vx < 0) t.searchbox.x += vfactor*t.vx;
-        if (t.vx > 0) t.searchbox.max_x += vfactor*t.vx;
-        if (t.vy < 0) t.searchbox.y += vfactor*t.vy;
-        if (t.vy > 0) t.searchbox.max_y += vfactor*t.vy;
+
+        // Amount to expand search box by relative to movement. Lateral movement more likely
+        double vxfactor = 2.5;
+        double vyfactor = 1.5;
+
+        if (t.vx < 0) t.searchbox.x += vxfactor*t.vx;
+        if (t.vx > 0) t.searchbox.max_x += vxfactor*t.vx;
+
+        if (t.vy < 0) t.searchbox.y += vyfactor*t.vy;
+        if (t.vy > 0) t.searchbox.max_y += vyfactor*t.vy;
         
         updateTrackerObject(t);
         
@@ -533,6 +555,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
    * Longer-lived objects are allowed to be dormant for longer before being discarded.
    */
   void discardInactiveTargets() {
+
     long now = System.currentTimeMillis();
     for (Target t : targets) {
       if (t != null) {
@@ -540,14 +563,14 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
          long target_dormant = now - t.last_move;
          int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max( Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
 
-         if ((t.max_vt > 15) && (t.matchscore > object_match_threshold)) {
+         if ((t.origin_vt > 18) && (t.matchscore > object_match_threshold)) {
            dormant_scaled = 60000;
          }
 
-         Logger.debug("discard? seq=" + t.seq + " id=" + t.id + " vt=" + Integer.toString((int) t.vt) + " max_vt=" + Integer.toString((int) t.max_vt) + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+         Logger.trace("discard? seq=" + t.seq + " id=" + t.id + " vt=" + Integer.toString((int) t.vt) + " origin_vt=" + Integer.toString((int) t.origin_vt) + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
 
          if (target_dormant > dormant_scaled) {
-           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " max_vt=" + Integer.toString((int) t.max_vt) + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " origin_vt=" + Integer.toString((int) t.origin_vt) + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
            discardTarget(t);
          }
       }
