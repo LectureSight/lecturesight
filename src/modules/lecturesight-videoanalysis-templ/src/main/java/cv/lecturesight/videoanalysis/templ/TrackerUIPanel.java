@@ -4,6 +4,7 @@ import cv.lecturesight.display.CustomRenderer;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.videoanalysis.templ.VideoAnalysisTemplateMatching.Target;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -50,58 +51,56 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
   public void render(Graphics g) {
 
     g.setFont(font);
-    
+
     frameTime[sample_i++] = 1000.0 / (double)(System.currentTimeMillis() - lastFrame);
     lastFrame = System.currentTimeMillis();
-    
+
     if (sample_i == FPS_SAMPLES) {
       sample_i = 0;
     }
-    
+
     if (parent.fsrc.getFrameNumber() % 15 == 0) {
       double sum = 0.0;
-      for (int i=0; i < FPS_SAMPLES; i++) {
+      for (int i = 0; i < FPS_SAMPLES; i++) {
         sum += (double)frameTime[i];
       }
       fps = sum / FPS_SAMPLES;
     }
-    
+
     g.drawString("  frame : " + Long.toString(parent.fsrc.getFrameNumber()), 3, 12);
     g.drawString("    fps : " + df.format(fps), 3, 22);
     g.drawString("targets : " + Integer.toString(parent.numTargets), 3, 32);
-    
+
     g.setFont(smallFont);
-    
+
     for (Target t : parent.targets) {
       if (t != null) {
-        int pos_x = t.x;
-        int pos_y = t.y;
         int halfTargetSize = parent.TARGET_SIZE / 2;
-                
+
         // change (distance from previous position)
         g.setColor(Color.yellow);
         g.drawRect(t.updatebox.x, t.updatebox.y, t.updatebox.width(), t.updatebox.height());
-        g.drawLine(pos_x, pos_y, pos_x + t.vx, pos_y + t.vy);
+        g.drawLine(t.x, t.y, t.x + t.vx, t.y + t.vy);
         g.drawString(Integer.toString((int) t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 13);
-        
+
         // search box
         g.setColor(Color.cyan);
         g.drawRect(t.searchbox.x, t.searchbox.y, t.searchbox.width(), t.searchbox.height());
-        
+
         // template match
         g.setColor(Color.green);
-        g.drawRect(pos_x - halfTargetSize, pos_y - halfTargetSize, parent.TARGET_SIZE, parent.TARGET_SIZE);
+        g.drawRect(t.x - halfTargetSize, t.y - halfTargetSize, parent.TARGET_SIZE, parent.TARGET_SIZE);
         g.drawString(Integer.toString(t.matchscore), t.x + halfTargetSize + 6, t.y - halfTargetSize + 6);
-      
-        drawDiamond(g, pos_x, pos_y);
-        
+
+        drawDiamond(g, t.x, t.y);
+
         // object data (id, sequence)
         g.setColor(Color.white);
         g.drawString(Integer.toString(t.id) + ":" + Integer.toString(t.seq), t.x - halfTargetSize, t.y - halfTargetSize - 2);
       }
     }
   }
-  
+
   void drawDiamond(Graphics g, int pos_x, int pos_y) {
     g.drawLine(pos_x, pos_y - 1, pos_x - 1, pos_y);
     g.drawLine(pos_x, pos_y - 1, pos_x + 1, pos_y);

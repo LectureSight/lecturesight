@@ -1,12 +1,5 @@
 package cv.lecturesight.videoanalysis.templ;
 
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLDevice;
-import com.nativelibs4java.opencl.CLEvent;
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLKernel;
-import com.nativelibs4java.opencl.CLMem;
-import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.cca.ConnectedComponentService;
 import cv.lecturesight.display.DisplayService;
@@ -22,11 +15,15 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.Position;
-import java.nio.IntBuffer;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLDevice;
+import com.nativelibs4java.opencl.CLEvent;
+import com.nativelibs4java.opencl.CLImage2D;
+import com.nativelibs4java.opencl.CLKernel;
+import com.nativelibs4java.opencl.CLMem;
+import com.nativelibs4java.opencl.CLQueue;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -34,6 +31,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
+
+import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 @Component(name = "lecturesight.videoanalysis", immediate = true)
 @Service
@@ -91,7 +94,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   CLKernel update_templates_K;
   CLKernel match_templates_K;
 
-  // -- GPU Buffers -- 
+  // -- GPU Buffers --
   CLImage2D input_rgb;
   CLImage2D input_rgb_last;
   CLImage2D change;
@@ -179,7 +182,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   class TrackingPreparationRun implements ComputationRun {
 
-    IntBuffer weights_host, centroids_host, headpos_host, bboxes_host;
+    IntBuffer weights_host;
+    IntBuffer centroids_host;
+    IntBuffer headpos_host;
+    IntBuffer bboxes_host;
+
     final int[] regionsDim = {MAX_REGIONS};
 
     {
@@ -233,7 +240,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
               if (searchBox.includes(t.x, t.y)) {
 
                 // UPDATE TARGET
-                
+
                 t.updatebox.x = region_centroids[i * 2] - TARGET_SIZE / 2;
                 t.updatebox.y = changeBox.y;
                 t.updatebox.max_x = t.updatebox.x + TARGET_SIZE;
@@ -256,7 +263,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
               }
             }
           } else if (updated.isEmpty()) {
-            if (changeBox.width() > TARGET_SIZE/2 && changeBox.height() > TARGET_SIZE/2) {
+            if (changeBox.width() > TARGET_SIZE / 2 && changeBox.height() > TARGET_SIZE / 2) {
               Target new_t = new Target(changeBox.x + changeBox.width() / 2, changeBox.y + TARGET_SIZE / 2);
               int idx = addTarget(new_t);
             }
@@ -271,7 +278,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   class TrackingUpdateRun implements ComputationRun {
 
-    int   numTemplUpdates, numTemplMatches;
+    int numTemplUpdates;
+    int numTemplMatches;
     int[] updateDim = new int[]{0, 32};
     IntBuffer output_host;
 
@@ -317,15 +325,15 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     public void land() {
       // update targets that were matched
       if (numTemplMatches > 0) {
-        int [] results = new int[numTemplMatches*4];
+        int [] results = new int[numTemplMatches * 4];
         output_host.get(results);
-        for (int i=0; i < numTemplMatches; i++) {
-          int idx = i*4;
-          int id = results[idx]+1;    // index --> ID
-          updateTarget(id, results[idx+1], results[idx+2], results[idx+3]);   
+        for (int i = 0; i < numTemplMatches; i++) {
+          int idx = i * 4;
+          int id = results[idx] + 1;    // index --> ID
+          updateTarget(id, results[idx + 1], results[idx + 2], results[idx + 3]);
         }
       }
-      
+
       incrementTargetLifetimes();
       discardInactiveTargets();
       ocl.castSignal(sig_VA_DONE);
@@ -338,13 +346,16 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     int seq = -1;
 
     // Initial position
-    int first_x, first_y;
+    int first_x;
+    int first_y;
 
     // Current position
-    int x, y;
+    int x;
+    int y;
 
     // Offset from last position
-    int vx, vy;
+    int vx;
+    int vy;
     double vt;
 
     // Max distance moved from point of origin in the target's lifetime
@@ -359,10 +370,10 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     Box searchbox;
     Box updatebox;
-    
+
     TrackerObject to;    // TrackerObject repreenting this target
 
-    public Target(int x, int y) {
+    Target(int x, int y) {
       this.seq = targetSeq++;
       this.x = x;
       this.y = y;
@@ -379,11 +390,14 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   class Box {
 
-    int x, y, max_x, max_y;
+    int x;
+    int y;
+    int max_x;
+    int max_y;
 
-    public Box(int min_x, int min_y, int max_x, int max_y) {
-      this.x = min_x;
-      this.y = min_y;
+    Box(int x, int y, int max_x, int max_y) {
+      this.x = x;
+      this.y = y;
       this.max_x = max_x;
       this.max_y = max_y;
     }
@@ -506,7 +520,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
             t.origin_vt = vt_origin;
           }
         }
-        
+
         if ((t.vt > object_move_threshold) && (match > object_match_threshold)) {
           t.last_move = System.currentTimeMillis();
         }
@@ -514,11 +528,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         if (match > object_match_threshold) {
           t.last_match = System.currentTimeMillis();
         }
-        
+
         t.x = x;
         t.y = y;
         t.matchscore = match;
-        
+
         int ht = TARGET_SIZE / 2;
         t.searchbox.x = x-ht-5;
         t.searchbox.y = y-ht-5;
@@ -534,14 +548,14 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
         if (t.vy < 0) t.searchbox.y += vyfactor*t.vy;
         if (t.vy > 0) t.searchbox.max_y += vyfactor*t.vy;
-        
+
         updateTrackerObject(t);
-        
+
         break;
       }
     }
   }
-  
+
   void incrementTargetLifetimes() {
     for (Target t : targets) {
       if (t != null) {
@@ -561,7 +575,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       if (t != null) {
          long target_age = now - t.first_seen;
          long target_dormant = now - t.last_move;
-         int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max( Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
+         int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max(Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
 
          if ((t.origin_vt > 18) && (t.matchscore > object_match_threshold)) {
            dormant_scaled = 60000;
@@ -576,7 +590,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       }
     }
   }
-  
+
   int makeTargetList(int[] a, boolean filterTargets) {
     int num = 0;
     int j = 0;
@@ -586,7 +600,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       Target next = null;
       for (; j < MAX_TARGETS; j++) {
         Target t = targets[j];
-        
+
         if (t != null) {
           if (filterTargets && t.time > 0) {
             next = targets[j++];
@@ -614,19 +628,6 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     }
     return num;
   }
-  
-  void printArray(int[] a, int gap) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("[ ");
-    for (int i=0; i < a.length; i++) {
-      sb.append(Integer.toString(a[i])).append(" ");
-      if ((i+1) < a.length && (i+1) % gap == 0) {
-        sb.append("][ ");
-      }
-    }
-    sb.append("]");
-    System.out.println(sb.toString());
-  } 
 
   /**
    * Gets computation parameters from the configuration.
@@ -737,7 +738,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
       object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
       Logger.info("Setting max number of cells in objects to " + object_max_cells);
     }
-    
+
     if (object_dormant_min != config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME)) {
       object_dormant_min = config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME);
       Logger.info("Setting min time in milliseconds before discarding a target to " + object_dormant_min);
@@ -827,7 +828,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     }
     return l;
   }
-  
+
   void updateTrackerObject(Target t) {
     t.to.setId(t.seq);
     if (t.last_match > t.last_move) {
@@ -837,7 +838,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     }
     t.to.setProperty(ObjectTracker.OBJ_PROPKEY_CENTROID, new Position(t.x, t.y));
   }
-  
+
   // Console Commands __________________________________________________________
   public void reset(String[] args) {
     for (int i = 0; i < MAX_TARGETS; i++) {
