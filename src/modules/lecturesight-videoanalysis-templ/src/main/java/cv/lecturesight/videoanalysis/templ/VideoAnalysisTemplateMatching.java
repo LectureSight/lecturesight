@@ -30,7 +30,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 import java.nio.IntBuffer;
