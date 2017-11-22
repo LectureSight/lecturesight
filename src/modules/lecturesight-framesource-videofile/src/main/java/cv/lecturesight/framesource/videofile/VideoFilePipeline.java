@@ -139,7 +139,8 @@ public class VideoFilePipeline implements FrameGrabber {
       public void padAdded(Element element, Pad pad) {
         Pad peerPad = videoconvert.getStaticPad("sink");
         if (pad.getDirection() == PadDirection.SRC) {
-	  if (pad.link(peerPad) != PadLinkReturn.OK) {
+	  PadLinkReturn result = pad.link(peerPad);
+	  if ((result != PadLinkReturn.OK) && (result != PadLinkReturn.WAS_LINKED)) {
             Logger.error("Can't link decodebin to videoconvert");
           } else {
             elementsLinked = true;
