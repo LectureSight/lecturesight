@@ -22,7 +22,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
   Font font = new Font("Monospaced", Font.PLAIN, 10);
   Font smallFont = new Font("Monospaced", Font.PLAIN, 9);
   long lastFrame;
-  DecimalFormat df = new DecimalFormat("#.0", DecimalFormatSymbols.getInstance(Locale.US));
+  DecimalFormat df = new DecimalFormat("#0.0", DecimalFormatSymbols.getInstance(Locale.US));
   final int FPS_SAMPLES = 30;
   double[] frameTime = new double[FPS_SAMPLES];
   int sample_i = 0;
@@ -90,7 +90,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
         g.setColor(Color.yellow);
         g.drawRect(t.updatebox.x, t.updatebox.y, t.updatebox.width(), t.updatebox.height());
         g.drawLine(t.x, t.y, t.x + t.vx, t.y + t.vy);
-        g.drawString(Integer.toString((int) t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 13);
+        g.drawString(Integer.toString((int) t.vt), t.x + halfTargetSize + 6, t.y - halfTargetSize + 16);
 
         // search box
         g.setColor(Color.cyan);
