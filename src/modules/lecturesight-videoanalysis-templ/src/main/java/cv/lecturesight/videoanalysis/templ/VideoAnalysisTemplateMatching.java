@@ -30,6 +30,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 import java.nio.IntBuffer;
@@ -57,6 +58,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_MOVE_THRESH = "object.move.threshold";
   private final static String PROPKEY_OBJECT_MATCH_THRESH = "object.match.threshold";
   private final static String PROPKEY_OBJECT_ACTIVE_MINTIME = "object.active.min";
+  private final static String PROPKEY_OBJECT_TIMEOUT = "object.timeout";
 
   @Reference
   Configuration config;       // configuration parameters
@@ -147,9 +149,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   int object_dormant_min;
   int object_dormant_max;
   int object_match_threshold;
+  int object_timeout;
   float object_dormant_age_factor;
   int object_min_active;
   double object_move_threshold;
+  double origin_move_threshold;
 
   // GPU max workgroup size
   long gpu_maxworkgroupsize;
@@ -460,8 +464,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     CLDevice[] devices = ocl.context().getDevices();
     for (CLDevice device : devices) {
         gpu_maxworkgroupsize = device.getMaxWorkGroupSize();
-        Logger.info("Max workgroup size for OpenCL device: " + device.getVendor() + " " + device.getName() + " is " + gpu_maxworkgroupsize);
+        Logger.info("Max workgroup size for OpenCL device: {} {} is {}", device.getVendor(), device.getName(), gpu_maxworkgroupsize);
     }
+
+    // Calculate origin move threshold as 1/40th of the diagonal of the frame (approx 18 pixels for 640x360)
+    origin_move_threshold = Math.sqrt(Math.pow(fsrc.getWidth(), 2) + Math.pow(fsrc.getHeight(), 2)) / 40;
+    Logger.debug("Calculated origin move threshold is {}", (int) origin_move_threshold);
 
     Logger.info("Activated.");
   }
@@ -472,7 +480,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
   int addTarget(Target t) {
     if (numTargets == MAX_TARGETS) {
-      Logger.debug("Maximum number of targets exceeded; ignore additional target");
+      Logger.debug("Maximum number of {} targets exceeded; ignoring additional target", MAX_TARGETS);
       return -1;
     }
     for (int i = 0; i < MAX_TARGETS; i++) {
@@ -487,7 +495,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   }
 
   void discardTarget(Target t) {
-    Logger.debug("Discarding target id=" + t.id);
+    Logger.trace("Discarding target id={}", t.id);
     if (targets[t.id - 1] == t) {
       targets[t.id - 1] = null;
       t.id = -1;
@@ -502,12 +510,14 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     for (Target t : targets) {
       if (t != null && t.id == id) {
 
-        t.vx = -(t.x - x);
-        t.vy = -(t.y - y);
+        t.vx = x - t.x;
+        t.vy = y - t.y;
         t.vt = Math.sqrt(Math.pow(t.vx, 2) + Math.pow(t.vy, 2));
 
-        Logger.trace("Updating target id=" + id + " seq=" + t.seq + " time=" + t.time + " lastx=" + t.x + " lasty=" + t.y + " newx=" + x + " newy=" + y + " vt=" + t.vt + " match=" + match);
+        Logger.trace("Updating target id={} seq={} time={} last(x,y)={},{} new(x,y)={},{} vt={}  match={}",
+                     id, t.seq, t.time, t.x, t.y, x, y, (int) t.vt, match);
 
+        // Set the origin point after a few matches
         if (t.time == 3) {
           t.first_x = x;
           t.first_y = y;
@@ -521,10 +531,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
           }
         }
 
+        // Moved?
         if ((t.vt > object_move_threshold) && (match > object_match_threshold)) {
           t.last_move = System.currentTimeMillis();
         }
 
+        // Positive match?
         if (match > object_match_threshold) {
           t.last_match = System.currentTimeMillis();
         }
@@ -533,13 +545,14 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         t.y = y;
         t.matchscore = match;
 
+        // Update the search box
         int ht = TARGET_SIZE / 2;
         t.searchbox.x = x-ht-5;
         t.searchbox.y = y-ht-5;
         t.searchbox.max_x = x+ht+5;
         t.searchbox.max_y = y+ht+5;
 
-        // Amount to expand search box by relative to movement. Lateral movement more likely
+        // Amount to expand search box by relative to movement. Lateral movement more likely.
         double vxfactor = 2.5;
         double vyfactor = 1.5;
 
@@ -577,14 +590,17 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
          long target_dormant = now - t.last_move;
          int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max(Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
 
-         if ((t.origin_vt > 18) && (t.matchscore > object_match_threshold)) {
-           dormant_scaled = 60000;
+         // If the object has moved since first tracked, assume it is worth following and make the timeout much higher
+         if ((object_timeout > dormant_scaled) && (t.origin_vt > origin_move_threshold) && (t.matchscore > object_match_threshold)) {
+           dormant_scaled = object_timeout;
          }
 
-         Logger.trace("discard? seq=" + t.seq + " id=" + t.id + " vt=" + Integer.toString((int) t.vt) + " origin_vt=" + Integer.toString((int) t.origin_vt) + " matchscore=" + t.matchscore + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+         Logger.trace("Checking target target seq={} id={} origin_vt={} matchscore={} age={} dormant={} dormant_scaled={}",
+                       t.seq, t.id, (int) t.origin_vt, t.matchscore, target_age, target_dormant, dormant_scaled);
 
          if (target_dormant > dormant_scaled) {
-           Logger.debug("Discarding dormant target seq=" + t.seq + " id=" + t.id + " origin_vt=" + Integer.toString((int) t.origin_vt) + " age=" + target_age + " dormant=" + target_dormant + " dormant_scaled=" + dormant_scaled);
+           Logger.debug("Discarding target seq={} id={} origin_vt={} matchscore={} age={} dormant={} dormant_scaled={}",
+                         t.seq, t.id, (int) t.origin_vt, t.matchscore, target_age, target_dormant, dormant_scaled);
            discardTarget(t);
          }
       }
@@ -644,6 +660,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
     object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
     object_match_threshold = config.getInt(PROPKEY_OBJECT_MATCH_THRESH);
+    object_timeout = config.getInt(PROPKEY_OBJECT_TIMEOUT);
   }
 
   /**
@@ -721,52 +738,57 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   public void configurationChanged() {
     if (change_threshold != config.getInt(PROPKEY_CHANGE_THRESH)) {
       change_threshold = config.getInt(PROPKEY_CHANGE_THRESH);
-      Logger.info("Setting change threshold to " + change_threshold);
+      Logger.info("Setting change threshold to {}", change_threshold);
     }
 
     if (cell_activation_threshold != config.getInt(PROPKEY_CELL_THRESH)) {
       cell_activation_threshold = config.getInt(PROPKEY_CELL_THRESH);
-      Logger.info("Setting cell activation threshold " + cell_activation_threshold);
+      Logger.info("Setting cell activation threshold {}" , cell_activation_threshold);
     }
 
     if (object_min_cells != config.getInt(PROPKEY_OBJECT_CELLS_MIN)) {
       object_min_cells = config.getInt(PROPKEY_OBJECT_CELLS_MIN);
-      Logger.info("Setting min number of cells in objects to " + object_min_cells);
+      Logger.info("Setting min number of cells in objects to {}", object_min_cells);
     }
 
     if (object_max_cells != config.getInt(PROPKEY_OBJECT_CELLS_MAX)) {
       object_max_cells = config.getInt(PROPKEY_OBJECT_CELLS_MAX);
-      Logger.info("Setting max number of cells in objects to " + object_max_cells);
+      Logger.info("Setting max number of cells in objects to {}", object_max_cells);
     }
 
     if (object_dormant_min != config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME)) {
       object_dormant_min = config.getInt(PROPKEY_OBJECT_DORMANT_MINTIME);
-      Logger.info("Setting min time in milliseconds before discarding a target to " + object_dormant_min);
+      Logger.info("Setting min time in milliseconds before discarding a target to {} ms", object_dormant_min);
     }
 
     if (object_dormant_max != config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME)) {
       object_dormant_max = config.getInt(PROPKEY_OBJECT_DORMANT_MAXTIME);
-      Logger.info("Setting max time in milliseconds before discarding a target to " + object_dormant_max);
+      Logger.info("Setting max time in milliseconds before discarding a target to {} ms", object_dormant_max);
     }
 
     if (object_dormant_age_factor != config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR)) {
       object_dormant_age_factor = config.getFloat(PROPKEY_OBJECT_DORMANT_AGE_FACTOR);
-      Logger.info("Setting age factor for discarding a target to " + object_dormant_age_factor);
+      Logger.info("Setting age factor for discarding a target to {}", object_dormant_age_factor);
     }
 
     if (object_min_active != config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME)) {
       object_min_active = config.getInt(PROPKEY_OBJECT_ACTIVE_MINTIME);
-      Logger.info("Setting minimum time in milliseconds before an object is recognized for tracking to " + object_min_active);
+      Logger.info("Setting minimum time in milliseconds before an object is recognized for tracking to {} ms", object_min_active);
     }
 
     if (object_move_threshold != config.getDouble(PROPKEY_OBJECT_MOVE_THRESH)) {
       object_move_threshold = config.getDouble(PROPKEY_OBJECT_MOVE_THRESH);
-      Logger.info("Setting target movement threshold to " + object_move_threshold);
+      Logger.info("Setting target movement threshold to {}", object_move_threshold);
     }
 
     if (object_match_threshold != config.getInt(PROPKEY_OBJECT_MATCH_THRESH)) {
       object_match_threshold = config.getInt(PROPKEY_OBJECT_MATCH_THRESH);
-      Logger.info("Setting target template match threshold to " + object_match_threshold);
+      Logger.info("Setting target template match threshold to {}", object_match_threshold);
+    }
+
+    if (object_timeout != config.getInt(PROPKEY_OBJECT_TIMEOUT)) {
+      object_timeout = config.getInt(PROPKEY_OBJECT_TIMEOUT);
+      Logger.info("Setting target timeout to {} ms", object_timeout);
     }
   }
 
