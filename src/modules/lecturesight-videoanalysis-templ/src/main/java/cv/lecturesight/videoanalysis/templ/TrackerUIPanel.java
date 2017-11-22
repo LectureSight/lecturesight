@@ -20,7 +20,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
   Display inputDisplay;
   DisplayPanel displayPanel;
   Font font = new Font("Monospaced", Font.PLAIN, 10);
-  Font smallFont = new Font("Monospaced", Font.PLAIN, 8);
+  Font smallFont = new Font("Monospaced", Font.PLAIN, 9);
   long lastFrame;
   DecimalFormat df = new DecimalFormat("#.0", DecimalFormatSymbols.getInstance(Locale.US));
   final int FPS_SAMPLES = 30;
@@ -69,12 +69,21 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
 
     g.drawString("  frame : " + Long.toString(parent.fsrc.getFrameNumber()), 3, 12);
     g.drawString("    fps : " + df.format(fps), 3, 22);
-    g.drawString("targets : " + Integer.toString(parent.numTargets), 3, 32);
 
     g.setFont(smallFont);
 
+    StringBuilder targetList = new StringBuilder();
+
     for (Target t : parent.targets) {
       if (t != null) {
+
+        if (targetList.length() > 0) {
+          targetList.append(" ");
+          targetList.append(t.seq);
+        } else {
+          targetList.append(t.seq);
+        }
+
         int halfTargetSize = parent.TARGET_SIZE / 2;
 
         // change (distance from previous position)
@@ -99,6 +108,14 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
         g.drawString(Integer.toString(t.id) + ":" + Integer.toString(t.seq), t.x - halfTargetSize, t.y - halfTargetSize - 2);
       }
     }
+
+    g.setFont(font);
+    if (parent.numTargets > 0) {
+      g.drawString("targets : " + parent.numTargets + " (" + targetList + ")", 3, 32);
+    } else {
+      g.drawString("targets : 0", 3, 32);
+    }
+
   }
 
   void drawDiamond(Graphics g, int pos_x, int pos_y) {
