@@ -61,7 +61,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   FrameSourceProvider fsp;
   FrameSource fsrc;
   
-  List<TrackerObject> targetList;
+  List<TrackerObject> targetList = Collections.emptyList();
 
   int interval = 200;
   int target_timeout;

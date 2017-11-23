@@ -204,10 +204,12 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
     // Draw targets considered in-frame
     List<TrackerObject> targets = operator.getFramedTargets();
-    for (TrackerObject t : targets) {
-      // draw target
-      Position fpos = (Position) t.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-      drawTarget(g, fpos.getX(), fpos.getY(), trackedColor);
+    if (targets != null) {
+      for (TrackerObject t : targets) {
+        // draw target
+        Position fpos = (Position) t.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+        drawTarget(g, fpos.getX(), fpos.getY(), trackedColor);
+      }
     }
   }
 
