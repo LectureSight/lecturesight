@@ -31,6 +31,7 @@ import org.freedesktop.gstreamer.Pad;
 import org.freedesktop.gstreamer.PadDirection;
 import org.freedesktop.gstreamer.PadLinkReturn;
 import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
@@ -54,6 +55,7 @@ public class VideoFilePipeline implements FrameGrabber {
   private int width, height;    // the video frame size
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
+  private Sample lastSam;
   private boolean elementsLinked;
   private boolean error;
   private boolean playing;
@@ -203,14 +205,17 @@ public class VideoFilePipeline implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buf = appsink.pullSample().getBuffer();
+      Sample sam = appsink.pullSample();
+      Buffer buf = sam.getBuffer();
       if (buf != null) {
         lastFrame = buf.map(false);
         if (lastBuf != null) {
            // Free memory allocated for the previous buffer so we don't leak memory
            lastBuf.unmap();
+           lastSam.dispose();
         }
         lastBuf = buf;
+        lastSam = sam;
       } else {
         Logger.warn("Buffer is NULL!!");
       }
