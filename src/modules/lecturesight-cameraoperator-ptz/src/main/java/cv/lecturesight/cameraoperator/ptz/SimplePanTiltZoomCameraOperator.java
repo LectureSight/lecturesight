@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.cameraoperator.ptz;
 
-import org.pmw.tinylog.Logger;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
@@ -29,18 +28,21 @@ import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
+
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component(name = "lecturesight.cameraoperator.ptz", immediate = true)
 @Service
-public class SimplePanTiltZoomCameraOperator implements CameraOperator, ConfigurationListener {
+public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperator, ConfigurationListener {
 
   @Reference
   Configuration config;
@@ -91,21 +93,21 @@ public class SimplePanTiltZoomCameraOperator implements CameraOperator, Configur
    ** Set configuration values
    */
   private void setConfiguration() {
-    target_timeout = config.getInt(Constants.PROPKEY_TARGET_TIMEOUT);
-    tracking_timeout = config.getInt(Constants.PROPKEY_TRACKING_TIMEOUT);
-    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
-    start_pan = config.getFloat(Constants.PROPKEY_PAN);
-    start_tilt = config.getFloat(Constants.PROPKEY_TILT);
-    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
-    tilt_lock = config.getBoolean(Constants.PROPKEY_TILT_LOCK);
+    target_timeout = config.getInt(PROPKEY_TARGET_TIMEOUT);
+    tracking_timeout = config.getInt(PROPKEY_TRACKING_TIMEOUT);
+    idle_preset = config.getInt(PROPKEY_IDLE_PRESET);
+    start_pan = config.getFloat(PROPKEY_PAN);
+    start_tilt = config.getFloat(PROPKEY_TILT);
+    start_zoom = config.getFloat(PROPKEY_ZOOM);
+    tilt_lock = config.getBoolean(PROPKEY_TILT_LOCK);
     if(tilt_lock) {
       tilt_offset = 0;
     } else {
-      tilt_offset = config.getFloat(Constants.PROPKEY_TILT_OFFSET);
+      tilt_offset = config.getFloat(PROPKEY_TILT_OFFSET);
     }
-    frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
-    frame_height = config.getFloat(Constants.PROPKEY_FRAME_HEIGHT);
-    target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
+    frame_width = config.getFloat(PROPKEY_FRAME_WIDTH);
+    frame_height = config.getFloat(PROPKEY_FRAME_HEIGHT);
+    target_limit = config.getInt(PROPKEY_TARGET_LIMIT);
 
     Logger.debug("Target timeout: " + target_timeout + " ms, tracking timeout: " + tracking_timeout + " ms"
             + ", idle.preset: " + idle_preset
@@ -247,8 +249,8 @@ public class SimplePanTiltZoomCameraOperator implements CameraOperator, Configur
                   && (tilt_lock || ((target_pos.getY() < trigger_up) &&  (target_pos.getY() > trigger_down)))) {
             move = false;
             Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos
-                    + " position is inside frame trigger limits " +
-                    String.format("%.4f to %.4f, %.4f to %.4f", trigger_left, trigger_right, trigger_down, trigger_up));
+                    + " position is inside frame trigger limits "
+                    + String.format("%.4f to %.4f, %.4f to %.4f", trigger_left, trigger_right, trigger_down, trigger_up));
           }
         }
 
