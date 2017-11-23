@@ -313,6 +313,17 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   }
 
   @Override
+  public void setFrameWidth(float frame_width) {
+    // Ideally we want to actually use this to set the camera's zoom position. For now it's just for display purposes.
+    this.frame_width = frame_width;
+  }
+
+  @Override
+  public float getFrameWidth() {
+    return frame_width;
+  }
+
+  @Override
   public void movePreset(int preset) {
     camera.movePreset(preset);
   }

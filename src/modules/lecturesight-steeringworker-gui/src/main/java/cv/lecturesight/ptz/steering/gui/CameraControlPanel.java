@@ -40,8 +40,8 @@ import javax.swing.JPanel;
 
 public class CameraControlPanel extends JPanel implements UISlave, MouseListener, CustomRenderer, DisplayRegistrationListener{
 
-  private static final int DEFAULT_WIDTH = 400;
-  private static final int DEFAULT_HEIGHT = 300;
+  private static final int DEFAULT_WIDTH = 640;
+  private static final int DEFAULT_HEIGHT = 360;
 
   private CoordinatesNormalization normalizer = new CoordinatesNormalization(DEFAULT_WIDTH, DEFAULT_HEIGHT);
   private CameraSteeringWorker camera;
@@ -53,6 +53,7 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
   // graphics stuff
   private final Color targetColor = Color.yellow;
   private final Color positionColor = Color.cyan;
+  private final Color frameColor = Color.cyan;
   private final Font font = new Font("Monospaced", Font.PLAIN, 10);
 
   public CameraControlPanel(CameraMovementUI parent, CameraSteeringWorker camera) {
@@ -91,6 +92,8 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     int height = getHeight();
     int rootX = getWidth() / 2;
     int rootY = getHeight() / 2;
+
+    float frameWidth = camera.getFrameWidth();
 
     g.setFont(font);
 
@@ -153,6 +156,25 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     g.setColor(positionColor);
     drawCursor(g, apos.getX(), apos.getY(), positionColor);
     g.drawString(cameraPosStr, apos.getX() + 5, apos.getY() + 10);
+
+    // Draw left and right frame boundaries
+    g.setColor(frameColor);
+
+    NormalizedPosition frameLeft = new NormalizedPosition(aposn.getX() - frameWidth / 2, aposn.getY());
+    NormalizedPosition frameRight = new NormalizedPosition(aposn.getX() + frameWidth / 2, aposn.getY());
+
+    int frameHeight = height / 6;
+
+    if (frameLeft.getX() > -1) {
+      Position frameLeftN = normalizer.fromNormalized(frameLeft);
+      g.drawLine(frameLeftN.getX(), Math.max(frameLeftN.getY() - frameHeight / 2, 0), frameLeftN.getX(), Math.min(frameLeftN.getY() + frameHeight / 2, height-1));
+    }
+
+    if (frameRight.getX() < 1) {
+      Position frameRightN = normalizer.fromNormalized(frameRight);
+      g.drawLine(frameRightN.getX(), Math.max(frameRightN.getY() - frameHeight / 2, 0), frameRightN.getX(), Math.min(frameRightN.getY() + frameHeight / 2, height-1));
+    }
+
   }
 
   private void drawCursor(Graphics g, int x, int y, Color color) {

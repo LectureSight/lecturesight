@@ -159,6 +159,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
       Logger.debug("Set initial tracking position");
       NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
       steerer.setZoom(start_zoom);  
+      steerer.setFrameWidth(frame_width);
       steerer.setInitialPosition(neutral);
   }
 
@@ -235,8 +236,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
           if ((frame_width > 0) && !steerer.isMoving()) {
 
-		  double trigger_left  = actual_pos.getX() - (frame_width/2);
-		  double trigger_right = actual_pos.getX() + (frame_width/2);
+		  double trigger_left  = actual_pos.getX() - (frame_width/2) * 0.65;
+		  double trigger_right = actual_pos.getX() + (frame_width/2) * 0.65;
 
 		  if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
 		       move = false;
