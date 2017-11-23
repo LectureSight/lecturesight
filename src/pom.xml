@@ -28,6 +28,10 @@
       </activation>
       <modules>
         <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-ptz</module>
+        <module>modules/lecturesight-cameraoperator-scripted</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
         <module>modules/lecturesight-opencl-api</module>
         <module>modules/lecturesight-opencl-impl</module>
         <module>modules/lecturesight-display-api</module>

@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-cameraoperator-panonly</artifactId>
-  <name>LectureSight Pan-Only Camera Operator</name>
+  <artifactId>lecturesight-cameraoperator-ptz</artifactId>
+  <name>LectureSight Simple PTZ Camera Operator</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
@@ -99,7 +99,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.cameraoperator.panonly</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.cameraoperator.ptz</Bundle-SymbolicName>
           </instructions>
         </configuration>
       </plugin>
