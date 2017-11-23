@@ -22,6 +22,9 @@ import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.display.DisplayRegistration;
 import cv.lecturesight.display.DisplayRegistrationListener;
+import cv.lecturesight.objecttracker.ObjectTracker;
+import cv.lecturesight.objecttracker.TrackerObject;
+import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
@@ -36,6 +39,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 import javax.swing.JPanel;
 
 public class CameraControlPanel extends JPanel implements UISlave, MouseListener, CustomRenderer, DisplayRegistrationListener{
@@ -45,6 +49,7 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
   private CoordinatesNormalization normalizer = new CoordinatesNormalization(DEFAULT_WIDTH, DEFAULT_HEIGHT);
   private CameraSteeringWorker camera;
+  private CameraOperator operator;
 
   private Display cameraDisplay;
   private DisplayPanel cameraDisplayPanel;
@@ -52,13 +57,15 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
 
   // graphics stuff
   private final Color targetColor = Color.yellow;
+  private final Color trackedColor = Color.orange;
   private final Color positionColor = Color.cyan;
   private final Color frameColor = Color.cyan;
   private final Font font = new Font("Monospaced", Font.PLAIN, 10);
 
-  public CameraControlPanel(CameraMovementUI parent, CameraSteeringWorker camera) {
+  public CameraControlPanel(CameraMovementUI parent, CameraSteeringWorker camera, CameraOperator operator) {
     this.parent = parent;
     this.camera = camera;
+    this.operator = operator;
     this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
     try {
@@ -175,6 +182,14 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
       g.drawLine(frameRightN.getX(), Math.max(frameRightN.getY() - frameHeight / 2, 0), frameRightN.getX(), Math.min(frameRightN.getY() + frameHeight / 2, height-1));
     }
 
+    // Draw targets considered in-frame
+    List<TrackerObject> targets = operator.getFramedTargets();
+    for (TrackerObject t : targets) {
+      // draw target
+      Position fpos = (Position) t.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+      drawTarget(g, fpos.getX(), fpos.getY(), trackedColor);
+    }
+
   }
 
   private void drawCursor(Graphics g, int x, int y, Color color) {
@@ -185,6 +200,13 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     g.drawLine(x, y-4, x+4, y);
     g.drawLine(x, y+4, x-4, y);
     g.drawLine(x, y+4, x+4, y);
+    g.setColor(tmp);
+  }
+
+  private void drawTarget(Graphics g, int x, int y, Color color) {
+    Color tmp = g.getColor();
+    g.setColor(color);
+    g.fillOval(x-4, y-4, 8, 8);
     g.setColor(tmp);
   }
 

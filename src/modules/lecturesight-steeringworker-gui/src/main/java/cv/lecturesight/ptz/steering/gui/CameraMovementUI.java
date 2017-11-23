@@ -43,7 +43,7 @@ public class CameraMovementUI implements UserInterface {
   private CameraControlPanel controlPanel;
 
   protected void activate(ComponentContext cc) {
-    controlPanel = new CameraControlPanel(this, worker);
+    controlPanel = new CameraControlPanel(this, worker, operator);
     dsps.addRegistrationListener(controlPanel);
     worker.addUISlave(controlPanel);
   }

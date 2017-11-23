@@ -30,6 +30,8 @@ import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -59,6 +61,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   FrameSourceProvider fsp;
   FrameSource fsrc;
   
+  List<TrackerObject> targetList;
+
   int interval = 200;
   int target_timeout;
   int tracking_timeout;
@@ -152,6 +156,12 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
       return steerer.isSteering();
   }
 
+  // Objects framed. Being a simple operator, only 1 target is ever returned here.
+  @Override
+  public List<TrackerObject> getFramedTargets() {
+    return targetList;
+  }
+
   /*
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
@@ -203,7 +213,10 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
         if ((objs.size() > 0) && (objs.size() <= target_limit)) {
           // only track one target at a time
           target = findBestTrackedObject(objs);
+
           if (target != null) {
+             targetList = new ArrayList<TrackerObject>();
+             targetList.add(target);
              metrics.incCounter("camera.operator.target.new");
              first_tracked_time = now;
           }
@@ -254,6 +267,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
         } else {
           // Target has timed out
           target = null;
+          targetList = Collections.emptyList();
           metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
         }
       }
