@@ -76,7 +76,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   float start_pan = 0;
   float start_tilt = 0;
   float start_zoom = 0;
-  float frame_width = 0;
+  float frame_width = 0.5f;
+  float frame_trigger = 0.65f;
 
   protected void activate(ComponentContext cc) throws Exception {
 
@@ -103,13 +104,17 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     start_pan = config.getFloat(Constants.PROPKEY_PAN);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
     start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
-    frame_width = config.getFloat(Constants.PROPKEY_FRAME_WIDTH);
+    frame_width = limitRange(config.getFloat(Constants.PROPKEY_FRAME_WIDTH), 0, 2);
+    frame_trigger = limitRange(config.getFloat(Constants.PROPKEY_FRAME_TRIGGER), 0, 1);
     target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Target timeout: " + target_timeout + " ms, tracking timeout: " + tracking_timeout + " ms" +
-                 ", idle.preset: " + idle_preset +
-                 ", initial pan: " + start_pan + ", tilt: " + start_tilt + ", zoom: " + start_zoom + 
-                 ", frame.width: " + frame_width + ", target.limit: " + target_limit);
+    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} " +
+                 "frame.width: {}, frame.trigger: {}, target.limit: {}", target_timeout, tracking_timeout, idle_preset,
+                 start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
+  }
+
+  private float limitRange(float value, float min, float max) {
+    return Math.min(Math.max(value, min), max);
   }
 
   @Override
@@ -249,8 +254,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
           if ((frame_width > 0) && !steerer.isMoving()) {
 
-		  double trigger_left  = actual_pos.getX() - (frame_width/2) * 0.65;
-		  double trigger_right = actual_pos.getX() + (frame_width/2) * 0.65;
+		  double trigger_left  = actual_pos.getX() - (frame_width/2) * frame_trigger;
+		  double trigger_right = actual_pos.getX() + (frame_width/2) * frame_trigger;
 
 		  if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
 		       move = false;
