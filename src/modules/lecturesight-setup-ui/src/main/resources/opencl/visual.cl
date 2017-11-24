@@ -1,10 +1,5 @@
 const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP_TO_EDGE;
 
-#define ENCODE_INDEX(pos) pos.x + pos.y * (width+2)
-#define CLAMP_POS(pos) if (pos.x > width || pos.y > height) return
-#define BLACK (uint4)(0,0,0,255)
-#define WHITE (uint4)(255,255,255,255)
-
 __kernel void copy_red_tint
 (
   __read_only  image2d_t input,
@@ -15,7 +10,6 @@ __kernel void copy_red_tint
 )
 {
   int2 pos = (int2)(get_global_id(0), get_global_id(1));
-  int  adr = ENCODE_INDEX((int2)(pos.x+1, pos.y+1)); 
 
   uint4 input_pxl = read_imageui(input, sampler, pos);
   uint4 fgmap_pxl = read_imageui(fgmap, sampler, pos);
