@@ -65,6 +65,8 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
   float damp_pan, damp_tilt;          // movement speed dampening factors 
+  float frame_width;                  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
   boolean xflip = false;
