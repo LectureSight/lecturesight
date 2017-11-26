@@ -19,6 +19,7 @@ package cv.lecturesight.opencl.impl;
 
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
+
 import java.util.ArrayList;
 import java.util.List;
 
