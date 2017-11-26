@@ -17,9 +17,10 @@
  */
 package cv.lecturesight.cca;
 
-import com.nativelibs4java.opencl.CLBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.Position;
+
+import com.nativelibs4java.opencl.CLBuffer;
 
 public interface CentroidFinder {
 
