@@ -17,15 +17,16 @@
  */
 package cv.lecturesight.util.conf;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.pmw.tinylog.Logger;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
 
 public class ConfigurationFactory implements ServiceFactory {
 
@@ -53,7 +54,7 @@ public class ConfigurationFactory implements ServiceFactory {
         URL configUrl = (URL) res.nextElement();        // get URL of config file
         Properties bundleDefaults = new Properties();
         bundleDefaults.load(configUrl.openStream());    // load defaults from file
-        
+
         // add bundle defaults to default properties
         for (Iterator<String> keys = bundleDefaults.stringPropertyNames().iterator(); keys.hasNext();) {
           String key = keys.next();

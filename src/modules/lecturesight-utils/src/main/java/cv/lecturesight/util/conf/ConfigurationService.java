@@ -24,8 +24,8 @@ import java.util.Properties;
 
 public interface ConfigurationService {
 
-  public static final String LS_VERSION_PROPERTY = "cv.lecturesight.version";
-  public static final String LS_BUILDINFO_PROPERTY = "cv.lecturesight.buildinfo";
+  String LS_VERSION_PROPERTY = "cv.lecturesight.version";
+  String LS_BUILDINFO_PROPERTY = "cv.lecturesight.buildinfo";
 
   Properties getSystemConfiguration();
   Properties getSystemDefaults();
@@ -37,7 +37,6 @@ public interface ConfigurationService {
   void addConfigurationListener(ConfigurationListener l);
   void removeConfigurationListener(ConfigurationListener l);
 
-  public String getVersion();
-  public String getBuildInfo();
-
+  String getVersion();
+  String getBuildInfo();
 }
