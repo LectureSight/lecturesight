@@ -2,17 +2,20 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
+
+import org.pmw.tinylog.Logger;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.pmw.tinylog.Logger;
 
 public class DisplayUIPanel extends javax.swing.JPanel {
 
@@ -92,28 +95,28 @@ public class DisplayUIPanel extends javax.swing.JPanel {
     javax.swing.GroupLayout displayHolderLayout = new javax.swing.GroupLayout(displayHolder);
     displayHolder.setLayout(displayHolderLayout);
     displayHolderLayout.setHorizontalGroup(
-      displayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 0, Short.MAX_VALUE)
-    );
+                                           displayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                           .addGap(0, 0, Short.MAX_VALUE)
+                                           );
     displayHolderLayout.setVerticalGroup(
-      displayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 269, Short.MAX_VALUE)
-    );
+                                         displayHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                         .addGap(0, 269, Short.MAX_VALUE)
+                                         );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE)
-      .addComponent(displayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-    );
+                              layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                              .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE)
+                              .addComponent(displayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                              );
     layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(displayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-    );
+                            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                      .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                      .addComponent(displayHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            );
   }// </editor-fold>//GEN-END:initComponents
 
   private void screenShotButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_screenShotButtonActionPerformed
@@ -124,8 +127,8 @@ public class DisplayUIPanel extends javax.swing.JPanel {
     if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       if (file.exists() && JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
-              this, "The file " + file.getName() + " already exists. Do you want to replace it?",
-              "Replace file", JOptionPane.YES_NO_OPTION)) {
+                                                                                  this, "The file " + file.getName() + " already exists. Do you want to replace it?",
+                                                                                  "Replace file", JOptionPane.YES_NO_OPTION)) {
         return;
       }
       try {

@@ -19,6 +19,8 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayRegistration;
 
+import java.util.Objects;
+
 public class DisplayRegistrationImpl implements DisplayRegistration {
 
   private static int nextId = 0;
@@ -39,8 +41,20 @@ public class DisplayRegistrationImpl implements DisplayRegistration {
   public String getSID() {
     return sid;
   }
-  
-  public boolean equals(DisplayRegistrationImpl other) {
-    return id == other.id && sid.equals(other.sid);
+
+  @Override
+  public boolean equals(Object other) {
+
+    if (other == null || !(other instanceof DisplayRegistrationImpl))
+      return false;
+
+    DisplayRegistrationImpl o = (DisplayRegistrationImpl) other;
+    return id == o.id && sid.equals(o.sid);
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(sid) + 31*id;
+  }
+
 }
