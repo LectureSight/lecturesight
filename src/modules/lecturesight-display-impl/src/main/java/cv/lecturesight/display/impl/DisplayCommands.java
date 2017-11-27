@@ -18,6 +18,7 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +27,15 @@ public class DisplayCommands {
   static final String[] commands = {"list", "show", "hide"};
   private DisplayServiceFactory parent;
   private Map<Integer,DisplayWindow> displayWindows = new HashMap<Integer,DisplayWindow>();
-  
+
   public DisplayCommands(DisplayServiceFactory parent) {
     this.parent = parent;
+  }
+
+  private void console(String s) {
+    //CHECKSTYLE:OFF
+    System.out.println(s);
+    //CHECKSTYLE:ON
   }
 
   public void list() {
@@ -47,7 +54,7 @@ public class DisplayCommands {
       sb.append(title);
       sb.append("\n");
     }
-    System.out.println(sb.toString());
+    console(sb.toString());
   }
 
   private String rightAlign(String in, int places) {
@@ -81,7 +88,7 @@ public class DisplayCommands {
         }
       }
     } catch (Exception e) {
-      System.out.println("usage: display:show <id>");
+      console("usage: display:show <id>");
     }
   }
 
@@ -95,7 +102,7 @@ public class DisplayCommands {
         displayWindows.remove(id);
       }
     } catch (Exception e) {
-      System.out.println("usage: display:hide <id>");
-    }    
+      console("usage: display:hide <id>");
+    }
   }
 }

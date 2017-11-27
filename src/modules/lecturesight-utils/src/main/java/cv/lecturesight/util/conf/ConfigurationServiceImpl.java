@@ -17,8 +17,13 @@
  */
 package cv.lecturesight.util.conf;
 
-import java.io.File;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.pmw.tinylog.Logger;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,13 +32,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 
 public class ConfigurationServiceImpl implements ConfigurationService, ServiceListener {
-  
+
   private BundleContext bcontext;
   Properties config;
   Properties defaults;
@@ -42,7 +43,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
 
   String version;
   String buildinfo;
- 
+
   public ConfigurationServiceImpl(BundleContext bcontext, Properties config, Properties defaults) {
     this.bcontext = bcontext;
     this.config = config;
@@ -51,29 +52,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
     // Set the version string
     version = config.getProperty(ConfigurationService.LS_VERSION_PROPERTY);
     if (version == null || version.isEmpty()) {
-             Dictionary<String,String> manifest = bcontext.getBundle().getHeaders();
-             version = manifest.get("Bundle-Version");
+      Dictionary<String,String> manifest = bcontext.getBundle().getHeaders();
+      version = manifest.get("Bundle-Version");
     }
     Logger.info("LectureSight version " + version);
 
     // Set the build info string
     buildinfo = config.getProperty(ConfigurationService.LS_BUILDINFO_PROPERTY);
     if (buildinfo != null && !buildinfo.isEmpty()) {
-        Logger.info("LectureSight build " + buildinfo);
+      Logger.info("LectureSight build " + buildinfo);
     }
 
   }
-  
+
   @Override
   public Properties getSystemConfiguration() {
     return config;
   }
-  
+
   @Override
   public Properties getSystemDefaults() {
     return defaults;
   }
-  
+
   @Override
   public void loadSystemConfiguration(InputStream is) {
     try {
@@ -84,7 +85,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
       throw new RuntimeException("Unable to read configuration.", ex);
     }
   }
-  
+
   @Override
   public void saveSystemConfiguration(OutputStream os) {
     try {
@@ -95,32 +96,32 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
       throw new RuntimeException("Unable to write configuration", e);
     }
   }
-  
+
   @Override
   public void notifyListeners() {
     for (Iterator<ConfigurationListener> it = listeners.iterator(); it.hasNext();) {
       it.next().configurationChanged();
     }
   }
-  
+
   @Override
   public void addConfigurationListener(ConfigurationListener l) {
     Logger.info("Adding ConfigurationListener " + l.getClass().getName());
     listeners.add(l);
   }
-  
+
   @Override
   public void removeConfigurationListener(ConfigurationListener l) {
     Logger.info("Removing ConfigurationListener " + l.getClass().getName());
     listeners.remove(l);
   }
-  
+
   @Override
   public void serviceChanged(ServiceEvent se) {
 
     // Ignore service events during framework shutdown (otherwise some bundles can get restarted)
     if (bcontext.getBundle(0).getState() != Bundle.ACTIVE) {
-        return;
+      return;
     }
 
     Object service = null;
@@ -129,7 +130,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
     } catch (Exception e) {
       // java.lang.IllegalStateException: Invalid BundleContext --> this service already unregistered
     }
-    
+
     if (service != null && service instanceof ConfigurationListener) {
 
       // add/remove ConfigurationListener
@@ -146,24 +147,24 @@ public class ConfigurationServiceImpl implements ConfigurationService, ServiceLi
     }
   }
 
-    @Override
-    public void setConfigurationFile(File configFile) {
-        this.configFile = configFile;
-    }
+  @Override
+  public void setConfigurationFile(File configFile) {
+    this.configFile = configFile;
+  }
 
-    @Override
-    public File getConfigurationFile() {
-        return configFile;
-    }
+  @Override
+  public File getConfigurationFile() {
+    return configFile;
+  }
 
-    @Override
-    public String getVersion() {
-	return version;
-    }
+  @Override
+  public String getVersion() {
+    return version;
+  }
 
-    @Override
-    public String getBuildInfo() {
-	return buildinfo;
-    }
+  @Override
+  public String getBuildInfo() {
+    return buildinfo;
+  }
 
 }

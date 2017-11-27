@@ -20,17 +20,20 @@ package cv.lecturesight.util.metrics;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 
-import com.codahale.metrics.*;
-import com.codahale.metrics.json.MetricsModule;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.CsvReporter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricFilter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Slf4jReporter;
+import com.codahale.metrics.Timer;
 import com.codahale.metrics.json.HealthCheckModule;
+import com.codahale.metrics.json.MetricsModule;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.concurrent.TimeUnit;
-import java.util.SortedMap;
-import java.util.Locale;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -40,11 +43,17 @@ import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Locale;
+import java.util.SortedMap;
+import java.util.concurrent.TimeUnit;
+
 @Component(name="lecturesight.util.metrics", immediate=true)
 @Service
 @Properties({
-  @Property(name = "osgi.command.scope", value = "metrics"),
-  @Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause", "resume"})
+@Property(name = "osgi.command.scope", value = "metrics"),
+@Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause", "resume"})
 })
 
 public class MetricsServiceImpl implements MetricsService, ConfigurationListener {
@@ -82,7 +91,7 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
   private CsvReporter   csv_reporter;
   private JmxReporter   jmx_reporter;
   private Slf4jReporter log_reporter;
-  
+
   /* Reporting interval */
   private int csv_interval = 30;
   private int log_interval = 300;
@@ -95,9 +104,9 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     setConfiguration();
 
     if (enable) {
-       Logger.info("Metrics Enabled (CSV=" + report_csv + " JMX=" + report_jmx + " LOG=" + report_log + ")");
+      Logger.info("Metrics Enabled (CSV=" + report_csv + " JMX=" + report_jmx + " LOG=" + report_log + ")");
     } else {
-       Logger.info("Metrics Disabled");
+      Logger.info("Metrics Disabled");
     }
 
     // make sure metrics directory exists
@@ -120,28 +129,28 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     // Set session start
     last_reset = System.currentTimeMillis();
 
-    setup_metrics();
+    setupMetrics();
 
     if (enable) {
-       start_reporting();
+      startReporting();
     }
 
     Logger.debug("Activated");
-  } 
+  }
 
   protected void deactivate(ComponentContext cc) {
-      stop_reporting();
-      save();
-      shutdown = true;
-      Logger.debug("Deactivated");
+    stopReporting();
+    save();
+    shutdown = true;
+    Logger.debug("Deactivated");
   }
 
   @Override
   public void configurationChanged() {
     if (updateConfiguration() && !shutdown) {
-       Logger.debug("Configuration updated");
-       stop_reporting();
-       start_reporting();
+      Logger.debug("Configuration updated");
+      stopReporting();
+      startReporting();
     }
   }
 
@@ -162,40 +171,40 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     boolean changed = false;
 
     if (enable != config.getBoolean(PROPKEY_ENABLE)) {
-        enable = !enable;
-	changed = true;
+      enable = !enable;
+      changed = true;
     }
 
     if (report_csv != config.getBoolean(PROPKEY_CSV_ENABLE)) {
-	report_csv = !report_csv;
-	changed = true;
+      report_csv = !report_csv;
+      changed = true;
     }
 
     if (report_jmx != config.getBoolean(PROPKEY_JMX_ENABLE)) {
-	report_jmx = !report_jmx;
-	changed = true;
+      report_jmx = !report_jmx;
+      changed = true;
     }
 
     if (report_log != config.getBoolean(PROPKEY_LOG_ENABLE)) {
-	report_log = !report_log;
-	changed = true;
+      report_log = !report_log;
+      changed = true;
     }
 
     if (csv_interval != config.getInt(PROPKEY_CSV_INTERVAL)) {
-	csv_interval = config.getInt(PROPKEY_CSV_INTERVAL);
-	changed = true;
+      csv_interval = config.getInt(PROPKEY_CSV_INTERVAL);
+      changed = true;
     }
 
     if (log_interval != config.getInt(PROPKEY_LOG_INTERVAL)) {
-	log_interval = config.getInt(PROPKEY_LOG_INTERVAL);
-	changed = true;
+      log_interval = config.getInt(PROPKEY_LOG_INTERVAL);
+      changed = true;
     }
 
     return changed;
   }
 
   /* Set up internal metrics */
-  private void setup_metrics() {
+  private void setupMetrics() {
 
     // set up a counter for session start time
     Counter counter = registry.counter("metrics.session.start");
@@ -203,70 +212,70 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
 
     // set up a gauge for elapsed time
     registry.register(MetricRegistry.name("metrics.session.elapsed"),
-                         new Gauge<Long>() {
-                             @Override
-                             public Long getValue() {
-                                 return new Long(System.currentTimeMillis() - last_reset);
-                             }
-                         });
+                      new Gauge<Long>() {
+                        @Override
+                        public Long getValue() {
+                          return new Long(System.currentTimeMillis() - last_reset);
+                        }
+                      });
 
   }
 
-  private void start_reporting() {
+  private void startReporting() {
 
     if (!enable) return;
 
     // CSV reporting (if enabled)
     if (report_csv && csv_reporter == null) {
-        csv_reporter = CsvReporter.forRegistry(registry)
-                                        .formatFor(Locale.US)
-                                        .convertRatesTo(TimeUnit.MINUTES)
-                                        .convertDurationsTo(TimeUnit.MILLISECONDS)
-                                        .build(metricsDir);
-        csv_reporter.start(csv_interval, TimeUnit.SECONDS);
+      csv_reporter = CsvReporter.forRegistry(registry)
+      .formatFor(Locale.US)
+      .convertRatesTo(TimeUnit.MINUTES)
+      .convertDurationsTo(TimeUnit.MILLISECONDS)
+      .build(metricsDir);
+      csv_reporter.start(csv_interval, TimeUnit.SECONDS);
     }
 
     // JMX reporting (if enabled)
     if (report_jmx && jmx_reporter == null) {
-       jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
-       jmx_reporter.start();
+      jmx_reporter = JmxReporter.forRegistry(registry).inDomain("cv.lecturesight.util.metrics").build();
+      jmx_reporter.start();
     }
 
     // Console reporting (if enabled)
     if (report_log && log_reporter == null) {
-       log_reporter = Slf4jReporter.forRegistry(registry)
-                                            .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
-                                            .convertRatesTo(TimeUnit.MINUTES)
-                                            .convertDurationsTo(TimeUnit.MILLISECONDS)
-                                            .build();
-       log_reporter.start(log_interval, TimeUnit.SECONDS);
+      log_reporter = Slf4jReporter.forRegistry(registry)
+      .outputTo(LoggerFactory.getLogger("cv.lecturesight.util.metrics"))
+      .convertRatesTo(TimeUnit.MINUTES)
+      .convertDurationsTo(TimeUnit.MILLISECONDS)
+      .build();
+      log_reporter.start(log_interval, TimeUnit.SECONDS);
     }
 
   }
 
-  private void stop_reporting() {
+  private void stopReporting() {
 
     // Shut down reporting threads
     if (csv_reporter != null) {
-	csv_reporter.stop();
-	csv_reporter = null;
+      csv_reporter.stop();
+      csv_reporter = null;
     }
 
     if (jmx_reporter != null) {
-	jmx_reporter.stop();
-	jmx_reporter = null;
+      jmx_reporter.stop();
+      jmx_reporter = null;
     }
 
     if (log_reporter != null) {
-	log_reporter.stop();
-	log_reporter = null;
+      log_reporter.stop();
+      log_reporter = null;
     }
 
   }
 
   @Override
   public MetricRegistry getRegistry() {
-      return registry;
+    return registry;
   }
 
   @Override
@@ -281,8 +290,8 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
 
     last_reset = System.currentTimeMillis();
 
-    setup_metrics();
-    start_reporting();
+    setupMetrics();
+    startReporting();
   }
 
   @Override
@@ -299,23 +308,23 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     File metricsJson;
 
     if (eventId != null) {
-        metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics-" + eventId + ".json");
+      metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics-" + eventId + ".json");
     } else {
-        metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics.json");
+      metricsJson = new File(metricsDir.getAbsolutePath() + File.separator + "metrics.json");
     }
 
     Logger.info("Saving metrics data to " + metricsJson.getAbsolutePath());
-    
+
     FileOutputStream os = null;
     try {
-        os = new FileOutputStream(metricsJson);
-        objectMapper.writer().writeValue(os, registry); 
+      os = new FileOutputStream(metricsJson);
+      objectMapper.writer().writeValue(os, registry);
     } catch (Exception e) {
-	Logger.error(e, "Unable to write JSON metrics data to file");
+      Logger.error(e, "Unable to write JSON metrics data to file");
     } finally {
-	if (os != null) {
-	   try { os.close(); } catch (Exception ef) { }
-	}
+      if (os != null) {
+        try { os.close(); } catch (Exception ef) { }
+      }
     }
   }
 
@@ -339,7 +348,7 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     if (!enable) return;
 
     Logger.info("Reporting paused (metrics will continue to be updated)");
-    stop_reporting();
+    stopReporting();
   }
 
   @Override
@@ -348,7 +357,7 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     if (!enable) return;
 
     Logger.info("Reporting resumed");
-    start_reporting();
+    startReporting();
   }
 
   @Override
@@ -368,11 +377,11 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     Counter counter;
 
     if (counters.containsKey(key)) {
-       Logger.debug("Increment existing counter: " + key);
-       counter = counters.get(key);
+      Logger.debug("Increment existing counter: " + key);
+      counter = counters.get(key);
     } else {
-       Logger.debug("Increment new counter: " + key);
-       counter = registry.counter(key);
+      Logger.debug("Increment new counter: " + key);
+      counter = registry.counter(key);
     }
 
     counter.inc();
@@ -393,14 +402,14 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     Counter counter;
 
     if (timers.containsKey(key)) {
-       Logger.debug("Adding duration to existing timer: " + key);
-       timer = timers.get(key);
-       counter = counters.get(MetricRegistry.name(key,"elapsed"));
+      Logger.debug("Adding duration to existing timer: " + key);
+      timer = timers.get(key);
+      counter = counters.get(MetricRegistry.name(key,"elapsed"));
     }  else {
-       Logger.debug("Adding duration to new timer: " + key);
-       // TODO Use a sliding window reservoir?
-       timer = registry.timer(key);
-       counter = registry.counter(MetricRegistry.name(key,"elapsed"));
+      Logger.debug("Adding duration to new timer: " + key);
+      // TODO Use a sliding window reservoir?
+      timer = registry.timer(key);
+      counter = registry.counter(MetricRegistry.name(key,"elapsed"));
     }
 
     timer.update(duration_ms, TimeUnit.MILLISECONDS);
@@ -418,19 +427,21 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
 
   // Console commands
 
+  //CHECKSTYLE:OFF
   public void list(String[] args) {
     if (enable) {
-       // List all the metrics
-       for (String metrickey : registry.getNames()) {
-          System.out.println(metrickey);
-       }
+      // List all the metrics
+      for (String metrickey : registry.getNames()) {
+        System.out.println(metrickey);
+      }
     } else {
-       System.out.println("disabled");
+      System.out.println("disabled");
     }
   }
 
   public void show(String[] args) {
     System.out.println(enable ? json() : "disabled");
   }
+  //CHECKSTYLE:ON
 
 }

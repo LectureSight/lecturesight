@@ -18,6 +18,7 @@
 package cv.lecturesight.opencl.impl.profiling;
 
 import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,8 +37,10 @@ public class ProfilingServer extends Thread {
   final static String FRAMETIMEFILE_SUFFIX = ".csv";
   final static String FRAMETIEMFILE_HEADER = "frame;time";
   private final BlockingQueue<ProfilingResult> recordQueue;
-  private File dataFile, frametimeFile;
-  private OutputStreamWriter dataWriter, frametimeWriter;
+  private File dataFile;
+  private File frametimeFile;
+  private OutputStreamWriter dataWriter;
+  private OutputStreamWriter frametimeWriter;
   private long currentFrame = 0L;
   private long lastNanoTime = -1L;
 
@@ -48,10 +51,10 @@ public class ProfilingServer extends Thread {
       dataFile = new File(DATAFILE_PREFIX + sessionTime + DATAFILE_SUFFIX);
       dataWriter = new OutputStreamWriter(new FileOutputStream(dataFile));
       dataWriter.write(DATAFILE_HEADER + NL);
-      
+
       frametimeFile = new File(FRAMETIMEFILE_PREFIX + sessionTime + DATAFILE_SUFFIX);
       frametimeWriter = new OutputStreamWriter(new FileOutputStream(frametimeFile));
-      frametimeWriter.write( FRAMETIEMFILE_HEADER + NL);
+      frametimeWriter.write(FRAMETIEMFILE_HEADER + NL);
     } catch (IOException e) {
       Logger.error("Could not open datafile " + dataFile.getAbsolutePath() + " for writing!", e);
     }
@@ -83,13 +86,13 @@ public class ProfilingServer extends Thread {
           dataWriter.write(result.getName());
           dataWriter.write(NL);
         } catch (IOException e) {
-          Logger.warn("Could not write to data file: " + e.getMessage()); 
+          Logger.warn("Could not write to data file: " + e.getMessage());
         }
       }
     } catch (InterruptedException e) {
     }
   }
-  
+
   public void nextFrame() {
     long currentNanoTime = System.nanoTime();
     if (++currentFrame > 1) {
@@ -100,7 +103,7 @@ public class ProfilingServer extends Thread {
         frametimeWriter.write(Long.toString(frameTime));
         frametimeWriter.append(NL);
       } catch (Exception e) {
-        Logger.warn("Could not write to data file: " + e.getMessage()); 
+        Logger.warn("Could not write to data file: " + e.getMessage());
       }
     }
     lastNanoTime = currentNanoTime;

@@ -62,9 +62,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_INVERTED = "inverted";
   final static String PROPKEY_MAXFPS = "maxfps";
+  final static String PROPKEY_SNAPSHOT_INTERVAL = "snapshot.interval";
+  final static String PROPKEY_SNAPSHOT_FILE = "snapshot.file";
+
   final static String DISPLAYNAME_INPUT = "cam.overview.input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
+
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
   @Reference
@@ -78,8 +82,11 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
+
   private boolean inverted = false;
   int maxfps = -1;
+  int snapshotInterval = 0;
+  String snapshotFile;
 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
@@ -94,6 +101,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     maxfps = config.getInt(PROPKEY_MAXFPS);
     if (maxfps > 0) {
       Logger.info("Framesource will be limited to " + maxfps + " fps");
+    }
+
+    snapshotInterval = config.getInt(PROPKEY_SNAPSHOT_INTERVAL);
+    snapshotFile = config.get(PROPKEY_SNAPSHOT_FILE);
+
+    if (!snapshotFile.isEmpty()) {
+      Logger.info("Framesource snapshots will be saved to {} every {} seconds", snapshotFile, snapshotInterval);
     }
 
     // scan for plugins already installed
@@ -146,7 +160,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
           spm.registerProfileListener(updater);
         }
 
-        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps);
+        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps, snapshotInterval, snapshotFile);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
       }

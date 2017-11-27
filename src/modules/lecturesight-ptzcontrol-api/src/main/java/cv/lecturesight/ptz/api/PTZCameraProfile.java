@@ -18,11 +18,12 @@
 package cv.lecturesight.ptz.api;
 
 import cv.lecturesight.util.geometry.Position;
+
 import java.util.Properties;
 
 public class PTZCameraProfile {
-  
-  public static enum Property {
+
+  public enum Property {
     VENDOR("camera.vendor.name"),
     MODEL("camera.model.name"),
     PAN_MIN("camera.pan.min"),
@@ -36,16 +37,23 @@ public class PTZCameraProfile {
     ZOOM_MAXSPEED("camera.zoom.maxspeed"),
     HOME_PAN("camera.home.pan"),
     HOME_TILT("camera.home.tilt");
-    
+
     private String key;
     Property(String key) {this.key=key;}
     public String key() {return key;}
   }
-  
-  private String vendor, model;
-  private int zoom_min, zoom_max, zoom_maxspeed;
-  private int pan_min, pan_max, pan_maxspeed;
-  private int tilt_min, tilt_max, tilt_maxspeed;
+
+  private String vendor;
+  private String model;
+  private int zoom_min;
+  private int zoom_max;
+  private int zoom_maxspeed;
+  private int pan_min;
+  private int pan_max;
+  private int pan_maxspeed;
+  private int tilt_min;
+  private int tilt_max;
+  private int tilt_maxspeed;
   private Position home_pos;
 
   public PTZCameraProfile(String vendor, String model,
@@ -53,7 +61,7 @@ public class PTZCameraProfile {
           int tilt_min, int tilt_max, int tilt_maxspeed,
           int zoom_min, int zoom_max, int zoom_maxspeed,
           Position home_pos) {
-    
+
     this.vendor = vendor;
     this.model = model;
     this.pan_min = pan_min;
@@ -67,7 +75,7 @@ public class PTZCameraProfile {
     this.zoom_maxspeed = zoom_maxspeed;
     this.home_pos = home_pos;
   }
-  
+
   public PTZCameraProfile(Properties props) {
     this.vendor = props.getProperty(Property.VENDOR.key());
     this.model = props.getProperty(Property.MODEL.key());
@@ -82,9 +90,9 @@ public class PTZCameraProfile {
     this.zoom_maxspeed = Integer.parseInt(props.getProperty(Property.ZOOM_MAXSPEED.key()));
     this.home_pos = new Position(
             Integer.parseInt(props.getProperty(Property.HOME_PAN.key())),
-            Integer.parseInt(props.getProperty(Property.HOME_TILT.key())) );
+            Integer.parseInt(props.getProperty(Property.HOME_TILT.key())));
   }
-  
+
   public String getVendor() {
     return vendor;
   }

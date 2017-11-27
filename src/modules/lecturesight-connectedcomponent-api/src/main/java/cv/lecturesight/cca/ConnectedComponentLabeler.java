@@ -17,9 +17,10 @@
  */
 package cv.lecturesight.cca;
 
+import cv.lecturesight.opencl.api.OCLSignal;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
-import cv.lecturesight.opencl.api.OCLSignal;
 
 public interface ConnectedComponentLabeler {
 
@@ -42,5 +43,5 @@ public interface ConnectedComponentLabeler {
   int getSize(int id);
   int getMaxBlobs();
   void dispose();
-  void setInput(CLImage2D image);  
+  void setInput(CLImage2D image);
 }
