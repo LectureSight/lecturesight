@@ -110,7 +110,7 @@ public class RegionTrackerImpl implements RegionTracker {
               centroidFinder.getSignal(CentroidFinder.Signal.DONE)
             });
 
-    // init label buffer copy 
+    // init label buffer copy
     labels_current = fgLabeler.getLabelBuffer();
     labels_last = ocl.context().createIntBuffer(Usage.InputOutput, labels_current.getElementCount());
     ocl.utils().setValues(0, (int) labels_last.getElementCount() - 1, labels_last, 0);
@@ -118,10 +118,10 @@ public class RegionTrackerImpl implements RegionTracker {
     // init overlap image
     current_fg = fgs.getForegroundMap();
     last_fg = ocl.context().createImage2D(Usage.InputOutput,
-            Format.INTENSITY_UNINT8.getCLImageFormat(), workDim[0], workDim[1]);
+            Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     ocl.utils().setValues(0, 0, workDim[0], workDim[1], last_fg, 0);
     overlap = ocl.context().createImage2D(Usage.InputOutput,
-            Format.INTENSITY_UNINT8.getCLImageFormat(), workDim[0], workDim[1]);
+            Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
 
     // init buffer for label pairs
     label_pairs = ocl.context().createIntBuffer(Usage.InputOutput, Constants.pairsBufferLength);
@@ -137,13 +137,13 @@ public class RegionTrackerImpl implements RegionTracker {
 
     registerDisplays();
     debugEnabled = config.getBoolean(Constants.PROPKEY_DEBUG);
-        
+
     Logger.info("Activated");
   }
 
   //<editor-fold defaultstate="collapsed" desc="Display Registration">
-  /** Register displays if configured 
-   * 
+  /** Register displays if configured
+   *
    */
   private void registerDisplays() {
     if (config.getBoolean(Constants.PROPKEY_DISPLAY_OVERLAP)) {
@@ -183,12 +183,12 @@ public class RegionTrackerImpl implements RegionTracker {
   public int numRegions() {
     return trackedRegions.size();
   }
-  
+
   @Override
   public void discardRegion(Region region) {
     ocl.immediateLaunch(new SetRegionRun(region, 0));
   }
-  
+
   @Override
   public void strengthenRegion(Region region) {
     ocl.immediateLaunch(new SetRegionRun(region, 255));
@@ -431,18 +431,18 @@ public class RegionTrackerImpl implements RegionTracker {
   }
 
   private RegionImpl createTrackerRegion(int regionId, long time) {
-    RegionImpl region = 
+    RegionImpl region =
             new RegionImpl(regionId, time,
-                    centroidFinder.getControid(regionId), 
-                    boxFinder.getBox(regionId), 
+                    centroidFinder.getControid(regionId),
+                    boxFinder.getBox(regionId),
                     fgLabeler.getSize(regionId));
     return region;
   }
 
   private RegionImpl updateTrackerRegion(int regionId, long time, RegionImpl region) {
-    region.update(regionId, time, 
-            centroidFinder.getControid(regionId), 
-            boxFinder.getBox(regionId), 
+    region.update(regionId, time,
+            centroidFinder.getControid(regionId),
+            boxFinder.getBox(regionId),
             fgLabeler.getSize(regionId));
     return region;
   }
@@ -517,7 +517,7 @@ public class RegionTrackerImpl implements RegionTracker {
       ocl.castSignal(SIG_done);
     }
   }
-  
+
   private class SetRegionRun implements ComputationRun {
 
     private Region region;
@@ -530,11 +530,11 @@ public class RegionTrackerImpl implements RegionTracker {
       this.value = value;
       this.regionDim = new int[] {region.getBoundingBox().getWidth(), region.getBoundingBox().getHeight()};
     }
-    
+
     @Override
     public void launch(CLQueue queue) {
       setRegionK.setArgs(fgs.getForegroundWorkingBuffer().current(), fgLabeler.getLabelBuffer(),
-              region.getBoundingBox().getMin().getX(), region.getBoundingBox().getMin().getY(), 
+              region.getBoundingBox().getMin().getX(), region.getBoundingBox().getMin().getY(),
               workDim[0], region.getLabel(), value);
       setRegionK.enqueueNDRange(queue, regionDim);
     }
