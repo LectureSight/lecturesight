@@ -19,8 +19,7 @@ package cv.lecturesight.framesource.videofile;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.io.File;
-import java.nio.ByteBuffer;
+
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Caps;
@@ -35,9 +34,11 @@ import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
-
 import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
+
+import java.io.File;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -52,7 +53,10 @@ public class VideoFilePipeline implements FrameGrabber {
   private AppSink appsink;
   private Pipeline pipeline;
 
-  private int width, height;    // the video frame size
+  // the video frame size
+  private int width;
+  private int height;
+
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
   private Sample lastSam;
@@ -92,12 +96,12 @@ public class VideoFilePipeline implements FrameGrabber {
     if (!playing) {
       stop();
       throw new FrameSourceException(
-              String.format("Pipeline not running after %d sec", (int)(waitPlaying / 10)));
+                                     String.format("Pipeline not running after %d sec", (int)(waitPlaying / 10)));
     }
 
     try {
       Structure structure = appsink.getSinkPads().get(0)
-              .getNegotiatedCaps().getStructure(0);
+      .getNegotiatedCaps().getStructure(0);
       width = structure.getInteger("width");
       height = structure.getInteger("height");
     } catch (Exception e) {
@@ -141,8 +145,8 @@ public class VideoFilePipeline implements FrameGrabber {
       public void padAdded(Element element, Pad pad) {
         Pad peerPad = videoconvert.getStaticPad("sink");
         if (pad.getDirection() == PadDirection.SRC) {
-	  PadLinkReturn result = pad.link(peerPad);
-	  if ((result != PadLinkReturn.OK) && (result != PadLinkReturn.WAS_LINKED)) {
+          PadLinkReturn result = pad.link(peerPad);
+          if ((result != PadLinkReturn.OK) && (result != PadLinkReturn.WAS_LINKED)) {
             Logger.error("Can't link decodebin to videoconvert");
           } else {
             elementsLinked = true;
@@ -194,8 +198,8 @@ public class VideoFilePipeline implements FrameGrabber {
    * Called by factory when service is stopped.
    */
   void stop() {
-      playing = false;
-      pipeline.setState(State.NULL);
+    playing = false;
+    pipeline.setState(State.NULL);
   }
 
   /**
@@ -210,9 +214,9 @@ public class VideoFilePipeline implements FrameGrabber {
       if (buf != null) {
         lastFrame = buf.map(false);
         if (lastBuf != null) {
-           // Free memory allocated for the previous buffer so we don't leak memory
-           lastBuf.unmap();
-           lastSam.dispose();
+          // Free memory allocated for the previous buffer so we don't leak memory
+          lastBuf.unmap();
+          lastSam.dispose();
         }
         lastBuf = buf;
         lastSam = sam;
@@ -220,7 +224,7 @@ public class VideoFilePipeline implements FrameGrabber {
         Logger.warn("Buffer is NULL!!");
       }
     } else {
-        Logger.trace("appsink is EOS");
+      Logger.trace("appsink is EOS");
     }
 
     if (lastFrame == null) {
