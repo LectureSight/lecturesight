@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
@@ -31,13 +30,9 @@ import cv.lecturesight.profile.api.SceneProfileEventAdapter;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.util.conf.Configuration;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -47,6 +42,14 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.pmw.tinylog.Logger;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Implementation of Service API
@@ -142,7 +145,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
           updater.profileActivated(spm.getActiveProfile());
           spm.registerProfileListener(updater);
         }
-        
+
         newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
@@ -160,7 +163,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     if (sourceTypes.containsKey(fsrc.getType())) {
       FrameGrabberFactory factory = sourceTypes.get(fsrc.getType());
       factory.destroyFrameGrabber(fsrc.frameGrabber);    // de-init the stuff that gets the frames (native libs etc.)
-      fsrc.uploader.destroy();                           // free GPU buffers created by uploader               
+      fsrc.uploader.destroy();                           // free GPU buffers created by uploader
     } else {
       throw new FrameSourceException("No factory registered for type " + fsrc.getType());
     }
@@ -248,7 +251,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     FrameUploader client;
     BufferedImage mask;
 
-    public MaskUpdater(FrameUploader uploader) {
+    MaskUpdater(FrameUploader uploader) {
       client = uploader;
       CLImage2D outimg = uploader.getOutputImage();
       mask = new BufferedImage((int)outimg.getWidth(), (int)outimg.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -259,12 +262,12 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       Graphics2D g = mask.createGraphics();
       g.setColor(Color.WHITE);
       g.fill3DRect(0, 0, mask.getWidth(), mask.getHeight(), true);
-      
+
       g.setColor(Color.BLACK);
       for (Zone zone : profile.getIgnoreZones()) {
         g.fillRect(zone.x, zone.y, zone.width, zone.height);
       }
-      
+
       client.setMask(mask);
     }
   }

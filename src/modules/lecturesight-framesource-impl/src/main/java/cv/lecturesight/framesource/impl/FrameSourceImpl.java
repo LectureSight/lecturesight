@@ -17,11 +17,13 @@
  */
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 
@@ -41,7 +43,7 @@ class FrameSourceImpl implements FrameSource {
 
   int min_frame_duration = 0;
 
-  public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader, int maxfps) {
+  FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader, int maxfps) {
     this.type = type;
     this.frameGrabber = frameGrabber;
     this.uploader = loader;
