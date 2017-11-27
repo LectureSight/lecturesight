@@ -62,6 +62,9 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
   // Enabled by default
   private boolean enable = true;
 
+  // Shutting down
+  private boolean shutdown = false;
+
   private static final MetricRegistry registry = new MetricRegistry();
 
   // JSON serialization
@@ -127,14 +130,15 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
   } 
 
   protected void deactivate(ComponentContext cc) {
+      stop_reporting();
+      save();
+      shutdown = true;
       Logger.debug("Deactivated");
   }
 
   @Override
   public void configurationChanged() {
-    Logger.debug("Refreshing configuration");
-
-    if (updateConfiguration()) {
+    if (updateConfiguration() && !shutdown) {
        Logger.debug("Configuration updated");
        stop_reporting();
        start_reporting();

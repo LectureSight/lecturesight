@@ -39,10 +39,14 @@ class FrameSourceImpl implements FrameSource {
   double[] frameTime = new double[FPS_SAMPLES];
   int sample_i = 0;
 
-  public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader) {
+  int min_frame_duration = 0;
+
+  public FrameSourceImpl(String type, FrameGrabber frameGrabber, FrameUploader loader, int maxfps) {
     this.type = type;
     this.frameGrabber = frameGrabber;
     this.uploader = loader;
+
+    min_frame_duration = (maxfps > 0) ? (1000 / maxfps) : 0;
   }
 
   @Override
@@ -72,6 +76,12 @@ class FrameSourceImpl implements FrameSource {
   @Override
   public void captureFrame() throws FrameSourceException {
     try {
+
+      long now = System.currentTimeMillis();
+      if (now < (lastFrame + min_frame_duration)) {
+        Thread.sleep(lastFrame + min_frame_duration - now);
+      }
+
       Buffer buf = frameGrabber.captureFrame();
       if (buf != null) {
         lastImage = uploader.getOutputImage();

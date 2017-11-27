@@ -21,7 +21,6 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Caps;
@@ -32,10 +31,12 @@ import org.freedesktop.gstreamer.Pad;
 import org.freedesktop.gstreamer.PadDirection;
 import org.freedesktop.gstreamer.PadLinkReturn;
 import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
 
+import org.pmw.tinylog.Level;
 import org.pmw.tinylog.Logger;
 
 /**
@@ -54,6 +55,7 @@ public class VideoFilePipeline implements FrameGrabber {
   private int width, height;    // the video frame size
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
+  private Sample lastSam;
   private boolean elementsLinked;
   private boolean error;
   private boolean playing;
@@ -81,7 +83,12 @@ public class VideoFilePipeline implements FrameGrabber {
       }
     }
 
-//    pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, "ls-framesource", true);
+    // Write pipeline .dot file. Requires gstreamer configured with "--gst-enable-gst-debug"
+    //  and the environment variable GST_DEBUG_DUMP_DOT_DIR set to a basepath (e.g. /tmp)
+    if (Logger.getLevel(VideoFilePipeline.class) == Level.DEBUG) {
+      pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, "ls-framesource", false);
+    }
+
     if (!playing) {
       stop();
       throw new FrameSourceException(
@@ -134,7 +141,8 @@ public class VideoFilePipeline implements FrameGrabber {
       public void padAdded(Element element, Pad pad) {
         Pad peerPad = videoconvert.getStaticPad("sink");
         if (pad.getDirection() == PadDirection.SRC) {
-	  if (pad.link(peerPad) != PadLinkReturn.OK) {
+	  PadLinkReturn result = pad.link(peerPad);
+	  if ((result != PadLinkReturn.OK) && (result != PadLinkReturn.WAS_LINKED)) {
             Logger.error("Can't link decodebin to videoconvert");
           } else {
             elementsLinked = true;
@@ -164,7 +172,9 @@ public class VideoFilePipeline implements FrameGrabber {
 
       @Override
       public void endOfStream(GstObject go) {
-        pipeline.seek(0, TimeUnit.SECONDS);
+        Logger.info("Looping video file framesource");
+        pipeline.stop();
+        pipeline.play();
       }
     });
 
@@ -195,17 +205,22 @@ public class VideoFilePipeline implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buf = appsink.pullSample().getBuffer();
+      Sample sam = appsink.pullSample();
+      Buffer buf = sam.getBuffer();
       if (buf != null) {
         lastFrame = buf.map(false);
         if (lastBuf != null) {
            // Free memory allocated for the previous buffer so we don't leak memory
            lastBuf.unmap();
+           lastSam.dispose();
         }
         lastBuf = buf;
+        lastSam = sam;
       } else {
         Logger.warn("Buffer is NULL!!");
       }
+    } else {
+        Logger.trace("appsink is EOS");
     }
 
     if (lastFrame == null) {

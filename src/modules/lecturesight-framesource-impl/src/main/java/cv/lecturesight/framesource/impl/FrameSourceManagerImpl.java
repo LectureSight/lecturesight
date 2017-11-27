@@ -58,6 +58,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_INVERTED = "inverted";
+  final static String PROPKEY_MAXFPS = "maxfps";
   final static String DISPLAYNAME_INPUT = "cam.overview.input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
@@ -75,6 +76,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
   private boolean inverted = false;
+  int maxfps = -1;
 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
@@ -84,6 +86,11 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     inverted = config.getBoolean(PROPKEY_INVERTED);
     if (inverted) {
       Logger.info("Framesource is inverted, and will be rotated 180 degrees");
+    }
+
+    maxfps = config.getInt(PROPKEY_MAXFPS);
+    if (maxfps > 0) {
+      Logger.info("Framesource will be limited to " + maxfps + " fps");
     }
 
     // scan for plugins already installed
@@ -136,7 +143,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
           spm.registerProfileListener(updater);
         }
         
-        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader);
+        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
       }

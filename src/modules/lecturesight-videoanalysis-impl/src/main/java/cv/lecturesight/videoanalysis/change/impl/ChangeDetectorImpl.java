@@ -59,7 +59,7 @@ public class ChangeDetectorImpl implements ChangeDetector {
   CLImage2D changeMapRaw13;
   CLImage2D changeMapDilated;
   CLImage2D combinedDiffs;
-  
+
   private int[] workDim;
   private EnumMap<ChangeDetector.Signal, OCLSignal> signals =
           new EnumMap<ChangeDetector.Signal, OCLSignal>(ChangeDetector.Signal.class);
@@ -67,7 +67,7 @@ public class ChangeDetectorImpl implements ChangeDetector {
   protected void activate(ComponentContext cc) {
     // create signals
     signals.put(Signal.DONE_DETECTION, ocl.getSignal(Constants.SIGNAME_DONE_DETECTION));
-    
+
     // set up input
     fsrc = fsp.getFrameSource();
     input = fsrc.getImage();
@@ -76,12 +76,12 @@ public class ChangeDetectorImpl implements ChangeDetector {
     // allocate gpu buffers
     twoback = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
     last = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    changeMapRaw12 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    changeMapRaw23 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    changeMapRaw13 = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    changeMapDilated = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
-    combinedDiffs = ocl.context().createImage2D(Usage.InputOutput, Format.INTENSITY_UINT8.getCLImageFormat(), workDim[0], workDim[1]);    
-    
+    changeMapRaw12 = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapRaw23 = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapRaw13 = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    changeMapDilated = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+    combinedDiffs = ocl.context().createImage2D(Usage.InputOutput, Format.RGBA_UINT8.getCLImageFormat(), workDim[0], workDim[1]);
+
     ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, last);
     ocl.utils().copyImage(0, 0, workDim[0], workDim[1], input, 0, 0, twoback);
 

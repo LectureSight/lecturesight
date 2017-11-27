@@ -15,6 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <!--___________________________ Build Profiles ____________________________--> 
@@ -61,7 +62,7 @@
         <module>modules/lecturesight-ptzcontrol-onvif</module>
         <module>modules/lecturesight-ptzcontrol-vapix</module>
         <module>modules/lecturesight-regiontracker-api</module>
-        <!--module>modules/lecturesight-regiontracker-impl</module-->
+        <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-scheduler</module>
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-scripting-stub</module>
@@ -73,7 +74,7 @@
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-videoanalysis-api</module>
-        <!--module>modules/lecturesight-videoanalysis-impl</module-->
+        <module>modules/lecturesight-videoanalysis-impl</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
         <module>modules/lecturesight-visualization</module>
         <module>modules/wulff-visca-api</module>
@@ -176,13 +177,13 @@
     <defaultGoal>install</defaultGoal>
     <plugins>
       
-      <!-- Require Java 6 or higher for building -->
+      <!-- Require Java 8 or higher for building -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
         <configuration>
-          <source>1.7</source>
+          <source>1.8</source>
           <target>1.8</target>
           <encoding>UTF-8</encoding>
         </configuration>
@@ -204,6 +205,40 @@
             </configuration>
             <goals>
               <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checkstyle for code quality -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>6.18</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <skip>${checkstyle.skip}</skip>
+          <configLocation>docs/checkstyle/lecturesight-checkstyle.xml</configLocation>
+          <headerLocation>docs/checkstyle/lecturesight-header.txt</headerLocation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <consoleOutput>true</consoleOutput>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <sourceDirectory>src</sourceDirectory>
+          <excludes>**/package-info.java,**/generated-sources/**/*</excludes>
+          <failOnViolation>true</failOnViolation>
+          <failsOnError>true</failsOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
             </goals>
           </execution>
         </executions>
@@ -273,7 +308,14 @@
         <artifactId>commons-io</artifactId>
         <version>1.4</version>
       </dependency>
-      
+
+      <!-- gstreamer bindings -->
+      <dependency>
+        <groupId>org.freedesktop.gstreamer</groupId>
+        <artifactId>gst1-java-core</artifactId>
+        <version>0.9.1</version>
+      </dependency>
+     
       <!-- testing -->
       <dependency>
         <groupId>junit</groupId>
@@ -335,11 +377,12 @@
         <enabled>true</enabled>
       </releases>
     </repository>
-
+    
+    <!-- v4l4j -->
     <repository>
-      <id>lecturesight</id>
-      <name>LectureSightRepo</name>
-      <url>http://nexus.virtuos.uos.de:8081/nexus/content/repositories/lecturesight-3rd-party/</url>
+      <id>lecturesight-3rd-party</id>
+      <name>LectureSight 3rd Party</name>
+      <url>http://nexus.opencast.org/nexus/content/repositories/lecturesight-3rd-party</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -347,19 +390,6 @@
         <enabled>true</enabled>
       </releases>
     </repository>
-
-    <!-- Manchesters own local Repo -->
-    <!--repository>
-      <id>man-mtt</id>
-      <name>manchester-mtt</name>
-      <url>http://garnier.rcs.manchester.ac.uk:8081/nexus/content/repositories/man-mtt</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository-->
     
     <!-- blackpad often breaks build -->
     <repository>
