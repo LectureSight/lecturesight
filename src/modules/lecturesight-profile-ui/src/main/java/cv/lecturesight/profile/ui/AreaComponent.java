@@ -25,6 +25,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -109,10 +110,10 @@ public class AreaComponent extends JPanel {
         int y = -(start_movement.y - end_movement.y);
 
         if(action_type == 10) {
-          move_area(x,y);
+          moveArea(x,y);
         }
         else
-          resize_area(x,y);
+          resizeArea(x,y);
 
         width = r.width;
         height = r.height;
@@ -128,10 +129,10 @@ public class AreaComponent extends JPanel {
         int y = -(start_movement.y - end_movement.y);
 
         if(action_type == 10) {
-          move_area(x,y);
+          moveArea(x,y);
         }
         else
-          resize_area(x,y);
+          resizeArea(x,y);
       }
 
       @Override
@@ -186,7 +187,10 @@ public class AreaComponent extends JPanel {
 
   public void update(Point e) {
     two = new Point(e.x, e.y);
-    int min_x, min_y, max_x, max_y;
+    int min_x;
+    int min_y;
+    int max_x;
+    int max_y;
     if(origin.x < two.x) {
       min_x = origin.x;
       max_x = two.x;
@@ -210,7 +214,7 @@ public class AreaComponent extends JPanel {
     this.setBounds(r);
   }
 
-  public void move_area(int x, int y) {
+  public void moveArea(int x, int y) {
     origin.x += x;
     origin.y += y;
     r.x = origin.x;
@@ -218,8 +222,9 @@ public class AreaComponent extends JPanel {
     setBounds(r);
   }
 
-  public void resize_area(int x, int y) {
-    int width_n = (int) r.getWidth(), height_n = (int) r.getHeight();
+  public void resizeArea(int x, int y) {
+    int width_n = (int) r.getWidth();
+    int height_n = (int) r.getHeight();
     origin = r.getLocation();
     switch(action_type) {
       case 0:
@@ -262,6 +267,8 @@ public class AreaComponent extends JPanel {
         height_n = height;
         width_n = width+x;
         break;
+      default:
+        break;
     }
     r.setBounds(origin.x, origin.y, width_n, height_n);
     setBounds(r);
@@ -271,7 +278,7 @@ public class AreaComponent extends JPanel {
     return Math.sqrt(r.width*r.width+r.height*r.height);
   }
 
-  public boolean near_to_border(Point p) {
+  public boolean nearToBorder(Point p) {
     int diff = 5;
     return(Math.abs(r.getMinX()-p.x) < diff || Math.abs(r.getMaxX()-p.x) < diff
     || Math.abs(r.getMinY() - p.y) < diff || Math.abs(r.getMaxY() - p.y) < diff);

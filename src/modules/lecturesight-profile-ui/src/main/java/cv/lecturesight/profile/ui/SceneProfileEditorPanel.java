@@ -21,9 +21,12 @@ import cv.lecturesight.display.CustomRenderer;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.profile.api.ProfileSerializerException;
-import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
+import cv.lecturesight.profile.api.Zone;
+
+import org.pmw.tinylog.Logger;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -37,10 +40,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -205,7 +208,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
         case CALIBRATION:
           drawMarkerZone(g, z, black_solid, red_transparent, (selection != null && z == selection.zone));
           break;
-
+        default:
+          break;
       }
     }
   }
@@ -478,6 +482,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
             prevRight = false;
             prevDown = false;
             break;
+          default:
+            break;
         }
 
         boolean right = prevRight;
@@ -678,6 +684,9 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
           }
 
           break;
+
+        default:
+          break;
       }
     }
   }
@@ -691,7 +700,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     DraggingType dragging;
     Zone zone;
 
-    public ObjectSelection(Zone area, DraggingType type) {
+    ObjectSelection(Zone area, DraggingType type) {
       this.dragging = type;
       this.zone = area;
     }
@@ -702,7 +711,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     String name;
     SceneProfile profile;
 
-    public SceneProfileListItem(SceneProfile profile) {
+    SceneProfileListItem(SceneProfile profile) {
       this.name = profile.name;
       this.profile = profile;
     }
@@ -1013,7 +1022,7 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
     }
     String filename = sanitizeFilename(JOptionPane.showInputDialog(this, "Enter a file name for new profile: ", "Create Profile", 1));
 
-    if (filename.equals(".scn")) {
+    if (".scn".equals(filename)) {
       return;
     }
 

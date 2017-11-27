@@ -13,7 +13,7 @@ import cv.lecturesight.profile.api.SceneProfile;
  * @author wulff
  */
 public class ProfilePreferencesDialog extends javax.swing.JDialog {
-  
+
   private SceneProfile profile;
 
   /**
@@ -23,7 +23,7 @@ public class ProfilePreferencesDialog extends javax.swing.JDialog {
     super(parent, true);
     initComponents();
   }
-  
+
   /**
    * Creates new form ProfilePreferencesDialog
    */
@@ -80,42 +80,42 @@ public class ProfilePreferencesDialog extends javax.swing.JDialog {
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
     layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addGroup(layout.createSequentialGroup()
-            .addGap(0, 0, Short.MAX_VALUE)
-            .addComponent(cancelButton)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(okButton))
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(nameLabel)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(nameTextfield))
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(descriptionLabel)
-            .addGap(0, 0, Short.MAX_VALUE))
-          .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE))
-        .addContainerGap())
-    );
+                              layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                              .addGroup(layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                  .addGroup(layout.createSequentialGroup()
+                                                            .addGap(0, 0, Short.MAX_VALUE)
+                                                            .addComponent(cancelButton)
+                                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(okButton))
+                                                  .addGroup(layout.createSequentialGroup()
+                                                            .addComponent(nameLabel)
+                                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                            .addComponent(nameTextfield))
+                                                  .addGroup(layout.createSequentialGroup()
+                                                            .addComponent(descriptionLabel)
+                                                            .addGap(0, 0, Short.MAX_VALUE))
+                                                  .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE))
+                                        .addContainerGap())
+                              );
     layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(nameLabel)
-          .addComponent(nameTextfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addGap(18, 18, 18)
-        .addComponent(descriptionLabel)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(okButton)
-          .addComponent(cancelButton))
-        .addContainerGap())
-    );
+                            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                      .addContainerGap()
+                                      .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(nameLabel)
+                                                .addComponent(nameTextfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                      .addGap(18, 18, 18)
+                                      .addComponent(descriptionLabel)
+                                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                      .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                      .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(okButton)
+                                                .addComponent(cancelButton))
+                                      .addContainerGap())
+                            );
 
     pack();
   }// </editor-fold>//GEN-END:initComponents
@@ -133,11 +133,11 @@ public class ProfilePreferencesDialog extends javax.swing.JDialog {
   /**
    * @param args the command line arguments
    */
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-     * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+    //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+    /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+     * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
      */
     try {
       for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -155,7 +155,7 @@ public class ProfilePreferencesDialog extends javax.swing.JDialog {
     } catch (javax.swing.UnsupportedLookAndFeelException ex) {
       java.util.logging.Logger.getLogger(ProfilePreferencesDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
     }
-        //</editor-fold>
+    //</editor-fold>
 
     /* Create and display the dialog */
     java.awt.EventQueue.invokeLater(new Runnable() {
@@ -182,3 +182,4 @@ public class ProfilePreferencesDialog extends javax.swing.JDialog {
   private javax.swing.JButton okButton;
   // End of variables declaration//GEN-END:variables
 }
+

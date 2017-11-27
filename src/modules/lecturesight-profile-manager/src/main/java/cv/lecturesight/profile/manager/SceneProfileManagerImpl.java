@@ -17,22 +17,31 @@
  */
 package cv.lecturesight.profile.manager;
 
+import static cv.lecturesight.profile.api.Zone.Type.PERSON;
+
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.SceneProfileSerializer;
 import cv.lecturesight.profile.api.Zone;
-import static cv.lecturesight.profile.api.Zone.Type.PERSON;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationService;
-import java.io.*;
-import java.util.*;
+
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 @Component(name="lecturesight.profile.manager", immediate=true)
 @Service()
@@ -45,14 +54,16 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   @Reference
   private ConfigurationService configService;
   private ProfileStore profiles = new ProfileStore();
-  private SceneProfile defaultProfile, activeProfile, loadProfile;
+  private SceneProfile defaultProfile;
+  private SceneProfile activeProfile;
+  private SceneProfile loadProfile;
   private Set<SceneProfileListener> subscribers = new HashSet<SceneProfileListener>();
   private String configuredProfile;
   private boolean active = true;
 
   protected void activate(ComponentContext cc) throws Exception {
     // make sure profile directory existis
-    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");  
+    File profileDir = new File(System.getProperty("user.dir") + File.separator + "profiles");
     if (!profileDir.exists()) {
       Logger.info("Profile directory not existing. Attempting to create " + profileDir.getAbsolutePath());
       try {
@@ -61,12 +72,12 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
         Logger.error("Failed to create profile directory. ", e);
       }
     }
-    
+
     // create system default profile
     defaultProfile = new SceneProfile("default", "System default profile", 640, 360);
     defaultProfile.name = "default";
     profiles.put(defaultProfile);
-    
+
     // get name of configured profile
     configuredProfile = config.get(PROPKEY_PROFILE);
 
@@ -74,18 +85,18 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     File[] files = profileDir.listFiles();
 
     for (File file : files) {
-        if (file.isFile() && canHandle(file)) {
-            install(file);
-        }
+      if (file.isFile() && canHandle(file)) {
+        install(file);
+      }
     }
 
     // setting defaultProfile as active profile
     // if the configured profile has not been specified or is not available
     if (activeProfile == null) {
-        activeProfile = defaultProfile;
+      activeProfile = defaultProfile;
     }
 
-    Logger.info("Activated. Configured scene profile is: " + activeProfile.name );
+    Logger.info("Activated. Configured scene profile is: " + activeProfile.name);
   }
 
   protected void deactivate(ComponentContext cc) {
@@ -103,7 +114,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     activeProfile = profile.clone();
     notifySubscribersActivated(profile);
     Logger.info("Activated scene profile: " + activeProfile.name);
-    
+
     // if profile has a person zone then adjust video analysis parameters accordingly
     Zone person = findPersonZone(activeProfile);
     if (person != null) {
@@ -112,43 +123,43 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
       double height = person.height;
       double whole = width * height;
       double avg_weight = (3.0/4.0) * whole;
-      
+
       Properties conf = configService.getSystemConfiguration();
-      
+
       double minweight = (1.0/10) * avg_weight;
       minweight = minweight < 20 ? 20 : minweight;
       conf.setProperty("cv.lecturesight.videoanalysis.foreground.ccl.blobsize.min", Integer.toString((int)minweight));
       conf.setProperty("cv.lecturesight.videoanalysis.foreground.ccl.blobsize.max", Integer.toString((int)whole));
-      
+
       double minheight = (1.0/10) * height;
       conf.setProperty("cv.lecturesight.regiontracker.height.min", Integer.toString((int)minheight));
       conf.setProperty("cv.lecturesight.regiontracker.height.max", Integer.toString((int)(height + 3 * minheight)));
-      
+
       double minwidth = (1.0/10) * width;
       conf.setProperty("cv.lecturesight.regiontracker.width.min", Integer.toString((int)minwidth));
       conf.setProperty("cv.lecturesight.regiontracker.width.max", Integer.toString((int)(minwidth + 2 * minwidth)));
-      
+
       conf.setProperty("cv.lecturesight.regiontracker.size.min", Integer.toString((int)((1.0/10) * whole)));
       conf.setProperty("cv.lecturesight.regiontracker.size.max", Integer.toString((int)whole));
-      
+
       conf.setProperty("cv.lecturesight.objecttracker.simple.width.min", Integer.toString((int)((1.0/4) * width)));
       conf.setProperty("cv.lecturesight.objecttracker.simple.width.max", Integer.toString((int)(width + 2 * minwidth)));
       conf.setProperty("cv.lecturesight.objecttracker.simple.height.min", Integer.toString((int)((1.0/4) * height)));
       conf.setProperty("cv.lecturesight.objecttracker.simple.height.max", Integer.toString((int)(height + 3 * minheight)));
-      
+
       conf.setProperty("cv.lecturesight.objecttracker.simple.template.width", Integer.toString((int)((1.0/4) * height)));
       conf.setProperty("cv.lecturesight.objecttracker.simple.template.height", Integer.toString((int)(height + 3 * minheight)));
-      
+
       configService.notifyListeners();
     }
   }
-  
+
   /** Returns the first occurrence of a Zone of Type PERSON or null if such a
    * zone is not in the profile.
-   * 
+   *
    * @param profile
-   * @return Person Zone 
-   */  
+   * @return Person Zone
+   */
   private Zone findPersonZone(SceneProfile profile) {
     for (Zone z : profile.getAllZones()) {
       if (z.getType().equals(PERSON)) {
@@ -162,7 +173,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
   public List<SceneProfile> getProfiles() {
     return profiles.getAll();
   }
-  
+
   @Override
   public void putProfile(SceneProfile profile) {
     if (profiles.hasProfile(profile)) {
@@ -176,7 +187,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
       setActiveProfile(profile);
     }
   }
-  
+
   @Override
   public void removeProfile(SceneProfile profile) {
     String filename = profiles.getFilename(profile);
@@ -197,7 +208,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (profile.equals(defaultProfile)) {
       throw new IllegalArgumentException("The profile cannot be saved since it is the default profile.");
     }
-    
+
     // save the profile if it was installed from file
     String filename = profiles.getFilename(profile);
     if (filename != null) {
@@ -214,9 +225,9 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
       throw new IllegalArgumentException("The profile cannot be saved since it has no artifact origin.");
     }
   }
-  
-  
- // <editor-fold defaultstate="collapsed" desc="Event Notification Stuff">   
+
+
+  // <editor-fold defaultstate="collapsed" desc="Event Notification Stuff">
   @Override
   public void registerProfileListener(SceneProfileListener listener) {
     subscribers.add(listener);
@@ -231,51 +242,51 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     for (SceneProfileListener listener : subscribers) {
       listener.profileActivated(profile);
     }
-  }  
-  
+  }
+
   private void notifySubscribersInstalled(SceneProfile profile) {
     for (SceneProfileListener listener : subscribers) {
       listener.profileInstalled(profile);
     }
   }
-  
+
   private void notifySubscribersUpdated(SceneProfile profile) {
     for (SceneProfileListener listener : subscribers) {
       listener.profileUpdated(profile);
     }
   }
-  
+
   private void notifySubscribersRemoved(SceneProfile profile) {
     for (SceneProfileListener listener : subscribers) {
       listener.profileRemoved(profile);
     }
   }
- // </editor-fold>
-  
-  
- // <editor-fold defaultstate="collapsed" desc="ArtifactInstaller Methods"> 
+  // </editor-fold>
+
+
+  // <editor-fold defaultstate="collapsed" desc="ArtifactInstaller Methods">
   @Override
   public boolean canHandle(File file) {
     return file.isFile() && file.getName().toLowerCase().endsWith(FILEEXT_PROFILE);
   }
-  
+
   @Override
   public void install(File file) throws Exception {
     if (!active) return;
 
     String filename = file.getAbsolutePath();
     try {
-        SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
-        profiles.putWithFilename(filename, profile);
-        Logger.info("Installed scene profile \"" + profile.name + "\" from " + filename);
-        notifySubscribersInstalled(profile);
-    
-        // test if the installed artifact contains the active profile, activate it if so
-        if (configuredProfile.equals(profile.name)) {
-          setActiveProfile(profile);
-        }
+      SceneProfile profile = SceneProfileSerializer.deserialize(new FileInputStream(file));
+      profiles.putWithFilename(filename, profile);
+      Logger.info("Installed scene profile \"" + profile.name + "\" from " + filename);
+      notifySubscribersInstalled(profile);
+
+      // test if the installed artifact contains the active profile, activate it if so
+      if (configuredProfile.equals(profile.name)) {
+        setActiveProfile(profile);
+      }
     } catch (Exception e) {
-        Logger.warn("Ignoring invalid scene profile in " + filename + ": " + e.getMessage());
+      Logger.warn("Ignoring invalid scene profile in " + filename + ": " + e.getMessage());
     }
   }
 
@@ -288,7 +299,7 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     profiles.putWithFilename(filename, profile);
     Logger.info("Updated scene profile \"" + profile.name + "\" from " + filename);
     notifySubscribersUpdated(profile);
-    
+
     // test if active profile was updated
     if (activeProfile.equals(profile)) {
       setActiveProfile(profile);
@@ -300,19 +311,19 @@ public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactIns
     if (!active) return;
 
     String filename = file.getAbsolutePath();
-    
+
     if (profiles.hasFilename(filename)) {
       SceneProfile profile = profiles.getByFilename(filename);
       profiles.remove(profile);
       Logger.info("Removed scene profile " + filename);
       notifySubscribersRemoved(profile);
-      
+
       // test if active profile was removed, activated default profile if so
       if (activeProfile.equals(profile)) {
         setActiveProfile(defaultProfile);
       }
     }
   }
-// </editor-fold>
+  // </editor-fold>
 
 }

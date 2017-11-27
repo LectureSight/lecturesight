@@ -18,6 +18,7 @@
 package cv.lecturesight.profile.manager;
 
 import cv.lecturesight.profile.api.SceneProfile;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,12 +28,12 @@ import java.util.List;
  * @author wulff
  */
 public class ProfileStore {
-  
+
   // List of SceneProfiles and (optionally) a path to an artifact origin
   private HashMap<SceneProfile, String> pl = new HashMap<SceneProfile, String>();
-  
+
   /** Returns true if this store contains a profile with the given name.
-   * 
+   *
    * @param name of the profile in question
    * @return true if profile was found
    */
@@ -44,7 +45,7 @@ public class ProfileStore {
     }
     return false;
   }
-  
+
   synchronized boolean hasProfile(SceneProfile profile)  {
     for (SceneProfile p : pl.keySet()) {
       if (p.equals(profile)) {
@@ -53,7 +54,7 @@ public class ProfileStore {
     }
     return false;
   }
-  
+
   synchronized boolean hasFilename(String filename) {
     return pl.values().contains(filename);
   }
@@ -61,7 +62,7 @@ public class ProfileStore {
   synchronized String getFilename(SceneProfile profile) {
     return pl.get(profile);
   }
-  
+
   synchronized SceneProfile getByName(String name) {
     for (SceneProfile p : pl.keySet()) {
       if (p.name.equals(name)) {
@@ -70,8 +71,8 @@ public class ProfileStore {
     }
     return null;
   }
-  
-  synchronized SceneProfile getByFilename(String filename) {  
+
+  synchronized SceneProfile getByFilename(String filename) {
     for (SceneProfile p : pl.keySet()) {
       if (pl.get(p).equals(filename)) {
         return p;
@@ -79,7 +80,7 @@ public class ProfileStore {
     }
     return null;
   }
-  
+
   synchronized void put(SceneProfile profile) {
     pl.put(profile, null);
   }
@@ -87,11 +88,11 @@ public class ProfileStore {
   synchronized void putWithFilename(String filename, SceneProfile profile) {
     pl.put(profile, filename);
   }
-  
+
   synchronized void remove(SceneProfile profile) {
     pl.remove(profile);
   }
-    
+
   synchronized void removeByFilename(String filename) {
     for (SceneProfile p : pl.keySet()) {
       if (pl.get(p).equals(filename)) {
@@ -99,7 +100,7 @@ public class ProfileStore {
       }
     }
   }
-  
+
   synchronized List<SceneProfile> getAll() {
     ArrayList<SceneProfile> list = new ArrayList<SceneProfile>();
     for (SceneProfile p : pl.keySet()) {

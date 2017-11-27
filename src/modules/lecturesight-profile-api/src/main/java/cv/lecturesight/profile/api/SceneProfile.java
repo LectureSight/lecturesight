@@ -48,7 +48,7 @@ public class SceneProfile {
   }
 
   /** Returns true if this profile contains a Zone that is equal to <code>zone</code>.
-   * 
+   *
    * @param zone
    * @return true if profile contains zone, false otherwise
    */
@@ -62,14 +62,14 @@ public class SceneProfile {
   }
 
   /** Puts <code>zone</code> into this profile.
-   * @param zone 
+   * @param zone
    */
   public synchronized void putZone(Zone zone) {
     zones.add(zone);
   }
 
   /** Removes <code>zone</code> from the collection of Zones.
-   * 
+   *
    * @param zone Zone to be removed
    */
   public synchronized void removeZone(Zone zone) {
@@ -77,12 +77,12 @@ public class SceneProfile {
       zones.remove(zone);
     }
   }
-  
-  /** Returns a deep copy of the first zone found having the specified name or 
+
+  /** Returns a deep copy of the first zone found having the specified name or
    * null if such a zone can not be found.
-   * 
+   *
    * @param name of the Zone to be retrieved
-   * @return Zone or null, if Zone with specified name is not found 
+   * @return Zone or null, if Zone with specified name is not found
    */
   public synchronized Zone getZoneByName(String name) {
     for (Zone z : zones) {
@@ -94,7 +94,7 @@ public class SceneProfile {
   }
 
   /** Returns an List of deep copies of all Zones in this profile.
-   * 
+   *
    * @return List of all Zones in this profile
    */
   public synchronized List<Zone> getAllZones() {
@@ -106,7 +106,7 @@ public class SceneProfile {
   }
 
   /** Returns a List of deep copies of all Zones of Type IGNORE.
-   * 
+   *
    * @return List of IGNORE Zones
    */
   public synchronized List<Zone> getIgnoreZones() {
@@ -120,7 +120,7 @@ public class SceneProfile {
   }
 
   /** Returns a List of deep copies of all Zones of Type TRACK.
-   * 
+   *
    * @return List of TRACK Zones.
    */
   public synchronized List<Zone> getTrackingZones() {
@@ -134,7 +134,7 @@ public class SceneProfile {
   }
 
   /** Returns a List of deep copies of all Zones of Type TRIGGER.
-   * 
+   *
    * @return List of TRIGGER Zones
    */
   public synchronized List<Zone> getTriggerZones() {
@@ -170,29 +170,29 @@ public class SceneProfile {
     }
     return clone;
   }
-  
+
   @Override
   public synchronized boolean equals(Object other) {
     SceneProfile otherProfile;
 
     // test if other is even a SceneProfile, cast to if so
-//    if (other instanceof SceneProfile) {
-//      otherProfile = (SceneProfile) other;
-//    } else {
-//      return false;
-//    }
+    //    if (other instanceof SceneProfile) {
+    //      otherProfile = (SceneProfile) other;
+    //    } else {
+    //      return false;
+    //    }
 
     // test if both have same number of zones
-//    if (this.zones.size() != otherProfile.zones.size()) {
-//      return false;
-//    }
+    //    if (this.zones.size() != otherProfile.zones.size()) {
+    //      return false;
+    //    }
 
     // test if zones in both profiles are the same
-//    for (Zone zone : otherProfile.zones) {
-//      if (!this.containsZone(zone)) {
-//        return false;
-//      }
-//    }
+    //    for (Zone zone : otherProfile.zones) {
+    //      if (!this.containsZone(zone)) {
+    //        return false;
+    //      }
+    //    }
 
     return this.name.equals(((SceneProfile)other).name);
   }
