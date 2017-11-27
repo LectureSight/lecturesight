@@ -26,5 +26,5 @@ public interface HeartBeat {
   void step(int i);
   void go();
   void stop();
-  
+
 }

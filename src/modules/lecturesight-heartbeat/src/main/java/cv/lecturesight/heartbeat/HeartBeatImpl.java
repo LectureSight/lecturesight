@@ -17,15 +17,16 @@
  */
 package cv.lecturesight.heartbeat;
 
-import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.framesource.FrameSourceProvider;
+import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.util.conf.Configuration;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -62,7 +63,7 @@ public class HeartBeatImpl implements HeartBeat {
     if (autostart > 0) {
       init();
       Logger.info("Autostart in " + autostart + "ms...");
-      
+
       new Thread(new Runnable() {
 
         @Override
@@ -80,11 +81,11 @@ public class HeartBeatImpl implements HeartBeat {
             Logger.info("Autostart disabled");
           }
         }
-        
+
       }).start();
     }
   }
-  
+
   protected void deactivate(ComponentContext cc) throws Exception {
     if (ready) {
       deinit();
@@ -123,18 +124,18 @@ public class HeartBeatImpl implements HeartBeat {
     // create signal barrier
     barrier = ocl.createSignalBarrier(listenTo);
     ocl.registerTriggerable(barrier.getSignal(),
-            new Triggerable() {
+                            new Triggerable() {
 
-              @Override
-              public void triggered(OCLSignal signal) {   // when all signals have arrived
-                if (iterationsToRun != 0) {
-                  nextFrame();                              // accquire next frame
-                  if (iterationsToRun > 0) {
-                    iterationsToRun--;
-                  }
-                }
-              }
-            });
+      @Override
+      public void triggered(OCLSignal signal) {   // when all signals have arrived
+        if (iterationsToRun != 0) {
+          nextFrame();                              // accquire next frame
+          if (iterationsToRun > 0) {
+            iterationsToRun--;
+          }
+        }
+      }
+    });
 
     ready = true;
     Logger.info("Initialized");
