@@ -18,9 +18,11 @@
 package cv.lecturesight.opencl.impl;
 
 import cv.lecturesight.opencl.OCLProgramStore;
+
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLProgram;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;

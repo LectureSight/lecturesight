@@ -19,15 +19,17 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.opencl.OpenCLService;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.pmw.tinylog.Logger;
+
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class DisplayServiceFactory implements ServiceFactory {
 
