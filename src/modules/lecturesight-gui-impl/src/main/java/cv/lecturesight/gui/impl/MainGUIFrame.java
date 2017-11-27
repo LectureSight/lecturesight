@@ -20,6 +20,9 @@ package cv.lecturesight.gui.impl;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.util.conf.ConfigurationService;
 
+import org.osgi.framework.BundleContext;
+import org.pmw.tinylog.Logger;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
@@ -35,8 +39,6 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
-import org.osgi.framework.BundleContext;
-import org.pmw.tinylog.Logger;
 
 public class MainGUIFrame extends javax.swing.JFrame implements ActionListener,InternalFrameListener {
 

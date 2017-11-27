@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 
 public interface UserInterface {
 
-  public String getTitle();
-  public JPanel getPanel();
-  public boolean isResizeable();
+  String getTitle();
+  JPanel getPanel();
+  boolean isResizeable();
 }
