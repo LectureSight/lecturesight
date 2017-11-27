@@ -19,19 +19,20 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
 import cv.lecturesight.gui.api.UserInterface;
+
 import javax.swing.JPanel;
 
 public class DisplayUI implements UserInterface {
 
   String title;
   DisplayUIPanel ui;
-  
+
   public DisplayUI(Display display, String title) {
     this.title = title;
     ui = new DisplayUIPanel(title);
     ui.setDisplay(display);
   }
-  
+
   @Override
   public String getTitle() {
     return title;

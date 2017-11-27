@@ -19,6 +19,7 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayListener;
 import cv.lecturesight.display.DisplayPanel;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -27,6 +28,7 @@ import java.awt.event.HierarchyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
 
 public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, HierarchyListener {
@@ -47,7 +49,7 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
   public Dimension getImageDimension() {
     return new Dimension((int) size.getWidth(), (int) size.getHeight());
   }
-  
+
   @Override
   public void paint(Graphics componentG) {
     display.addListener(this);
@@ -56,14 +58,15 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
 
     // draw gpu image to render buffer
     renderBufferG.drawImage(gpuImage, 0, 0, this);
-    
+
     // draw custom graphics (if any) to render buffer
     if (hasCustomRenderer()) {
       getCustomRenderer().render(renderBufferG);
     }
-    
+
     // draw render buffer to component
-    int x = 0, y = 0;
+    int x = 0;
+    int y = 0;
     if (size.getWidth() < getWidth() || size.getHeight() < getHeight()) {
       x = (getWidth() - (int) size.getWidth()) / 2;
       y = (getHeight() - (int) size.getHeight()) / 2;
@@ -71,16 +74,16 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
     componentG.setColor(Color.black);
     componentG.drawRect(0, 0, getWidth(), getHeight());
     componentG.drawImage(renderBuffer, x, y, this);
-    
+
     // save render buffer if recording
     if (isRecording()) {
       File filepath = new File(getRecordingDir().getAbsolutePath() + File.separator + "frame-" + Long.toString(display.getCurrentFrame()) + ".png");
-      
+
       try {
         ImageIO.write(renderBuffer, "PNG", filepath);
       } catch (IOException ex) {
         // TODO add error logging here
-      }      
+      }
     }
     // TODO dispose renderBufferG here??
   }
@@ -111,12 +114,9 @@ public class DisplayPanelImpl extends DisplayPanel implements DisplayListener, H
   @Override
   public void hierarchyChanged(HierarchyEvent e) {
     if ((HierarchyEvent.SHOWING_CHANGED & e.getChangeFlags()) != 0
-            && (e.getChanged().isVisible() || this.getParent().isShowing())) {
-
-      //System.out.println("ACTIVATE DISPLAYLISTENER");
+        && (e.getChanged().isVisible() || this.getParent().isShowing())) {
       display.addListener(this);
     } else {
-      //System.out.println("DEACTIVATE DISPLAYLISTENER");
       display.removeListener(this);
     }
   }

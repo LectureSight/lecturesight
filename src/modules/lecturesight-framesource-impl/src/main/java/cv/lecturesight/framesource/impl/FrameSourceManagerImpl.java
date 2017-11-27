@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
@@ -31,13 +30,9 @@ import cv.lecturesight.profile.api.SceneProfileEventAdapter;
 import cv.lecturesight.profile.api.SceneProfileManager;
 import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.util.conf.Configuration;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -47,6 +42,14 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.pmw.tinylog.Logger;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Implementation of Service API
@@ -59,9 +62,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   final static String PROPKEY_MRL = "input.mrl";
   final static String PROPKEY_INVERTED = "inverted";
   final static String PROPKEY_MAXFPS = "maxfps";
+  final static String PROPKEY_SNAPSHOT_INTERVAL = "snapshot.interval";
+  final static String PROPKEY_SNAPSHOT_FILE = "snapshot.file";
+
   final static String DISPLAYNAME_INPUT = "cam.overview.input";
   public static final String FRAMESOURCE_NAME_PROPERTY = "cv.lecturesight.framesource.name";
   public static final String FRAMESOURCE_TYPE_PROPERTY = "cv.lecturesight.framesource.type";
+
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
   @Reference
@@ -75,8 +82,11 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
   private FrameSourceDescriptor providerMRL = null;
+
   private boolean inverted = false;
   int maxfps = -1;
+  int snapshotInterval = 0;
+  String snapshotFile;
 
   protected void activate(ComponentContext cc) {
     componentContext = cc;
@@ -91,6 +101,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     maxfps = config.getInt(PROPKEY_MAXFPS);
     if (maxfps > 0) {
       Logger.info("Framesource will be limited to " + maxfps + " fps");
+    }
+
+    snapshotInterval = config.getInt(PROPKEY_SNAPSHOT_INTERVAL);
+    snapshotFile = config.get(PROPKEY_SNAPSHOT_FILE);
+
+    if (!snapshotFile.isEmpty()) {
+      Logger.info("Framesource snapshots will be saved to {} every {} seconds", snapshotFile, snapshotInterval);
     }
 
     // scan for plugins already installed
@@ -142,8 +159,8 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
           updater.profileActivated(spm.getActiveProfile());
           spm.registerProfileListener(updater);
         }
-        
-        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps);
+
+        newSource = new FrameSourceImpl(fsd.getType(), grabber, uploader, maxfps, snapshotInterval, snapshotFile);
       } else {
         throw new FrameSourceException("No factory registered for type " + fsd.getType());
       }
@@ -248,7 +265,7 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     FrameUploader client;
     BufferedImage mask;
 
-    public MaskUpdater(FrameUploader uploader) {
+    MaskUpdater(FrameUploader uploader) {
       client = uploader;
       CLImage2D outimg = uploader.getOutputImage();
       mask = new BufferedImage((int)outimg.getWidth(), (int)outimg.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -259,12 +276,12 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
       Graphics2D g = mask.createGraphics();
       g.setColor(Color.WHITE);
       g.fill3DRect(0, 0, mask.getWidth(), mask.getHeight(), true);
-      
+
       g.setColor(Color.BLACK);
       for (Zone zone : profile.getIgnoreZones()) {
         g.fillRect(zone.x, zone.y, zone.width, zone.height);
       }
-      
+
       client.setMask(mask);
     }
   }

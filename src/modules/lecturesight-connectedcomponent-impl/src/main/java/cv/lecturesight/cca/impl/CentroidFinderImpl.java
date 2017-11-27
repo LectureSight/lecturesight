@@ -17,16 +17,18 @@
  */
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLKernel;
-import com.nativelibs4java.opencl.CLMem.Usage;
-import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.cca.CentroidFinder;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.Position;
+
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLKernel;
+import com.nativelibs4java.opencl.CLMem.Usage;
+import com.nativelibs4java.opencl.CLQueue;
+
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
@@ -35,11 +37,12 @@ public class CentroidFinderImpl implements CentroidFinder {
 
   final static String SIGNAME_DONE = "cv.lecturesight.cca.centroidfinder.DONE";
   EnumMap<CentroidFinder.Signal, OCLSignal> signals =
-          new EnumMap<CentroidFinder.Signal, OCLSignal>(Signal.class);
+  new EnumMap<CentroidFinder.Signal, OCLSignal>(Signal.class);
   OpenCLService ocl;
   ConnectedComponentLabelerImpl ccli;
   CLBuffer<Integer> centroids;
-  int maxCount, numBlobs;
+  int maxCount;
+  int numBlobs;
   int[] centroids_out;
   int[] workDim;
 
@@ -63,7 +66,7 @@ public class CentroidFinderImpl implements CentroidFinder {
   public CLBuffer<Integer> getCentroidBuffer() {
     return centroids;
   }
-  
+
   @Override
   public Position getControid(int id) {
     int index = (id-1) * 2;

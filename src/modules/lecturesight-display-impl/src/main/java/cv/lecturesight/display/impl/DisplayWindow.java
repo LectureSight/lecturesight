@@ -18,33 +18,37 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
+
+import org.pmw.tinylog.Logger;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+
 import javax.swing.JFrame;
 
 public class DisplayWindow implements WindowListener, KeyListener {
-  
+
   String title = "";
   Display display;
   JFrame frame;
-  
+
   public DisplayWindow(String title, Display display) {
     this.title = title;
     this.display = display;
     initComponents();
   }
-  
+
   private void initComponents() {
     frame = new JFrame(title);
     frame.getContentPane().add(display.getDisplayPanel());
     frame.setResizable(false);
     frame.addWindowListener(this);
   }
-  
+
   public void setVisible(boolean b) {
-    frame.setVisible(b);  
+    frame.setVisible(b);
   }
 
   @Override
@@ -77,7 +81,7 @@ public class DisplayWindow implements WindowListener, KeyListener {
 
   @Override
   public void keyTyped(KeyEvent e) {
-    System.out.println("Key Code: " + e.getKeyCode());
+    Logger.trace("Key Code: {}", e.getKeyCode());
   }
 
   @Override

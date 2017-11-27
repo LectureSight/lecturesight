@@ -20,6 +20,7 @@ package cv.lecturesight.display;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.io.File;
+
 import javax.swing.JLabel;
 
 public abstract class DisplayPanel extends JLabel {
@@ -48,7 +49,7 @@ public abstract class DisplayPanel extends JLabel {
     Point pout = new Point(p);
 
     // the image is centred if cDim.x|y > iDim.x|y otherwise origins are coincident
-    if ( cDim.width > iDim.width || cDim.height > iDim.height ) {
+    if (cDim.width > iDim.width || cDim.height > iDim.height) {
       pout.x -= (cDim.width - iDim.width) / 2;
       pout.y -= (cDim.height - iDim.height) / 2;
     }

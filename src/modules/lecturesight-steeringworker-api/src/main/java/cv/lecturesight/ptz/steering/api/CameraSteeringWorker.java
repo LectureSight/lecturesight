@@ -41,6 +41,10 @@ public interface CameraSteeringWorker {
   
   public float getZoom();
 
+  public void setFrameWidth(float width);
+
+  public float getFrameWidth();
+
   public void movePreset(int preset);
 
   public void moveHome();

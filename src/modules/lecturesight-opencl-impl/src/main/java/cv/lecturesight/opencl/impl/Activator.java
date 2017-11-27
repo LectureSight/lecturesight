@@ -17,6 +17,11 @@
  */
 package cv.lecturesight.opencl.impl;
 
+import cv.lecturesight.opencl.OpenCLService;
+import cv.lecturesight.opencl.api.OCLSignal;
+import cv.lecturesight.opencl.api.Triggerable;
+import cv.lecturesight.opencl.impl.profiling.ProfilingServer;
+
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
@@ -29,10 +34,16 @@ import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
 import com.nativelibs4java.opencl.JavaCL;
 import com.nativelibs4java.util.IOUtils;
-import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.opencl.api.Triggerable;
-import cv.lecturesight.opencl.impl.profiling.ProfilingServer;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Level;
+import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,14 +55,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceException;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.pmw.tinylog.Level;
-import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator, ServiceFactory {
 
@@ -75,24 +78,24 @@ public final class Activator implements BundleActivator, ServiceFactory {
     // Device report for all available devices
     CLDevice[] devices = oclContext.getPlatform().listAllDevices(true);
     for (CLDevice device : devices) {
-        Logger.info(generateDeviceReport(device));
+      Logger.info(generateDeviceReport(device));
     }
 
     // Device which will be used
     devices = oclContext.getDevices();
     for (CLDevice device : devices) {
-        Logger.info("Selected OpenCL device: " + device.getVendor() + " " + device.getName());
+      Logger.info("Selected OpenCL device: " + device.getVendor() + " " + device.getName());
     }
 
     // Check supported image formats for the selected device
     if (Logger.getLevel() == Level.TRACE) {
-        StringBuilder formatlist = new StringBuilder();
-        CLImageFormat[] supportedImageFormats = oclContext.getSupportedImageFormats(Flags.ReadWrite, ObjectType.Image2D);
-        for (CLImageFormat format : supportedImageFormats) {
-            formatlist.append(format);
-            formatlist.append("\n");
-        }
-        Logger.trace("Supported image formats ({}):\n\n{}", supportedImageFormats.length, formatlist);
+      StringBuilder formatlist = new StringBuilder();
+      CLImageFormat[] supportedImageFormats = oclContext.getSupportedImageFormats(Flags.ReadWrite, ObjectType.Image2D);
+      for (CLImageFormat format : supportedImageFormats) {
+        formatlist.append(format);
+        formatlist.append("\n");
+      }
+      Logger.trace("Supported image formats ({}):\n\n{}", supportedImageFormats.length, formatlist);
     }
 
     // set up CL Command Queue
@@ -165,12 +168,12 @@ public final class Activator implements BundleActivator, ServiceFactory {
       try {
         CLPlatform[] platforms = JavaCL.listPlatforms();
         List<CLDevice> devices = new LinkedList();
-        
+
         // find all available devices of configured type
         for (CLPlatform platform : platforms) {
           devices.addAll(Arrays.asList(platform.listDevices(type, true)));
         }
-        
+
         // find best device
         Iterator<CLDevice> it = devices.iterator();
         CLDevice best = it.next();
@@ -183,10 +186,10 @@ public final class Activator implements BundleActivator, ServiceFactory {
             best = comp.compare(device, best) > 0 ? device : best;
           }
         }
-      
+
         // FIXME provide ContextProperties?
         ctx = JavaCL.createContext(null, best);
-        
+
       } catch (Exception e) {
         Exception ex = new IllegalStateException("No suitable compute device found: " + type.name());
         Logger.error("!! OPENCL INITIALIZATION FAILED !! ", ex);
@@ -195,11 +198,11 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
     }
 
-    // testing if context is working by getting platform information 
+    // testing if context is working by getting platform information
     try {
       CLPlatform platform = ctx.getPlatform();
       Logger.info("OpenCL platform: " + platform.getName() + " " + platform.getVersion() + " " + platform.getProfile());
-    } catch (Exception e) {   
+    } catch (Exception e) {
       throw new IllegalStateException("Unable to query context for OpenCL platform!", e);
     }
 
@@ -207,15 +210,15 @@ public final class Activator implements BundleActivator, ServiceFactory {
   }
 
   private String generateDeviceReport(CLDevice device) {
-    final float KILOBYTE = 1024;
-    final float MEGABYTE = 1024 * KILOBYTE;
+    final float kiloByte = 1024;
+    final float megaByte = 1024 * kiloByte;
     String out = "OpenCL device report:\n\n";
 
     out += " " + device.getVendor() + " " + device.getName() + " (driver version: " + device.getDriverVersion() + ")\n\n";
     out += " Compute units :  " + device.getMaxComputeUnits() + " at " + device.getMaxClockFrequency() + " MHz max\n\n";
-    out += "      Memories :  global   : " + (device.getGlobalMemSize() / MEGABYTE) + " MB\n";
-    out += "                  constant : " + (device.getMaxConstantBufferSize() / KILOBYTE) + " KB\n";
-    out += "                  local    : " + (device.getLocalMemSize() / KILOBYTE) + " KB\n\n";
+    out += "      Memories :  global   : " + (device.getGlobalMemSize() / megaByte) + " MB\n";
+    out += "                  constant : " + (device.getMaxConstantBufferSize() / kiloByte) + " KB\n";
+    out += "                  local    : " + (device.getLocalMemSize() / kiloByte) + " KB\n\n";
     out += "    Workgroups :  " + device.getMaxWorkGroupSize() + " threads max in " + device.getMaxWorkItemDimensions() + " dimensions\n";
     out += " 2D Image size :  " + device.getImage2DMaxWidth() + "x" + device.getImage2DMaxHeight() + " max\n";
 
@@ -223,7 +226,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
     out += "Work item sizes:  ";
 
     for (long size : workItemSizes) {
-	out += size + " ";
+      out += size + " ";
     }
     out += "\n";
 
@@ -293,7 +296,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
   public static boolean configured(String propkey) {
     try {
       String pvalue = System.getProperty(propkey);
-      return (pvalue.equalsIgnoreCase("true") || pvalue.equalsIgnoreCase("yes") || pvalue.equalsIgnoreCase("on"));
+      return ("true".equalsIgnoreCase(pvalue) || "yes".equalsIgnoreCase(pvalue) || "on".equalsIgnoreCase(pvalue));
     } catch (Exception e) {
       return false;
     }
@@ -304,7 +307,7 @@ public final class Activator implements BundleActivator, ServiceFactory {
       String strval = System.getProperty(PROPKEY_DEVICE_TYPE);
       return CLDevice.Type.valueOf(strval);
     } catch (Exception e) {
-      return CLDevice.Type.GPU;   // defaults is GPU 
+      return CLDevice.Type.GPU;   // defaults is GPU
     }
   }
 }

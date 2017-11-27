@@ -17,8 +17,10 @@
  */
 package cv.lecturesight.display;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import java.util.Set;
 
 public interface DisplayService {

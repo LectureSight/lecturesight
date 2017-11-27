@@ -25,5 +25,5 @@ public interface ConnectedComponentService {
   ConnectedComponentLabeler createLabeler(CLImage2D binaryImage, int maxBlobs, int minSize, int maxSize);
   BoundingBoxFinder createBoundingBoxFinder(ConnectedComponentLabeler ccl);
   CentroidFinder createCentroidFinder(ConnectedComponentLabeler ccl);
-  
+
 }

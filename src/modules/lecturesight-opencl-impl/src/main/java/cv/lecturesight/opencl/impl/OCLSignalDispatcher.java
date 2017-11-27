@@ -18,9 +18,11 @@
 package cv.lecturesight.opencl.impl;
 
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import org.pmw.tinylog.Logger;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import org.pmw.tinylog.Logger;
 
 public class OCLSignalDispatcher extends Thread {
 

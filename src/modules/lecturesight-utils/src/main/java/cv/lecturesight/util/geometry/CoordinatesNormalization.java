@@ -19,7 +19,8 @@ package cv.lecturesight.util.geometry;
 
 public class CoordinatesNormalization {
 
-  private int maxX, maxY;
+  private int maxX;
+  private int maxY;
 
   public CoordinatesNormalization(int maxX, int maxY) {
     this.maxX = maxX;
