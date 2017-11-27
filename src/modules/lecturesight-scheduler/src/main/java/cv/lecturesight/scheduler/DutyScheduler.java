@@ -268,6 +268,14 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
         long now = System.currentTimeMillis();   // get current time
 	Event current = events.getNextAfter(0);	 // get earliest event
 
+        // Step when inactive so that overview images are snapshotted (if configured). This means that
+        // overview images will continue to be processed and displayed at 1fps (execution interval),
+        // without any analysis or camera movement taking place.
+        if (!heart.isRunning()) {
+          heart.step(1);
+        }
+
+        // Fire pending events
 	while ((current != null)  && (current.getTime() <= now)) {
 		fireEvent(current);
 		events.remove(current);
