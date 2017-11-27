@@ -10,7 +10,7 @@
                 <goal>install</goal>
             </goals>
             <properties>
-                <deployTo>/opt/lecturesight/runtime/bundles/application</deployTo>
+                <deployTo>/home/wulff/code/lecturesight/felix-4.2.0/lecturesight</deployTo>
             </properties>
         </action>
     </actions>
