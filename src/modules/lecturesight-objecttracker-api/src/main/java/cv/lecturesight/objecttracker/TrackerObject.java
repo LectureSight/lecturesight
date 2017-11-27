@@ -27,19 +27,18 @@ import java.util.Map;
  * @author wulff
  */
 public class TrackerObject {
-  
+
   private static int nextId = 1;
   private int id = nextId++;
-  private long firstSeen, lastSeen;
+  private long firstSeen;
+  private long lastSeen;
   private HashMap<String,Object> properties = new HashMap<String,Object>();
- 
-  final Calendar cal = Calendar.getInstance();
- 
+
   public TrackerObject() {
     firstSeen = System.currentTimeMillis();
     lastSeen = firstSeen;
   }
-  
+
   public TrackerObject(long time) {
     firstSeen = time;
     lastSeen = firstSeen;
@@ -48,24 +47,26 @@ public class TrackerObject {
   public int getId() {
     return id;
   }
-  
+
   public void setId(int id) {
     this.id = id;
   }
-  
+
   public long firstSeen() {
     return firstSeen;
   }
-  
+
   public void setLastSeen(long time) {
     lastSeen = time;
   }
-  
+
   public long lastSeen() {
     return lastSeen;
   }
- 
+
   public String toString() {
+    Calendar cal = Calendar.getInstance();
+
     cal.setTimeInMillis(firstSeen);
     final String fs = new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
 
@@ -74,20 +75,21 @@ public class TrackerObject {
 
     return "objid=" + id + " fs=" + fs + " ls=" + ls;
   }
- 
+
   public boolean hasProperty(String key) {
     return properties.containsKey(key);
   }
-  
+
   public Object getProperty(String key) {
-    return properties.get(key); 
+    return properties.get(key);
   }
-  
+
   public Map<String,Object> getProperties() {
     return (Map<String,Object>)properties.clone();
   }
-  
+
   public void setProperty(String key, Object value) {
     properties.put(key, value);
   }
 }
+
