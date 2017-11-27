@@ -1,11 +1,13 @@
 package cv.lecturesight.cameraoperator.scripted;
 
 import org.pmw.tinylog.Logger;
+import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 import java.io.*;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -271,4 +273,10 @@ public class ScriptedCameraOperator implements CameraOperator, ScriptingService,
   public Object invokeFunction(String function, Object... args) {
     throw new UnsupportedOperationException("invokeFunction() is not implemented.");
   }
+
+  @Override
+  public List<TrackerObject> getFramedTargets() {
+    return Collections.emptyList();
+  }
+
 }

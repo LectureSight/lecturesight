@@ -17,6 +17,9 @@
  */
 package cv.lecturesight.operator;
 
+import cv.lecturesight.objecttracker.TrackerObject;
+import java.util.List;
+
 /** Camera Operator Service API
  * 
  */
@@ -26,5 +29,9 @@ public interface CameraOperator {
   void stop();
   void reset();
   boolean isRunning();
-  
+
+  /**
+   * The list of targets selected by the operator to include in the camera field of view
+   */
+  public List<TrackerObject> getFramedTargets();
 }
