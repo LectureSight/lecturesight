@@ -7,7 +7,7 @@ public class BridgeRegistration {
   String identifier;
   ScriptBridge bridgeObject;
   String[] imports;
-  
+
   public BridgeRegistration(String identifier, ScriptBridge bridgeObject, String[] imports) {
     this.identifier = identifier;
     this.bridgeObject = bridgeObject;
