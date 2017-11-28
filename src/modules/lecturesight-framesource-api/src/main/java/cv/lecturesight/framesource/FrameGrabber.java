@@ -21,7 +21,7 @@ import java.nio.Buffer;
 
 public interface FrameGrabber {
 
-  public enum PixelFormat{RGB_8BIT, BGRA_8BIT, INTENSITY_8BIT};
+  enum PixelFormat{RGB_8BIT, BGRA_8BIT, INTENSITY_8BIT};
 
   int getWidth();
   int getHeight();

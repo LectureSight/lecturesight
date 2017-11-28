@@ -17,28 +17,30 @@
  */
 package cv.lecturesight.framesource.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 
 public interface FrameUploader {
 
-  final String SIG_NEWFRAME = "framesource.NEWFRAME";
-  
+  String SIG_NEWFRAME = "framesource.NEWFRAME";
+
   OCLSignal getSignal();
 
   CLImage2D getRawOutputImage();
-  
+
   CLImage2D getOutputImage();
-  
+
   CLImage2D getLastOutputImage();
-  
+
   BufferedImage getOutputImageHost();
 
   void upload(Buffer frame);
 
   void setMask(BufferedImage mask);
-  
+
   void destroy();
 }

@@ -24,8 +24,8 @@ package cv.lecturesight.framesource.videofile;
 import org.freedesktop.gstreamer.Element;
 
 public class UnableToLinkElementsException extends Exception {
-    
-    public UnableToLinkElementsException(Element src, Element sink) {
-        super("Can not link " + src.getName() + " to " + sink.getName());
-    }
+
+  public UnableToLinkElementsException(Element src, Element sink) {
+    super("Can not link " + src.getName() + " to " + sink.getName());
+  }
 }

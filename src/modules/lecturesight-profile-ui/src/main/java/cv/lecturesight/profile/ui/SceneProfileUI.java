@@ -23,11 +23,13 @@ import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
-import javax.swing.JPanel;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+
+import javax.swing.JPanel;
 
 /**
  * UserInterface adapter for the Scene Profile Editor UI. In addition, this

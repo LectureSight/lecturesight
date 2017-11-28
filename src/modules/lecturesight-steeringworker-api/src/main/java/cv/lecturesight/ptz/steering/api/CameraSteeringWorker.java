@@ -25,47 +25,48 @@ import cv.lecturesight.util.geometry.Position;
  */
 public interface CameraSteeringWorker {
 
-  public boolean isSteering();
+  boolean isSteering();
 
-  public void setSteering(boolean on);
+  void setSteering(boolean on);
 
-  public void setInitialPosition(NormalizedPosition pos);
+  void setInitialPosition(NormalizedPosition pos);
 
-  public void setTargetPosition(NormalizedPosition pos);
+  void setTargetPosition(NormalizedPosition pos);
 
-  public NormalizedPosition getTargetPosition();
+  NormalizedPosition getTargetPosition();
 
-  public NormalizedPosition getActualPosition();
+  NormalizedPosition getActualPosition();
 
-  public void setZoom(float zoom);
+  void setZoom(float zoom);
 
-  public float getZoom();
+  float getZoom();
 
-  public void setFrameWidth(float width);
+  void setFrameWidth(float width);
 
-  public float getFrameWidth();
+  float getFrameWidth();
 
-  public void setFrameHeight(float height);
+  void setFrameHeight(float height);
 
-  public float getFrameHeight();
+  float getFrameHeight();
 
-  public void movePreset(int preset);
+  void movePreset(int preset);
 
-  public void moveHome();
+  void moveHome();
 
-  public boolean isMoving();
+  boolean isMoving();
 
-  public int getPanMin();
+  int getPanMin();
 
-  public int getPanMax();
+  int getPanMax();
 
-  public int getTiltMin();
+  int getTiltMin();
 
-  public int getTiltMax();
+  int getTiltMax();
 
-  public Position toCameraCoordinates(NormalizedPosition posn);
+  Position toCameraCoordinates(NormalizedPosition posn);
 
-  public void addUISlave(UISlave slave);
+  void addUISlave(UISlave slave);
 
-  public void removeUISlave(UISlave slave);
+  void removeUISlave(UISlave slave);
 }
+

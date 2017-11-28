@@ -3,15 +3,17 @@ package cv.lecturesight.ptzcontrol.dummy;
 import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
-import org.pmw.tinylog.Logger;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
-import java.util.LinkedList;
-import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @Component(name = "cv.lecturesight.ptzcontrol.dummy", immediate = true)
 @Service
@@ -28,17 +30,17 @@ public class SimulatedCamera implements PTZCamera {
   static final int TILT_MAX = 10000;
   static final int ZOOM_MAX = 1000;
   final Position HOME_POS = new Position(0, 0);
-    
+
   @Reference
   Configuration config;
-  
+
   PTZCameraProfile myProfile = new PTZCameraProfile(
-          "ACME Inc.", CAMERA_NAME,
-          PAN_MIN, PAN_MAX, PAN_MAX_SPEED,
-          TILT_MIN, TILT_MAX, TILT_MAX_SPEED,
-          0, ZOOM_MAX, ZOOM_MAX_SPEED,
-          HOME_POS);
-  
+                                                    "ACME Inc.", CAMERA_NAME,
+                                                    PAN_MIN, PAN_MAX, PAN_MAX_SPEED,
+                                                    TILT_MIN, TILT_MAX, TILT_MAX_SPEED,
+                                                    0, ZOOM_MAX, ZOOM_MAX_SPEED,
+                                                    HOME_POS);
+
   int delay;
   boolean running = true;
   Position current_pos = HOME_POS.clone();
@@ -49,10 +51,10 @@ public class SimulatedCamera implements PTZCamera {
   int speedPan = 0;
   int speedTilt = 0;
   int speedZoom = 0;
-  
+
   final Object mutex = new Object();
   List<CameraListener> listeners = new LinkedList<CameraListener>();
-  
+
   protected void activate(ComponentContext cc) {
     delay = config.getInt(PROPKEY_DELAY);
     (new Thread(new Runnable() {
@@ -60,16 +62,17 @@ public class SimulatedCamera implements PTZCamera {
       @Override
       public void run() {
         Logger.info("Entering main loop");
-        
-        int dx,dy;
+
+        int dx;
+        int dy;
         while(running) {
           synchronized(mutex) {
-            
+
             dx = target_pos.getX() - current_pos.getX();
             dy = target_pos.getY() - current_pos.getY();
-            
+
             // update X
-            if (dx > 0 ) {
+            if (dx > 0) {
               current_pos.setX(current_pos.getX() + speedPan);
               if (current_pos.getX() > target_pos.getX()) {
                 current_pos.setX(target_pos.getX());
@@ -86,7 +89,7 @@ public class SimulatedCamera implements PTZCamera {
             }
 
             // update Y
-            if (dy > 0 ) {
+            if (dy > 0) {
               current_pos.setY(current_pos.getY() + speedTilt);
               if (current_pos.getY() > target_pos.getY()) {
                 current_pos.setY(target_pos.getY());
@@ -101,29 +104,29 @@ public class SimulatedCamera implements PTZCamera {
             } else {
               speedTilt = 0;
             }
-            
+
             informListeners();
           }
-          
+
           try {
             Thread.sleep(delay);
           } catch (InterruptedException e) {
             Logger.warn("Worker thread interrupted.");
           }
         }
-        
+
         Logger.info("Exited main loop");
       }
-      
+
     })).start();
     Logger.info("Activated. Delay is " + delay + " ms");
   }
-  
+
   protected void deactivate(ComponentContext cc) {
     running = false;
     Logger.info("Deactivating");
   }
-  
+
   @Override
   public String getName() {
     return CAMERA_NAME;
@@ -276,7 +279,7 @@ public class SimulatedCamera implements PTZCamera {
       speedTilt = tiltSpeed;
     }
   }
-  
+
   void clampPosition(Position in) {
     int x = in.getX();
     if (x < PAN_MIN) in.setX(PAN_MIN);
@@ -371,12 +374,12 @@ public class SimulatedCamera implements PTZCamera {
   public void removeCameraListener(CameraListener l) {
     listeners.remove(l);
   }
-  
+
   private void informListeners() {
     for (CameraListener l : listeners) {
       Logger.debug("informListeners()");
       l.positionUpdated(current_pos.clone());
     }
   }
-  
+
 }

@@ -75,7 +75,7 @@
       <property name="severity" value="error" />
     </module>
     <module name="ImportOrder">
-      <property name="groups" value="cv.lecturesight,com,net,org,java,javax"/>
+      <property name="groups" value="cv.lecturesight,*,java,javax"/>
       <property name="ordered" value="true"/>
       <property name="separated" value="true"/>
       <property name="option" value="top"/>

@@ -30,7 +30,9 @@ import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+
 import org.pmw.tinylog.Logger;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -40,6 +42,7 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
+
 import javax.swing.JPanel;
 
 public class CameraControlPanel extends JPanel implements UISlave, MouseListener, CustomRenderer, DisplayRegistrationListener{

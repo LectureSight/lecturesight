@@ -19,7 +19,7 @@ package cv.lecturesight.framesource.rtph264;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.nio.ByteBuffer;
+
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
@@ -29,15 +29,17 @@ import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
-
 import org.pmw.tinylog.Logger;
+
+import java.nio.ByteBuffer;
 
 public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
   private String host;
   private int port;
   private final Pipeline pipeline;
-  private int width, height;
+  private int width;
+  private int height;
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
   private Sample lastSam;

@@ -22,11 +22,11 @@ package cv.lecturesight.profile.api;
  * @author wulff
  */
 public class ProfileSerializerException extends Exception {
-  
+
   public ProfileSerializerException(String msg) {
     super(msg);
   }
-  
+
   public ProfileSerializerException(String msg, Throwable cause) {
     super(msg, cause);
   }
