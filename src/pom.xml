@@ -32,10 +32,6 @@
         <module>modules/lecturesight-cameraoperator-simple</module>
         <module>modules/lecturesight-connectedcomponent-api</module>
         <module>modules/lecturesight-connectedcomponent-impl</module>
-        <module>modules/lecturesight-decorator-color</module>
-        <module>modules/lecturesight-decorator-head</module>
-        <module>modules/lecturesight-decorator-manager</module>
-        <module>modules/lecturesight-decorator-person</module>
         <module>modules/lecturesight-display-api</module>
         <module>modules/lecturesight-display-impl</module>
         <module>modules/lecturesight-framesource-api</module>
@@ -74,15 +70,13 @@
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-videoanalysis-api</module>
-        <module>modules/lecturesight-videoanalysis-impl</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
-        <module>modules/lecturesight-visualization</module>
         <module>modules/wulff-visca-api</module>
         <module>modules/wulff-visca-over-ip-service</module>
         <module>modules/wulff-visca-service</module>
       </modules>      
     </profile>
-    
+
     <profile>
       <id>production-with-gui</id>
       <activation>
@@ -167,6 +161,21 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>  
+      </modules>
+    </profile>
+
+    <profile>
+      <id>deprecated</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-decorator-color</module>
+        <module>modules/lecturesight-decorator-head</module>
+        <module>modules/lecturesight-decorator-manager</module>
+        <module>modules/lecturesight-decorator-person</module>
+        <module>modules/lecturesight-videoanalysis-impl</module>
+        <module>modules/lecturesight-visualization</module>
       </modules>
     </profile>
     
