@@ -21,11 +21,13 @@ import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
-import javax.swing.JPanel;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+
+import javax.swing.JPanel;
 
 @Component(name = "lecturesight.ptz.steering.ui", immediate = true)
 @Service

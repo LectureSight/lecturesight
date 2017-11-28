@@ -18,23 +18,23 @@
 package cv.lecturesight.profile.api;
 
 public class Zone implements Cloneable {
-  
+
   public enum Type {
     SIZE, TRACK, IGNORE, TRIGGER, PERSON, CALIBRATION;
   }
-  
+
   public String name;
-  
+
   Type type;
-  
+
   public int x;
-  
+
   public int y;
-  
+
   public int width;
-  
+
   public int height;
-    
+
   public Zone() {
     this.name="";
     this.type = Type.IGNORE;
@@ -43,7 +43,7 @@ public class Zone implements Cloneable {
     this.width = 1;
     this.height = 1;
   }
-  
+
   public Zone(String name, Type type, int x, int y, int width, int height) {
     this.name = name;
     this.type = type;
@@ -52,16 +52,16 @@ public class Zone implements Cloneable {
     this.width = width;
     this.height = height;
   }
-  
+
   public Type getType() {
     return type;
   }
-  
+
   @Override
   public Zone clone() {
     return new Zone(name, type, x, y, width, height);
   }
-  
+
   @Override
   public boolean equals(Object other) {
     return other instanceof Zone && hashCode() == ((Zone)other).hashCode();

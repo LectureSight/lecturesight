@@ -19,32 +19,33 @@ package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.util.conf.ConfigurationService;
-import javax.swing.JPanel;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import javax.swing.JPanel;
 
 @Component(name="lecturesight.gui.configeditor", immediate=true)
 @Service
 public class ConfigEditorUI implements UserInterface {
 
-    ConfigEditorPanel editorPanel;
+  ConfigEditorPanel editorPanel;
 
-    @Reference
-    ConfigurationService configService;
-    
-    protected void activate(ComponentContext cc) {
-      editorPanel = new ConfigEditorPanel(configService);
-      Logger.info("Activated");
-    }
-    
-    protected void deactivate(ComponentContext cc) {
-      editorPanel.deactivate();
-      Logger.info("Deactivated");
-    }
+  @Reference
+  ConfigurationService configService;
+
+  protected void activate(ComponentContext cc) {
+    editorPanel = new ConfigEditorPanel(configService);
+    Logger.info("Activated");
+  }
+
+  protected void deactivate(ComponentContext cc) {
+    editorPanel.deactivate();
+    Logger.info("Deactivated");
+  }
 
   @Override
   public String getTitle() {

@@ -78,8 +78,8 @@ public class CameraPositionModel {
     float x = pos.getX();
     float y = pos.getY();
 
-    out.setX( (int) ( (x+1) * (pan_max - pan_min) * 0.5 + pan_min));
-    out.setY( (int) ( (y+1) * (tilt_max - tilt_min) * 0.5 + tilt_min));
+    out.setX((int) ((x+1) * (pan_max - pan_min) * 0.5 + pan_min));
+    out.setY((int) ((y+1) * (tilt_max - tilt_min) * 0.5 + tilt_min));
 
     return out;
   }
@@ -121,7 +121,7 @@ public class CameraPositionModel {
   public synchronized NormalizedPosition getTargetPositionNorm() {
     return target_posn.clone();
   }
-  
+
   public boolean isTargetSet() {
     return target_set;
   }

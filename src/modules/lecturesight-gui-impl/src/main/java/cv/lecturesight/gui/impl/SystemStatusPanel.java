@@ -17,8 +17,6 @@
  */
 package cv.lecturesight.gui.impl;
 
-import org.pmw.tinylog.Logger;
-
 /**
  *
  * @author wulff
@@ -26,14 +24,14 @@ import org.pmw.tinylog.Logger;
 public class SystemStatusPanel extends javax.swing.JPanel {
 
   SystemStatusUI parent;
-  
+
   /**
    * Creates new form SystemStatusPanel
    */
   public SystemStatusPanel() {
     initComponents();
   }
-  
+
   public SystemStatusPanel(SystemStatusUI parent) {
     initComponents();
     this.parent = parent;

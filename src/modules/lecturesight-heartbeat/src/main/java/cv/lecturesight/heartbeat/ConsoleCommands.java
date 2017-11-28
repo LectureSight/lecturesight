@@ -19,6 +19,7 @@ package cv.lecturesight.heartbeat;
 
 import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.util.DummyInterface;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -45,7 +46,7 @@ public class ConsoleCommands implements DummyInterface {
     Logger.info("Commands activated");
   }
 
-  public void run(String param[]) {
+  public void run(String[] param) {
     try {
       ensureReady();
       main.go();
@@ -54,14 +55,14 @@ public class ConsoleCommands implements DummyInterface {
     }
   }
 
-  public void stop(String param[]) {
+  public void stop(String[] param) {
     if (main.isRunning()) {
       main.stop();
       main.deinit();
     }
   }
 
-  public void pause(String param[]) {
+  public void pause(String[] param) {
     if (main.isRunning()) {
       try {
         main.stop();
@@ -71,7 +72,7 @@ public class ConsoleCommands implements DummyInterface {
     }
   }
 
-  public void restart(String param[]) {
+  public void restart(String[] para) {
     if (main.isRunning()) {
       try {
         main.stop();
@@ -88,7 +89,7 @@ public class ConsoleCommands implements DummyInterface {
     }
   }
 
-  public void step(String param[]) {
+  public void step(String[] param) {
     int i = 1;
     if (param.length > 0) {
       try {

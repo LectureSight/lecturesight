@@ -18,6 +18,7 @@
 package cv.lecturesight.profile.api;
 
 import org.pmw.tinylog.Logger;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -33,11 +34,13 @@ import java.nio.charset.StandardCharsets;
  *
  * @author wulff
  */
-public class SceneProfileSerializer {
+public final class SceneProfileSerializer {
 
   private static final String TAB = "\t";
   private static final String NEWLINE = "\n";
   private static final String COMMENT_INDICATOR = "#";
+
+  private SceneProfileSerializer() {};
 
   public static void serialize(SceneProfile profile, OutputStream os) throws ProfileSerializerException {
     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(os));
@@ -50,16 +53,20 @@ public class SceneProfileSerializer {
       out.append(sanitize(profile.name)).append(TAB).append(sanitize(profile.description)).append(NEWLINE);
 
       // write dimensions
-      out.append(Zone.Type.SIZE.name()).append(TAB).append("size").append(TAB).append("0").append(TAB).append("0").append(TAB)
-         .append(Integer.toString(profile.width)).append(TAB).append(Integer.toString(profile.height)).append(NEWLINE);
+      out.append(Zone.Type.SIZE.name()).append(TAB)
+      .append("size").append(TAB)
+      .append("0").append(TAB)
+      .append("0").append(TAB)
+      .append(Integer.toString(profile.width)).append(TAB)
+      .append(Integer.toString(profile.height)).append(NEWLINE);
 
       // write zones
       for (Zone zone : profile.zones) {
         out.append(zone.type.name()).append(TAB).append(sanitize(zone.name)).append(TAB)
-                .append(Integer.toString(zone.x)).append(TAB)
-                .append(Integer.toString(zone.y)).append(TAB)
-                .append(Integer.toString(zone.width)).append(TAB)
-                .append(Integer.toString(zone.height)).append(NEWLINE);
+        .append(Integer.toString(zone.x)).append(TAB)
+        .append(Integer.toString(zone.y)).append(TAB)
+        .append(Integer.toString(zone.width)).append(TAB)
+        .append(Integer.toString(zone.height)).append(NEWLINE);
       }
       out.flush();
     } catch (IOException e) {
@@ -119,7 +126,9 @@ public class SceneProfileSerializer {
 
             // make sure we have 5 fields in line, otherwise we can fail here already
             if (token.length != 6) {
-              throw new ProfileSerializerException("Wrong format in line " + line_num + ". Format must be: type \\t name \\t x \\t y \\t width \\t height \\n [" + line + "]");
+              throw new ProfileSerializerException("Wrong format in line " + line_num
+                                                   + ". Format must be: type \\t name \\t x \\t y \\t width \\t height \\n ["
+                                                   + line + "]");
             }
 
             Zone.Type type = Zone.Type.valueOf(token[0]);
@@ -176,3 +185,4 @@ public class SceneProfileSerializer {
     return in.replaceAll("\\t", "   ").replaceAll("\\n", "\\n");
   }
 }
+

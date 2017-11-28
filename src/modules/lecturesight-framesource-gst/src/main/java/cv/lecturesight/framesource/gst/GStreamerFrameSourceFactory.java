@@ -20,7 +20,7 @@ package cv.lecturesight.framesource.gst;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -29,6 +29,8 @@ import org.freedesktop.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import java.util.Map;
+
 /**
  * GStreamer FrameSourceFactory
  *
@@ -36,8 +38,8 @@ import org.pmw.tinylog.Logger;
 @Component(name = "lecturesight.framesource.gst", immediate = true)
 @Service
 @Properties({
-  @Property(name = "cv.lecturesight.framesource.name", value = "GStreamer"),
-  @Property(name = "cv.lecturesight.framesource.type", value = "gst")
+@Property(name = "cv.lecturesight.framesource.name", value = "GStreamer"),
+@Property(name = "cv.lecturesight.framesource.type", value = "gst")
 })
 public class GStreamerFrameSourceFactory implements FrameGrabberFactory {
 
@@ -52,7 +54,7 @@ public class GStreamerFrameSourceFactory implements FrameGrabberFactory {
 
   @Override
   public FrameGrabber createFrameGrabber(String input, Map<String, String> conf) throws FrameSourceException {
-    
+
     // evaluate drop parameter if configured
     boolean drop = true;
     if (conf.containsKey("drop")) {
@@ -62,7 +64,7 @@ public class GStreamerFrameSourceFactory implements FrameGrabberFactory {
         Logger.warn("Error while parsing value for 'drop' parameter, using default drop=true");
       }
     }
-    
+
     // create FrameGrabber
     GStreamerFrameGrabber fg = new GStreamerFrameGrabber(input, drop);
     Logger.info("Create new GStreamerFrameGrabber " + fg.toString());

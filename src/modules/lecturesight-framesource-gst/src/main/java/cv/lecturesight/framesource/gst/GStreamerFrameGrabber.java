@@ -19,7 +19,6 @@ package cv.lecturesight.framesource.gst;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.nio.ByteBuffer;
 
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
@@ -30,14 +29,16 @@ import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
-
 import org.pmw.tinylog.Logger;
+
+import java.nio.ByteBuffer;
 
 public class GStreamerFrameGrabber implements FrameGrabber {
 
   private String definition;
   private final Pipeline pipeline;
-  private int width, height;
+  private int width;
+  private int height;
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
   private Sample lastSam;
@@ -137,13 +138,13 @@ public class GStreamerFrameGrabber implements FrameGrabber {
       Buffer buf = sam.getBuffer();
       if (buf != null) {
         lastFrame = buf.map(false);
-	if (lastBuf != null) {
-           // Free memory allocated for the previous buffer so we don't leak memory
-	   lastBuf.unmap();
-	   lastSam.dispose();
-	}
-	lastBuf = buf;
-	lastSam = sam;
+        if (lastBuf != null) {
+          // Free memory allocated for the previous buffer so we don't leak memory
+          lastBuf.unmap();
+          lastSam.dispose();
+        }
+        lastBuf = buf;
+        lastSam = sam;
       } else {
         Logger.warn("Buffer is NULL!!");
       }
@@ -175,10 +176,10 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("(")
-            .append("pipeline=\"").append(definition).append("\"")
-            .append(" drop=").append(Boolean.toString(dropFrames))
-            .append(" size=").append(width).append("x").append(height)
-            .append(")");
+    .append("pipeline=\"").append(definition).append("\"")
+    .append(" drop=").append(Boolean.toString(dropFrames))
+    .append(" size=").append(width).append("x").append(height)
+    .append(")");
     return sb.toString();
   }
 }

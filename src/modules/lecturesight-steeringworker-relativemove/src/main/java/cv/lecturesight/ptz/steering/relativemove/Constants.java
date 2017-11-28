@@ -1,6 +1,8 @@
 package cv.lecturesight.ptz.steering.relativemove;
 
-public class Constants {
+public final class Constants {
+
+  private Constants() {};
 
   static final String PROPKEY_AUTOSTART ="cv.lecturesight.ptz.steering.worker.relativemove.autostart";
   static final String PROPKEY_XFLIP = "cv.lecturesight.ptz.steering.worker.relativemove.xflip";

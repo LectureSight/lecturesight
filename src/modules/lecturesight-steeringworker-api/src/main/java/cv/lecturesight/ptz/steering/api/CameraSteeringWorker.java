@@ -21,47 +21,48 @@ import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 
 /** Camera Steering Worker API
- * 
+ *
  */
 public interface CameraSteeringWorker {
-  
-  public boolean isSteering();
-  
-  public void setSteering(boolean on);
 
-  public void setInitialPosition(NormalizedPosition pos);
-  
-  public void setTargetPosition(NormalizedPosition pos);
-  
-  public NormalizedPosition getTargetPosition();
-  
-  public NormalizedPosition getActualPosition();
-  
-  public void setZoom(float zoom);
-  
-  public float getZoom();
+  boolean isSteering();
 
-  public void setFrameWidth(float width);
+  void setSteering(boolean on);
 
-  public float getFrameWidth();
+  void setInitialPosition(NormalizedPosition pos);
 
-  public void movePreset(int preset);
+  void setTargetPosition(NormalizedPosition pos);
 
-  public void moveHome();
-  
-  public boolean isMoving();
-  
-  public int getPanMin();
-  
-  public int getPanMax();
-  
-  public int getTiltMin();
-  
-  public int getTiltMax();
-  
-  public Position toCameraCoordinates(NormalizedPosition posn);
-  
-  public void addUISlave(UISlave slave);
-  
-  public void removeUISlave(UISlave slave);
+  NormalizedPosition getTargetPosition();
+
+  NormalizedPosition getActualPosition();
+
+  void setZoom(float zoom);
+
+  float getZoom();
+
+  void setFrameWidth(float width);
+
+  float getFrameWidth();
+
+  void movePreset(int preset);
+
+  void moveHome();
+
+  boolean isMoving();
+
+  int getPanMin();
+
+  int getPanMax();
+
+  int getTiltMin();
+
+  int getTiltMax();
+
+  Position toCameraCoordinates(NormalizedPosition posn);
+
+  void addUISlave(UISlave slave);
+
+  void removeUISlave(UISlave slave);
 }
+

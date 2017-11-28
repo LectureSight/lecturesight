@@ -17,8 +17,10 @@
  */
 package cv.lecturesight.gui.impl;
 
-import cv.lecturesight.util.conf.ConfigurationService;
 import cv.lecturesight.gui.api.UserInterface;
+import cv.lecturesight.util.DummyInterface;
+import cv.lecturesight.util.conf.ConfigurationService;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -26,20 +28,20 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
-import cv.lecturesight.util.DummyInterface;
-import java.awt.HeadlessException;
 import org.pmw.tinylog.Logger;
+
+import java.awt.HeadlessException;
 
 @Component(name="lecturesight.gui", immediate=true)
 @Service
 public class MainGUI implements DummyInterface {
-  
+
   @Reference
   private ConfigurationService configService;
 
   UserInterfaceTracker uiTracker;
   MainGUIFrame window;
-  
+
   protected void activate(ComponentContext cc) {
     Logger.info("Activated");
     try {
@@ -51,39 +53,39 @@ public class MainGUI implements DummyInterface {
     uiTracker = new UserInterfaceTracker(cc.getBundleContext());
     uiTracker.open();
   }
-  
+
   protected void deactivate(ComponentContext cc) {
     uiTracker.close();
     Logger.info("Deactivated");
   }
-  
+
   void install(UserInterface ui) {
     if (window != null) {
-       Logger.info("Installing interface: " + ui.getTitle());
-       window.addServiceUI(ui);
+      Logger.info("Installing interface: " + ui.getTitle());
+      window.addServiceUI(ui);
     }
   }
-  
+
   void uninstall(UserInterface ui) {
     if (window != null) {
-       Logger.info("Uninstalling interface: " + ui.getTitle());
-       window.removeServiceUI(ui);
+      Logger.info("Uninstalling interface: " + ui.getTitle());
+      window.removeServiceUI(ui);
     }
   }
-  
+
   private class UserInterfaceTracker extends ServiceTracker {
-    
-    public UserInterfaceTracker(BundleContext bc) {
+
+    UserInterfaceTracker(BundleContext bc) {
       super(bc, UserInterface.class.getName(), null);
     }
-    
+
     @Override
     public Object addingService(ServiceReference ref) {
       UserInterface ui = (UserInterface)context.getService(ref);
       install(ui);
       return ui;
     }
-    
+
     @Override
     public void removedService(ServiceReference ref, Object so) {
       uninstall((UserInterface)so);
