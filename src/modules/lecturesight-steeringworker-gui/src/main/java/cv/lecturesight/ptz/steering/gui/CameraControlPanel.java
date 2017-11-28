@@ -120,7 +120,13 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
       rootY = height / 2;
     }
 
+    // Frame is in normalized coords
     float frameWidth = camera.getFrameWidth();
+    float frameHeight = camera.getFrameHeight();
+
+    if (frameHeight == 0.0) {
+      frameHeight = frameWidth;
+    }
 
     g.setFont(font);
 
@@ -187,19 +193,29 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     // Draw left and right frame boundaries
     g.setColor(frameColor);
 
-    NormalizedPosition frameLeft = new NormalizedPosition(aposn.getX() - frameWidth / 2, aposn.getY());
-    NormalizedPosition frameRight = new NormalizedPosition(aposn.getX() + frameWidth / 2, aposn.getY());
+    NormalizedPosition frameUpLeftN = new NormalizedPosition(aposn.getX() - frameWidth / 2, aposn.getY() - frameHeight/2);
+    NormalizedPosition frameDownRightN = new NormalizedPosition(aposn.getX() + frameWidth / 2, aposn.getY() + frameHeight/2);
+    Position frameUpLeft = normalizer.fromNormalized(frameUpLeftN);
+    Position frameDownRight = normalizer.fromNormalized(frameDownRightN);
 
-    int frameHeight = height / 6;
-
-    if (frameLeft.getX() > -1) {
-      Position frameLeftN = normalizer.fromNormalized(frameLeft);
-      g.drawLine(frameLeftN.getX(), Math.max(frameLeftN.getY() - frameHeight / 2, 0), frameLeftN.getX(), Math.min(frameLeftN.getY() + frameHeight / 2, height-1));
+    if (frameUpLeftN.getX() > -1) {
+      g.drawLine(frameUpLeft.getX(), Math.max(frameUpLeft.getY(), 0),
+              frameUpLeft.getX(), Math.min(frameDownRight.getY(), height-1));
     }
 
-    if (frameRight.getX() < 1) {
-      Position frameRightN = normalizer.fromNormalized(frameRight);
-      g.drawLine(frameRightN.getX(), Math.max(frameRightN.getY() - frameHeight / 2, 0), frameRightN.getX(), Math.min(frameRightN.getY() + frameHeight / 2, height-1));
+    if (frameDownRightN.getX() < 1) {
+      g.drawLine(frameDownRight.getX(), Math.max(frameUpLeft.getY(), 0),
+              frameDownRight.getX(), Math.min(frameDownRight.getY(), height-1));
+    }
+
+    if (frameUpLeftN.getY() > -1) {
+      g.drawLine(Math.max(frameUpLeft.getX(), 0), frameUpLeft.getY(),
+              Math.min(frameDownRight.getX(), width-1), frameUpLeft.getY());
+    }
+
+    if (frameDownRightN.getY() < 1) {
+      g.drawLine(Math.max(frameUpLeft.getX(), 0), frameDownRight.getY(),
+              Math.min(frameDownRight.getX(), width-1), frameDownRight.getY());
     }
 
     // Draw targets considered in-frame

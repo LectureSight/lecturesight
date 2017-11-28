@@ -53,26 +53,27 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
   @Reference
   PTZCamera camera;            // PTZCamera implementation
-  
+
   @Reference
   private ScriptingService engine;
 
   CameraPositionModel model;   // model mapping normalized coords <--> camera coords
 
   SteeringWorker worker;       // worker updating the pan and tilt speed
-  
+
   private CameraBridge bridge; // script bridge
-  
+
   int pan_min, pan_max;               // pan limits
   int tilt_min, tilt_max;             // tilt limits
   int zoom_min, zoom_max;             // zoom limits
   int maxspeed_zoom;                  // max zoom speed
-  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
+  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
   int stop_x, stop_y;                 // Distance within which the camera is considered to have reached the target
   int initial_delay;                  // Time in milliseconds to allow camera to reach initial position
-  float damp_pan, damp_tilt;          // movement speed dampening factors 
+  float damp_pan, damp_tilt;          // movement speed dampening factors
   float frame_width;                  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+  float frame_height;                 // The height of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
@@ -189,7 +190,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
-         
+
           if (ps == 0 && ts == 0) {
             if (last_cmd != CameraCmd.STOP) {
               camera.stopMove();
@@ -264,7 +265,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   protected void deactivate(ComponentContext cc) throws Exception {
     camera.removeCameraListener(worker);
 
-    // Wait for any camera movements to complete (e.g. move to home / preset)  
+    // Wait for any camera movements to complete (e.g. move to home / preset)
     Thread.sleep(1000);
 
     camera.stopMove();
@@ -437,6 +438,17 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   @Override
   public float getFrameWidth() {
     return frame_width;
+  }
+
+  @Override
+  public void setFrameHeight(float frame_height) {
+    // Ideally we want to actually use this to set the camera's zoom position. For now it's just for display purposes.
+    this.frame_height = frame_height;
+  }
+
+  @Override
+  public float getFrameHeight() {
+    return frame_height;
   }
 
   @Override

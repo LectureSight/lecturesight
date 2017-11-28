@@ -189,6 +189,7 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
     NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
     steerer.setZoom(start_zoom);
     steerer.setFrameWidth(frame_width);
+    steerer.setFrameHeight(frame_height);
     steerer.setInitialPosition(neutral);
   }
 

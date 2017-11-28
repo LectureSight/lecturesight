@@ -21,47 +21,51 @@ import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 
 /** Camera Steering Worker API
- * 
+ *
  */
 public interface CameraSteeringWorker {
-  
+
   public boolean isSteering();
-  
+
   public void setSteering(boolean on);
 
   public void setInitialPosition(NormalizedPosition pos);
-  
+
   public void setTargetPosition(NormalizedPosition pos);
-  
+
   public NormalizedPosition getTargetPosition();
-  
+
   public NormalizedPosition getActualPosition();
-  
+
   public void setZoom(float zoom);
-  
+
   public float getZoom();
 
   public void setFrameWidth(float width);
 
   public float getFrameWidth();
 
+  public void setFrameHeight(float height);
+
+  public float getFrameHeight();
+
   public void movePreset(int preset);
 
   public void moveHome();
-  
+
   public boolean isMoving();
-  
+
   public int getPanMin();
-  
+
   public int getPanMax();
-  
+
   public int getTiltMin();
-  
+
   public int getTiltMax();
-  
+
   public Position toCameraCoordinates(NormalizedPosition posn);
-  
+
   public void addUISlave(UISlave slave);
-  
+
   public void removeUISlave(UISlave slave);
 }

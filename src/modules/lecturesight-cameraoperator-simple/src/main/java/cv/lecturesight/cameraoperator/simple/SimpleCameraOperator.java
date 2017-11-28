@@ -53,14 +53,14 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
 
   @Reference
   ObjectTracker tracker;
-  
+
   @Reference
   CameraSteeringWorker steerer;
-  
+
   @Reference
   FrameSourceProvider fsp;
   FrameSource fsrc;
-  
+
   List<TrackerObject> targetList = Collections.emptyList();
 
   int interval = 200;
@@ -72,7 +72,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
   CameraOperatorWorker worker;
- 
+
   float start_pan = 0;
   float start_tilt = 0;
   float start_zoom = 0;
@@ -108,9 +108,9 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     frame_trigger = limitRange(config.getFloat(Constants.PROPKEY_FRAME_TRIGGER), 0, 1);
     target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} " +
-                 "frame.width: {}, frame.trigger: {}, target.limit: {}", target_timeout, tracking_timeout, idle_preset,
-                 start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
+    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} "
+            + "frame.width: {}, frame.trigger: {}, target.limit: {}", target_timeout, tracking_timeout, idle_preset,
+            start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
   }
 
   private float limitRange(float value, float min, float max) {
@@ -152,13 +152,13 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
 
   @Override
   public void reset() {
-      Logger.debug("Reset");
-      setInitialTrackingPosition();
+    Logger.debug("Reset");
+    setInitialTrackingPosition();
   }
 
   @Override
   public boolean isRunning() {
-      return steerer.isSteering();
+    return steerer.isSteering();
   }
 
   // Objects framed. Being a simple operator, only 1 target is ever returned here.
@@ -171,20 +171,20 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
   private void setInitialTrackingPosition() {
-      Logger.debug("Set initial tracking position");
-      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
-      steerer.setZoom(start_zoom);  
-      steerer.setFrameWidth(frame_width);
-      steerer.setInitialPosition(neutral);
+    Logger.debug("Set initial tracking position");
+    NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
+    steerer.setZoom(start_zoom);
+    steerer.setFrameWidth(frame_width);
+    steerer.setInitialPosition(neutral);
   }
 
-  /* 
+  /*
    * Return the camera to the start pan/tilt position
    */
   private void returnInitialTrackingPosition() {
-      Logger.debug("Return to initial tracking position");
-      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
-      steerer.setTargetPosition(neutral);
+    Logger.debug("Return to initial tracking position");
+    NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
+    steerer.setTargetPosition(neutral);
   }
 
   /*
@@ -192,9 +192,9 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    */
   private void setIdlePosition() {
     if (idle_preset >= 0) {
-       steerer.movePreset(idle_preset);
+      steerer.movePreset(idle_preset);
     } else {
-       steerer.moveHome();
+      steerer.moveHome();
     }
   }
 
@@ -220,16 +220,16 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           target = findBestTrackedObject(objs);
 
           if (target != null) {
-             targetList = new ArrayList<TrackerObject>();
-             targetList.add(target);
-             metrics.incCounter("camera.operator.target.new");
-             first_tracked_time = now;
+            targetList = new ArrayList<TrackerObject>();
+            targetList.add(target);
+            metrics.incCounter("camera.operator.target.new");
+            first_tracked_time = now;
           }
         }
 
         // Return to the initial position if no targets have been visible for a while
         if ((objs.isEmpty() || target == null) && (tracking_timeout > 0) && (last_tracked_time > 0) && (now - last_tracked_time > tracking_timeout)) {
-	  returnInitialTrackingPosition();
+          returnInitialTrackingPosition();
           metrics.incCounter("camera.operator.move.home");
           last_tracked_time = 0;
         }
@@ -238,15 +238,15 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
 
         if (now - target.lastSeen() < target_timeout) {
 
-	  boolean move = true;
+          boolean move = true;
           last_tracked_time = now;
 
           // Target position
-	  Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-	  NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
-	  NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
+          Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+          NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
+          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
 
- 	  // Actual position
+          // Actual position
           NormalizedPosition actual_pos = steerer.getActualPosition();
 
           Logger.debug("Tracking object " + target + " currently at position " + target_pos);
@@ -254,19 +254,19 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
           if ((frame_width > 0) && !steerer.isMoving()) {
 
-		  double trigger_left  = actual_pos.getX() - (frame_width/2) * frame_trigger;
-		  double trigger_right = actual_pos.getX() + (frame_width/2) * frame_trigger;
+            double trigger_left = actual_pos.getX() - (frame_width / 2) * frame_trigger;
+            double trigger_right = actual_pos.getX() + (frame_width / 2) * frame_trigger;
 
-		  if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
-		       move = false;
-		       Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos + 
-				 " position is inside frame trigger limits " + String.format("%.4f to %.4f", trigger_left, trigger_right));
-		  }
+            if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
+              move = false;
+              Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos
+                      + " position is inside frame trigger limits " + String.format("%.4f to %.4f", trigger_left, trigger_right));
+            }
           }
 
           if (move) {
-		  Logger.debug("Moving steerer for object " + target + " to position " + target_pos);
-		  steerer.setTargetPosition(target_pos);
+            Logger.debug("Moving steerer for object " + target + " to position " + target_pos);
+            steerer.setTargetPosition(target_pos);
           }
 
         } else {
@@ -281,7 +281,6 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     private TrackerObject findBestTrackedObject(List<TrackerObject> objects) {
 
       // Track the oldest object
-
       TrackerObject out = null;
       long oldest = System.currentTimeMillis();
 
