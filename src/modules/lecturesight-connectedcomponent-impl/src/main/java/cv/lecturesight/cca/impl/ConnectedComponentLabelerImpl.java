@@ -17,15 +17,17 @@
  */
 package cv.lecturesight.cca.impl;
 
+import cv.lecturesight.cca.ConnectedComponentLabeler;
+import cv.lecturesight.opencl.OpenCLService;
+import cv.lecturesight.opencl.api.ComputationRun;
+import cv.lecturesight.opencl.api.OCLSignal;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem.Usage;
 import com.nativelibs4java.opencl.CLQueue;
-import cv.lecturesight.cca.ConnectedComponentLabeler;
-import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.opencl.api.ComputationRun;
-import cv.lecturesight.opencl.api.OCLSignal;
+
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
@@ -38,14 +40,22 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   final static String SIGNAME_DONE = "cv.lecturesight.cca.analysis.DONE";
 
   private EnumMap<ConnectedComponentLabeler.Signal, OCLSignal> signals =
-          new EnumMap<ConnectedComponentLabeler.Signal, OCLSignal>(ConnectedComponentLabeler.Signal.class);
+  new EnumMap<ConnectedComponentLabeler.Signal, OCLSignal>(ConnectedComponentLabeler.Signal.class);
   private OpenCLService ocl;
-  private ComputationRun initRun, updateRun, resultRun;
+  private ComputationRun initRun;
+  private ComputationRun updateRun;
+  private ComputationRun resultRun;
   private CLImage2D input;
   CLImage2D labelImage;
-  CLBuffer<Integer> labels_work, sizes_work, ids, sizes, changed;
-  int[] imageDim, bufferDim;
-  int[] ids_out, sizes_out;
+  CLBuffer<Integer> labels_work;
+  CLBuffer<Integer> sizes_work;
+  CLBuffer<Integer> ids;
+  CLBuffer<Integer> sizes;
+  CLBuffer<Integer> changed;
+  int[] imageDim;
+  int[] bufferDim;
+  int[] ids_out;
+  int[] sizes_out;
   long bufferSize;
   int minSize;
   int maxSize;
@@ -76,7 +86,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     initRun = new InitRun();
     updateRun = new UpdateRun();
     resultRun = new ResultRun();
-    
+
     // register ComputationRuns
     ocl.registerLaunch(signals.get(Signal.START), initRun);
     ocl.registerLaunch(signals.get(Signal.ITERATE), updateRun);
@@ -95,12 +105,12 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   public void doLabels() {
     ocl.castSignal(signals.get(Signal.START));
   }
-  
+
   public void doLabels(OCLSignal trigger) {
     this.trigger = trigger;
     ocl.registerLaunch(trigger, initRun);
   }
-  
+
   @Override
   public void dispose() {
     // unregister runs
@@ -110,7 +120,7 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     ocl.unregisterLaunch(signals.get(Signal.START), initRun);
     ocl.unregisterLaunch(signals.get(Signal.ITERATE), updateRun);
     ocl.unregisterLaunch(signals.get(Signal.FINISH), resultRun);
-    
+
     // release buffer object
     labels_work.release();
     sizes_work.release();
@@ -118,13 +128,13 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     ids.release();
     sizes.release();
   }
-  
+
   //<editor-fold defaultstate="collapsed" desc="Getters and Setters">
   @Override
   public OCLSignal getSignal(Signal signal) {
     return signals.get(signal);
   }
-  
+
   @Override
   public CLImage2D getLabelImage() {
     return labelImage;
@@ -161,26 +171,26 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
   public int[] getSizes() {
     return sizes_out;         // TODO make thread-safe
   }
-  
+
   public int getSize(int id) {
     return sizes_out[id-1];
   }
-  
+
   @Override
   public int getMaxBlobs() {
     return maxBlobs;
   }
-  
+
   @Override
   public void setInput(CLImage2D image) {
     this.input = image;
   }
-  
+
   @Override
   public CLBuffer<Integer> getIdBuffer() {
     return ids;
   }
-  
+
   @Override
   public CLBuffer<Integer> getSizeBuffer() {
     return sizes;
@@ -251,7 +261,8 @@ public class ConnectedComponentLabelerImpl implements ConnectedComponentLabeler 
     CLKernel resetK = ocl.programs().getKernel("labelequiv", "reset_change");
     CLKernel getResultsK = ocl.programs().getKernel("labelequiv", "make_blob_ids");
     CLKernel updateResultLabelK = ocl.programs().getKernel("labelequiv", "update_blob_ids");
-    IntBuffer idsH, sizesH;
+    IntBuffer idsH;
+    IntBuffer sizesH;
 
     @Override
     public void launch(CLQueue queue) {

@@ -444,6 +444,28 @@
       </roles>
       <timezone>+0</timezone>
     </developer>
+    <developer>
+      <id>jperrin</id>
+      <name>James Perrin</name>
+      <email></email>
+      <organization>University of Manchester</organization>
+      <organizationUrl>http://www.manchester.ac.uk/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+0</timezone>
+    </developer>
+    <developer>
+      <id>smarquard</id>
+      <name>Stephen Marquard</name>
+      <email>stephen.marquard@uct.ac.za</email>
+      <organization>University of Cape Town</organization>
+      <organizationUrl>http://www.cilt.uct.ac.za/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+2</timezone>
+    </developer>
   </developers>
   <dependencies></dependencies>
 </project>

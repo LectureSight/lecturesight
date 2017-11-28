@@ -72,6 +72,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   int stop_x, stop_y;                 // Distance within which the camera is considered to have reached the target
   int initial_delay;                  // Time in milliseconds to allow camera to reach initial position
   float damp_pan, damp_tilt;          // movement speed dampening factors 
+  float frame_width;                  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
   boolean xflip = false;
@@ -424,6 +426,17 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   @Override
   public float getZoom() {
     return ((float) camera.getZoom()) / ((float) zoom_max);
+  }
+
+  @Override
+  public void setFrameWidth(float frame_width) {
+    // Ideally we want to actually use this to set the camera's zoom position. For now it's just for display purposes.
+    this.frame_width = frame_width;
+  }
+
+  @Override
+  public float getFrameWidth() {
+    return frame_width;
   }
 
   @Override

@@ -17,15 +17,16 @@
  */
 package cv.lecturesight.opencl;
 
-import com.nativelibs4java.opencl.CLContext;
-import com.nativelibs4java.opencl.CLImageFormat;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
 
+import com.nativelibs4java.opencl.CLContext;
+import com.nativelibs4java.opencl.CLImageFormat;
+
 /** API for the OpenCL Service
- * 
+ *
  * @author wulff
  */
 public interface OpenCLService {
@@ -33,14 +34,14 @@ public interface OpenCLService {
   // Image formats
   enum Format {
     RGBA_UINT8(new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.UnsignedInt8));
-    
+
     //<editor-fold defaultstate="collapsed" desc="Enums gutts">
     private CLImageFormat clFormat;
-  
+
     Format(CLImageFormat clFormat) {
       this.clFormat = clFormat;
     }
-    
+
     public CLImageFormat getCLImageFormat() {
       return clFormat;
     }
@@ -48,7 +49,7 @@ public interface OpenCLService {
   };
 
   /** Returns the underlying JavaCL context
-   * 
+   *
    * @return JavaCl context
    */
   CLContext context();
@@ -56,16 +57,16 @@ public interface OpenCLService {
   /** Returns the <code>OCLProgramStore</code> of this service instance. Every
    * bundle that uses the OpenCL Service is scanned for OpenCL sources. The
    * compiled OpenCL programs can be accessed through the program store.
-   * 
+   *
    * @return OpenCL program store
    */
   OCLProgramStore programs();
 
-  /** Schedule a <ComputationRun> for immediate launch. The <code>run</code> 
+  /** Schedule a <ComputationRun> for immediate launch. The <code>run</code>
    * will be launched of the next possible occasion.
-   * 
+   *
    * TODO return CLEvent for synchronization
-   * 
+   *
    * @param run ComputationRun to be launched
    */
   void immediateLaunch(ComputationRun run);
@@ -73,42 +74,42 @@ public interface OpenCLService {
   /** Returns the <code>OCLSignal</code> with the specified name. If a signal
    * with the specified name is not existing, it will be created and registered
    * under that name.
-   * 
+   *
    * @param name of the signal
    * @return OCLSignal registered under <code>name</name>
    */
   OCLSignal getSignal(String name);
 
   /** Returns the object that holds the utility functions.
-   * 
+   *
    * @return object with utility functions
    */
   OCLUtils utils();
 
   /** Emiits the provided signal the to OpenCL runtime management system.
-   * 
+   *
    * @param signal signal to be emitted.
    */
   void castSignal(OCLSignal signal);
 
-  /** Register <code>run</code> to be launched when <code>trigger</code> is 
+  /** Register <code>run</code> to be launched when <code>trigger</code> is
    * emitted.
-   * 
+   *
    * @param trigger signal that should trigger the launch
    * @param run ComputationRun to be launched on trigger
    */
   void registerLaunch(OCLSignal trigger, ComputationRun run);
 
-  /** Register <code>run</code> to be launched when any of the <code>triggers</code> 
+  /** Register <code>run</code> to be launched when any of the <code>triggers</code>
    * is emitted.
-   * 
+   *
    * @param triggers signals that should trigger the launch
    * @param run ComputationRun to be launched on trigger
    */
   void registerLaunch(OCLSignal[] triggers, ComputationRun run);
 
-  /** Unregister <code>run</code> from launch on <code>trigger</code>. 
-   * 
+  /** Unregister <code>run</code> from launch on <code>trigger</code>.
+   *
    * @param trigger signal from which the ComputationRun should be detached
    * @param run ComputationRun to be detached from signal
    */

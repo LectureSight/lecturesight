@@ -17,9 +17,12 @@
  */
 package cv.lecturesight.util.geometry;
 
+import java.util.Objects;
+
 public class NormalizedPosition implements Cloneable {
 
-  private float x, y;
+  private float x;
+  private float y;
 
   public NormalizedPosition() {
     this.x = 0.0f;
@@ -59,8 +62,8 @@ public class NormalizedPosition implements Cloneable {
 
   public double distance(NormalizedPosition other) {
     return Math.sqrt(
-            Math.pow(Math.abs(getX() - other.getX()), 2)
-            + Math.pow(Math.abs(getY() - other.getY()), 2));
+                     Math.pow(Math.abs(getX() - other.getX()), 2)
+                     + Math.pow(Math.abs(getY() - other.getY()), 2));
   }
 
   @Override
@@ -72,14 +75,20 @@ public class NormalizedPosition implements Cloneable {
   public NormalizedPosition clone() {
     return new NormalizedPosition(getX(), getY());
   }
-  
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof Position) {
-      NormalizedPosition other = (NormalizedPosition)o;
+      NormalizedPosition other = (NormalizedPosition) o;
       return other.x == this.x && other.y == this.y;
     } else {
       return false;
     }
   }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(x, y);
+  }
+
 }

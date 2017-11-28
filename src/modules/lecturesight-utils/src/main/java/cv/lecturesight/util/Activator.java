@@ -17,18 +17,24 @@
  */
 package cv.lecturesight.util;
 
-import cv.lecturesight.util.conf.*;
+import cv.lecturesight.util.conf.ConfigCommands;
+import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.conf.ConfigurationFactory;
+import cv.lecturesight.util.conf.ConfigurationService;
+import cv.lecturesight.util.conf.ConfigurationServiceImpl;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceException;
+import org.osgi.framework.ServiceRegistration;
+import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceException;
-import org.osgi.framework.ServiceRegistration;
-import org.pmw.tinylog.Logger;
 
 public final class Activator implements BundleActivator {
 
@@ -64,7 +70,7 @@ public final class Activator implements BundleActivator {
     } catch (IOException e) {
       Logger.debug("Failed to load build config from " + buildConfigFile.getAbsolutePath());
     }
-    
+
     // register config service
     ConfigurationService confService = new ConfigurationServiceImpl(context, systemProperties, defaultProperties);
     context.registerService(ConfigurationService.class.getName(), confService, null);
@@ -74,7 +80,7 @@ public final class Activator implements BundleActivator {
     // register config factory
     ConfigurationFactory confFactory = new ConfigurationFactory(systemProperties, defaultProperties, (ConfigurationServiceImpl)confService);
     confFactoryReg = context.registerService(Configuration.class.getName(), confFactory, null);
-    
+
     // register config commands
     ConfigCommands commandImpl = new ConfigCommands((ConfigurationServiceImpl)confService);
     Dictionary<String, Object> commands = new Hashtable<String, Object>();

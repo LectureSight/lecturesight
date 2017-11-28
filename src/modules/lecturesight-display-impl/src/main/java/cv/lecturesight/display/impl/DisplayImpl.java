@@ -17,14 +17,16 @@
  */
 package cv.lecturesight.display.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
-import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayListener;
 import cv.lecturesight.display.DisplayPanel;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+import com.nativelibs4java.opencl.CLQueue;
+
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
@@ -34,9 +36,11 @@ import java.util.UUID;
 public class DisplayImpl implements Display {
 
   OpenCLService ocl;
-  OCLSignal trigger, sig_DONE;
+  OCLSignal trigger;
+  OCLSignal sig_DONE;
   ComputationRun workingRun;
-  private int width, height;
+  private int width;
+  private int height;
   private CLImage2D imageCL;
   private BufferedImage imageHost;
   private boolean active = false;

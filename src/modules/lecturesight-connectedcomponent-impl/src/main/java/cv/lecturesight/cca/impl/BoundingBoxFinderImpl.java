@@ -17,10 +17,6 @@
  */
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLBuffer;
-import com.nativelibs4java.opencl.CLKernel;
-import com.nativelibs4java.opencl.CLMem.Usage;
-import com.nativelibs4java.opencl.CLQueue;
 import cv.lecturesight.cca.BoundingBoxFinder;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.opencl.OpenCLService;
@@ -28,6 +24,12 @@ import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.util.geometry.Position;
+
+import com.nativelibs4java.opencl.CLBuffer;
+import com.nativelibs4java.opencl.CLKernel;
+import com.nativelibs4java.opencl.CLMem.Usage;
+import com.nativelibs4java.opencl.CLQueue;
+
 import java.nio.IntBuffer;
 import java.util.EnumMap;
 import java.util.UUID;
@@ -58,7 +60,7 @@ public class BoundingBoxFinderImpl implements BoundingBoxFinder {
   public OCLSignal getSignal(Signal signal) {
     return signals.get(signal);
   }
-  
+
   @Override
   public CLBuffer<Integer> getBoxBuffer() {
     return boxes;

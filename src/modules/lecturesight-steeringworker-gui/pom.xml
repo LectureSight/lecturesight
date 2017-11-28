@@ -34,7 +34,17 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-cameraoperator-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-gui-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-objecttracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

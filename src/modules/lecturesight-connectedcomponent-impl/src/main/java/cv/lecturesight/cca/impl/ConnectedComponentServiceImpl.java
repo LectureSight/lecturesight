@@ -17,13 +17,15 @@
  */
 package cv.lecturesight.cca.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.cca.BoundingBoxFinder;
 import cv.lecturesight.cca.CentroidFinder;
 import cv.lecturesight.cca.ConnectedComponentLabeler;
 import cv.lecturesight.cca.ConnectedComponentService;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.util.conf.Configuration;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;

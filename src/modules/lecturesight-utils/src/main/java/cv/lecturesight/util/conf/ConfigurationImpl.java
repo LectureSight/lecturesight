@@ -34,7 +34,7 @@ public class ConfigurationImpl implements Configuration {
     key = ensureBundleName(key);
     props.setProperty(key, value);
   }
-  
+
   @Override
   public String get(String key) throws IllegalArgumentException {
     key = ensureBundleName(key);

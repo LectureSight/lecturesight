@@ -18,8 +18,9 @@
 package cv.lecturesight.opencl.impl;
 
 import cv.lecturesight.opencl.api.OCLSignal;
-import cv.lecturesight.opencl.impl.trigger.OCLSignalImpl;
 import cv.lecturesight.opencl.api.Triggerable;
+import cv.lecturesight.opencl.impl.trigger.OCLSignalImpl;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
