@@ -26,10 +26,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -91,8 +91,8 @@ public class SceneAreasUI extends JPanel{
     jButton1.setToolTipText("You can choose to ignore areas in the scene, which are not important for the recording of the lecture.");
     jButton1.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-          video_frame.changeType(0, c1);
-          marker = 10;
+        video_frame.changeType(0, c1);
+        marker = 10;
       }
     });
 
@@ -146,11 +146,11 @@ public class SceneAreasUI extends JPanel{
       }
     });
 
-//    JPanel reset_panel = new JPanel();
-//    reset_panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-//    reset_panel.setPreferredSize(new Dimension(100, video_frame.getHeight()));
-//
-//    reset_panel.add(jButton5);
+    //    JPanel reset_panel = new JPanel();
+    //    reset_panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    //    reset_panel.setPreferredSize(new Dimension(100, video_frame.getHeight()));
+    //
+    //    reset_panel.add(jButton5);
 
     Component cb = Box.createGlue();
     cb.setPreferredSize(new Dimension(100, 95));
@@ -172,14 +172,14 @@ public class SceneAreasUI extends JPanel{
 
     bottom.setLayout(new GridBagLayout());
     GridBagConstraints c_1 = new GridBagConstraints();
-    
+
     JLabel camera_header = new JLabel();
     camera_header.setText("Camera options");
     camera_header.setFont(new Font("Arial", 0, 16));
     camera_header.setVisible(true);
     camera_header.setPreferredSize(new Dimension(200, 35));
     camera_header.setVerticalAlignment(SwingConstants.CENTER);
-    
+
     c_1.gridx = 0;
     c_1.gridy = 0;
 
@@ -196,7 +196,7 @@ public class SceneAreasUI extends JPanel{
     slider_label.setText("camera velocity");
     slider_label.setFont(new Font("Arial", 0, 12));
     slider_label.setVisible(true);
-    
+
     slider_panel.add(slider_label);
 
     JPanel slider_box = new JPanel();
@@ -270,6 +270,6 @@ public class SceneAreasUI extends JPanel{
     c.gridy = 1;
     c.weighty = 1.0;
 
-    add(bottom, c);    
+    add(bottom, c);
   }
 }

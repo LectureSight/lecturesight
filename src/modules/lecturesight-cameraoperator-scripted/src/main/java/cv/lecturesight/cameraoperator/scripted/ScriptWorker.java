@@ -1,5 +1,11 @@
 package cv.lecturesight.cameraoperator.scripted;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,17 +19,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.pmw.tinylog.Logger;
 
 public class ScriptWorker implements Runnable {
 
   String name;         // name used for the script logger
   Scriptable scope;    // scope the script is running in
-  
+
   List<String> imports;        // list of imports that are added to script space before the script is loaded
   Map<String,Object> objects;  // list of Java object that are added to script space before script is loaded
 
@@ -42,7 +43,7 @@ public class ScriptWorker implements Runnable {
   public ScriptWorker(String name) throws Exception {
     this.name = name;
     imports = new LinkedList<String>();
-    
+
     // initialize script scope
     Context ctx = Context.enter();
     scope = ctx.initStandardObjects(null, true);
@@ -112,7 +113,7 @@ public class ScriptWorker implements Runnable {
   }
 
   /**
-   * Adds an object <code>obj</code> to the list of objects that are loaded into 
+   * Adds an object <code>obj</code> to the list of objects that are loaded into
    * script space when load() is called.
    *
    * @param name
@@ -130,10 +131,10 @@ public class ScriptWorker implements Runnable {
       Context.exit();
     }
   }
-  
-  /** Loads and evaluates the specified <code>scriptfile</code>. 
-   * 
-   * @param scriptfile 
+
+  /** Loads and evaluates the specified <code>scriptfile</code>.
+   *
+   * @param scriptfile
    */
   public void load(File scriptfile) {
     Logger.info("Loading script " + scriptfile.getName());
@@ -216,7 +217,7 @@ public class ScriptWorker implements Runnable {
     }
     String code = "var Config = {" + join(params.iterator(), ",") + "};";
 
-    // inject Config object 
+    // inject Config object
     Context ctx = Context.enter();
     try {
       ctx.evaluateString(scope, code, "<scriptWorker>", 1, null);

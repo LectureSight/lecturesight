@@ -20,6 +20,7 @@ package cv.lecturesight.ptz.steering.relativemove;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.geometry.NormalizedPosition;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -46,12 +47,19 @@ public class ConsoleCommands implements DummyInterface {
     steerer.setSteering(false);
   }
 
+  private void console(String s) {
+    //CHECKSTYLE:OFF
+    System.out.println(s);
+    //CHECKSTYLE:ON
+    return;
+  }
+
   public void move(String[] args) {
     try {
       steerer.setTargetPosition(getPosition(args));
     } catch (IllegalArgumentException e) {
       Logger.warn(e.getMessage());
-      System.out.println("Usage: cs:move (float)x (float)y");
+      console("Usage: cs:move (float)x (float)y");
     }
   }
 
@@ -74,13 +82,13 @@ public class ConsoleCommands implements DummyInterface {
 
   public void zoom(String[] args) {
     if (args.length == 0) {
-      System.out.println("Zoom: " + steerer.getZoom());
+      console("Zoom: " + steerer.getZoom());
     } else {
       try {
         float zoom = Float.parseFloat(args[0]);
         steerer.setZoom(zoom);
       } catch (NumberFormatException e) {
-        System.out.println("Could not parse zoom factor.");
+        console("Could not parse zoom factor.");
       }
     }
   }

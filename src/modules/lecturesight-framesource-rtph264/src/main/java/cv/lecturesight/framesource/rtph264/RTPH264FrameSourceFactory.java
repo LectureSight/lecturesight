@@ -20,10 +20,7 @@ package cv.lecturesight.framesource.rtph264;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -31,6 +28,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.freedesktop.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * RTP h.264 Streaming FrameSourceFactory
@@ -49,7 +51,6 @@ public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
   private List<RTPH264ClientFrameGrabber> children = new LinkedList<RTPH264ClientFrameGrabber>();
 
   protected void activate(ComponentContext cc) {
-    System.out.println("RTPH264FrameSourceFactory.activate");
     Gst.init();
     Logger.info("RTP h.264 Streaming FrameSource activated");
   }

@@ -22,55 +22,55 @@ import java.util.List;
 public interface SceneProfileManager {
 
   /** Sets the active profile. The active profile is the profile the system uses
-   * in operation. When the active profile has been changed, this method should 
+   * in operation. When the active profile has been changed, this method should
    * be called again in order for the changes to take effect.
-   * 
-   * @param profile 
+   *
+   * @param profile
    */
   void setActiveProfile(SceneProfile profile);
-  
-  /** Returns the active profile. 
-   * 
+
+  /** Returns the active profile.
+   *
    * @return profile that is currently active
    */
   SceneProfile getActiveProfile();
-  
+
   /** Returns a list of all installed profiles.
-   * 
-   * @return list of installed profiles 
+   *
+   * @return list of installed profiles
    */
   List<SceneProfile> getProfiles();
-  
+
   /** Stores a profile.
-   * 
+   *
    * @param profile to install
    */
   void putProfile(SceneProfile profile);
-  
+
   /** Removes a profile from system.
-   * 
+   *
    * @param profile to remove
    */
   void removeProfile(SceneProfile profile);
-  
+
   /** Save a profile to the file it was loaded from.
-   * 
+   *
    * @param profile to save
    */
   void saveProfile(SceneProfile profile);
-  
-  /** Register a <code>SceneProfileListener</code> that is notified when the 
+
+  /** Register a <code>SceneProfileListener</code> that is notified when the
    * active profile changes.
-   * 
+   *
    * @param listener to register
    */
   void registerProfileListener(SceneProfileListener listener);
-  
-  /** Unregister a <code>SceneProfileListener</code>. If <code>listener</code> 
-   * was not previously registered, this method fails quietly. 
-   * 
-   * @param listener 
+
+  /** Unregister a <code>SceneProfileListener</code>. If <code>listener</code>
+   * was not previously registered, this method fails quietly.
+   *
+   * @param listener
    */
   void unregisterProfileListener(SceneProfileListener listener);
-  
+
 }

@@ -3,6 +3,7 @@ package cv.lecturesight.ptz.steering.relativemove;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.geometry.NormalizedPosition;
+
 import org.osgi.service.component.ComponentContext;
 
 public class CameraBridge implements ScriptBridge, MovementListener {
@@ -34,11 +35,11 @@ public class CameraBridge implements ScriptBridge, MovementListener {
   protected void activate(ComponentContext cc) {
     camera.addMoveListener(this);
   }
-  
+
   protected void deactivate(ComponentContext cc) {
     camera.removeMoveListener(this);
   }
-  
+
   public NormalizedPosition targetPos() {
     return camera.getTargetPosition();
   }

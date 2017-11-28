@@ -1,5 +1,10 @@
 package cv.lecturesight.framesource.impl;
 
+import cv.lecturesight.framesource.FrameGrabber;
+import cv.lecturesight.opencl.OpenCLService;
+import cv.lecturesight.opencl.api.ComputationRun;
+import cv.lecturesight.opencl.api.OCLSignal;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLImage2D;
@@ -7,10 +12,9 @@ import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem;
 import com.nativelibs4java.opencl.CLQueue;
-import cv.lecturesight.framesource.FrameGrabber;
-import cv.lecturesight.opencl.OpenCLService;
-import cv.lecturesight.opencl.api.ComputationRun;
-import cv.lecturesight.opencl.api.OCLSignal;
+
+import org.pmw.tinylog.Logger;
+
 import java.awt.image.BufferedImage;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -21,12 +25,14 @@ public class IntensityFrameUploader implements FrameUploader {
   private final String UID = UUID.randomUUID().toString();
   private final OpenCLService ocl;
   private final FrameGrabber grabber;
-  private final CLKernel conversionK, maskK;
+  private final CLKernel conversionK;
+  private final CLKernel maskK;
   private final int[] workDim;
   private final long bufferSize;
   private ByteBuffer hostBuffer;
   private CLBuffer<Byte> gpuRawBuffer;
-  private final CLImage2D gpuBuffer, tempBuffer;
+  private final CLImage2D gpuBuffer;
+  private final CLImage2D tempBuffer;
   private CLImage2D last;
   private CLImage2D mask = null;
   private BufferedImage imageHost;
@@ -49,15 +55,15 @@ public class IntensityFrameUploader implements FrameUploader {
     bufferSize = grabber.getWidth() * grabber.getHeight() * 3;
     gpuRawBuffer = ocl.context().createByteBuffer(CLMem.Usage.InputOutput, bufferSize);
     gpuBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
-            grabber.getWidth(), grabber.getHeight());
+                                            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+                                            grabber.getWidth(), grabber.getHeight());
     last = ocl.context().createImage2D(CLMem.Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
-            grabber.getWidth(), grabber.getHeight());
+                                       new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+                                       grabber.getWidth(), grabber.getHeight());
     ocl.utils().setValues(0, 0, grabber.getWidth(), grabber.getHeight(), last, 0, 0, 0, 0);
     tempBuffer = ocl.context().createImage2D(CLMem.Usage.InputOutput,
-            new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
-            grabber.getWidth(), grabber.getHeight());
+                                             new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UnsignedInt8),
+                                             grabber.getWidth(), grabber.getHeight());
 
     // set up conversion kernel
     conversionK = ocl.programs().getKernel("conversions", "Intensity8_RGBAUint8");
@@ -67,7 +73,7 @@ public class IntensityFrameUploader implements FrameUploader {
 
     workDim = new int[]{grabber.getWidth(), grabber.getHeight()};
 
-    // System.out.println("Computed buffer size: " + bufferSize);
+    Logger.trace("Computed buffer size: {}", bufferSize);
 
     // set up conversion run
     uploadRun = new ComputationRun() {
@@ -100,7 +106,7 @@ public class IntensityFrameUploader implements FrameUploader {
   public void destroy() {
     // deregister this uploaders computationRun
     ocl.unregisterLaunch(sig_start, uploadRun);
-    
+
     // free GPU buffers
     gpuRawBuffer.release();
     gpuBuffer.release();

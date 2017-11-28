@@ -19,26 +19,26 @@ package cv.lecturesight.profile.api;
 
 public interface SceneProfileListener {
 
-  /** Called by SceneProfileManager service when a profile was activated 
-   * 
+  /** Called by SceneProfileManager service when a profile was activated
+   *
    * @param profile that was activated
    */
   void profileActivated(SceneProfile profile);
-  
-  /** Called by SceneProfileManager service when a profile was installed 
-   * 
+
+  /** Called by SceneProfileManager service when a profile was installed
+   *
    * @param profile that was installed
    */
   void profileInstalled(SceneProfile profile);
-  
+
   /** Called by SceneProfileManager service when a profile was updated
-   * 
+   *
    * @param profile that was updated
    */
   void profileUpdated(SceneProfile profile);
-  
+
   /** Called by SceneProfileManager service when a profile was removed
-   * 
+   *
    * @param profile that was removed
    */
   void profileRemoved(SceneProfile profile);

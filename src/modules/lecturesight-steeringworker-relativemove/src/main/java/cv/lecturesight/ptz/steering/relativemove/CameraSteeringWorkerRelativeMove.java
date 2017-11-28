@@ -24,18 +24,20 @@ import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
-import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.List;
+import cv.lecturesight.util.metrics.MetricsService;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Camera Steering SteeringWorker Implementation
@@ -53,26 +55,46 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
   @Reference
   PTZCamera camera;            // PTZCamera implementation
-  
+
   @Reference
   private ScriptingService engine;
 
   CameraPositionModel model;   // model mapping normalized coords <--> camera coords
 
   SteeringWorker worker;       // worker updating the pan and tilt speed
-  
+
   private CameraBridge bridge; // script bridge
-  
-  int pan_min, pan_max;               // pan limits
-  int tilt_min, tilt_max;             // tilt limits
-  int zoom_min, zoom_max;             // zoom limits
-  int maxspeed_zoom;                  // max zoom speed
-  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
-  int alpha_x, alpha_y;               // alpha environment size in x and y direction
-  int stop_x, stop_y;                 // Distance within which the camera is considered to have reached the target
-  int initial_delay;                  // Time in milliseconds to allow camera to reach initial position
-  float damp_pan, damp_tilt;          // movement speed dampening factors 
-  float frame_width;                  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+
+  // pan, tilt and zoom limits
+  int pan_min;
+  int pan_max;
+  int tilt_min;
+  int tilt_max;
+  int zoom_min;
+  int zoom_max;
+
+  // max pan, tilt and zoom speeds
+  int maxspeed_pan;
+  int maxspeed_tilt;
+  int maxspeed_zoom;
+
+  // alpha environment size in x and y direction
+  int alpha_x;
+  int alpha_y;
+
+  // Distance within which the camera is considered to have reached the target
+  int stop_x;
+  int stop_y;
+
+  // Time in milliseconds to allow camera to reach initial position
+  int initial_delay;
+
+  // movement speed dampening factors
+  float damp_pan;
+  float damp_tilt;
+
+  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+  float frame_width;
 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
@@ -104,9 +126,9 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
       // If no target has been set yet, do nothing except record position
       if (!model.isTargetSet()) {
-         model.setCameraPosition(new_pos);
-         camera_pos = new_pos;
-         return;
+        model.setCameraPosition(new_pos);
+        camera_pos = new_pos;
+        return;
       }
 
       Position target_pos = model.getTargetPosition();
@@ -175,11 +197,15 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
         // Stop moving if the camera is close enough
         if (dx_abs < stop_x) {
-		dx = dx_abs = ps = 0;
+          dx = 0;
+          dx_abs = 0;
+          ps = 0;
         }
 
         if (dy_abs < stop_y) {
-		dy = dy_abs = ts = 0;
+          dy = 0;
+          dy_abs = 0;
+          ts = 0;
         }
 
         // apply computed speeds if speeds or target have changed
@@ -189,7 +215,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
-         
+
           if (ps == 0 && ts == 0) {
             if (last_cmd != CameraCmd.STOP) {
               camera.stopMove();
@@ -264,7 +290,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   protected void deactivate(ComponentContext cc) throws Exception {
     camera.removeCameraListener(worker);
 
-    // Wait for any camera movements to complete (e.g. move to home / preset)  
+    // Wait for any camera movements to complete (e.g. move to home / preset)
     Thread.sleep(1000);
 
     camera.stopMove();
@@ -302,28 +328,28 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     // initialize limits for pan and tilt, if not configured by camera calibration
     // the limits from the camera profile are taken
     String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
       pan_min = camera.getProfile().getPanMin();
     } else {
       pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
     }
 
     val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
       pan_max = camera.getProfile().getPanMax();
     } else {
       pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
     }
 
     val = config.get(Constants.PROPKEY_LIMIT_TOP);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
       tilt_max = camera.getProfile().getTiltMax();
     } else {
       tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
     }
 
     val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
-    if (val.isEmpty() || val.equalsIgnoreCase("none")) {
+    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
       tilt_min = camera.getProfile().getTiltMin();
     } else {
       tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
@@ -385,14 +411,14 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
     // Allow the camera to reach the target absolute position before sending it any other movement commands
     try {
-       Thread.sleep(initial_delay);
+      Thread.sleep(initial_delay);
     } catch (Exception e) {
-       // ignore
+      // ignore
     }
     setSteering(s);
 
     if (focus_fixed) {
-       camera.focusMode(PTZCamera.FocusMode.MANUAL);
+      camera.focusMode(PTZCamera.FocusMode.MANUAL);
     }
 
     informUISlaves();
@@ -443,7 +469,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   public void movePreset(int preset) {
     camera.movePreset(preset);
     if (focus_fixed) {
-       camera.focusMode(PTZCamera.FocusMode.AUTO);
+      camera.focusMode(PTZCamera.FocusMode.AUTO);
     }
   }
 
@@ -451,7 +477,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   public void moveHome() {
     camera.moveHome();
     if (focus_fixed) {
-       camera.focusMode(PTZCamera.FocusMode.AUTO);
+      camera.focusMode(PTZCamera.FocusMode.AUTO);
     }
   }
 
