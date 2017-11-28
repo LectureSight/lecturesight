@@ -17,6 +17,8 @@
  */
 package cv.lecturesight.opencl.impl;
 
+import cv.lecturesight.opencl.OCLUtils;
+
 import com.nativelibs4java.opencl.CLBuffer;
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLEvent;
@@ -24,13 +26,14 @@ import com.nativelibs4java.opencl.CLImage2D;
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLProgram;
 import com.nativelibs4java.opencl.CLQueue;
-import cv.lecturesight.opencl.OCLUtils;
 
 public class OCLUtilsImpl implements OCLUtils {
 
   private CLQueue queue;
   // Kernels
-  CLKernel set_values4, set_values1, set_valuesInt;
+  CLKernel set_values4;
+  CLKernel set_values1;
+  CLKernel set_valuesInt;
   CLKernel copy_image;
 
   public OCLUtilsImpl(CLQueue queue, CLProgram utils) throws CLBuildException {

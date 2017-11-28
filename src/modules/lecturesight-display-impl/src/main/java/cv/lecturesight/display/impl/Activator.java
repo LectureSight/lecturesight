@@ -19,8 +19,7 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.opencl.OpenCLService;
-import java.util.Dictionary;
-import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
@@ -29,14 +28,17 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.pmw.tinylog.Logger;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 public class Activator implements BundleActivator, ServiceListener {
 
   final static String serviceFilter = "(objectClass=" + OpenCLService.class.getName() + ")";
-    
+
   private BundleContext bc;
   private DisplayServiceFactory serviceFactory;
   private ServiceRegistration serviceReg = null;
-  
+
   @Override
   public void start(BundleContext bc) throws Exception {
     this.bc = bc;
@@ -59,7 +61,7 @@ public class Activator implements BundleActivator, ServiceListener {
       serviceReg = bc.registerService(DisplayService.class.getName(), serviceFactory, props);
     }
   }
-  
+
   private void deactivateService() {
     if (serviceReg != null) {
       serviceFactory.deactivate();
@@ -67,7 +69,7 @@ public class Activator implements BundleActivator, ServiceListener {
     }
     Logger.info("Stopped.");
   }
-  
+
   @Override
   public void stop(BundleContext bc) throws Exception {
     deactivateService();
@@ -85,7 +87,10 @@ public class Activator implements BundleActivator, ServiceListener {
         Logger.debug("OpenCLService unregistering");
         deactivateService();
         break;
+      default:
+        break;
     }
   }
-  
+
 }
+

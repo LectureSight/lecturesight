@@ -17,9 +17,10 @@
  */
 package cv.lecturesight.cca;
 
-import com.nativelibs4java.opencl.CLBuffer;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.geometry.BoundingBox;
+
+import com.nativelibs4java.opencl.CLBuffer;
 
 public interface BoundingBoxFinder {
 
@@ -31,5 +32,5 @@ public interface BoundingBoxFinder {
   CLBuffer<Integer> getBoxBuffer();
   BoundingBox getBox(int id);
   BoundingBox[] getAllBoxes();
-  
+
 }

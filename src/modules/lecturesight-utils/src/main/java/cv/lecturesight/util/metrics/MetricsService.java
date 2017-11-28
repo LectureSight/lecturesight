@@ -22,36 +22,34 @@ import com.codahale.metrics.MetricRegistry;
 public interface MetricsService {
 
   /* Reset metrics */
-  public void reset();
+  void reset();
 
   /* Pause metric reporting */
-  public void pause();
+  void pause();
 
   /* Resume metric reporting */
-  public void resume();
+  void resume();
 
   /* Save JSON snapshot to file */
-  public void save();
+  void save();
 
   /* Save JSON snapshot, with the eventId in the filename */
-  public void save(String eventId);
+  void save(String eventId);
 
   /* JSON snapshot of metrics */
-  public String json();
+  String json();
 
-  public void setDescription(String key, String desc);
+  void setDescription(String key, String desc);
 
   /* Increment Counter */
-  public void incCounter(String key);
+  void incCounter(String key);
 
   /* Add a timed event (Timer) */
-  public void timedEvent(String key, long duration_ms);
+  void timedEvent(String key, long duration_ms);
 
   /* Gauge */
-  public void setGauge(String key, long value);
+  void setGauge(String key, long value);
 
   /* Access to the MetricsRegistry */
-  public MetricRegistry getRegistry();
-
+  MetricRegistry getRegistry();
 }
-

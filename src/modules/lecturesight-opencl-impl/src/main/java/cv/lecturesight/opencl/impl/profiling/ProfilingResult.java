@@ -23,8 +23,8 @@ class ProfilingResult {
   private long launchTime;
   private long ladningTime;
   private long finishingTime;
-  
-  public ProfilingResult(String name, long launchT, long landT, long finishT) {
+
+  ProfilingResult(String name, long launchT, long landT, long finishT) {
     this.name = name;
     this.launchTime = launchT;
     this.ladningTime = landT;
@@ -47,3 +47,4 @@ class ProfilingResult {
     return finishingTime;
   }
 }
+

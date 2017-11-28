@@ -19,6 +19,7 @@ package cv.lecturesight.ptz.steering.gui;
 
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.gui.api.UserInterface;
+import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import javax.swing.JPanel;
 import org.apache.felix.scr.annotations.Component;
@@ -31,14 +32,18 @@ import org.osgi.service.component.ComponentContext;
 public class CameraMovementUI implements UserInterface {
 
   @Reference
+  CameraOperator operator;
+
+  @Reference
   CameraSteeringWorker worker;
+
   @Reference
   DisplayService dsps;
 
   private CameraControlPanel controlPanel;
 
   protected void activate(ComponentContext cc) {
-    controlPanel = new CameraControlPanel(this, worker);
+    controlPanel = new CameraControlPanel(this, worker, operator);
     dsps.addRegistrationListener(controlPanel);
     worker.addUISlave(controlPanel);
   }

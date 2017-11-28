@@ -32,6 +32,12 @@ public class DisplayCommands {
     this.parent = parent;
   }
 
+  private void console(String s) {
+    //CHECKSTYLE:OFF
+    System.out.println(s);
+    //CHECKSTYLE:ON
+  }
+
   public void list() {
     StringBuilder sb = new StringBuilder();
     sb.append("   Id   State          Name\n");
@@ -48,7 +54,7 @@ public class DisplayCommands {
       sb.append(title);
       sb.append("\n");
     }
-    System.out.println(sb.toString());
+    console(sb.toString());
   }
 
   private String rightAlign(String in, int places) {
@@ -82,7 +88,7 @@ public class DisplayCommands {
         }
       }
     } catch (Exception e) {
-      System.out.println("usage: display:show <id>");
+      console("usage: display:show <id>");
     }
   }
 
@@ -96,7 +102,7 @@ public class DisplayCommands {
         displayWindows.remove(id);
       }
     } catch (Exception e) {
-      System.out.println("usage: display:hide <id>");
+      console("usage: display:hide <id>");
     }
   }
 }
