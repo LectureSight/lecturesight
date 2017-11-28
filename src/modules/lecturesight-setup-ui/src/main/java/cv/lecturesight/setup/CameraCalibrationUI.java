@@ -78,7 +78,6 @@ public class CameraCalibrationUI implements UserInterface {
     if (steeringWorker != null) {
       wasSteeringBefore = steeringWorker.isSteering();
       steeringWorker.setSteering(false);
-      steeringWorker.stop();
     }
 
     // activate production camera frame source, set ui class as custom renderer if configured
@@ -109,7 +108,6 @@ public class CameraCalibrationUI implements UserInterface {
   void abandonControl() {
     // bring steering worker to last state
     if (steeringWorker != null) {
-      steeringWorker.start();
       steeringWorker.setSteering(wasSteeringBefore);
     }
 
