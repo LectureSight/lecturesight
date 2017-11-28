@@ -109,7 +109,6 @@
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
-        <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
         <module>modules/lecturesight-ptzcontrol-dummy</module>
         <!--module>modules/wulff-visca-api</module>
@@ -174,6 +173,7 @@
         <module>modules/lecturesight-decorator-head</module>
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-decorator-person</module>
+        <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-impl</module>
         <module>modules/lecturesight-visualization</module>
       </modules>
