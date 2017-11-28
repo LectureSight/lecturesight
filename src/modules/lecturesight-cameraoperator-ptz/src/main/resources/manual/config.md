@@ -29,20 +29,32 @@ the torso, not the head. Ignored if _cv.lecturesight.cameraoperator.ptz.tilt.loc
 
 *Default:* 0.0
 
-Sets the initial zoom position.
+Sets the initial zoom position in normalized coordinates
 
-### cv.lecturesight.cameraoperator.pantitlt.frame.width
+### cv.lecturesight.cameraoperator.ptz.frame.width
 
 *Default:* 0.5
 
-Sets the width in which the target object can move without triggering the
+Sets the width of the PTZ camera's frame in normalized coordinates
+
+###cv.lecturesight.cameraoperator.ptz.frame.height
+
+*Default:* 0.5
+
+Sets the height of the PTZ camera's frame in normalized coordinates
+
+### cv.lecturesight.cameraoperator.ptz.frame.trigger.width
+
+*Default:* 0.65
+
+Sets the proportion of the frame width in which the target object can move without triggering the
 camera to move.
 
-###cv.lecturesight.cameraoperator.ptz.frame.height=0.5
+###cv.lecturesight.cameraoperator.ptz.frame.trigger.height
 
-*Default:* 0.5
+*Default:* 0.8
 
-Sets the height in which the target object can move without triggering the
+Sets the proportion of the frame height in which the target object can move without triggering the
 camera to move.
 
 ### cv.lecturesight.cameraoperator.ptz.target.timeout

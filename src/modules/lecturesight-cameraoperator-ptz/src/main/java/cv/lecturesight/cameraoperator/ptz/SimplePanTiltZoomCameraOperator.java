@@ -28,6 +28,7 @@ import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.util.metrics.MetricsService;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,6 +36,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +51,9 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
   Configuration config;
 
   @Reference
+  MetricsService metrics;
+
+  @Reference
   ObjectTracker tracker;
 
   @Reference
@@ -56,6 +62,8 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
   @Reference
   FrameSourceProvider fsp;
   FrameSource fsrc;
+
+  List<TrackerObject> targetList = Collections.emptyList();
 
   int interval = 200;
   int target_timeout;
@@ -70,8 +78,10 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
   float start_pan = 0;
   float start_tilt = 0;
   float start_zoom = 0;
-  float frame_width = 0;
-  float frame_height = 0;
+  float frame_width = 0.5f;
+  float frame_height = 0.5f;
+  float frame_trigger_width = 0.65f;
+  float frame_trigger_height = 0.8f;
   boolean tilt_lock = true;
   float tilt_offset = 0;
 
@@ -107,13 +117,18 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
     }
     frame_width = config.getFloat(PROPKEY_FRAME_WIDTH);
     frame_height = config.getFloat(PROPKEY_FRAME_HEIGHT);
+    frame_trigger_width = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_WIDTH), 0, 1);
+    frame_trigger_height = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_HEIGHT), 0, 1);
     target_limit = config.getInt(PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Target timeout: " + target_timeout + " ms, tracking timeout: " + tracking_timeout + " ms"
-            + ", idle.preset: " + idle_preset
-            + ", initial pan: " + start_pan + ", tilt: " + start_tilt + ", zoom: " + start_zoom
-            + ", frame.width: " + frame_width + ", frame.height: " + frame_height + ", target.limit: " + target_limit
-            + ", tilt.lock: " + tilt_lock+ ", tilt.offset: " + tilt_offset);
+    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} " +
+                 "frame.width: {}, frame.trigger.width: {}, frame.trigger.height: {}, target.limit: {}, tilt.lock: {}, tilt.offset: {}",
+                 target_timeout, tracking_timeout, idle_preset, start_pan, start_tilt, start_zoom, frame_width, frame_trigger_width,
+                 frame_trigger_height, target_limit, tilt_lock, tilt_offset);
+  }
+
+  private float limitRange(float value, float min, float max) {
+    return Math.min(Math.max(value, min), max);
   }
 
   @Override
@@ -160,6 +175,12 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
     return steerer.isSteering();
   }
 
+  // Objects framed. Being a simple operator, only 1 target is ever returned here.
+  @Override
+  public List<TrackerObject> getFramedTargets() {
+    return targetList;
+  }
+
   /*
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
@@ -167,6 +188,7 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
     Logger.debug("Set initial tracking position");
     NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
     steerer.setZoom(start_zoom);
+    steerer.setFrameWidth(frame_width);
     steerer.setInitialPosition(neutral);
   }
 
@@ -193,6 +215,7 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
   private class CameraOperatorWorker implements Runnable {
 
     TrackerObject target = null;
+    long first_tracked_time;
     long last_tracked_time;
 
     @Override
@@ -209,11 +232,19 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
         if ((objs.size() > 0) && (objs.size() <= target_limit)) {
           // only track one target at a time
           target = findBestTrackedObject(objs);
+
+          if (target != null) {
+            targetList = new ArrayList<TrackerObject>();
+            targetList.add(target);
+            metrics.incCounter("camera.operator.target.new");
+            first_tracked_time = now;
+          }
         }
 
         // Return to the initial position if no targets have been visible for a while
         if ((objs.isEmpty() || target == null) && (tracking_timeout > 0) && (last_tracked_time > 0) && (now - last_tracked_time > tracking_timeout)) {
           returnInitialTrackingPosition();
+          metrics.incCounter("camera.operator.move.home");
           last_tracked_time = 0;
         }
 
@@ -241,10 +272,10 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
         // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
         if ((frame_width > 0 || frame_height > 0) && !steerer.isMoving()) {
           // In Steerer Model Coords (y +ve == UP )
-          double trigger_left = actual_pos.getX() - (frame_width / 2);
-          double trigger_right = actual_pos.getX() + (frame_width / 2);
-          double trigger_up = actual_pos.getY() + (frame_height / 2);
-          double trigger_down = actual_pos.getY() - (frame_height / 2);
+          double trigger_left = actual_pos.getX() - (frame_width / 2) * frame_trigger_width;
+          double trigger_right = actual_pos.getX() + (frame_width / 2) * frame_trigger_width;
+          double trigger_up = actual_pos.getY() + (frame_height / 2) * frame_trigger_height;
+          double trigger_down = actual_pos.getY() - (frame_height / 2) * frame_trigger_height;
           if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)
                   && (tilt_lock || ((target_pos.getY() < trigger_up) &&  (target_pos.getY() > trigger_down)))) {
             move = false;
@@ -260,7 +291,10 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
         }
 
       } else {
+        // Target has timed out
         target = null;
+        targetList = Collections.emptyList();
+        metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
       }
     }
 

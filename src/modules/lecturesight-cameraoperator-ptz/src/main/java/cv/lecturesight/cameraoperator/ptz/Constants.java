@@ -30,4 +30,6 @@ public interface Constants {
   String PROPKEY_TARGET_LIMIT = "target.limit";
   String PROPKEY_TILT_LOCK = "tilt.lock";
   String PROPKEY_TILT_OFFSET = "tilt.offset";
+  String PROPKEY_FRAME_TRIGGER_WIDTH = "frame.trigger.width";
+  String PROPKEY_FRAME_TRIGGER_HEIGHT = "frame.trigger.height";
 }
