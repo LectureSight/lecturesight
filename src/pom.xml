@@ -69,7 +69,6 @@
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-utils</module>
-        <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
         <module>modules/wulff-visca-api</module>
         <module>modules/wulff-visca-over-ip-service</module>
