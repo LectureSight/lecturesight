@@ -14,7 +14,9 @@ import java.util.List;
  * A very limited ICal parser that does just the basic stuff we need for the
  * scheduler module.
  */
-public class ICalendar {
+public final class ICalendar {
+
+  private ICalendar() {};
 
   // String constants
   static final String VEVENT_BEGIN = "BEGIN:VEVENT";
@@ -24,18 +26,18 @@ public class ICalendar {
   static final String SUMMARY = "SUMMARY:";
   static final String LOCATION = "LOCATION:";
   static final String UID = "UID:";
-  
+
   // Date format used in Matterhorn ICal files
   static DateFormat format = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 
   /**
    * Parses the iCal delivered by <code>stream</code> and returns a <code>List</code>
    * of all sane (having start and end time) events found.
-   * 
+   *
    * @param stream that delivers the iCal data
    * @return List of VEvents that could be parsed
    * @throws IOException
-   * @throws ICalendarException 
+   * @throws ICalendarException
    */
   public static List<VEvent> parseVEvents(InputStream stream) throws IOException, ICalendarException {
     List<VEvent> result = new LinkedList<VEvent>();
@@ -55,7 +57,7 @@ public class ICalendar {
         }
         current = new VEvent();
 
-        // DTSTART  
+        // DTSTART
       } else if (line.startsWith(DTSTART)) {
         if (current == null) {
           throw new ICalendarException("Start date without event at line " + lineNumber);
