@@ -2,7 +2,9 @@ site_name: Lecturesight Guide
 repo_url: https://bitbucket.org/bwulff/lecturesight/
 
 # Default theme used is readthedocs
-theme: readthedocs
+theme:
+  name:  material
+  logo:  'images/lecturesight.png'
 
 # The directory that contain the source .md files
 docs_dir: 'docs'
