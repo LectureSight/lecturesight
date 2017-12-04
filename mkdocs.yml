@@ -20,8 +20,9 @@ pages:
 #- Upgrade: 'upgrade.md'
 #- Changelog: 'changelog.md'
 #
-#- Installation:
-#   - Overview: 'installation/index.md'
+- Installation:
+   - Overview: 'install/index.md'
+   - Dependencies: 'install/dependencies.md'
 #   - Installation from Source:
 #      - Linux: 'installation/source-linux.md'
 #- Configuration:
@@ -34,6 +35,7 @@ pages:
     - 'Scene Profile': 'core/profile.md'
     - 'Video Analysis' : 'core/videoanalysis-templ.md'
     - 'Scheduler' : 'core/scheduler.md'
+    - 'Console': 'core/console.md'
     - 'Metrics': 'core/metrics.md'
 
 - 'Modules':
