@@ -23,6 +23,9 @@ pages:
 - Installation:
    - Overview: 'install/index.md'
    - Dependencies: 'install/dependencies.md'
+   - Hardware: 'install/hardware.md'
+   - Cameras: 'install/cameras.md'
+
 #   - Installation from Source:
 #      - Linux: 'installation/source-linux.md'
 #- Configuration:
