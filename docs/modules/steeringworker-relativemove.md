@@ -1,3 +1,21 @@
-# Absolute Move Steering Worker
+# Relative Move Steering Worker
 
+# Configuration
+
+cv.lecturesight.ptz.steering.worker.relativemove.autostart | true
+cv.lecturesight.ptz.steering.worker.relativemove.focus.fixed | false
+cv.lecturesight.ptz.steering.worker.relativemove.interval | 200
+cv.lecturesight.ptz.steering.worker.relativemove.move.alpha.x | 400
+cv.lecturesight.ptz.steering.worker.relativemove.move.alpha.y | 400
+cv.lecturesight.ptz.steering.worker.relativemove.move.damp.pan | 1.0
+cv.lecturesight.ptz.steering.worker.relativemove.move.damp.tilt | 1.0
+cv.lecturesight.ptz.steering.worker.relativemove.move.initial.delay | 2500
+cv.lecturesight.ptz.steering.worker.relativemove.move.stop.x | 10
+cv.lecturesight.ptz.steering.worker.relativemove.move.stop.y | 10
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.bottom | none
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.left | none
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.right | none
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.top | none
+cv.lecturesight.ptz.steering.worker.relativemove.xflip | false
+cv.lecturesight.ptz.steering.worker.relativemove.yflip | false
 

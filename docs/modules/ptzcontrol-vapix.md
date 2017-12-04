@@ -20,6 +20,7 @@ as [propertyName]=[propertyValue]
 | cv.lecturesight.vapix.camera.host     | 172.0.0.1 | The host name / ip address for the camera.
 | cv.lecturesight.vapix.camera.username | admin     | The username that will be used to authenticate on the camera
 | cv.lecturesight.vapix.camera.password | admin     | The password to use for authentication.
+| cv.lecturesight.vapix.camera.inverted | false     | Whether the camera is mounted inverted.
 | cv.lecturesight.vapix.camera.pan.min  | -17000    | The minimum pan value to use in translating LectureSight values to camera values. VAPIX uses degrees with fractions for the range that the camera can pan.
 | cv.lecturesight.vapix.camera.pan.max  | 17000     | The maximum pan value.
 | cv.lecturesight.vapix.camera.pan.maxspeed | 100 | The maximum speed for changing the pan value.

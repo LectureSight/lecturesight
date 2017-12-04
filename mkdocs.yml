@@ -27,16 +27,25 @@ pages:
 #- Configuration:
 #
 
-- Modules:
-    - 'Frame Source': 'modules/framesource.md'
+- Core Services:
+    - 'OpenCL': 'core/opencl.md'
+    - 'Heartbeat': 'core/heartbeat.md'
+    - 'Frame Source': 'core/framesource.md'
+    - 'Scene Profile': 'core/profile.md'
+    - 'Video Analysis' : 'core/videoanalysis-templ.md'
+    - 'Scheduler' : 'core/scheduler.md'
+    - 'Metrics': 'core/metrics.md'
+
+- 'Modules':
     - 'Pan-Only Camera Operator' : 'modules/cameraoperator-simple.md'
     - 'Relative Move Steering Worker': 'modules/steeringworker-relativemove.md'
-    - 'Dummy Camera': modules/ptzcontrol-dummy.md
+    - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
     - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
-    - 'Video Analysis' : 'modules/videoanalysis-templ.md'
-    - 'Scheduler' : 'modules/scheduler.md'
+    - 'VISCA Camera': 'modules/ptzcontrol-visca.md'
 
 - User Interface:
+    - 'Overview Camera': 'ui/overview.md'
+    - 'Scene Profile Editor': 'ui/profile.md'
     - 'Object Tracker': 'ui/objecttracker.md'
     - 'PTZ Camera Control': 'ui/cameracontrol.md'
-    - 'Scene Profile Editor': 'ui/profile.md'
+    - 'System Configuration': 'ui/config.md'

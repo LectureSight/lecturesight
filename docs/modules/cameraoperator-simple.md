@@ -12,4 +12,9 @@ pre-configured.
 | cv.lecturesight.cameraoperator.panonly.zoom | 0.0 | Sets the initial zoom position  <br> (0 to 1)
 | cv.lecturesight.cameraoperator.panonly.target.timeout | 2500 | Sets the time in milliseconds after the last target movement after which a target will no longer be tracked.
 | cv.lecturesight.cameraoperator.panonly.tracking.timeout | 60000 | Sets the time in milliseconds after the last target movement to return to the initial tracking position  <br> (0 to disable)
+| cv.lecturesight.cameraoperator.panonly.frame.trigger | 0.65
+| cv.lecturesight.cameraoperator.panonly.frame.width | 0.5
+| cv.lecturesight.cameraoperator.panonly.idle.preset | -1
+| cv.lecturesight.cameraoperator.panonly.target.limit | 3
+| cv.lecturesight.cameraoperator.panonly.target.timeout | 2500
 

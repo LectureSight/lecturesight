@@ -1,0 +1,12 @@
+# VISCA Camera
+
+## Configuration
+
+com.wulff.lecturesight.visca.port.databits | 8
+com.wulff.lecturesight.visca.port.device | /dev/ttyS0
+com.wulff.lecturesight.visca.port.parity | none
+com.wulff.lecturesight.visca.port.speed | 9600
+com.wulff.lecturesight.visca.port.stopbits | 1
+com.wulff.lecturesight.visca.updater.interval | 100
+com.wulff.lecturesight.visca.updater.poll.focus | false
+

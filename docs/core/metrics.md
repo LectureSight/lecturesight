@@ -1,0 +1,16 @@
+Metrics
+---------
+
+Metrics Service description
+
+# Configuration
+
+| Key                                   | Default   | Description |
+|---------------------------------------|-----------|-------------------------------------------|
+| cv.lecturesight.util.metrics.csv.enable | true
+| cv.lecturesight.util.metrics.csv.interval | 30
+| cv.lecturesight.util.metrics.enable | false
+| cv.lecturesight.util.metrics.jmx.enable | true
+| cv.lecturesight.util.metrics.log.enable | true
+| cv.lecturesight.util.metrics.log.interval | 300
+
