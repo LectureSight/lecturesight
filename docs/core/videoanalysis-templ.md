@@ -14,3 +14,7 @@ cv.lecturesight.videoanalysis.object.active.min | 500
 cv.lecturesight.videoanalysis.object.move.threshold | 3
 cv.lecturesight.videoanalysis.object.match.threshold | 15
 
+cv.lecturesight.blobfinder.blobsize.max | 10000
+cv.lecturesight.blobfinder.blobsize.min | 20
+cv.lecturesight.blobfinder.blobs.max | 100
+
