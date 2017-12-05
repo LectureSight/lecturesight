@@ -1,6 +1,6 @@
 # Frame Sources
 
-A frame source provides images to Lecturesight for processing, typically from an overview camera.
+A frame source provides images to LectureSight for processing, typically from an overview camera.
 
 The _FrameSourceProvider_ service in the  `lecturesight-framesource-impl` bundle provides the infrastructure responsible for managing FrameSource implementations. It discovers video input plugins and is responsible for setting up configured _FrameSources_ with the proper input plugin.
 
@@ -28,7 +28,7 @@ type :// path [options]
 
 For real time operation, devices that provide raw video streams are recommended, as encoding and decoding of frames can lead to several hundred milliseconds of delay.
 
-## V4L Framesource
+## V4L Frame Source
 
 The `lecturesight-framesource-v4l` bundle provides a FrameSource implementation for accquiring frames from Video4Linux and Video4Linux 2 devices.
 
@@ -65,7 +65,7 @@ cv.lecturesight.framesource.v4l.resolution.height | 240 | Default height for inp
 cv.lecturesight.framesource.v4l.resolution.width | 320 | Default width for input frames.
 cv.lecturesight.framesource.v4l.standard | 0 | Default video standard. Usually not used with USB webcams but rather with capture cards. Which value indicates a certain standard (eg. PAL-X/NTSC) depends on the driver of the video device.
 
-## Gstreamer Frame Source
+## GStreamer Frame Source
 
 The `lecturesight-framesource-gst` bundle provides a Frame Source implementation that uses a user-defined
 GStreamer pipeline to capture frames. The pipeline definition is given in the
@@ -120,7 +120,7 @@ Use a gstreamer test pattern:
 cv.lecturesight.framesource.input.mrl=gst://videotestsrc ! identity
 ```
 
-## RTPH264 Framesource
+## RTPH264 Frame Source
 
 The `lecturesight-framesource-rtph264` bundle provides a FrameSource implementation that reads H264 video from an RTP stream. This is a special-purpose gstreamer pipeline designed to consume video from a RaspberryPi camera with minimal latency.
 
@@ -130,7 +130,7 @@ Example:
     cv.lecturesight.framesource.input.mrl=rtph264://venue1-camera.someplace.edu:8554
 ```
 
-## Videofile Framesource
+## Videofile Frame Source
 
 The `lecturesight-framesource-videofile` bundle provides a FrameSource implementation that reads frames from a video file using gstreamer.
 

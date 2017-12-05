@@ -1,4 +1,4 @@
-site_name: Lecturesight Guide
+site_name: LectureSight Guide
 repo_url: https://bitbucket.org/bwulff/lecturesight/
 
 # Default theme used is readthedocs
@@ -22,11 +22,14 @@ pages:
 #- Upgrade: 'upgrade.md'
 #- Changelog: 'changelog.md'
 #
+- Hardware:
+   - Server: 'hardware/server.md'
+   - Overview Camera: 'hardware/overview-camera.md'
+   - PTZ Camera: 'hardware/ptz-camera.md'
+
 - Installation:
    - Overview: 'install/index.md'
    - Dependencies: 'install/dependencies.md'
-   - Hardware: 'install/hardware.md'
-   - Cameras: 'install/cameras.md'
 
 #   - Installation from Source:
 #      - Linux: 'installation/source-linux.md'
@@ -49,6 +52,7 @@ pages:
     - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
     - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
     - 'VISCA Camera': 'modules/ptzcontrol-visca.md'
+    - 'ONVIF Camera': 'modules/ptzcontrol-onvif.md'
 
 - User Interface:
     - 'Overview Camera': 'ui/overview.md'
@@ -56,3 +60,6 @@ pages:
     - 'Object Tracker': 'ui/objecttracker.md'
     - 'PTZ Camera Control': 'ui/cameracontrol.md'
     - 'System Configuration': 'ui/config.md'
+
+- Development:
+    - 'Style Guide': 'develop/style.md'

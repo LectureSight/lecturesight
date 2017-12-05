@@ -2,5 +2,6 @@
 
 ## Configuration
 
-cv.lecturesight.ptzcontrol.dummy.delay | 100
-
+| Key                                   | Default   | Description |
+|---------------------------------------|-----------|-------------------------------------------|
+cv.lecturesight.ptzcontrol.dummy.delay | 100 |

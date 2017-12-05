@@ -16,35 +16,15 @@ cv.lecturesight.videoanalysis.object.active.min | 500
 cv.lecturesight.videoanalysis.object.move.threshold | 3
 cv.lecturesight.videoanalysis.object.match.threshold | 15
 
-| Key                                   | Default   | Description |
-|---------------------------------------|-----------|-------------------------------------------|
-cv.lecturesight.blobfinder.blobsize.max | 10000
-cv.lecturesight.blobfinder.blobsize.min | 20
-cv.lecturesight.blobfinder.blobs.max | 100
-
 ## Connected Component Configuration
 
-### cv.lecturesight.blobfinder.blobs.max
+The Template-Matching Video Analysis Service uses the Connected Components service, which has the following configuration options:
 
-*Default:* 100
-
-The maximum number of blobs that an instance of a BlobFinder can work with. This
-value affects the size fo several GPU buffers. Thus this may help to solve
-memory shortages on older GPUs.
-
-### cv.lecturesight.blobfinder.blobsize.min
-
-*Default:* 20
-
-Default minimum size (in pixels) of a valid blob. This value is usually set by
-the consumer when instantiating a BlobFinder.
-
-### cv.lecturesight.blobfinder.blobsize.max
-
-*Default:* 10000
-
-Default maximum size (in pixels) of a valid blob. This value is usually set by
-the consumer when instantiating a BlobFinder.
+| Key                                   | Default   | Description |
+|---------------------------------------|-----------|-------------------------------------------|
+| cv.lecturesight.blobfinder.blobs.max | 100 | The maximum number of blobs that an instance of a BlobFinder can work with. This value affects the size fo several GPU buffers. Thus this may help to solve memory shortages on older GPUs.
+| cv.lecturesight.blobfinder.blobsize.min | 20 | Default minimum size (in pixels) of a valid blob. This value is usually set by the consumer when instantiating a BlobFinder.
+| cv.lecturesight.blobfinder.blobsize.max | 10000 | Default maximum size (in pixels) of a valid blob. This value is usually set by the consumer when instantiating a BlobFinder.
 
 ## Console Commands
 **Command domain:** va

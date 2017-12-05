@@ -1,4 +1,6 @@
-# Hardware
+# Server Hardware
+
+LectureSight is designed to run on a Linux system equipped with a GPU.
 
 ### GPU
 The video processing portions of the system have been implemented for the GPU using the OpenCL standard for cross-platform parallel computing. Most modern graphics cards are compatible with OpenCL. Graphics cards with an NVIDIA GPU that are label as  _CUDA compatible_ are OpenCL compatible. ATI graphics chips that are labeled _Stream SDK compatible_ are also compatible with OpenCL.

@@ -1,7 +1,6 @@
-Lecturesight Guide
-==================
+# LectureSight Guide
 
-Installing Lecturesight
+Installing LectureSight
 
 Modules
 

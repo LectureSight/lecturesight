@@ -1,5 +1,6 @@
+# Overview Camera
 
-## Overview Cameras
+LectureSight requires an overview camera which captures the entire presentation area.
 
 As overview camera, USB webcams as well as analog SD video cameras connected to a fast frame grabber device can be used, or any image source which can be provided through a GStreamer pipeline.
 
@@ -30,24 +31,4 @@ IP Cameras can be used through the GStreamer Framesource bundle, which supports 
 Overview cameras which have been tested include:
 
 * Axis P1428-E network camera (with a stream configured for 1280x720 or 640x360).
-
-## PTZ Cameras
-
-### Sony VISCA Protocol
-The system supports Sony's VISCA protocol out-of-the-box. The driver detects the model and version of the camera and loads a fitting parameter set. If the camera model is unknown, the driver loads the profile for the Sony EVI-D30. Most Sony PTZ cameras can be switched into a D30 compatibility mode.
-
-The following cameras have been tested with LectureSight and have a dedicated camera profile:
-
-* Sony EVI-D30
-* Sony EVI-D70
-* Sony EVI-D100
-* Vaddio ClearVIEW HD-USB
-
-### AXIS VAPIX Protocol
-The system supports the AXIS VAPIX protocol for PTZ cameras. The following cameras have been tested with LectureSight:
-
-* AXIS V5915 PTZ Network Camera
-
-### ONVIF Protocol
-The system supports the ONVIF protocol for cameras. Any PTZ camera which supports ONVIF may work with LectureSight, although only the AXIS V5915 camera has been tested with ONVIF.
 
