@@ -16,3 +16,13 @@ exits, or at the end of each scheduled event if the Scheduler is enabled.
 | cv.lecturesight.util.metrics.log.enable | true | Enable log reporting
 | cv.lecturesight.util.metrics.log.interval | 300 | Interval to write out updates to log file
 
+## Console Commands
+
+| Command                                     | Description |
+|---------------------------------------|---------------|
+| metrics:list  |
+| metrics:pause |
+| metrics:reset |
+| metrics:resume |
+| metrics:save |
+| metrics:show |

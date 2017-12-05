@@ -1,5 +1,13 @@
 # Relative Move Steering Worker
 
+The `lecturesight-steeringworker-relativemove` bundle provides a "Camera Steering Worker", which is responsible for moving the camera.
+
+The steering worker is given a target position, monitors the camera position and decides whether to move the camera and at what  speed. The target position is updated by the Camera Operator, or can be set via console command or in the "PTZ Camera Control" window.
+
+In order to produce smooth camera movements, the steering worker will gradually decrease the speed of the camera movement as it gets closer to the target. Also if the target position is already near the actual position of the camera the steering worker will produce slow correction moves.
+
+Under a certain distance the steering worker will not produce any correction moves which compensates for slightly oscillating targets.
+
 ## Configuration
 
 | Key                                   | Default   | Description |
@@ -23,33 +31,11 @@
 
 ## Console Commands
 
-**Command domain:** cs
+| Command                                     | Description |
+|---------------------------------------|---------------|
+| cs:on | Activates the camera steering.
+| cs:off | Deactivates the camera steering.
+| cs:move *pan* *tilt* | Make the camera move the specified pan and tilt coordinates. The coordinates are normalized in a value range between -1.0 and 1.0, where -1 is left / bottom and 1.0 is right / top.
+|  cs:home | Makes the camera move to its home position. For most models this will be pan=0.0 and tilt=0.0.
+| cs:zoom *zoom* | Makes the camera set the specified zoom. The zoom value is normalized to a value range of 0.0 to 1.0. where 0 is neutral and 1 is maximum zoom.
 
-### cs:on
-
-Activates the camera steering.
-
-### cs:off
-
-Deactivates the camera steering.
-
-### cs:move *pan* *tilt*
-
-Make the camera move the specified pan and tilt coordinates. The coordinates are
-normalized in a value range between -1.0 and 1.0, where
-
-* pan: -1.0 left most, 1.0 right most
-* tilt: -1.0 bottom., 1.0 top most
-
-### cs:home
-
-Makes the camera move to its home position. For most models this will be pan=0.0
-and tilt=0.0.
-
-### cs:zoom *zoom*
-
-Makes the camera set the specified zoom. The zoom value is normalized to a value
-range of 0.0 to 1.0. where
-
-* 0.0 neutral
-* 1.0 maximal zoom

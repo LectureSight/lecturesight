@@ -6,6 +6,11 @@ theme:
   name:  material
   logo:  'images/lecturesight.png'
 
+extra:
+  social:
+    - type: 'twitter'
+      link: 'https://twitter.com/lecturesight'
+
 # The directory that contain the source .md files
 docs_dir: 'docs'
 
@@ -41,12 +46,13 @@ pages:
     - 'Heartbeat': 'core/heartbeat.md'
     - 'Frame Source': 'core/framesource.md'
     - 'Scene Profile': 'core/profile.md'
-    - 'Video Analysis' : 'core/videoanalysis-templ.md'
     - 'Scheduler' : 'core/scheduler.md'
     - 'Console': 'core/console.md'
     - 'Metrics': 'core/metrics.md'
+    - 'Logging': 'core/logging.md'
 
 - 'Modules':
+    - 'Video Analysis' : 'modules/videoanalysis.md'
     - 'Pan-Only Camera Operator' : 'modules/cameraoperator-simple.md'
     - 'Relative Move Steering Worker': 'modules/steeringworker-relativemove.md'
     - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'

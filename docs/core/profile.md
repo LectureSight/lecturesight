@@ -1,6 +1,6 @@
 # Scene Profile
 
-The Scene Profile defines the regions of the overview image that are ignored for tracking purposes. Profiles are stored in the `profiles` directory.
+The Scene Profile defines the regions of the overview image that are ignored for tracking purposes. Profiles can be edited by the [Scene Profile Editor](../ui/profile/) and are stored in the `profiles` directory.
 
 ## Configuration
 
@@ -8,4 +8,4 @@ The Scene Profile defines the regions of the overview image that are ignored for
 |---------------------------------------|-----------|-------------------------------------------|
 cv.lecturesight.profile.manager.active.profile | default | Name of the active profile. |
 
-The default profile cannot be saved, so create a new profile and update this setting with the new profile name.
+Note that the default profile cannot be saved, so to use a custom profile it is necessary to create a new profile and update this setting with the new profile name.

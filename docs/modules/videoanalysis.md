@@ -27,7 +27,6 @@ The Template-Matching Video Analysis Service uses the Connected Components servi
 | cv.lecturesight.blobfinder.blobsize.max | 10000 | Default maximum size (in pixels) of a valid blob. This value is usually set by the consumer when instantiating a BlobFinder.
 
 ## Console Commands
-**Command domain:** va
 
 ### va:reset
 
