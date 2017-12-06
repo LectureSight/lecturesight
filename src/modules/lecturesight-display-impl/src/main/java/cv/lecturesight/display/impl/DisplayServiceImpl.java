@@ -66,7 +66,7 @@ public class DisplayServiceImpl implements DisplayService {
 
   @Override
   public Display getDisplayByNumber(int id) {
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       if (reg.getID() == id) {
         return parent.displays.get(reg);
       }
@@ -76,7 +76,7 @@ public class DisplayServiceImpl implements DisplayService {
 
   @Override
   public Display getDisplayBySID(String id) {
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       if (reg.getSID().equals(id)) {
         return parent.displays.get(reg);
       }
@@ -86,18 +86,17 @@ public class DisplayServiceImpl implements DisplayService {
 
   @Override
   public Display getDisplayByRegistration(DisplayRegistration reg) {
-    for (DisplayRegistrationImpl r : parent.displays.keySet()) {
-      if (r.equals(ocl)) {
-        return parent.displays.get(reg);
-      }
+    if (parent.displays.containsKey(reg)) {
+      return parent.displays.get(reg);
+    } else {
+      throw new IllegalArgumentException("Unknown display registration");
     }
-    throw new IllegalArgumentException("Unknown display registration");
   }
 
   @Override
   public Set<DisplayRegistration> getDisplayRegistrations() {
     Set<DisplayRegistration> out = new HashSet<DisplayRegistration>();
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       out.add((DisplayRegistration)reg);
     }
     return out;
