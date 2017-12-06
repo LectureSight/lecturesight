@@ -2,7 +2,9 @@ package com.wulff.lecturesight.visca.api;
 
 public class CameraPosition {
 
-  int x,y,z;
+  int x;
+  int y;
+  int z;
 
   public CameraPosition() {
     this.x = 0;
