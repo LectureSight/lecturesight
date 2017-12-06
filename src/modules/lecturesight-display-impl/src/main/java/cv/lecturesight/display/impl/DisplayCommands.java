@@ -19,6 +19,7 @@ package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayRegistration;
+
 import java.util.HashMap;
 import java.util.Map;
 
