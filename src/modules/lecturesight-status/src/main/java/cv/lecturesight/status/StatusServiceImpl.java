@@ -93,22 +93,14 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
   /* Reporting interval */
   private int interval = 30;
 
-  private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-  private StatusExecutor statusExecutor = new StatusExecutor();
+  private ScheduledExecutorService executor = null;
+  private final StatusExecutor statusExecutor = new StatusExecutor();
 
   protected void activate(ComponentContext cc) {
 
     setConfiguration();
 
-    if (enable) {
-      Logger.info("Status Reporting Enabled (URL={}, interval={})", url, interval);
-    } else {
-      Logger.info("Status Reporting Disabled");
-    }
-
-    if (enable) {
-      startReporting();
-    }
+    startReporting();
 
     Logger.debug("Activated");
   }
@@ -122,7 +114,7 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
   @Override
   public void configurationChanged() {
     if (updateConfiguration() && !shutdown) {
-      Logger.debug("Configuration updated");
+      setConfiguration();
       stopReporting();
       startReporting();
     }
@@ -133,6 +125,16 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
     interval = config.getInt(PROPKEY_INTERVAL);
     url = config.get(PROPKEY_URL);
     name = config.get(PROPKEY_NAME);
+
+    // Sanity check
+    if ((interval <= 0) || (url == null) || (url.isEmpty()))
+      enable = false;
+
+    if (enable) {
+      Logger.info("Status Reporting Enabled URL: {} name: {}, interval: {}", url, name, interval);
+    } else {
+      Logger.info("Status Reporting Disabled");
+    }
   }
 
   private boolean updateConfiguration() {
@@ -140,27 +142,11 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
     // Ideally we would only get configurationChanged() events for this service, but
     // as it's called for any config change, we need to see what's changed.
 
-    boolean changed = false;
-
-    if (enable != config.getBoolean(PROPKEY_ENABLE)) {
-      enable = !enable;
-      changed = true;
-    }
-
-    if (interval != config.getInt(PROPKEY_INTERVAL)) {
-      interval = config.getInt(PROPKEY_INTERVAL);
-      changed = true;
-    }
-
-    if (url == null || !url.equals(config.get(PROPKEY_URL))) {
-      url = config.get(PROPKEY_URL);
-      changed = true;
-    }
-
-    if (name == null || !name.equals(config.get(PROPKEY_NAME))) {
-      name = config.get(PROPKEY_NAME);
-      changed = true;
-    }
+    boolean changed = (
+         (enable != config.getBoolean(PROPKEY_ENABLE))
+      || (interval != config.getInt(PROPKEY_INTERVAL))
+      || (url == null || !url.equals(config.get(PROPKEY_URL)))
+      || (name == null || !name.equals(config.get(PROPKEY_NAME))));
 
     return changed;
   }
@@ -170,12 +156,14 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
     if (!enable) return;
 
     // activate the status executor
-    executor.scheduleAtFixedRate(statusExecutor, interval, interval, TimeUnit.SECONDS);
-
+    executor = Executors.newScheduledThreadPool(1);
+    executor.scheduleWithFixedDelay(statusExecutor, interval, interval, TimeUnit.SECONDS);
   }
 
   private void stopReporting() {
-    executor.shutdownNow();     // shut down the status executor
+    if (executor != null)
+      executor.shutdownNow();     // shut down the status executor
+    executor = null;
   }
 
 
