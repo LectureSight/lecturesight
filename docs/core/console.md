@@ -21,6 +21,12 @@ The following services provide console commands:
 | scheduler | [Scheduler](scheduler/#console-commands) |
 | va | [Video Analysis](../modules/videoanalysis/#console-commands) |
 
+#### config
+
+#### cs
+[Camera Steering Worker](../modules/steeringworker-relativemove/#console-commands)
+
+
 config:buildinfo
 config:defaults
 config:load

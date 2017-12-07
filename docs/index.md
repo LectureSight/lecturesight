@@ -1,4 +1,4 @@
-# LectureSight Guide
+# Welcome to LectureSight
 
 Installing LectureSight
 

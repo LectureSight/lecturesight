@@ -1,16 +1,10 @@
 # Scheduler
 
-The `lecturesight-scheduler` bundle provides a service that loads a schedule from an iCalendar (RFC-2445) file and starts/stops object tracking and camera control accordingly.
+The `lecturesight-scheduler` bundle provides a service that loads a schedule from an iCalendar (RFC-2445) file and starts and stops object tracking and camera control for each event. The service is designed to allow LectureSight to follow the recording schedule of an [Opencast](http://www.opencast.org) capture agent such as [Galicaster](https://wiki.teltek.es/display/Galicaster/Galicaster+project+Home).
 
 Changes to the file are detected and the internal schedule is updated automatically. When the file is deleted, all events are removed.
 
-The implementation works internally with a periodically called routine that ensures that the state of object tracking and camera control components are consistent with the schedule.
-This way the system will, for instance, start to control the camera even if started after a scheduled begin of a recording.
-
-Depending on the video analysis implementation, the tracking components may need a certain time to adapt to the scene before producing correct tracking results.
-To prevent false camera movement caused by false positives the services can be configured to start camera control some time after the object tracking has been activated. 
-
-Tracking algorithms may need a certain amount of time to adapt to the scene. In this period, false positives could lead to unwanted camera movements, so starting the camera control some time after the object tracking might be useful.
+The video analysis and tracking components may need a certain time to adapt to the scene before producing correct tracking results. To prevent unnecessary camera movement caused by false positives, the services can be configured to start camera control some time after the object tracking has been activated.
 
 ## Configuration
 
@@ -29,5 +23,3 @@ cv.lecturesight.scheduler.tracking.leadtime | 0 | The time (in seconds) the serv
 | scheduler:start | Activates tracking and camera steering.
 | scheduler:stop | Deactivates tracking and camera steering.
 | scheduler:status | Shows the scheduler status.
-
-

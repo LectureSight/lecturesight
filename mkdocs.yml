@@ -1,4 +1,4 @@
-site_name: LectureSight Guide
+site_name: LectureSight
 repo_url: https://bitbucket.org/bwulff/lecturesight/
 
 # Default theme used is readthedocs
@@ -31,10 +31,13 @@ pages:
    - Server: 'hardware/server.md'
    - Overview Camera: 'hardware/overview-camera.md'
    - PTZ Camera: 'hardware/ptz-camera.md'
+   - Layout: 'hardware/layout.md'
 
 - Installation:
-   - Overview: 'install/index.md'
    - Dependencies: 'install/dependencies.md'
+   - Install Release: 'install/release.md'
+   - Build Source: 'install/source.md'
+   - Startup: 'install/startup.md'
 
 #   - Installation from Source:
 #      - Linux: 'installation/source-linux.md'

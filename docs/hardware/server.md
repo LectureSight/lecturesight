@@ -1,6 +1,8 @@
-# Server Hardware
+# Server Requirements
 
-LectureSight is designed to run on a Linux system equipped with a GPU.
+### Operating System
+
+LectureSight is designed to run on a Linux system equipped with a GPU and running a GUI desktop. Ubuntu 16.04 or later is recommended.
 
 ### GPU
 The video processing portions of the system have been implemented for the GPU using the OpenCL standard for cross-platform parallel computing. Most modern graphics cards are compatible with OpenCL. Graphics cards with an NVIDIA GPU that are label as  _CUDA compatible_ are OpenCL compatible. ATI graphics chips that are labeled _Stream SDK compatible_ are also compatible with OpenCL.
@@ -9,7 +11,7 @@ For use in a real-time scenario, it is suggested to use a GPU with a least six O
 
 For NVIDIA GPUs, the number of CUDA units divided by eight yields the number of OpenCL compute units. For example, the GT 220 has 48 CUDA units, thus the GPU provides 6 compute units in OpenCL.
 
-GPUs must support the following image formats (see LS-165)
+The GPU must support the following image formats (see [LS-165](http://opencast.jira.com/browse/LS-165))
 
 * BGRA / UnsignedInt8
 * INTENSITY / UnsignedInt8
@@ -28,8 +30,8 @@ These GPUs do not support the image formats required by LectureSight and thus ca
 LectureSight was designed with the goal of being capable of running on a single 2 GHz core. The system should not take up all CPU resources in a modern system so that video recording software can run alongside on the same computer. Thus LectureSight should run on any modern system. The suggestion is to use a system with a CPU of at least the performance of an Intel Core 2 Duo with 2,2 Ghz.
 
 ### RAM
-Since video ananlysis is nearly entirely done on the graphics card, there are no special memory requirements for LectureSight when run stand-alone. The usual defualt memory configuration for the Java VM suffice.
+Since video ananlysis is nearly entirely done on the graphics card, there are no special memory requirements for LectureSight when run stand-alone. The usual default memory configuration for the Java VM suffice.
 
 ### Storage
-For the whole system roughly 50 MB of mass storage must be reserved. Despite of log files that may need to be rotated, there are no sites where data is incrementally saved.
+LectureSight requires less than 50 MB of disk space when installed. Additional space may be used by [log files](../core/logging.md) or [metrics](../core/metrics.md) if configured. No other data is incrementally saved.
 
