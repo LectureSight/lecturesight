@@ -4,6 +4,8 @@ By default LectureSight will try to use the video device `/dev/video0` as overvi
 
 You will see the main application window appear. The  ``Services`` menu should be populated with a number of entries.
 
+![LectureSight main window](../images/ls_main_window.png "LectureSight main window")
+
 If you only see the entry `System configuration` , it is most likely that the system was not able to initialize the OpenCL platform successfully. You can find out if the OpenCL platform was initialized correctly by looking for the OpenCL device report in the console, for example:
 
 ```

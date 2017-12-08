@@ -39,10 +39,10 @@ pages:
    - Build Source: 'install/source.md'
    - Startup: 'install/startup.md'
 
-#   - Installation from Source:
-#      - Linux: 'installation/source-linux.md'
-#- Configuration:
-#
+- Configuration:
+   - Modules: 'config/modules.md'
+   - Settings: 'config/settings.md'
+   - Calibration: 'config/calibration.md'
 
 - Core Services:
     - 'OpenCL': 'core/opencl.md'
@@ -56,14 +56,15 @@ pages:
 
 - 'Modules':
     - 'Video Analysis' : 'modules/videoanalysis.md'
-    - 'Pan-Only Camera Operator' : 'modules/cameraoperator-simple.md'
-    - 'Relative Move Steering Worker': 'modules/steeringworker-relativemove.md'
+    - 'Pan Camera Operator' : 'modules/cameraoperator-simple.md'
+    - 'Steering Worker': 'modules/steeringworker-relativemove.md'
     - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
     - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
     - 'VISCA Camera': 'modules/ptzcontrol-visca.md'
     - 'ONVIF Camera': 'modules/ptzcontrol-onvif.md'
 
 - User Interface:
+    - 'Services Menu': 'ui/menu.md'
     - 'Overview Camera': 'ui/overview.md'
     - 'Scene Profile Editor': 'ui/profile.md'
     - 'Object Tracker': 'ui/objecttracker.md'
