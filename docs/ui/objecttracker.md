@@ -1,6 +1,6 @@
 # Object Tracker
 
-The Object Tracker display is produced by the [Video Analysis](../modules/videoanalysis.md) module, and shows the targets currently identified for possible camera tracking.
+The **Object Tracker** display is produced by the [Video Analysis](../modules/videoanalysis.md) module, and shows the targets currently identified for possible camera tracking.
 
 ## Single Target
 ![Object Tracker showing single target](../images/ls_object_tracker_single.png "Object Tracker showing single target")
@@ -12,8 +12,8 @@ The Object Tracker display is produced by the [Video Analysis](../modules/videoa
 
 The Video Analysis module also produces four other displays:
  
- * visual
- * change
- * cells
- * templates
+ * **visual**
+ * **change**
+ * **cells**
+ * **templates**
  

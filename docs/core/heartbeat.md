@@ -13,12 +13,8 @@ The `lecturesight-heartbeat` bundle provides the _Heartbeat_ service. It is resp
 
 | Command                                     | Description |
 |---------------------------------------|---------------|
-| ls:run | Lets the service activate the video analysis subsystem.
-| ls:step <number of frames> | Lets the service run the video analysis subsystem run for the given number of frames. If the argument is omitted the video analysis is run only a single iteration. This command is especially useful for debugging when working with a video file frame source instead of a life video input. |
-| ls:pause | Pauses the operation of the video analysis services without de-initializing the service.
-| ls:restart | Re-initializes the heart beat service and start the video analysis subsystem. This command mighty be used when the listens.to property was changed since the internal signal barrier will be newly setup up.
+| ls:run | Activate the video analysis subsystem.
+| ls:step [frames] | Run the video analysis subsystem run for the given number of frames. If the argument is omitted, the video analysis is run for 1 frame. This command is especially useful for debugging when working with a video file frame source instead of a live video input. |
+| ls:pause | Pause the video analysis service without de-initializing the service.
+| ls:restart | Re-initializes the heart beat service and start the video analysis subsystem. This command might be used when the listens.to property was changed since the internal signal barrier will be newly setup up.
 | ls:stop | Stops the video analysis subsystem and de-initializes the heartbeat service.
-
-
-
-

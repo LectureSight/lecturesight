@@ -4,8 +4,7 @@ VAPIX is the Axis camera API:
 
 [http://www.axis.com/techsup/cam_servers/dev/cam_http_api_index.php](http://www.axis.com/techsup/cam_servers/dev/cam_http_api_index.php)
 
-The communication with the camera is based around Hypertext Transfer Protocol
-(HTTP) response and requests. The returning value for success is
+The communication with the camera is based around HTTP response and requests. The returning value for success is
 
  - HTTP_NO_CONTENT (204): Command has been sent
  - HTTP_OK (200): Command sent
@@ -13,7 +12,7 @@ The communication with the camera is based around Hypertext Transfer Protocol
 and response in text format. The returning text format is structured
 as [propertyName]=[propertyValue]
 
-# Configuration
+## Configuration
 
 | Key                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|

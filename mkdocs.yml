@@ -6,6 +6,9 @@ theme:
   name:  material
   logo:  'images/lecturesight.png'
 
+markdown_extensions:
+  - admonition
+
 extra:
   social:
     - type: 'twitter'
@@ -31,20 +34,21 @@ pages:
    - Server: 'hardware/server.md'
    - Overview Camera: 'hardware/overview-camera.md'
    - PTZ Camera: 'hardware/ptz-camera.md'
-   - Layout: 'hardware/layout.md'
+   - Camera Layout: 'hardware/layout.md'
 
 - Installation:
    - Dependencies: 'install/dependencies.md'
-   - Install Release: 'install/release.md'
-   - Build Source: 'install/source.md'
-   - Startup: 'install/startup.md'
+   - Install release: 'install/release.md'
+   - Build source: 'install/source.md'
+   - Start: 'install/start.md'
 
-- Configuration:
-   - Modules: 'config/modules.md'
-   - Settings: 'config/settings.md'
-   - Calibration: 'config/calibration.md'
+#- Configuration:
+#   - Modules: 'config/modules.md'
+#   - Settings: 'config/settings.md'
+#   - Calibration: 'config/calibration.md'
 
 - Core Services:
+    - Configuration: core/config.md
     - 'OpenCL': 'core/opencl.md'
     - 'Heartbeat': 'core/heartbeat.md'
     - 'Frame Source': 'core/framesource.md'

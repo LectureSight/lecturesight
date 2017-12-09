@@ -20,9 +20,9 @@ exits, or at the end of each scheduled event if the Scheduler is enabled.
 
 | Command                                     | Description |
 |---------------------------------------|---------------|
-| metrics:list  |
-| metrics:pause |
-| metrics:reset |
-| metrics:resume |
-| metrics:save |
-| metrics:show |
+| metrics:list  | List the keys of all registered metrics.
+| metrics:pause | Suspend metric reporting.
+| metrics:reset | Reset all metrics.
+| metrics:resume | Resume metric reporting.
+| metrics:save | Save metrics summary to `metrics/metrics.json`
+| metrics:show | Show the metrics JSON summary

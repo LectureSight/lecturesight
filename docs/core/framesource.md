@@ -9,10 +9,10 @@ The _FrameSourceProvider_ service in the  `lecturesight-framesource-impl` bundle
 | Key                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|
 cv.lecturesight.framesource.input.mrl | v4l:///dev/video0<br>[width=320;height=240] | MRL of the video input from the overview camera
-cv.lecturesight.framesource.inverted | false | Set this to true if the framesource is inverted (mounted upside-down) and should be rotated 180 degrees
-cv.lecturesight.framesource.maxfps | 60 | Maximum fps rate at which frames should be read from the device
+cv.lecturesight.framesource.inverted | false | If true, rotates the framesource 180 degrees. Used for cameras mounted inverted (upside-down)
+cv.lecturesight.framesource.maxfps | 60 | Maximum fps rate at which frames should be read from the device.
 cv.lecturesight.framesource.snapshot.file | | Filename to which overview image snapshots should be saved periodically
-cv.lecturesight.framesource.snapshot.interval | 60 | Interval in seconds at which overview image snapshots should be saved
+cv.lecturesight.framesource.snapshot.interval | 60 | Interval in seconds to save overview image snapshots
 
  The Media Resource Locator (MRL) has the following form:
 
@@ -20,17 +20,16 @@ cv.lecturesight.framesource.snapshot.interval | 60 | Interval in seconds at whic
 type :// path [options]
 ```
 
-| MRL part  | Meaning |
-|-|-|
-| type | the type of the input, determines which input plugin is used |
-| path | path to the input, usually a Linux device or file |
-| options | additional arguments for the input plugin |
+| Part        | Meaning |
+|-----------|-----------|
+| type       | the type of the input, determines which input plugin is used
+| path       | path to the input, usually a Linux device or file
+| options  | additional arguments for the input plugin
 
-For real time operation, devices that provide raw video streams are recommended, as encoding and decoding of frames can lead to several hundred milliseconds of delay.
 
 ## V4L Frame Source
 
-The `lecturesight-framesource-v4l` bundle provides a FrameSource implementation for accquiring frames from Video4Linux and Video4Linux 2 devices.
+The `lecturesight-framesource-v4l` bundle provides a FrameSource implementation for accquiring frames from Video4Linux and Video4Linux 2 devices such as webcams and frame grabbers.
 
 Arguments for creation of a new FrameSource from this implementation can be provided in the FrameSource MRL. If an argument is not present in the MRL, the default value is taken from the configuration properties.
 
@@ -61,8 +60,8 @@ Video4Linux device `/dev/video0` as input with QVGA resolution.
 cv.lecturesight.framesource.v4l.channel | 0 | Default video input. Usually not used with USB webcams but rather with capture cards. This can be useful with capture cards, since they are by default set to tuner input and need to be set to composite (usually 1).
 cv.lecturesight.framesource.v4l.format | YUYV | YUYV or MJPEG for webcams
 cv.lecturesight.framesource.v4l.quality | 0 | Default encoding quality. Only used for devices that provide encoded video streams (such as MPEG2 or MJPEG). Value range depends on device driver.
-cv.lecturesight.framesource.v4l.resolution.height | 240 | Default height for input frames.
 cv.lecturesight.framesource.v4l.resolution.width | 320 | Default width for input frames.
+cv.lecturesight.framesource.v4l.resolution.height | 240 | Default height for input frames.
 cv.lecturesight.framesource.v4l.standard | 0 | Default video standard. Usually not used with USB webcams but rather with capture cards. Which value indicates a certain standard (eg. PAL-X/NTSC) depends on the driver of the video device.
 
 ## GStreamer Frame Source
@@ -89,13 +88,12 @@ __Note:__ You must define a pipeline with at least two elements, otherwise the c
 
 __drop__ -- optional, default: _true_
 
-Sets the _drop_ property of the `appsink` that is handing the frames over to
-the system.
+Sets the _drop_ property of the `appsink` that hands the frames over to the system.
 
-For real-time frame sources such as cameras it is recommended to
-have the value set to _true_ so that always the newest frames is uploaded to
-the GPU for video analysis. When testing with a non-live frame source such
-as video files, _drop_ may be set to _false_ so that the system gets every frame
+For real-time frame sources such as cameras it is recommended to set this value to _true_ so that the newest frames is uploaded to
+the GPU for video analysis.
+
+When testing with a non-live frame source such as video files, _drop_ may be set to _false_ so that the system gets every frame
 for analysis.
 
 More information on the `appsink` element and its _drop_ property are available

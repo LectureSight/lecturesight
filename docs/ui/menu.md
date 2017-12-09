@@ -1,6 +1,6 @@
 # Services Menu
 
-The `Services` menu provides access to the LectureSight displays and configuration windows.
+The **Services** menu provides access to the LectureSight displays and configuration windows.
 
 ![Services Menu](../images/ls_services_menu.png "Services Menu")
 

@@ -21,6 +21,8 @@ Copy the runtime OSGI bundles and configuration files:
 
     cp -R runtime/* /opt/ls/
 
+Edit the `production-with-gui` maven profile in `src/pom.xml` to enable or disable the camera modules that you need for your installation.
+
 Build LectureSight and install the resulting OSGI bundles:
 
     cd src
@@ -38,9 +40,5 @@ A successful build should end like this:
 [INFO] ------------------------------------------------------------------------
 ````
 
-Change into the LectureSight directory and run the start script:
+You can now [Start LectureSight](start)
 
-    cd /opt/ls
-    ./bin/start_lecturesight.sh
-
-and then check that LectureSight has [started up](startup.md) correctly.

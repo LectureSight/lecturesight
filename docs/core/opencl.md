@@ -1,8 +1,9 @@
 # OpenCL
 
+!!! bug
+    Code and default.properties are inconsistent.
+    
 ## Configuration
-
-TODO: Code and default.properties are inconsistent.
 
 | Key                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|
