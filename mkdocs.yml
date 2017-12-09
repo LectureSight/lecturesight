@@ -5,6 +5,7 @@ repo_url: https://bitbucket.org/bwulff/lecturesight/
 theme:
   name:  material
   logo:  'images/lecturesight.png'
+  favicon: 'images/favicon.png'
 
 markdown_extensions:
   - admonition
