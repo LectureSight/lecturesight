@@ -49,7 +49,7 @@ pages:
 #   - Calibration: 'config/calibration.md'
 
 - Core Services:
-    - Configuration: core/config.md
+    - 'Configuration': core/config.md
     - 'OpenCL': 'core/opencl.md'
     - 'Heartbeat': 'core/heartbeat.md'
     - 'Frame Source': 'core/framesource.md'
@@ -61,7 +61,7 @@ pages:
 
 - 'Modules':
     - 'Video Analysis' : 'modules/videoanalysis.md'
-    - 'Pan Camera Operator' : 'modules/cameraoperator-simple.md'
+    - 'Camera Operator' : 'modules/cameraoperator-simple.md'
     - 'Steering Worker': 'modules/steeringworker-relativemove.md'
     - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
     - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
