@@ -78,8 +78,8 @@ ID|State      |Level|Name
  0|Active     |    0|System Bundle (4.2.0)
  1|Active     |    1|Apache Felix Configuration Admin Service (1.2.8)
 ...
-38|Active     |    1|Lecturesight Object Tracker API (0.3.0)
-39|Active     |    1|Lecturesight GUI API (0.3.0)
+38|Active     |    1|LectureSight Object Tracker API (0.3.0)
+39|Active     |    1|LectureSight GUI API (0.3.0)
 40|Installed  |    1|LectureSight Video4Linux FrameSource (0.3.0)
 ```
 

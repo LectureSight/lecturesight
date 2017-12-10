@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-cameraoperator-api</artifactId>
-  <name>Lecturesight Camera Operator API</name>
+  <name>LectureSight Camera Operator API</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   

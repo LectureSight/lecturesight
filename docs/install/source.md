@@ -8,7 +8,7 @@ Create a destination folder for LectureSight:
 
     mkdir -p /opt/ls/bundles/application
 
-Clone the Lecturesight repo:
+Clone the LectureSight repo:
 
     git clone https://bitbucket.org/bwulff/lecturesight.git
 

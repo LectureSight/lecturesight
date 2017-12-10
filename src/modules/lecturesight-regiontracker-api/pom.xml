@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-regiontracker-api</artifactId>
-  <name>Lecturesight Region Tracker API</name>
+  <name>LectureSight Region Tracker API</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
