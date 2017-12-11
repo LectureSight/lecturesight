@@ -43,10 +43,9 @@ pages:
    - Build source: 'install/source.md'
    - Start: 'install/start.md'
 
-#- Configuration:
-#   - Modules: 'config/modules.md'
-#   - Settings: 'config/settings.md'
-#   - Calibration: 'config/calibration.md'
+- Configuration:
+   - Calibration: 'config/calibration.md'
+   - Examples: 'config/examples.md'
 
 - Core Services:
     - 'Configuration': core/config.md

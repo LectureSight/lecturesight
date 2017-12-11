@@ -15,12 +15,12 @@ cv.lecturesight.videoanalysis.cell.activation.threshold | 3 | Threshold for when
 cv.lecturesight.videoanalysis.object.cells.min | 2 | Minimum number of active cells in a cluster to be considered a tracking target.
 cv.lecturesight.videoanalysis.object.cells.max | 128 | Maximum number of cells that a tracking target may consist of.
 cv.lecturesight.videoanalysis.object.match.threshold | 15 | Template match score must exceed this value for the object at the template location to be considered the same object between successive frames.
-cv.lecturesight.videoanalysis.object.move.threshold | 3 | Movement threshold: the target is considered to have moved between two successive frames is the distance between positions exceeds this value.
+cv.lecturesight.videoanalysis.object.move.threshold | 3 | Movement threshold: the target is considered to have moved between two successive frames if the distance between positions exceeds this value.
 cv.lecturesight.videoanalysis.object.dormant.min | 400 | Minimum time in ms that a tracking target may be dormant before it is discarded from the list of targets.
 cv.lecturesight.videoanalysis.object.dormant.max | 8000 | Maximum time in ms that a static tracking target may be dormant before it is discarded from the list of targets.
 cv.lecturesight.videoanalysis.object.dormant.age.factor | 0.5 | Scaling factor that increases the dormant timeout value as the object ages. Older objects have a higher timeout value.
 cv.lecturesight.videoanalysis.object.active.min | 500 | Minimum time in ms that a tracking target must be active before it is included in the target list provided to the camera operator.
-cv.lecturesight.videoanalysis.object.timeout | 60000 | Maximum timeout value for target. This timeout is applied when the target has moved at least a certain distance from its original position.
+cv.lecturesight.videoanalysis.object.timeout | 60000 | Maximum timeout in ms for target. This timeout is applied when the target has moved at least a certain distance from its original position.
 
 Template-Matching Video Analysis uses the _ConnectedComponents_ service, which has the following configuration options:
 
