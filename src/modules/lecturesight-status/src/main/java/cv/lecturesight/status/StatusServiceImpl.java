@@ -68,7 +68,7 @@ public class StatusServiceImpl implements StatusService, ConfigurationListener {
   private SceneProfileManager sceneProfileManager;
 
   @Reference
-  FrameSourceManager frameSourceManager;
+  private FrameSourceManager frameSourceManager;
 
   // The active profile
   private SceneProfile activeProfile;
