@@ -14,6 +14,23 @@ LectureSight uses 3 co-ordinate systems:
 
 > [VAPIX](../modules/ptzcontrol-vapix) cameras use degrees as co-ordinates. As LectureSight manages PTZ co-ordinates as whole integers, VAPIX co-ordinates are scaled up by 1000 by the camera driver to preserve precision, so 37.650 degrees is represented as 37650.
 
+## Inverted cameras
+
+If the Overview Camera is mounted inverted (up-side down), you can invert the overview image using:
+
+    cv.lecturesight.framesource.inverted=true
+
+If the PTZ Camera is mounted inverted, you may need to add these properties for some [VISCA](../modules/ptzcontrol-visca) cameras:
+
+```
+cv.lecturesight.ptz.steering.worker.relativemove.xflip=true
+cv.lecturesight.ptz.steering.worker.relativemove.yflip=true
+```
+
+and this property for [VAPIX](../modules/ptzcontrol-vapix) cameras:
+
+    cv.lecturesight.vapix.camera.inverted=true
+
 ## Scene Limits
 
 These 4 configuration properties map the overview image to the camera PTZ co-ordinates.
