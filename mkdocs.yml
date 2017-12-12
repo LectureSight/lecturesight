@@ -1,5 +1,6 @@
 site_name: LectureSight
 repo_url: https://bitbucket.org/bwulff/lecturesight/
+edit_uri: src/0.3-sprint/docs/
 
 # Default theme used is readthedocs
 theme:
