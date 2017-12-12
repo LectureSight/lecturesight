@@ -12,10 +12,50 @@ LectureSight uses 3 co-ordinate systems:
 
 * The [Steering Worker](../modules/steeringworker-relativemove) uses the co-ordinate system of the PTZ camera.
 
-## Scene Bounds
+> [VAPIX](../modules/ptzcontrol-vapix) cameras use degrees as co-ordinates. As LectureSight manages PTZ co-ordinates as whole integers, VAPIX co-ordinates are scaled up by 1000 by the camera driver to preserve precision, so 37.650 degrees is represented as 37650.
+
+## Scene Limits
+
+These 4 configuration properties map the overview image to the camera PTZ co-ordinates.
+
+```
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.left
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.right
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.top
+cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.bottom
+```
+
+Initially these values are not set, and thus the limits of the camera's co-ordinates are used as the scene limits.
+
+To set the scene limits, disable camera steering by using the following command on the [console](../core/console)
+
+    cs:off
+    
+Move the production camera (using the PTZ Camera's remote control or web interface) so that the PTZ Camera is centred on first the top-left point of the overview image, and then the bottom-right point. Note the camera's co-ordinates at those points in the [PTZ Camera Control](../ui/cameracontrol) window. Update the `lecturesight.properties` configuration with those values, and restart LectureSight.
+
+## Initial position
+
+Set the initial position of the [PTZ camera](../modules/cameraoperator-simple)
+
+```
+cv.lecturesight.cameraoperator.panonly.pan=0.0
+cv.lecturesight.cameraoperator.panonly.tilt=0.0
+cv.lecturesight.cameraoperator.panonly.zoom=0.0
+```
+
+## Frame width
+
+Set the frame width of the [PTZ camera](../modules/cameraoperator-simple) at the configured zoom position, relative to the width of the overview image, which is 2 in normalized co-ordinates (-1 to 1).
+
+For example a frame.width of 0.5 means that the PTZ Camera's image is 25% of the width of the overview image (0.5 / 2).
+
+```
+cv.lecturesight.cameraoperator.panonly.frame.width=0.5
+```
+
+You can verify visually that the frame width is correct by looking at the frame boundary guides on the [PTZ Camera Control](../ui/cameracontrol) window.
 
 ## Scene Profile
 
-First we have to tell the PTZ camera where in it's field of operation the bound of the scene lie that the overview camera observes.
+Create a new [Scene Profile](../ui/profile) to restrict the area in which the system tracks objects.
 
-Lastly, in most lecture or seminar rooms, it is a good idea to restrict the area in which the systems tracks objects.

@@ -64,6 +64,16 @@ cv.lecturesight.framesource.v4l.resolution.width | 320 | Default width for input
 cv.lecturesight.framesource.v4l.resolution.height | 240 | Default height for input frames.
 cv.lecturesight.framesource.v4l.standard | 0 | Default video standard. Usually not used with USB webcams but rather with capture cards. Which value indicates a certain standard (eg. PAL-X/NTSC) depends on the driver of the video device.
 
+### V4L2 Device Controls
+
+It is also possible to set V4L2 device controls by including them in the option list. To find out which controls the v4l2 device supports, look at the device information logged by the _V4LFrameGrabberFactory.createFrameGrabber_ method. For example this device has a control named `Brightness` which can be set in the range 0 to 255:
+
+    2017-12-12 06:31:43.587 INFO    CM Configuration Updater (Update: pid=org.apache.felix.fileinstall.235d4e28-9777-462b-93dd-d7a91af9d18e) V4LFrameGrabberFactory.createFrameGrabber() : Name: Brightness = 128 Type: CTRL_TYPE_SLIDER Values: [ 0 .. 255 ] increment: 1
+
+To set this value in the MRL, add it to the option list:
+
+    cv.lecturesight.framesource.input.mrl=v4l2:///dev/logitech[width=640;height=360;Brightness=100]
+
 ## GStreamer Frame Source
 
 The `lecturesight-framesource-gst` bundle provides a Frame Source implementation that uses a user-defined

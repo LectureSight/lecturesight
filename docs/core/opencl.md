@@ -1,22 +1,17 @@
 # OpenCL
 
-!!! bug
-    Code and default.properties are inconsistent.
-    
+The _OpenCLService_ in the `lecturesight-opencl-impl` bundle is responsible for initializing the GPU.
+
+OpenCL is configured through Java system properties that are set in the `start_lecturesight.sh` script. To change these properties, edit the script before starting LectureSight.
+
 ## Configuration
 
-| Key                                   | Default   | Description |
+| Property                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|
-| cv.lecturesight.opencl.context.opengl | false | |
-| cv.lecturesight.opencl.queue.profiling | false | Enable profiling |
+| ocl.device.type | GPU | Set the _CLDevice.Type_: CPU or GPU
+| ocl.use.gl | false | Use current OpenGL context if true
+| ocl.profiling | false | Enable profiling if true
 
-## Startup options
+## Profiling
 
-Also start_lecturesight.sh
-
-```
-# OpenCL device type to be used. Default is GPU.
-# Available options: CPU, GPU, ACCELERATOR, DEFAULT, ALL
-OPENCL_DEVICE="GPU"
-OPENCL_OPTS="-Docl.device.type=$OPENCL_DEVICE -Docl.profiling=no"
-```
+If OpenCL profiing is enabled, LectureSight will save profiling information to the files `frametimes-TIMESTAMP.csv` and `profiling-TIMESTAMP.csv`.
