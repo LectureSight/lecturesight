@@ -59,6 +59,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   private final static String PROPKEY_OBJECT_ACTIVE_MINTIME = "object.active.min";
   private final static String PROPKEY_OBJECT_TIMEOUT = "object.timeout";
 
+  // Fraction (denominator) of the proportion of the overview diagonal to regard as a
+  // meaningful movement for tracking persistence purposes. Works out to approx 18
+  // pixels for 640x360 overview size.
+  private final int ORIGIN_MOVE_RATIO = 40;
+
   @Reference
   Configuration config;       // configuration parameters
 
@@ -362,7 +367,7 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     double vt;
 
     // Max distance moved from point of origin in the target's lifetime
-    double origin_vt = 0;
+    double vt_origin = 0;
 
     long first_seen = 0; // Time that the target was first seen
     long time = 0;
@@ -466,8 +471,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         Logger.info("Max workgroup size for OpenCL device: {} {} is {}", device.getVendor(), device.getName(), gpu_maxworkgroupsize);
     }
 
-    // Calculate origin move threshold as 1/40th of the diagonal of the frame (approx 18 pixels for 640x360)
-    origin_move_threshold = Math.sqrt(Math.pow(fsrc.getWidth(), 2) + Math.pow(fsrc.getHeight(), 2)) / 40;
+    // Calculate origin move threshold proportional to overview image size
+    origin_move_threshold = Math.sqrt(Math.pow(fsrc.getWidth(), 2) + Math.pow(fsrc.getHeight(), 2)) / ORIGIN_MOVE_RATIO;
     Logger.debug("Calculated origin move threshold is {}", (int) origin_move_threshold);
 
     Logger.info("Activated.");
@@ -525,8 +530,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
         // Maximum distance moved from point of origin
         if (t.time > 3) {
           double vt_origin = Math.sqrt(Math.pow(x - t.first_x, 2) + Math.pow(y - t.first_y, 2));
-          if (vt_origin > t.origin_vt) {
-            t.origin_vt = vt_origin;
+          if (vt_origin > t.vt_origin) {
+            t.vt_origin = vt_origin;
           }
         }
 
@@ -590,16 +595,16 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
          int dormant_scaled = Math.min(object_dormant_max, object_dormant_min + Math.max(Math.round(object_dormant_age_factor * (target_age - object_dormant_min)),0));
 
          // If the object has moved since first tracked, assume it is worth following and make the timeout much higher
-         if ((object_timeout > dormant_scaled) && (t.origin_vt > origin_move_threshold) && (t.matchscore > object_match_threshold)) {
+         if ((object_timeout > dormant_scaled) && (t.vt_origin > origin_move_threshold) && (t.matchscore > object_match_threshold)) {
            dormant_scaled = object_timeout;
          }
 
-         Logger.trace("Checking target target seq={} id={} origin_vt={} matchscore={} age={} dormant={} dormant_scaled={}",
-                       t.seq, t.id, (int) t.origin_vt, t.matchscore, target_age, target_dormant, dormant_scaled);
+         Logger.trace("Checking target target seq={} id={} vt_origin={} matchscore={} age={} dormant={} dormant_scaled={}",
+                       t.seq, t.id, (int) t.vt_origin, t.matchscore, target_age, target_dormant, dormant_scaled);
 
          if (target_dormant > dormant_scaled) {
-           Logger.debug("Discarding target seq={} id={} origin_vt={} matchscore={} age={} dormant={} dormant_scaled={}",
-                         t.seq, t.id, (int) t.origin_vt, t.matchscore, target_age, target_dormant, dormant_scaled);
+           Logger.debug("Discarding target seq={} id={} vt_origin={} matchscore={} age={} dormant={} dormant_scaled={}",
+                         t.seq, t.id, (int) t.vt_origin, t.matchscore, target_age, target_dormant, dormant_scaled);
            discardTarget(t);
          }
       }
