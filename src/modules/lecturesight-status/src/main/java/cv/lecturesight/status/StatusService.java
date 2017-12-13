@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Benjamin Wulff
+/* Copyright (C) 2016 University of Cape Town
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,13 +15,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.framesource;
+package cv.lecturesight.status;
 
-public interface FrameSourceManager {
-
-  FrameSource createFrameSource(String input) throws FrameSourceException;
-  void destroyFrameSource(FrameSource fsrc) throws FrameSourceException;
-
-  String getOverviewSnapshotFile();
-
+public interface StatusService {
 }

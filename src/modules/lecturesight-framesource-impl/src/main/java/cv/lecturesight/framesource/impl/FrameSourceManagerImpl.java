@@ -255,6 +255,11 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     }
   }
 
+  @Override
+  public String getOverviewSnapshotFile() {
+    return snapshotFile;
+  }
+
   /**
    * Class responsible for catching update events on the scene profile and
    * updating the ignore mask for the framesource accordingly.

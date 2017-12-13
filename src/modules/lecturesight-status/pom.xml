@@ -1,12 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-videoanalysis-impl</artifactId>
-  <name>LectureSight Video Analysis Services</name>
-  <groupId>cv.lecturesight</groupId>
+  <artifactId>lecturesight-status</artifactId>
+  <name>LectureSight Status</name>
   <packaging>bundle</packaging>
-
+  
   <version>0.3</version>
   
   <parent>
@@ -15,25 +14,16 @@
     <version>0.3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
-
-  <properties>
-    <checkstyle.skip>true</checkstyle.skip>
-  </properties>
-
+  
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-videoanalysis-api</artifactId>
+      <artifactId>lecturesight-heartbeat</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-display-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-gui-api</artifactId>
+      <artifactId>lecturesight-cameraoperator-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -43,12 +33,12 @@
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-opencl-api</artifactId>
+      <artifactId>lecturesight-util</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-util</artifactId>
+      <artifactId>lecturesight-profile-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -58,6 +48,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -71,15 +66,21 @@
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient-osgi</artifactId>
+        <version>4.5</version>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
 
-      <!-- Generate Declarative Service Descriptor -->
+     <!-- Generate Declarative Service Descriptor -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
+        <version>1.21.0</version>
         <executions>
           <execution>
             <id>generate-scr-scrdescriptor</id>
@@ -105,15 +106,16 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.videoanalysis</Bundle-SymbolicName>
-            <Export-Package>
-              cv.lecturesight.videoanalysis.change.impl;version=${project.version},
-              cv.lecturesight.videoanalysis.backgroundmodel.impl;version=${project.version},
-              cv.lecturesight.videoanalysis.foreground.impl;version=${project.version}
-            </Export-Package>
+            <Bundle-SymbolicName>cv.lecturesight.status</Bundle-SymbolicName>
+            <Import-Package>
+		!net.sf.ehcache,!net.spy.memcached,!javax.servlet,!org.apache.avalon.framework.logger,!org.apache.log,!org.apache.log4j,!org.codehaus.plexus.util,*
+            </Import-Package>
+            <Embed-Transitive>true</Embed-Transitive>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=http*|fluent-hc|commons-logging</Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
