@@ -12,7 +12,7 @@ LectureSight uses 3 co-ordinate systems:
 
 * The [Steering Worker](../modules/steeringworker-relativemove) uses the co-ordinate system of the PTZ camera.
 
-> [VAPIX](../modules/ptzcontrol-vapix) cameras use degrees as co-ordinates. As LectureSight manages PTZ co-ordinates as whole integers, VAPIX co-ordinates are scaled up by 1000 by the camera driver to preserve precision, so 37.650 degrees is represented as 37650.
+> [VAPIX](../modules/ptzcontrol-vapix) cameras use degrees as co-ordinates. As LectureSight manages PTZ co-ordinates as  integers, VAPIX co-ordinates are scaled up by 100 by the camera driver to preserve precision, so 37.65 degrees is represented as 3765.
 
 ## Inverted cameras
 

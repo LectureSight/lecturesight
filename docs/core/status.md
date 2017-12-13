@@ -17,7 +17,7 @@ The status service sends an HTTP POST request with the following multipart/form-
 
 | Field name                         | Type   | Description |
 |-------------------------------|-----------|-------------------------------------------|
-| name | text/plain | Name configured in cv.lecturesight.status.name
+| name | text/plain | Name configured in `cv.lecturesight.status.name`
 | status | text/plain | Tracking status: active or idle
 | metrics | application/json | Metrics summary from the [Metrics Service](metrics)
 | profile | text/plain | The active [scene profile](profile) definition

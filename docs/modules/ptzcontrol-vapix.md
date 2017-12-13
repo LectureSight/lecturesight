@@ -31,7 +31,15 @@ as [propertyName]=[propertyValue]
 | cv.lecturesight.vapix.camera.zoom.maxspeed | 10 | The maximum speed for changing the zoom level.
 | cv.lecturesight.vapix.updater.interval | 200 | The interval to send responses to all the registered camera listeners.
 
-Notes:
-
 The username should have Administrator privileges to be able to manage camera presets.
+
+## Inverted camera
+
+If the camera is mounted inverted, set these 3 properties:
+
+```
+cv.lecturesight.vapix.camera.inverted=true
+cv.lecturesight.vapix.camera.tilt.min=-9000
+cv.lecturesight.vapix.camera.tilt.max=2000
+```
 
