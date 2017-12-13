@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <checkstyle.skip>true</checkstyle.skip>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
 
   <!--___________________________ Build Profiles ____________________________--> 
@@ -69,6 +69,7 @@
         <module>modules/lecturesight-scripting-stub</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-setup-ui</module>
+        <module>modules/lecturesight-status</module>
         <module>modules/lecturesight-steeringworker-absolutemove</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
@@ -113,6 +114,7 @@
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-status</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>

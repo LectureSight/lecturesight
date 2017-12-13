@@ -18,6 +18,7 @@
 package cv.lecturesight.display.impl;
 
 import cv.lecturesight.display.Display;
+import cv.lecturesight.display.DisplayRegistration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class DisplayCommands {
   public void list() {
     StringBuilder sb = new StringBuilder();
     sb.append("   Id   State          Name\n");
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       String id = Integer.toString(reg.getID());
       Display display = parent.displays.get(reg);
       String active = display.isActive() ? "active" : "inactive";
@@ -80,7 +81,7 @@ public class DisplayCommands {
       if (displayWindows.containsKey(id)) {
         displayWindows.get(id).setVisible(true);
       } else {
-        for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+        for (DisplayRegistration reg : parent.displays.keySet()) {
           if (reg.getID() == id) {
             DisplayWindow window = new DisplayWindow(reg.getSID(), parent.displays.get(reg));
             displayWindows.put(id, window);

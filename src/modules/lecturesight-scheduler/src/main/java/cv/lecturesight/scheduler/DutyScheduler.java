@@ -4,17 +4,10 @@ import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.scheduler.ical.ICalendar;
 import cv.lecturesight.scheduler.ical.VEvent;
+import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.metrics.MetricsService;
-import cv.lecturesight.util.DummyInterface;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -24,6 +17,14 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that loads a schedule from a iCal file and starts/stops object
@@ -32,8 +33,8 @@ import org.pmw.tinylog.Logger;
 @Component(name = "lecturesight.dutyscheduler", immediate = true)
 @Service
 @Properties({
-  @Property(name = "osgi.command.scope", value = "scheduler"),
-  @Property(name = "osgi.command.function", value = {"start", "stop", "status"})
+@Property(name = "osgi.command.scope", value = "scheduler"),
+@Property(name = "osgi.command.function", value = {"start", "stop", "status"})
 })
 
 public class DutyScheduler implements ArtifactInstaller, DummyInterface {
@@ -69,8 +70,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     // Is the scheduler enabled?
     enable = config.getBoolean(PROPKEY_ENABLE);
     if (!enable) {
-       Logger.info("Activated. Scheduler is not enabled.");
-       return;
+      Logger.info("Activated. Scheduler is not enabled.");
+      return;
     }
 
     // Tracking and camera operator are initially stopped
@@ -142,11 +143,10 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
             Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR, vevent.getUID());
             newEvents.add(stopOperator);
 
-            Logger.info("Created recording event:  Start: " + startDate.toString() +
-                        "  End: " + stopDate.toString() + "  UID: " + vevent.getUID());
+            Logger.info("Created recording event: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
           }
         }
-        events.clear();                             // clear schedule 
+        events.clear();                             // clear schedule
         eventExecutor.reset();                      // reset the event executor
         events.addAll(newEvents);                   // load new events
         events.removeBefore(System.currentTimeMillis()); // discard events from the past
@@ -191,7 +191,7 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
   /**
    * Start and stop camera operator
-  */
+   */
   public void startOperator() {
     operator.start();
   }
@@ -232,20 +232,22 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
    * Commands
    */
   public void start() {
-     metrics.reset();
-     startTracking();
-     startOperator();
+    metrics.reset();
+    startTracking();
+    startOperator();
   }
 
   public void stop() {
-     stopOperator();
-     stopTracking();
-     metrics.pause();
-     metrics.save();
+    stopOperator();
+    stopTracking();
+    metrics.pause();
+    metrics.save();
   }
-  
+
   public void status() {
-     System.out.println(getStatus());
+    //CHECKSTYLE:OFF
+    System.out.println(getStatus());
+    //CHECKSTYLE:ON
   }
 
   /**
@@ -264,9 +266,9 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
     @Override
     public void run() {
 
-      synchronized (events) { 
+      synchronized (events) {
         long now = System.currentTimeMillis();   // get current time
-	Event current = events.getNextAfter(0);	 // get earliest event
+        Event current = events.getNextAfter(0);   // get earliest event
 
         // Step when inactive so that overview images are snapshotted (if configured). This means that
         // overview images will continue to be processed and displayed at 1fps (execution interval),
@@ -276,12 +278,12 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
         }
 
         // Fire pending events
-	while ((current != null)  && (current.getTime() <= now)) {
-		fireEvent(current);
-		events.remove(current);
-      		now = System.currentTimeMillis();
-		current = events.getNextAfter(0);
-	}
+        while ((current != null)  && (current.getTime() <= now)) {
+          fireEvent(current);
+          events.remove(current);
+          now = System.currentTimeMillis();
+          current = events.getNextAfter(0);
+        }
       }
     }
 
@@ -289,27 +291,30 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
      * Ensure that action associated with current event was set in motion.
      */
     void fireEvent(Event event) {
-        Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
-        switch (event.getAction()) {
+      Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
+      switch (event.getAction()) {
 
-          case START_TRACKING:
-            metrics.reset();
-            startTracking();
-            break;
+        case START_TRACKING:
+          metrics.reset();
+          startTracking();
+          break;
 
-          case STOP_TRACKING:
-            stopTracking();
-            metrics.pause();
-            metrics.save(event.getUID());
-            break;
+        case STOP_TRACKING:
+          stopTracking();
+          metrics.pause();
+          metrics.save(event.getUID());
+          break;
 
-          case START_OPERATOR:
-            startOperator();
-            break;
+        case START_OPERATOR:
+          startOperator();
+          break;
 
-          case STOP_OPERATOR:
-            stopOperator();
-            break;
+        case STOP_OPERATOR:
+          stopOperator();
+          break;
+
+        default:
+          break;
       }
     }
   }

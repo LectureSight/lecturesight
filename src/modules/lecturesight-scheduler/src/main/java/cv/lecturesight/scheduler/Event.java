@@ -1,6 +1,6 @@
 package cv.lecturesight.scheduler;
 
-/** 
+/**
  * A class representing a point in time and an action that should happen at
  * this instant.
  */
@@ -13,12 +13,12 @@ public class Event implements Comparable {
     START_OPERATOR,
     STOP_OPERATOR
   }
-  
+
   Long time;        // time of the event
   Action action;    // action that should be executed
   String uid;       // event id for which the action is being executed
 
-  /** 
+  /**
    * Returns new Event instance, sets time and action
    *
    * @param time time of the event
@@ -47,8 +47,8 @@ public class Event implements Comparable {
     int time_c = time.compareTo(((Event)other).time);
 
     if (time_c == 0)
-	return action.compareTo(((Event)other).action);
+      return action.compareTo(((Event)other).action);
     else
-    	return time_c;
+      return time_c;
   }
 }

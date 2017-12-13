@@ -16,6 +16,10 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
+  <properties>
+    <checkstyle.skip>true</checkstyle.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.wulff</groupId>
