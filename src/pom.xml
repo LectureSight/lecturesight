@@ -67,6 +67,7 @@
         <module>modules/lecturesight-scripting-stub</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-setup-ui</module>
+        <module>modules/lecturesight-status</module>
         <module>modules/lecturesight-steeringworker-absolutemove</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
@@ -111,6 +112,7 @@
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-status</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
