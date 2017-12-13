@@ -17,6 +17,7 @@
  */
 package cv.lecturesight.display.impl;
 
+import cv.lecturesight.display.DisplayRegistration;
 import cv.lecturesight.display.DisplayService;
 import cv.lecturesight.opencl.OpenCLService;
 
@@ -39,7 +40,7 @@ public class DisplayServiceFactory implements ServiceFactory {
   BundleContext bundleContext;
   DisplayService displayService;
 
-  Map<DisplayRegistrationImpl, DisplayImpl> displays = new HashMap<DisplayRegistrationImpl, DisplayImpl>();
+  Map<DisplayRegistration, DisplayImpl> displays = new HashMap<DisplayRegistration, DisplayImpl>();
 
   public DisplayServiceFactory(BundleContext bc) {
     this.bundleContext = bc;

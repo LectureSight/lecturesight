@@ -9,6 +9,10 @@
   
   <version>0.3</version>
 
+  <properties>
+    <checkstyle.skip>true</checkstyle.skip>
+  </properties>
+
   <parent>
     <groupId>cv.lecturesight</groupId>
     <artifactId>base</artifactId>
