@@ -58,6 +58,7 @@ pages:
     - 'Console': 'core/console.md'
     - 'Metrics': 'core/metrics.md'
     - 'Logging': 'core/logging.md'
+    - 'Status': 'core/status.md'
 
 - 'Modules':
     - 'Video Analysis' : 'modules/videoanalysis.md'
