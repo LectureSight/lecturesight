@@ -46,8 +46,6 @@
         <module>modules/lecturesight-heartbeat</module>
         <module>modules/lecturesight-manualpages-ui</module>
         <module>modules/lecturesight-objecttracker-api</module>
-        <module>modules/lecturesight-objecttracker-clustering</module>
-        <module>modules/lecturesight-objecttracker-impl</module>
         <module>modules/lecturesight-opencl-api</module>
         <module>modules/lecturesight-opencl-impl</module>
         <module>modules/lecturesight-profile-api</module>
@@ -57,8 +55,6 @@
         <module>modules/lecturesight-ptzcontrol-dummy</module>
         <module>modules/lecturesight-ptzcontrol-onvif</module>
         <module>modules/lecturesight-ptzcontrol-vapix</module>
-        <module>modules/lecturesight-regiontracker-api</module>
-        <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-scheduler</module>
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-scripting-stub</module>
@@ -172,6 +168,10 @@
         <module>modules/lecturesight-decorator-head</module>
         <module>modules/lecturesight-decorator-manager</module>
         <module>modules/lecturesight-decorator-person</module>
+        <module>modules/lecturesight-objecttracker-clustering</module>
+        <module>modules/lecturesight-objecttracker-impl</module>
+        <module>modules/lecturesight-regiontracker-api</module>
+        <module>modules/lecturesight-regiontracker-impl</module>
         <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-impl</module>
         <module>modules/lecturesight-visualization</module>
