@@ -68,12 +68,14 @@ public class TrackerObject {
     Calendar cal = Calendar.getInstance();
 
     cal.setTimeInMillis(firstSeen);
-    final String fs = new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
+    final String fs = new SimpleDateFormat("HH:mm:ss.SSS").format(cal.getTime());
 
     cal.setTimeInMillis(lastSeen);
-    final String ls = new SimpleDateFormat("HH:mm:ss").format(cal.getTime());
+    final String ls = new SimpleDateFormat("HH:mm:ss.SSS").format(cal.getTime());
 
-    return "objid=" + id + " fs=" + fs + " ls=" + ls;
+    long age = (lastSeen-firstSeen) / 1000;
+
+    return "objid=" + id + " fs=" + fs + " ls=" + ls + " age=" + age + "s";
   }
 
   public boolean hasProperty(String key) {
