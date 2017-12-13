@@ -36,8 +36,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -121,10 +121,10 @@ public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperato
     frame_trigger_height = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_HEIGHT), 0, 1);
     target_limit = config.getInt(PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} " +
-                 "frame.width: {}, frame.trigger.width: {}, frame.trigger.height: {}, target.limit: {}, tilt.lock: {}, tilt.offset: {}",
-                 target_timeout, tracking_timeout, idle_preset, start_pan, start_tilt, start_zoom, frame_width, frame_trigger_width,
-                 frame_trigger_height, target_limit, tilt_lock, tilt_offset);
+    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} "
+            + "frame.width: {}, frame.trigger.width: {}, frame.trigger.height: {}, target.limit: {}, tilt.lock: {}, tilt.offset: {}",
+            target_timeout, tracking_timeout, idle_preset, start_pan, start_tilt, start_zoom, frame_width, frame_trigger_width,
+            frame_trigger_height, target_limit, tilt_lock, tilt_offset);
   }
 
   private float limitRange(float value, float min, float max) {

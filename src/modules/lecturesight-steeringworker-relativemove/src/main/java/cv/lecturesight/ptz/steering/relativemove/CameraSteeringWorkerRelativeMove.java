@@ -96,7 +96,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   // The width and height of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
   float frame_width;
   float frame_height;
-  
+
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
   boolean xflip = false;
