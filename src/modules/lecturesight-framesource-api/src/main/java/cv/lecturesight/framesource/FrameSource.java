@@ -17,22 +17,24 @@
  */
 package cv.lecturesight.framesource;
 
-import com.nativelibs4java.opencl.CLImage2D;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import java.awt.image.BufferedImage;
 
 public interface FrameSource {
 
   String getType();
-  
+
   OCLSignal getSignal();
 
   CLImage2D getRawImage();
-  
+
   CLImage2D getImage();
-  
+
   CLImage2D getLastImage();
-  
+
   BufferedImage getImageHost();
 
   void captureFrame() throws FrameSourceException;
@@ -40,9 +42,9 @@ public interface FrameSource {
   int getWidth();
 
   int getHeight();
-  
+
   long getFrameNumber();
-  
+
   double getFPS();
 
 }

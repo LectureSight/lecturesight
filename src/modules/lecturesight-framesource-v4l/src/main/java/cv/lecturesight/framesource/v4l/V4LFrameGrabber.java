@@ -17,6 +17,9 @@
  */
 package cv.lecturesight.framesource.v4l;
 
+import cv.lecturesight.framesource.FrameGrabber.PixelFormat;
+import cv.lecturesight.framesource.FrameSourceException;
+
 import au.edu.jcu.v4l4j.CaptureCallback;
 import au.edu.jcu.v4l4j.FrameGrabber;
 import au.edu.jcu.v4l4j.ImageFormat;
@@ -24,20 +27,24 @@ import au.edu.jcu.v4l4j.ResolutionInfo;
 import au.edu.jcu.v4l4j.VideoDevice;
 import au.edu.jcu.v4l4j.VideoFrame;
 import au.edu.jcu.v4l4j.exceptions.V4L4JException;
-import cv.lecturesight.framesource.FrameGrabber.PixelFormat;
-import cv.lecturesight.framesource.FrameSourceException;
+
+import org.pmw.tinylog.Logger;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Vector;
-import org.pmw.tinylog.Logger;
 
 public class V4LFrameGrabber implements cv.lecturesight.framesource.FrameGrabber, CaptureCallback {
 
   private int exceptionCount = 0;
   private final int MAX_EXCEPTIONS = 5;
   VideoDevice device;
-  int width, height, standard, channel, quality;
+  int width;
+  int height;
+  int standard;
+  int channel;
+  int quality;
   private FrameGrabber grabber;
   private ByteBuffer frameBuffer;
   private String videoFormat;

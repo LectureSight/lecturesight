@@ -12,5 +12,5 @@ public class Activator implements BundleActivator {
 
   @Override
   public void stop(BundleContext bc) throws Exception {
-  }  
+  }
 }

@@ -17,7 +17,6 @@
  */
 package cv.lecturesight.opencl.impl;
 
-import com.nativelibs4java.opencl.CLContext;
 import cv.lecturesight.opencl.OCLProgramStore;
 import cv.lecturesight.opencl.OCLUtils;
 import cv.lecturesight.opencl.OpenCLService;
@@ -27,6 +26,9 @@ import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.opencl.impl.profiling.ProfilingComputationRun;
 import cv.lecturesight.opencl.impl.profiling.ProfilingServer;
+
+import com.nativelibs4java.opencl.CLContext;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,7 +43,7 @@ public class OpenCLServiceImpl implements OpenCLService {
   Map<ComputationRun, OCLExecution> executions = new java.util.HashMap<ComputationRun, OCLExecution>();
   boolean doProfiling = false;
   ProfilingServer profiler;
-  
+
   @Override
   public CLContext context() {
     return context;
@@ -99,7 +101,7 @@ public class OpenCLServiceImpl implements OpenCLService {
 
   @Override
   public void unregisterLaunch(OCLSignal trigger, ComputationRun run) {
-    if (executions.containsKey(run)) {                                  
+    if (executions.containsKey(run)) {
       dispatcher.signalManager.unregisterFromSignal(trigger, executions.get(run));
     }
   }

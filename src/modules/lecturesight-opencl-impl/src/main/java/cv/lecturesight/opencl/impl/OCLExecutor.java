@@ -17,14 +17,17 @@
  */
 package cv.lecturesight.opencl.impl;
 
+import cv.lecturesight.opencl.api.ComputationRun;
+
 import com.nativelibs4java.opencl.CLEvent;
 import com.nativelibs4java.opencl.CLQueue;
-import cv.lecturesight.opencl.api.ComputationRun;
+
+import org.pmw.tinylog.Logger;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.pmw.tinylog.Logger;
 
 /** A Thread that takes care of putting the OpenCL commands of issued
  *  ComputationRuns orderly into a single CL command queue so that memory access
@@ -41,12 +44,12 @@ public class OCLExecutor extends Thread {
   private final BlockingQueue<ComputationRun> taskQueue;
   private final ExecutorService callbackExecutor = Executors.newCachedThreadPool();   // TODO think about the question if this is the right type of thread pool
 
-  public OCLExecutor(CLQueue queue) {
+  OCLExecutor(CLQueue queue) {
     this.oclQueue = queue;
     taskQueue = new ArrayBlockingQueue<ComputationRun>(DEFAULT_QUEUE_SIZE);
   }
 
-  public OCLExecutor(CLQueue queue, int queueSize) {
+  OCLExecutor(CLQueue queue, int queueSize) {
     this.oclQueue = queue;
     taskQueue = new ArrayBlockingQueue<ComputationRun>(queueSize);
   }
@@ -101,7 +104,7 @@ public class OCLExecutor extends Thread {
     private CLEvent event;
     private ComputationRun run;
 
-    public CallbackExecution(CLEvent event, ComputationRun run) {
+    CallbackExecution(CLEvent event, ComputationRun run) {
       this.event = event;
       this.run = run;
     }

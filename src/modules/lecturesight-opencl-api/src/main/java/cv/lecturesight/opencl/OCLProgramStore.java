@@ -19,6 +19,7 @@ package cv.lecturesight.opencl;
 
 import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLProgram;
+
 import java.util.NoSuchElementException;
 
 public interface OCLProgramStore {

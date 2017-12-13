@@ -22,5 +22,5 @@ package cv.lecturesight.profile.manager;
  * @author wulff
  */
 public class SceneProfileCommands {
-  
+
 }

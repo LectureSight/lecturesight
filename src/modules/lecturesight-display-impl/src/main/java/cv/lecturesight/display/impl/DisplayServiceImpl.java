@@ -17,22 +17,24 @@
  */
 package cv.lecturesight.display.impl;
 
-import com.nativelibs4java.opencl.CLImage2D;
+import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayRegistration;
 import cv.lecturesight.display.DisplayRegistrationListener;
 import cv.lecturesight.display.DisplayService;
-import cv.lecturesight.display.Display;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.opencl.OpenCLService;
 import cv.lecturesight.opencl.api.OCLSignal;
+
+import com.nativelibs4java.opencl.CLImage2D;
+
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
 public class DisplayServiceImpl implements DisplayService {
-  
-  enum EVENT_TYPE {ADDED, REMOVED};
+
+  enum EventType {ADDED, REMOVED};
 
   private OpenCLService ocl;
   private DisplayServiceFactory parent;
@@ -50,21 +52,21 @@ public class DisplayServiceImpl implements DisplayService {
     DisplayRegistrationImpl reg = new DisplayRegistrationImpl(id);
     myRegs.add(reg);
     parent.displays.put(reg, display);
-    notifyObservers(EVENT_TYPE.ADDED, reg);
-    
+    notifyObservers(EventType.ADDED, reg);
+
     // register UI for new display
     DisplayUI ui = new DisplayUI(display, id);
     Dictionary<String, Object> props = new Hashtable<String, Object>();
     parent.bundleContext.registerService(UserInterface.class.getName(), ui, props);
-    
+
     return reg;
   }
-  
+
   // TODO implement unregisterDisplay()
 
   @Override
   public Display getDisplayByNumber(int id) {
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       if (reg.getID() == id) {
         return parent.displays.get(reg);
       }
@@ -74,7 +76,7 @@ public class DisplayServiceImpl implements DisplayService {
 
   @Override
   public Display getDisplayBySID(String id) {
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       if (reg.getSID().equals(id)) {
         return parent.displays.get(reg);
       }
@@ -84,24 +86,23 @@ public class DisplayServiceImpl implements DisplayService {
 
   @Override
   public Display getDisplayByRegistration(DisplayRegistration reg) {
-    for (DisplayRegistrationImpl r : parent.displays.keySet()) {
-      if (r.equals(ocl)) {
-        return parent.displays.get(reg);
-      }
+    if (parent.displays.containsKey(reg)) {
+      return parent.displays.get(reg);
+    } else {
+      throw new IllegalArgumentException("Unknown display registration");
     }
-    throw new IllegalArgumentException("Unknown display registration");
   }
 
   @Override
   public Set<DisplayRegistration> getDisplayRegistrations() {
     Set<DisplayRegistration> out = new HashSet<DisplayRegistration>();
-    for (DisplayRegistrationImpl reg : parent.displays.keySet()) {
+    for (DisplayRegistration reg : parent.displays.keySet()) {
       out.add((DisplayRegistration)reg);
     }
     return out;
   }
 
-  private void notifyObservers(EVENT_TYPE t, DisplayRegistration r) {
+  private void notifyObservers(EventType t, DisplayRegistration r) {
     for (DisplayRegistrationListener l: listeners) {
       switch (t) {
         case ADDED:
@@ -110,10 +111,12 @@ public class DisplayServiceImpl implements DisplayService {
         case REMOVED:
           l.displayRemoved(r);
           break;
+        default:
+          break;
       }
     }
   }
-  
+
   @Override
   public void addRegistrationListener(DisplayRegistrationListener listener) {
     listeners.add(listener);
@@ -124,3 +127,4 @@ public class DisplayServiceImpl implements DisplayService {
     listeners.remove(listener);
   }
 }
+

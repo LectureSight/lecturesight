@@ -18,23 +18,24 @@
 package cv.lecturesight.framesource.videofile;
 
 import cv.lecturesight.framesource.FrameGrabber;
-import cv.lecturesight.framesource.FrameSourceException;
 import cv.lecturesight.framesource.FrameGrabberFactory;
+import cv.lecturesight.framesource.FrameSourceException;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
-import org.freedesktop.gstreamer.Gst;
-import org.osgi.service.component.ComponentContext;
-import org.pmw.tinylog.Logger;
 
-/** Implementation of Service API
- *
+/**
+ * Implementation of Service API
  */
 @Component(name="lecturesight.framesource.videofile",immediate=true)
 @Service

@@ -22,4 +22,6 @@ public interface FrameSourceManager {
   FrameSource createFrameSource(String input) throws FrameSourceException;
   void destroyFrameSource(FrameSource fsrc) throws FrameSourceException;
 
+  String getOverviewSnapshotFile();
+
 }

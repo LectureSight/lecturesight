@@ -19,7 +19,7 @@ package cv.lecturesight.framesource.impl;
 
 class FrameSourceDescriptorParsingException extends Exception {
 
-  public FrameSourceDescriptorParsingException(String message) {
+  FrameSourceDescriptorParsingException(String message) {
     super(message);
   }
 

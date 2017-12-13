@@ -119,7 +119,7 @@ public class ConfigCommands {
     String filter = "*";
     if (args.length > 0) {
       filter = args[0].trim();
-      if (!filter.equals("*") && filter.endsWith("*")) {
+      if (!"*".equals(filter) && filter.endsWith("*")) {
         filter = filter.substring(1, filter.length() - 1);
       }
     }
@@ -140,10 +140,14 @@ public class ConfigCommands {
       sb.append("\n");
     }
     sb.append("\n");
+    //CHECKSTYLE:OFF
     System.out.println(sb.toString());  // PrintWriter to System.out wouldn't hurt
+    //CHECKSTYLE:ON
   }
 
   private void println(String msg) {
+    //CHECKSTYLE:OFF
     System.out.println(msg);
+    //CHECKSTYLE:ON
   }
 }

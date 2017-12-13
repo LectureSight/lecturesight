@@ -2,13 +2,13 @@ package cv.lecturesight.scheduler.ical;
 
 import java.util.Date;
 
-/** 
+/**
  * A class representing a VEVENT from the iCal with only the properties we are
  * interested in.
- * 
+ *
  */
 public class VEvent {
-  
+
   Date start = null;        // start time of event
   Date end = null;          // end time of event
   String summary = "";      // summary of event, here title of the Recording

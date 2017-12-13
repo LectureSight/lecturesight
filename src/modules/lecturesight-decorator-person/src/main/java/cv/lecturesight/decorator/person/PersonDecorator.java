@@ -1,7 +1,6 @@
 package cv.lecturesight.decorator.person;
 
 import cv.lecturesight.decorator.api.ObjectDecorator;
-import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
@@ -49,7 +48,7 @@ public class PersonDecorator implements ObjectDecorator {
     try {
       Position gravity = (Position)obj.getProperty(OBJ_PROPKEY_CENTROID);
       Position head    = (Position)obj.getProperty(OBJ_PROPKEY_HEAD_CENTROID);
-      
+
       if(head != null && gravity != null) {
         //Logger.info("Gravity: "+gravity.toString());
         //Logger.info("Head: "+head.toString());

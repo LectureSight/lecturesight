@@ -19,6 +19,9 @@ package cv.lecturesight.gui.impl;
 
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.conf.ConfigurationService;
+
+import org.pmw.tinylog.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,17 +29,18 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import org.pmw.tinylog.Logger;
 
 public class ConfigEditorPanel extends javax.swing.JPanel implements ConfigurationListener {
 
   private ConfigurationService config;
-  private Properties systemConfiguration, systemDefaults;
+  private Properties systemConfiguration;
+  private Properties systemDefaults;
   private Object[][] data;
   private String[] columns = new String[]{"Key", "Value"};
 
@@ -48,7 +52,7 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     config.addConfigurationListener(this);
     this.systemConfiguration = config.getSystemConfiguration();
     this.systemDefaults = config.getSystemDefaults();
-    
+
     // set operating system look-and-feel
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -58,9 +62,9 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     initComponents();
     update();
   }
-  
+
   public void update() {
-    
+
     List<String> keyList = new LinkedList<String>();
     keyList.addAll(systemConfiguration.stringPropertyNames());
     Collections.sort(keyList);
@@ -70,26 +74,26 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
       data[i][0] = key;
       data[i++][1] = systemConfiguration.getProperty(key);
     }
-    
+
     configTable.setModel(
-            new javax.swing.table.DefaultTableModel(data, columns) {
+                         new javax.swing.table.DefaultTableModel(data, columns) {
 
-              Class[] types = new Class[]{
-                java.lang.String.class, java.lang.String.class
-              };
-              boolean[] canEdit = new boolean[]{
-                false, true
-              };
+      Class[] types = new Class[]{
+      java.lang.String.class, java.lang.String.class
+      };
+      boolean[] canEdit = new boolean[]{
+      false, true
+      };
 
-              public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
-              }
+      public Class getColumnClass(int columnIndex) {
+        return types[columnIndex];
+      }
 
-              public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
-              }
-            });
-    
+      public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return canEdit[columnIndex];
+      }
+    });
+
     configTable.getModel().addTableModelListener(new TableModelListener() {
 
       @Override
@@ -103,9 +107,9 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
         Logger.info(key + " : " + oldValue + " => " + newValue);
         data[row][1] = newValue;
       }
-    
+
     });
-    
+
     Logger.debug("Configuration UI updated");
   }
 
@@ -120,18 +124,18 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     saveButton = new javax.swing.JButton();
 
     configTable.setModel(new javax.swing.table.DefaultTableModel(
-      new Object [][] {
+                                                                 new Object [][] {
 
-      },
-      new String [] {
-        "Key", "Value"
-      }
-    ) {
+                                                                 },
+                                                                 new String [] {
+                                                                   "Key", "Value"
+                                                                 }
+                                                                 ) {
       Class[] types = new Class [] {
-        java.lang.String.class, java.lang.String.class
+      java.lang.String.class, java.lang.String.class
       };
       boolean[] canEdit = new boolean [] {
-        false, true
+      false, true
       };
 
       public Class getColumnClass(int columnIndex) {
@@ -172,17 +176,17 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
-      .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-    );
+                              layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                              .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                              .addComponent(jToolBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                              );
     layout.setVerticalGroup(
-      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE))
-    );
+                            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                      .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                      .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 270, Short.MAX_VALUE))
+                            );
   }// </editor-fold>//GEN-END:initComponents
 
   private void loadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadButtonActionPerformed
@@ -205,8 +209,8 @@ public class ConfigEditorPanel extends javax.swing.JPanel implements Configurati
     if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       if (file.exists() && JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(
-              this, "The file " + file.getName() + " already exists. Do you want to replace it?", 
-              "Replace file", JOptionPane.YES_NO_OPTION)) {
+                                                                                  this, "The file " + file.getName() + " already exists. Do you want to replace it?",
+                                                                                  "Replace file", JOptionPane.YES_NO_OPTION)) {
         return;
       }
       try {

@@ -19,26 +19,29 @@ package cv.lecturesight.framesource.gst;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.nio.ByteBuffer;
 
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
-
 import org.pmw.tinylog.Logger;
+
+import java.nio.ByteBuffer;
 
 public class GStreamerFrameGrabber implements FrameGrabber {
 
   private String definition;
   private final Pipeline pipeline;
-  private int width, height;
+  private int width;
+  private int height;
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
+  private Sample lastSam;
   private AppSink appsink;
   private boolean dropFrames;
 
@@ -131,14 +134,17 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buf = appsink.pullSample().getBuffer();
+      Sample sam = appsink.pullSample();
+      Buffer buf = sam.getBuffer();
       if (buf != null) {
         lastFrame = buf.map(false);
-	if (lastBuf != null) {
-           // Free memory allocated for the previous buffer so we don't leak memory
-	   lastBuf.unmap();
-	}
-	lastBuf = buf;
+        if (lastBuf != null) {
+          // Free memory allocated for the previous buffer so we don't leak memory
+          lastBuf.unmap();
+          lastSam.dispose();
+        }
+        lastBuf = buf;
+        lastSam = sam;
       } else {
         Logger.warn("Buffer is NULL!!");
       }
@@ -170,10 +176,10 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("(")
-            .append("pipeline=\"").append(definition).append("\"")
-            .append(" drop=").append(Boolean.toString(dropFrames))
-            .append(" size=").append(width).append("x").append(height)
-            .append(")");
+    .append("pipeline=\"").append(definition).append("\"")
+    .append(" drop=").append(Boolean.toString(dropFrames))
+    .append(" size=").append(width).append("x").append(height)
+    .append(")");
     return sb.toString();
   }
 }

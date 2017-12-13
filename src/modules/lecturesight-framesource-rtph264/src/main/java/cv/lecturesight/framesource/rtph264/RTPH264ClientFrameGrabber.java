@@ -19,28 +19,31 @@ package cv.lecturesight.framesource.rtph264;
 
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
-import java.nio.ByteBuffer;
+
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
 import org.freedesktop.gstreamer.Structure;
 import org.freedesktop.gstreamer.elements.AppSink;
-
 import org.pmw.tinylog.Logger;
+
+import java.nio.ByteBuffer;
 
 public class RTPH264ClientFrameGrabber implements FrameGrabber {
 
   private String host;
   private int port;
   private final Pipeline pipeline;
-  private int width, height;
+  private int width;
+  private int height;
   private ByteBuffer lastFrame;
   private Buffer lastBuf;
+  private Sample lastSam;
   private AppSink appsink;
-
 
   public RTPH264ClientFrameGrabber(String host, int port) throws FrameSourceException {
     this.host = host;
@@ -135,14 +138,17 @@ public class RTPH264ClientFrameGrabber implements FrameGrabber {
   @Override
   public ByteBuffer captureFrame() throws FrameSourceException {
     if (!appsink.isEOS()) {
-      Buffer buf = appsink.pullSample().getBuffer();
+      Sample sam = appsink.pullSample();
+      Buffer buf = sam.getBuffer();
       if (buf != null) {
         lastFrame = buf.map(false);
         if (lastBuf != null) {
            // Free memory allocated for the previous buffer so we don't leak memory
            lastBuf.unmap();
+           lastSam.dispose();
         }
         lastBuf = buf;
+        lastSam = sam;
       } else {
         Logger.warn("Buffer is NULL!!");
       }

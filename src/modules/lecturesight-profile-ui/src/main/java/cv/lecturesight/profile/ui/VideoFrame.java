@@ -17,6 +17,8 @@
  */
 package cv.lecturesight.profile.ui;
 
+import org.pmw.tinylog.Logger;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -28,11 +30,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.pmw.tinylog.Logger;
 
 /**
  *
@@ -136,11 +138,12 @@ public class VideoFrame extends JPanel {
         return person;
       case 3:
         return trigger;
+      default:
+        return null;
     }
-    return null;
   }
 
-  public Dimension frame_dimension() {
+  public Dimension frameDimension() {
     return new Dimension(getWidth(), getHeight());
   }
 
@@ -152,11 +155,5 @@ public class VideoFrame extends JPanel {
     person.clear();
     repaint();
   }
-
-
-//  @Override
-//  public void paintComponent(Graphics g) {
-//    super.paintComponent(g);
-//  }
 
 }

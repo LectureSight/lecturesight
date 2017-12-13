@@ -15,6 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
 
   <!--___________________________ Build Profiles ____________________________--> 
@@ -26,51 +27,52 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>modules/lecturesight-utils</module>
-        <module>modules/lecturesight-opencl-api</module>
-        <module>modules/lecturesight-opencl-impl</module>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-scripted</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
+        <module>modules/lecturesight-connectedcomponent-api</module>
+        <module>modules/lecturesight-connectedcomponent-impl</module>
         <module>modules/lecturesight-display-api</module>
         <module>modules/lecturesight-display-impl</module>
         <module>modules/lecturesight-framesource-api</module>
         <module>modules/lecturesight-framesource-gst</module>
         <module>modules/lecturesight-framesource-impl</module>
-        <module>modules/lecturesight-framesource-kinect</module>
+        <!--module>modules/lecturesight-framesource-kinect</module-->
         <module>modules/lecturesight-framesource-rtph264</module>
         <module>modules/lecturesight-framesource-v4l</module>
-        <!-- module>modules/lecturesight-framesource-rtph264</module -->
-        <!-- module>modules/lecturesight-framesource-videofile</module -->
-        <module>modules/lecturesight-connectedcomponent-api</module>
-        <module>modules/lecturesight-connectedcomponent-impl</module>
-        <module>modules/lecturesight-videoanalysis-api</module>
-        <module>modules/lecturesight-videoanalysis-impl</module>
-        <module>modules/lecturesight-regiontracker-api</module>
-        <module>modules/lecturesight-regiontracker-impl</module>
-        <module>modules/lecturesight-objecttracker-api</module>
-        <module>modules/lecturesight-objecttracker-impl</module>
-        <!-- module>modules/lecturesight-objecttracker-clustering</module -->
-        <module>modules/lecturesight-decorator-manager</module>
+        <module>modules/lecturesight-framesource-videofile</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
         <module>modules/lecturesight-heartbeat</module>
-        <module>modules/lecturesight-visualization</module>
-        <!-- module>modules/lecturesight-decorator-head</module -->
-        <module>modules/lecturesight-ptzcontrol-api</module>
-        <module>modules/lecturesight-ptzcontrol-onvif</module>
-        <module>modules/lecturesight-ptzcontrol-vapix</module>
-        <module>modules/lecturesight-steeringworker-api</module>
-        <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-manualpages-ui</module>
+        <module>modules/lecturesight-objecttracker-api</module>
+        <module>modules/lecturesight-opencl-api</module>
+        <module>modules/lecturesight-opencl-impl</module>
         <module>modules/lecturesight-profile-api</module>
         <module>modules/lecturesight-profile-manager</module>
         <module>modules/lecturesight-profile-ui</module>
-        <module>modules/lecturesight-cameraoperator-api</module>
-        <module>modules/lecturesight-cameraoperator-simple</module>
-        <!-- module>modules/lecturesight-cameraoperator-scripted</module -->
-        <module>modules/lecturesight-decorator-color</module>
-        <module>modules/lecturesight-gui-api</module>
-        <module>modules/lecturesight-gui-impl</module>
-        <!-- module>modules/lecturesight-decorator-person</module -->
-        <!-- module>modules/lecturesight-cameraoperator-impl</module -->
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-dummy</module>
+        <module>modules/lecturesight-ptzcontrol-onvif</module>
+        <module>modules/lecturesight-ptzcontrol-vapix</module>
+        <module>modules/lecturesight-scheduler</module>
+        <module>modules/lecturesight-scripting-api</module>
+        <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-script-utils</module>
+        <module>modules/lecturesight-setup-ui</module>
+        <module>modules/lecturesight-status</module>
+        <module>modules/lecturesight-steeringworker-absolutemove</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-videoanalysis-templ</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-over-ip-service</module>
+        <module>modules/wulff-visca-service</module>
       </modules>      
     </profile>
-    
+
     <profile>
       <id>production-with-gui</id>
       <activation>
@@ -100,10 +102,10 @@
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-status</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
-        <module>modules/lecturesight-videoanalysis-api</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
         <module>modules/lecturesight-ptzcontrol-dummy</module>
         <!--module>modules/wulff-visca-api</module>
@@ -157,6 +159,26 @@
       <modules>  
       </modules>
     </profile>
+
+    <profile>
+      <id>deprecated</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-decorator-color</module>
+        <module>modules/lecturesight-decorator-head</module>
+        <module>modules/lecturesight-decorator-manager</module>
+        <module>modules/lecturesight-decorator-person</module>
+        <module>modules/lecturesight-objecttracker-clustering</module>
+        <module>modules/lecturesight-objecttracker-impl</module>
+        <module>modules/lecturesight-regiontracker-api</module>
+        <module>modules/lecturesight-regiontracker-impl</module>
+        <module>modules/lecturesight-videoanalysis-api</module>
+        <module>modules/lecturesight-videoanalysis-impl</module>
+        <module>modules/lecturesight-visualization</module>
+      </modules>
+    </profile>
     
   </profiles>
 
@@ -165,13 +187,13 @@
     <defaultGoal>install</defaultGoal>
     <plugins>
       
-      <!-- Require Java 6 or higher for building -->
+      <!-- Require Java 8 or higher for building -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
         <configuration>
-          <source>1.7</source>
+          <source>1.8</source>
           <target>1.8</target>
           <encoding>UTF-8</encoding>
         </configuration>
@@ -193,6 +215,40 @@
             </configuration>
             <goals>
               <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checkstyle for code quality -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.17</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>6.18</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <skip>${checkstyle.skip}</skip>
+          <configLocation>docs/checkstyle/lecturesight-checkstyle.xml</configLocation>
+          <headerLocation>docs/checkstyle/lecturesight-header.txt</headerLocation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <consoleOutput>true</consoleOutput>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <sourceDirectory>src</sourceDirectory>
+          <excludes>**/package-info.java,**/generated-sources/**/*</excludes>
+          <failOnViolation>true</failOnViolation>
+          <failsOnError>true</failsOnError>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
             </goals>
           </execution>
         </executions>
@@ -262,7 +318,14 @@
         <artifactId>commons-io</artifactId>
         <version>1.4</version>
       </dependency>
-      
+
+      <!-- gstreamer bindings -->
+      <dependency>
+        <groupId>org.freedesktop.gstreamer</groupId>
+        <artifactId>gst1-java-core</artifactId>
+        <version>0.9.1</version>
+      </dependency>
+     
       <!-- testing -->
       <dependency>
         <groupId>junit</groupId>
@@ -397,6 +460,28 @@
         <role>developer</role>
       </roles>
       <timezone>+0</timezone>
+    </developer>
+    <developer>
+      <id>jperrin</id>
+      <name>James Perrin</name>
+      <email></email>
+      <organization>University of Manchester</organization>
+      <organizationUrl>http://www.manchester.ac.uk/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+0</timezone>
+    </developer>
+    <developer>
+      <id>smarquard</id>
+      <name>Stephen Marquard</name>
+      <email>stephen.marquard@uct.ac.za</email>
+      <organization>University of Cape Town</organization>
+      <organizationUrl>http://www.cilt.uct.ac.za/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+2</timezone>
     </developer>
   </developers>
   <dependencies></dependencies>
