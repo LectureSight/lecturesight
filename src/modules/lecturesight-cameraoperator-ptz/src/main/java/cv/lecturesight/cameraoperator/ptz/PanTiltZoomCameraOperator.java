@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component(name = "lecturesight.cameraoperator.ptz", immediate = true)
 @Service
-public class SimplePanTiltZoomCameraOperator implements Constants, CameraOperator, ConfigurationListener {
+public class PanTiltZoomCameraOperator implements Constants, CameraOperator, ConfigurationListener {
 
   @Reference
   Configuration config;

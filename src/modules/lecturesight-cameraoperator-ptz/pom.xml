@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-cameraoperator-ptz</artifactId>
-  <name>LectureSight Simple PTZ Camera Operator</name>
+  <name>LectureSight PTZ Camera Operator</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
