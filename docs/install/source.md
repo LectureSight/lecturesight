@@ -21,12 +21,20 @@ Copy the runtime OSGI bundles and configuration files:
 
     cp -R runtime/* /opt/ls/
 
-Edit the `production-with-gui` maven profile in `src/pom.xml` to enable or disable the camera modules that you need for your installation.
+By default the `demonstration` profile will be built, this deploys a dummy PTZ
+camera so you run LectureSight without access to a real PTZ camera.
 
-Build LectureSight and install the resulting OSGI bundles:
+Build the LectureSight `demonstration` profile and install the resulting OSGI bundles:
 
     cd src
     mvn clean install -DdeployTo=/opt/ls/bundles/application
+
+Alternatively, edit the `production-with-gui` maven profile in `src/pom.xml` to
+enable or disable the camera modules that you need for your installation,
+(see the `ptz-####-only` profiles for the required modules).
+
+    cd src
+    mvn clean install -DdeployTo=/opt/ls/bundles/application -Pproduction-with-gui
 
 A successful build should end like this:
 

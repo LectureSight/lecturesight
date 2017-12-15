@@ -74,14 +74,55 @@
     </profile>
 
     <profile>
-      <id>production-with-gui</id>
+      <id>demonstration</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-cameraoperator-api</module>
-        <module>modules/lecturesight-cameraoperator-scripted</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
+        <module>modules/lecturesight-connectedcomponent-api</module>
+        <module>modules/lecturesight-connectedcomponent-impl</module>
+        <module>modules/lecturesight-display-api</module>
+        <module>modules/lecturesight-display-impl</module>
+        <module>modules/lecturesight-framesource-api</module>
+        <module>modules/lecturesight-framesource-gst</module>
+        <module>modules/lecturesight-framesource-impl</module>
+        <module>modules/lecturesight-framesource-rtph264</module>
+        <module>modules/lecturesight-framesource-v4l</module>
+        <module>modules/lecturesight-framesource-videofile</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+        <module>modules/lecturesight-heartbeat</module>
+        <module>modules/lecturesight-objecttracker-api</module>
+        <module>modules/lecturesight-opencl-api</module>
+        <module>modules/lecturesight-opencl-impl</module>
+        <module>modules/lecturesight-profile-api</module>
+        <module>modules/lecturesight-profile-manager</module>
+        <module>modules/lecturesight-profile-ui</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-dummy</module>
+        <module>modules/lecturesight-scheduler</module>
+        <module>modules/lecturesight-scripting-api</module>
+        <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-script-utils</module>
+        <module>modules/lecturesight-status</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-videoanalysis-templ</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>production-with-gui</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
         <module>modules/lecturesight-connectedcomponent-api</module>
         <module>modules/lecturesight-connectedcomponent-impl</module>
         <module>modules/lecturesight-display-api</module>
@@ -99,6 +140,7 @@
         <module>modules/lecturesight-profile-manager</module>
         <module>modules/lecturesight-profile-ui</module>
         <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-vapix</module>
         <module>modules/lecturesight-scripting-api</module>
         <module>modules/lecturesight-script-utils</module>
         <module>modules/lecturesight-scripting-stub</module>
@@ -107,32 +149,12 @@
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-videoanalysis-templ</module>
-        <module>modules/lecturesight-ptzcontrol-dummy</module>
-        <!--module>modules/wulff-visca-api</module>
-        <module>modules/wulff-visca-service</module -->
+        <module>modules/lecturesight-utils</module>
       </modules>
     </profile>
     
     <profile>
-      <id>production-headless</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>  
-      </modules>
-    </profile>
-    
-    <profile>
-      <id>tracking-only</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-      </modules>            
-    </profile>
-
-    <profile>
-      <id>ptz-only</id>
+      <id>ptz-onvif-only</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -140,23 +162,46 @@
         <module>modules/lecturesight-utils</module>
         <module>modules/lecturesight-ptzcontrol-api</module>
         <module>modules/lecturesight-ptzcontrol-onvif</module>
-        <module>modules/lecturesight-ptzcontrol-vapix</module>
         <module>modules/lecturesight-steeringworker-api</module>
         <module>modules/lecturesight-steeringworker-gui</module>
-        <module>modules/lecturesight-steeringworker-impl</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
-        <module>modules/wulff-visca-api</module>
-        <module>modules/wulff-visca-service</module>
       </modules>            
     </profile>
     
     <profile>
-      <id>headless</id>
+      <id>ptz-vapix-only</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
-      <modules>  
+      <modules>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-vapix</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>ptz-visca-only</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+        <module>modules/wulff-visca-api</module>
+        <module>modules/wulff-visca-service</module>
       </modules>
     </profile>
 
