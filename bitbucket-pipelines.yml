@@ -8,7 +8,7 @@ pipelines:
   default:
     - step:
         caches:
-  	  - maven
+          - maven
         script: # Modify the commands below to build your repository.
           - mvn --version
           - cd src
