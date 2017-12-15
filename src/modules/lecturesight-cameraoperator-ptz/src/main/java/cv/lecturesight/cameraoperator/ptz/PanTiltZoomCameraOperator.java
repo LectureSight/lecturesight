@@ -15,9 +15,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  */
-package cv.lecturesight.cameraoperator.simple;
+package cv.lecturesight.cameraoperator.ptz;
 
-import org.pmw.tinylog.Logger;
 import cv.lecturesight.framesource.FrameSource;
 import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.objecttracker.ObjectTracker;
@@ -26,24 +25,27 @@ import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
-import cv.lecturesight.util.metrics.MetricsService;
 import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
-import java.util.Collections;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import cv.lecturesight.util.metrics.MetricsService;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.cameraoperator.panonly", immediate = true)
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+@Component(name = "lecturesight.cameraoperator.ptz", immediate = true)
 @Service
-public class SimpleCameraOperator implements CameraOperator, ConfigurationListener {
+public class PanTiltZoomCameraOperator implements Constants, CameraOperator, ConfigurationListener {
 
   @Reference
   Configuration config;
@@ -77,10 +79,13 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   float start_tilt = 0;
   float start_zoom = 0;
   float frame_width = 0.5f;
-  float frame_trigger = 0.65f;
+  float frame_height = 0.5f;
+  float frame_trigger_width = 0.65f;
+  float frame_trigger_height = 0.8f;
+  boolean tilt_lock = true;
+  float tilt_offset = 0;
 
   protected void activate(ComponentContext cc) throws Exception {
-
     setConfiguration();
     Logger.info("Activated");
 
@@ -98,19 +103,28 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    ** Set configuration values
    */
   private void setConfiguration() {
-    target_timeout = config.getInt(Constants.PROPKEY_TARGET_TIMEOUT);
-    tracking_timeout = config.getInt(Constants.PROPKEY_TRACKING_TIMEOUT);
-    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
-    start_pan = config.getFloat(Constants.PROPKEY_PAN);
-    start_tilt = config.getFloat(Constants.PROPKEY_TILT);
-    start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
-    frame_width = limitRange(config.getFloat(Constants.PROPKEY_FRAME_WIDTH), 0, 2);
-    frame_trigger = limitRange(config.getFloat(Constants.PROPKEY_FRAME_TRIGGER), 0, 1);
-    target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
+    target_timeout = config.getInt(PROPKEY_TARGET_TIMEOUT);
+    tracking_timeout = config.getInt(PROPKEY_TRACKING_TIMEOUT);
+    idle_preset = config.getInt(PROPKEY_IDLE_PRESET);
+    start_pan = config.getFloat(PROPKEY_PAN);
+    start_tilt = config.getFloat(PROPKEY_TILT);
+    start_zoom = config.getFloat(PROPKEY_ZOOM);
+    tilt_lock = config.getBoolean(PROPKEY_TILT_LOCK);
+    if(tilt_lock) {
+      tilt_offset = 0;
+    } else {
+      tilt_offset = config.getFloat(PROPKEY_TILT_OFFSET);
+    }
+    frame_width = config.getFloat(PROPKEY_FRAME_WIDTH);
+    frame_height = config.getFloat(PROPKEY_FRAME_HEIGHT);
+    frame_trigger_width = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_WIDTH), 0, 1);
+    frame_trigger_height = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_HEIGHT), 0, 1);
+    target_limit = config.getInt(PROPKEY_TARGET_LIMIT);
 
     Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} "
-            + "frame.width: {}, frame.trigger: {}, target.limit: {}", target_timeout, tracking_timeout, idle_preset,
-            start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
+            + "frame.width: {}, frame.trigger.width: {}, frame.trigger.height: {}, target.limit: {}, tilt.lock: {}, tilt.offset: {}",
+            target_timeout, tracking_timeout, idle_preset, start_pan, start_tilt, start_zoom, frame_width, frame_trigger_width,
+            frame_trigger_height, target_limit, tilt_lock, tilt_offset);
   }
 
   private float limitRange(float value, float min, float max) {
@@ -175,6 +189,7 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
     steerer.setZoom(start_zoom);
     steerer.setFrameWidth(frame_width);
+    steerer.setFrameHeight(frame_height);
     steerer.setInitialPosition(neutral);
   }
 
@@ -234,47 +249,53 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           last_tracked_time = 0;
         }
 
-      } else {
+      } else if (now - target.lastSeen() < target_timeout) {
 
-        if (now - target.lastSeen() < target_timeout) {
+        boolean move = true;
+        last_tracked_time = now;
 
-          boolean move = true;
-          last_tracked_time = now;
+        // Target position
+        Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+        NormalizedPosition target_pos = normalizer.toNormalized(obj_pos);
 
-          // Target position
-          Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-          NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
-          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
-
-          // Actual position
-          NormalizedPosition actual_pos = steerer.getActualPosition();
-
-          Logger.debug("Tracking object " + target + " currently at position " + target_pos);
-
-          // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
-          if ((frame_width > 0) && !steerer.isMoving()) {
-
-            double trigger_left = actual_pos.getX() - (frame_width / 2) * frame_trigger;
-            double trigger_right = actual_pos.getX() + (frame_width / 2) * frame_trigger;
-
-            if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)) {
-              move = false;
-              Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos
-                      + " position is inside frame trigger limits " + String.format("%.4f to %.4f", trigger_left, trigger_right));
-            }
-          }
-
-          if (move) {
-            Logger.debug("Moving steerer for object " + target + " to position " + target_pos);
-            steerer.setTargetPosition(target_pos);
-          }
-
+        if (tilt_lock) {
+          target_pos.setY(start_tilt);
         } else {
-          // Target has timed out
-          target = null;
-          targetList = Collections.emptyList();
-          metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
+          // ObjectTracker has y +ve == DOWN
+          target_pos.setY(-target_pos.getY() + tilt_offset);
         }
+
+        // Actual position
+        NormalizedPosition actual_pos = steerer.getActualPosition();
+
+        Logger.debug("Tracking object " + target + " currently at position " + target_pos);
+
+        // Reduce pan activity - only start moving camera if the target is approaching the frame boundaries
+        if ((frame_width > 0 || frame_height > 0) && !steerer.isMoving()) {
+          // In Steerer Model Coords (y +ve == UP )
+          double trigger_left = actual_pos.getX() - (frame_width / 2) * frame_trigger_width;
+          double trigger_right = actual_pos.getX() + (frame_width / 2) * frame_trigger_width;
+          double trigger_up = actual_pos.getY() + (frame_height / 2) * frame_trigger_height;
+          double trigger_down = actual_pos.getY() - (frame_height / 2) * frame_trigger_height;
+          if ((target_pos.getX() < trigger_right) && (target_pos.getX() > trigger_left)
+                  && (tilt_lock || ((target_pos.getY() < trigger_up) &&  (target_pos.getY() > trigger_down)))) {
+            move = false;
+            Logger.debug("Not moving: camera=" + actual_pos + " target=" + target_pos
+                    + " position is inside frame trigger limits "
+                    + String.format("%.4f to %.4f, %.4f to %.4f", trigger_left, trigger_right, trigger_down, trigger_up));
+          }
+        }
+
+        if (move) {
+          Logger.debug("Moving steerer for object " + target + " to position " + target_pos);
+          steerer.setTargetPosition(target_pos);
+        }
+
+      } else {
+        // Target has timed out
+        target = null;
+        targetList = Collections.emptyList();
+        metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
       }
     }
 

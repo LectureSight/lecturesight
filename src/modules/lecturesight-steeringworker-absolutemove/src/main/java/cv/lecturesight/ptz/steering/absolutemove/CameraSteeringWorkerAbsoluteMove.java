@@ -48,24 +48,25 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
 
   @Reference
   PTZCamera camera;            // PTZCamera implementation
-  
+
   @Reference
   private ScriptingService engine;
 
   CameraPositionModel model;   // model mapping normalized coords <--> camera coords
 
   SteeringWorker worker;       // worker updating the pan and tilt speed
-  
+
   private CameraBridge bridge; // script bridge
-  
+
   int pan_min, pan_max;               // pan limits
   int tilt_min, tilt_max;             // tilt limits
   int zoom_min, zoom_max;             // zoom limits
   int maxspeed_zoom;                  // max zoom speed
-  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds 
+  int maxspeed_pan, maxspeed_tilt;    // max pan and tilt speeds
   int alpha_x, alpha_y;               // alpha environment size in x and y direction
-  float damp_pan, damp_tilt;          // movement speed dampening factors 
+  float damp_pan, damp_tilt;          // movement speed dampening factors
   float frame_width;                  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+  float frame_height;                 // The height of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
@@ -121,7 +122,7 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
           ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
           if (ps > 1) {
             ps *= damp_pan;
-          } 
+          }
           ps = ps == 0 ? 1 : ps;
         } else {
           ps = (int) (maxspeed_pan * damp_pan);
@@ -133,7 +134,7 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
           ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
           if (ts > 1) {
             ts *= damp_tilt;
-          } 
+          }
           ts = ts == 0 ? 1 : ts;
         } else {
           ts = (int) (maxspeed_tilt * damp_tilt);
@@ -146,7 +147,7 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
-          
+
           camera.moveAbsolute(ps, ts, target_pos);
 
           last_ps = ps;
@@ -281,7 +282,7 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   @Override
   public void setInitialPosition(NormalizedPosition pos) {
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
-    setTargetPosition(pos); 
+    setTargetPosition(pos);
   }
 
   @Override
@@ -323,6 +324,17 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   @Override
   public float getFrameWidth() {
     return frame_width;
+  }
+
+  @Override
+  public void setFrameHeight(float frame_height) {
+    // Ideally we want to actually use this to set the camera's zoom position. For now it's just for display purposes.
+    this.frame_height = frame_height;
+  }
+
+  @Override
+  public float getFrameHeight() {
+    return frame_height;
   }
 
   @Override
