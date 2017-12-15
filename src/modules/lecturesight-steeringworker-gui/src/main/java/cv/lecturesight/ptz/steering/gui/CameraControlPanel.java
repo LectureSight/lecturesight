@@ -126,8 +126,13 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     // Frame is in normalized coords
     float frameWidth = camera.getFrameWidth();
     float frameHeight = camera.getFrameHeight();
+    boolean frameHeightSet = false;
 
-    if (frameHeight == 0.0) {
+    if (frameHeight > 0.0) {
+      frameHeightSet = true;
+    }
+
+    if (frameHeight <= 0.0) {
       frameHeight = frameWidth;
     }
 
@@ -193,7 +198,7 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
     drawCursor(g, apos.getX(), apos.getY(), positionColor);
     g.drawString(cameraPosStr, apos.getX() + 5, apos.getY() + FONT_SIZE);
 
-    // Draw left and right frame boundaries
+    // Draw frame boundaries
     g.setColor(frameColor);
 
     NormalizedPosition frameUpLeftN = new NormalizedPosition(aposn.getX() - frameWidth / 2, aposn.getY() - frameHeight/2);
@@ -211,14 +216,16 @@ public class CameraControlPanel extends JPanel implements UISlave, MouseListener
               frameDownRight.getX(), Math.min(frameDownRight.getY(), height-1));
     }
 
-    if (frameUpLeftN.getY() > -1) {
-      g.drawLine(Math.max(frameUpLeft.getX(), 0), frameUpLeft.getY(),
-              Math.min(frameDownRight.getX(), width-1), frameUpLeft.getY());
-    }
+    if (frameHeightSet) {
+      if (frameUpLeftN.getY() > -1) {
+        g.drawLine(Math.max(frameUpLeft.getX(), 0), frameUpLeft.getY(),
+                Math.min(frameDownRight.getX(), width - 1), frameUpLeft.getY());
+      }
 
-    if (frameDownRightN.getY() < 1) {
-      g.drawLine(Math.max(frameUpLeft.getX(), 0), frameDownRight.getY(),
-              Math.min(frameDownRight.getX(), width-1), frameDownRight.getY());
+      if (frameDownRightN.getY() < 1) {
+        g.drawLine(Math.max(frameUpLeft.getX(), 0), frameDownRight.getY(),
+                Math.min(frameDownRight.getX(), width - 1), frameDownRight.getY());
+      }
     }
 
     // Draw targets considered in-frame
