@@ -7,7 +7,9 @@ image: maven:3.3.3
 pipelines:
   default:
     - step:
+        caches:
+  	  - maven
         script: # Modify the commands below to build your repository.
           - mvn --version
           - cd src
-          - mvn clean install
+          - mvn clean install -Pfull
