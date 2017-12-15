@@ -62,7 +62,8 @@ pages:
 
 - 'Modules':
     - 'Video Analysis' : 'modules/videoanalysis.md'
-    - 'Camera Operator' : 'modules/cameraoperator-simple.md'
+    - 'Pan Only Camera Operator' : 'modules/cameraoperator-simple.md'
+    - 'Pan Tilt Zoom Camera Operator' : 'modules/cameraoperator-ptz.md'
     - 'Steering Worker': 'modules/steeringworker-relativemove.md'
     - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
     - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
