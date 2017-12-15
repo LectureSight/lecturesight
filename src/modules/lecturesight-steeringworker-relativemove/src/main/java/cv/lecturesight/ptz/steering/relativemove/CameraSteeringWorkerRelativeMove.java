@@ -93,8 +93,9 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   float damp_pan;
   float damp_tilt;
 
-  // The width of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
+  // The width and height of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
   float frame_width;
+  float frame_height;
 
   boolean steering = false;           // indicates if the update callback steers camera
   boolean moving = false;             // indicates if the camera if moving
@@ -463,6 +464,17 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   @Override
   public float getFrameWidth() {
     return frame_width;
+  }
+
+  @Override
+  public void setFrameHeight(float frame_height) {
+    // Ideally we want to actually use this to set the camera's zoom position. For now it's just for display purposes.
+    this.frame_height = frame_height;
+  }
+
+  @Override
+  public float getFrameHeight() {
+    return frame_height;
   }
 
   @Override

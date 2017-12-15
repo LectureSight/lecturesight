@@ -45,6 +45,10 @@ public interface CameraSteeringWorker {
 
   float getFrameWidth();
 
+  void setFrameHeight(float height);
+
+  float getFrameHeight();
+
   void movePreset(int preset);
 
   void moveHome();
