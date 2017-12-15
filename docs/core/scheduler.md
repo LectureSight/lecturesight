@@ -10,11 +10,11 @@ The video analysis and tracking components may need a certain time to adapt to t
 
 | Key                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|
-| cv.lecturesight.scheduler.enable | true | Whether to enable the scheduler.
+| cv.lecturesight.scheduler.enable | false | Whether to enable the scheduler.
 | cv.lecturesight.scheduler.schedule.file|schedule.ics|The filename of the iCal file holding the schedule.
 | cv.lecturesight.scheduler.agent.name | | A capture agent name the service will look for in case the iCal holds schedules for more than one capture agent. If not set, the service will take every event from the iCal into account.
 | cv.lecturesight.scheduler.timezone.offset | 1 | The time zone offset to add to the event times from the schedule.
-cv.lecturesight.scheduler.tracking.leadtime | 0 | The time (in seconds) the service will wait after the object tracking has been activated before the camera control is activated.
+| cv.lecturesight.scheduler.tracking.leadtime | 0 | The time (in seconds) the service will wait after the object tracking has been activated before the camera control is activated.
 
 ## Console Commands
 
