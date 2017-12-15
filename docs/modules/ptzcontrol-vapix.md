@@ -16,7 +16,7 @@ as [propertyName]=[propertyValue]
 
 | Key                                   | Default   | Description |
 |---------------------------------------|-----------|-------------------------------------------|
-| cv.lecturesight.vapix.camera.host     | 172.0.0.1 | The host name / ip address for the camera.
+| cv.lecturesight.vapix.camera.host     | 127.0.0.1 | The host name / ip address for the camera.
 | cv.lecturesight.vapix.camera.username | admin     | The username that will be used to authenticate on the camera
 | cv.lecturesight.vapix.camera.password | admin     | The password to use for authentication.
 | cv.lecturesight.vapix.camera.inverted | false     | Whether the camera is mounted inverted.
