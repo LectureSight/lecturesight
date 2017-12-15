@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cv.lecturesight</groupId>
 	<artifactId>lecturesight-vapix-camera</artifactId>
-	<name>Lecturesight VAPIX Camera</name>
+	<name>LectureSight VAPIX Camera</name>
 	<version>0.3</version>
 	<packaging>bundle</packaging>
 

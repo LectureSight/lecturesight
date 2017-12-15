@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cv.lecturesight</groupId>
 	<artifactId>lecturesight-onvif-camera</artifactId>
-	<name>Lecturesight ONVIF Camera</name>
+	<name>LectureSight ONVIF Camera</name>
 	<version>0.3</version>
 	<packaging>bundle</packaging>
 

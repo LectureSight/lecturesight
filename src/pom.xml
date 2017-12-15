@@ -45,7 +45,6 @@
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
         <module>modules/lecturesight-heartbeat</module>
-        <module>modules/lecturesight-manualpages-ui</module>
         <module>modules/lecturesight-objecttracker-api</module>
         <module>modules/lecturesight-opencl-api</module>
         <module>modules/lecturesight-opencl-impl</module>

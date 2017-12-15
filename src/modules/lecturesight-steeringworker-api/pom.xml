@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   
   <artifactId>lecturesight-steeringworker-api</artifactId>
-  <name>Lecturesight Camera Steering Worker API</name>
+  <name>LectureSight Camera Steering Worker API</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   

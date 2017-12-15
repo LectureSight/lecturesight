@@ -1,0 +1,81 @@
+site_name: LectureSight
+repo_url: https://bitbucket.org/bwulff/lecturesight/
+edit_uri: src/0.3-sprint/docs/
+
+# Default theme used is readthedocs
+theme:
+  name:  material
+  logo:  'images/lecturesight.png'
+  favicon: 'images/favicon.png'
+
+markdown_extensions:
+  - admonition
+
+extra:
+  social:
+    - type: 'twitter'
+      link: 'https://twitter.com/lecturesight'
+
+# The directory that contain the source .md files
+docs_dir: 'docs'
+
+# The directory to which the site is built using mkdocs
+site_dir: 'site'
+
+# This needs to be listed in order to populate the left navigation and the TOC
+# Items will appear in this order
+
+pages:
+- Home: 'index.md'
+
+#- Release Notes: 'releasenotes.md'
+#- Upgrade: 'upgrade.md'
+#- Changelog: 'changelog.md'
+#
+- Hardware:
+   - Server: 'hardware/server.md'
+   - Overview Camera: 'hardware/overview-camera.md'
+   - PTZ Camera: 'hardware/ptz-camera.md'
+   - Camera Layout: 'hardware/layout.md'
+
+- Installation:
+   - Dependencies: 'install/dependencies.md'
+   - Install release: 'install/release.md'
+   - Build source: 'install/source.md'
+   - Start: 'install/start.md'
+
+- Configuration:
+   - Calibration: 'config/calibration.md'
+   - Examples: 'config/examples.md'
+
+- Core Services:
+    - 'Configuration': core/config.md
+    - 'OpenCL': 'core/opencl.md'
+    - 'Heartbeat': 'core/heartbeat.md'
+    - 'Frame Source': 'core/framesource.md'
+    - 'Scene Profile': 'core/profile.md'
+    - 'Scheduler' : 'core/scheduler.md'
+    - 'Console': 'core/console.md'
+    - 'Metrics': 'core/metrics.md'
+    - 'Logging': 'core/logging.md'
+    - 'Status': 'core/status.md'
+
+- 'Modules':
+    - 'Video Analysis' : 'modules/videoanalysis.md'
+    - 'Camera Operator' : 'modules/cameraoperator-simple.md'
+    - 'Steering Worker': 'modules/steeringworker-relativemove.md'
+    - 'Dummy Camera': 'modules/ptzcontrol-dummy.md'
+    - 'VAPIX Camera': 'modules/ptzcontrol-vapix.md'
+    - 'VISCA Camera': 'modules/ptzcontrol-visca.md'
+    - 'ONVIF Camera': 'modules/ptzcontrol-onvif.md'
+
+- User Interface:
+    - 'Services Menu': 'ui/menu.md'
+    - 'Overview Camera': 'ui/overview.md'
+    - 'Scene Profile Editor': 'ui/profile.md'
+    - 'Object Tracker': 'ui/objecttracker.md'
+    - 'PTZ Camera Control': 'ui/cameracontrol.md'
+    - 'System Configuration': 'ui/config.md'
+
+- Development:
+    - 'Style Guide': 'develop/style.md'
