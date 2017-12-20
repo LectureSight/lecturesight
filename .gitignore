@@ -5,6 +5,10 @@ target/
 # ignore mkdocs generated docs
 site/
 
+# IntelliJ
+*.iml
+base/
+
 # ignore Eclipse project data
 .project
 .classpath

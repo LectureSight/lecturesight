@@ -9,7 +9,7 @@
   <name>LectureSight</name>
 
   <prerequisites>
-    <maven>2.0.6</maven>
+    <maven>3.1.0</maven>
   </prerequisites>
   
   <properties>
@@ -236,7 +236,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.7.0</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -248,7 +248,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.6</version>
+        <version>1.8</version>
         <executions>
           <execution>
             <id>copy-to-felix</id>
@@ -298,7 +298,25 @@
           </execution>
         </executions>
       </plugin>
-      
+
+      <!-- analyse dependencies -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.0.2</version>
+        <executions>
+          <execution>
+            <id>analyze</id>
+            <goals>
+              <goal>analyze-only</goal>
+            </goals>
+            <configuration>
+              <failOnWarning>false</failOnWarning>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>    
   </build>
 
@@ -343,12 +361,12 @@
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.11.0</version>
+        <version>1.25.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.9.0</version>
+        <version>1.12.0</version>
       </dependency>
 
       <!-- OpenCL -->
@@ -361,7 +379,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>1.4</version>
+        <version>2.6</version>
       </dependency>
 
       <!-- gstreamer bindings -->
@@ -390,19 +408,6 @@
       <url>http://oss.sonatype.org/content/groups/public</url>
     </repository>
     
-    <!-- Fraunhofer IAIS Repository -->
-    <!-- repository>
-      <id>iais.fraunhofer.de</id>
-      <name>Fraunhofer IAIS</name>
-      <url>http://mp-devel.iais.fraunhofer.de:8081/nexus/content/repositories/lecturesight/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository -->
-
     <repository>
       <id>maven2-repository.dev.java.net</id>
       <name>Java.net Repository for Maven</name>
@@ -444,18 +449,6 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository>
-    
-    <!-- blackpad often breaks build -->
-    <repository>
-      <id>blackpad-nexus</id>
-      <url>http://www.blackpad.fr</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
     </repository>
     
   </repositories>

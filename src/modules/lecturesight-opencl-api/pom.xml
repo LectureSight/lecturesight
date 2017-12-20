@@ -19,12 +19,8 @@
   <dependencies>
     <dependency>
       <groupId>com.nativelibs4java</groupId>
-      <artifactId>javacl-jna</artifactId>
+      <artifactId>javacl-core-jna</artifactId>
       <version>1.0.0-RC3</version>
-    </dependency>
-    <dependency>
-        <groupId>org.tinylog</groupId>
-        <artifactId>tinylog</artifactId>
     </dependency>
   </dependencies>
 
@@ -59,4 +55,3 @@
   </build>
 
 </project>
-              

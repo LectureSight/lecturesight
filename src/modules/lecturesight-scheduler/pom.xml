@@ -34,19 +34,11 @@
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -98,15 +90,6 @@
             <Bundle-SymbolicName>cv.lecturesight.scheduler</Bundle-SymbolicName>
             <Export-Package>cv.lecturesight.scheduler;version=${project.version}</Export-Package>
           </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>
