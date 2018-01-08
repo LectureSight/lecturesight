@@ -9,6 +9,8 @@
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
   
+  <version>0.3</version>
+
   <parent>
     <groupId>cv.lecturesight</groupId>
     <artifactId>base</artifactId>
@@ -19,31 +21,8 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-opencl-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-framesource-api</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <!-- dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-regiontracker-api</artifactId>
-      <version>${project.version}</version>
-    </dependency -->
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-util</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.fileinstall</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -54,29 +33,21 @@
       <artifactId>org.apache.felix.scr.annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
-    </dependency>
-    <!-- dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency -->
-    <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-gui-api</artifactId>
-      <version>0.3</version>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-display-api</artifactId>
-      <version>0.3</version>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-profile-api</artifactId>
-      <version>0.3</version>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -85,8 +56,6 @@
     </dependency>
   </dependencies>
   
-  <version>0.3</version>
-
   <build>
     <plugins>
 

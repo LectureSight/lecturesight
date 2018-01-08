@@ -23,6 +23,11 @@
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
+      <artifactId>lecturesight-connectedcomponent-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>cv.lecturesight</groupId>
       <artifactId>lecturesight-scripting-api</artifactId>
       <version>${project.version}</version>
     </dependency>

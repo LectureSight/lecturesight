@@ -22,10 +22,6 @@
       <artifactId>lecturesight-objecttracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-        <groupId>org.tinylog</groupId>
-        <artifactId>tinylog</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

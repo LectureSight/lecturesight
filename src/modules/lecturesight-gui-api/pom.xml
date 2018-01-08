@@ -17,10 +17,6 @@
   </parent>
   
   <dependencies>
-    <dependency>
-        <groupId>org.tinylog</groupId>
-        <artifactId>tinylog</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
