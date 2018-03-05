@@ -2,9 +2,9 @@ package cv.lecturesight.ptz.steering.relativemove;
 
 public final class Constants {
 
-  private Constants() {};
+  private Constants() { };
 
-  static final String PROPKEY_AUTOSTART ="cv.lecturesight.ptz.steering.worker.relativemove.autostart";
+  static final String PROPKEY_AUTOSTART = "cv.lecturesight.ptz.steering.worker.relativemove.autostart";
   static final String PROPKEY_XFLIP = "cv.lecturesight.ptz.steering.worker.relativemove.xflip";
   static final String PROPKEY_YFLIP = "cv.lecturesight.ptz.steering.worker.relativemove.yflip";
   static final String PROPKEY_ALPHAX = "cv.lecturesight.ptz.steering.worker.relativemove.move.alpha.x";

@@ -21,6 +21,10 @@ nbactions.xml
 nbactions*.xml
 nb-configuration.xml
 
+# Ignore IntelliJ
+*.iml
+base/
+
 # Class Files #
 *.class
 

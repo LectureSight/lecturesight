@@ -78,9 +78,9 @@ public class NormalizedPosition implements Cloneable {
 
   @Override
   public boolean equals(Object o) {
-    if (o instanceof Position) {
+    if (o instanceof NormalizedPosition) {
       NormalizedPosition other = (NormalizedPosition) o;
-      return other.x == this.x && other.y == this.y;
+      return ((Math.abs(other.x - this.x) < 0.0001) && (Math.abs(other.y - this.y) < 0.0001));
     } else {
       return false;
     }

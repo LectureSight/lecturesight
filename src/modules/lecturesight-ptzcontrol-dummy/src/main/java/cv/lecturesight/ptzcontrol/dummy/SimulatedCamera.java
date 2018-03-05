@@ -5,6 +5,7 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.util.geometry.Preset;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -12,6 +13,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -314,6 +316,11 @@ public class SimulatedCamera implements PTZCamera {
   }
 
   @Override
+  public List<Preset> getPresets() {
+    return Collections.emptyList();
+  }
+
+  @Override
   public void stopZoom() {
     synchronized(mutex) {
       speedZoom = 0;
@@ -377,7 +384,7 @@ public class SimulatedCamera implements PTZCamera {
 
   private void informListeners() {
     for (CameraListener l : listeners) {
-      Logger.debug("informListeners()");
+      Logger.trace("informListeners()");
       l.positionUpdated(current_pos.clone());
     }
   }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
-  <artifactId>lecturesight-steeringworker-relative-move</artifactId>
-  <name>LectureSight Relative Move Steering Worker</name>
+  <artifactId>lecturesight-objecttracker-dummy</artifactId>
+  <name>LectureSight Simulated Object Tracker</name>
   <groupId>cv.lecturesight</groupId>
   <packaging>bundle</packaging>
+
+  <version>0.3</version>
   
   <parent>
     <groupId>cv.lecturesight</groupId>
@@ -15,31 +15,16 @@
     <version>0.3</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
-  
+
   <dependencies>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-scripting-api</artifactId>
+      <artifactId>lecturesight-objecttracker-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-steeringworker-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-ptzcontrol-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-gui-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>cv.lecturesight</groupId>
-      <artifactId>lecturesight-profile-api</artifactId>
+      <artifactId>lecturesight-opencl-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -68,8 +53,6 @@
         <artifactId>tinylog</artifactId>
     </dependency>
   </dependencies>
-  
-  <version>0.3</version>
 
   <build>
     <plugins>
@@ -78,7 +61,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.21.0</version>
         <executions>
           <execution>
             <id>generate-scr-scrdescriptor</id>
@@ -104,7 +86,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>cv.lecturesight.ptz.steering.worker.relativemove</Bundle-SymbolicName>
+            <Bundle-SymbolicName>cv.lecturesight.simulated.tracker</Bundle-SymbolicName>
           </instructions>
         </configuration>
       </plugin>

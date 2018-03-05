@@ -18,6 +18,9 @@
 package cv.lecturesight.ptz.api;
 
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.util.geometry.Preset;
+
+import java.util.List;
 
 public interface PTZCamera {
 
@@ -66,6 +69,8 @@ public interface PTZCamera {
   void setLimitDownLeft(int pan, int tilt);
 
   Position getPosition();
+
+  List<Preset> getPresets();
 
   void stopZoom();
 

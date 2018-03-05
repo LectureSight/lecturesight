@@ -261,8 +261,7 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
         if (tilt_lock) {
           target_pos.setY(start_tilt);
         } else {
-          // ObjectTracker has y +ve == DOWN
-          target_pos.setY(-target_pos.getY() + tilt_offset);
+          target_pos.setY(target_pos.getY() + tilt_offset);
         }
 
         // Actual position

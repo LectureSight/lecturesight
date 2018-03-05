@@ -17,6 +17,9 @@
  */
 package cv.lecturesight.ptz.steering.relativemove;
 
+import cv.lecturesight.profile.api.SceneProfile;
+import cv.lecturesight.profile.api.SceneProfileManager;
+import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.ptz.api.CameraListener;
 import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
@@ -24,8 +27,11 @@ import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
+import cv.lecturesight.util.geometry.CameraPositionModel;
+import cv.lecturesight.util.geometry.CoordinatesNormalization;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.util.geometry.Preset;
 import cv.lecturesight.util.metrics.MetricsService;
 
 import org.apache.felix.scr.annotations.Component;
@@ -34,7 +40,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,67 +56,69 @@ import java.util.List;
 public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, ConfigurationListener {
 
   @Reference
-  Configuration config;        // service configuration
+  private Configuration config;        // service configuration
 
   @Reference
-  MetricsService metrics;      // metrics
+  private MetricsService metrics;      // metrics
 
   @Reference
-  PTZCamera camera;            // PTZCamera implementation
+  private PTZCamera camera;            // PTZCamera implementation
+
+  @Reference
+  private SceneProfileManager spm;     // Scene profile manager
 
   @Reference
   private ScriptingService engine;
 
-  CameraPositionModel model;   // model mapping normalized coords <--> camera coords
+  private CameraPositionModel model;   // model mapping normalized coords <--> camera coords
 
-  SteeringWorker worker;       // worker updating the pan and tilt speed
+  private SteeringWorker worker;       // worker updating the pan and tilt speed
 
   private CameraBridge bridge; // script bridge
 
   // pan, tilt and zoom limits
-  int pan_min;
-  int pan_max;
-  int tilt_min;
-  int tilt_max;
-  int zoom_min;
-  int zoom_max;
+  private int pan_min;
+  private int pan_max;
+  private int tilt_min;
+  private int tilt_max;
+  private int zoom_max;
+  private boolean autoCalibrated = false;
 
   // max pan, tilt and zoom speeds
-  int maxspeed_pan;
-  int maxspeed_tilt;
-  int maxspeed_zoom;
+  protected int maxspeed_pan;
+  protected int maxspeed_tilt;
 
   // alpha environment size in x and y direction
-  int alpha_x;
-  int alpha_y;
+  private int alpha_x;
+  private int alpha_y;
 
   // Distance within which the camera is considered to have reached the target
-  int stop_x;
-  int stop_y;
+  private int stop_x;
+  private int stop_y;
 
   // Time in milliseconds to allow camera to reach initial position
-  int initial_delay;
+  private int initial_delay;
 
   // movement speed dampening factors
-  float damp_pan;
-  float damp_tilt;
+  private float damp_pan;
+  private float damp_tilt;
 
   // The width and height of the frame in normalized co-ordinates (-1 to 1, so 0 < frame_width < 2)
-  float frame_width;
-  float frame_height;
+  private float frame_width;
+  private float frame_height;
 
-  boolean steering = false;           // indicates if the update callback steers camera
-  boolean moving = false;             // indicates if the camera if moving
-  boolean xflip = false;
-  boolean yflip = false;
-  boolean focus_fixed = false;        // Switch off auto-focus when in tracking position
+  private boolean steering = false;           // indicates if the update callback steers camera
+  private boolean moving = false;             // indicates if the camera if moving
+  private boolean xflip = false;
+  private boolean yflip = false;
+  private boolean focus_fixed = false;        // Switch off auto-focus when in tracking position
 
   public enum CameraCmd { STOP, MOVE };
-  CameraCmd last_cmd;
+  private CameraCmd last_cmd;
 
   // lists of listeners
-  List<UISlave> uiListeners = new LinkedList<UISlave>();
-  List<MovementListener> moveListeners = new LinkedList<MovementListener>();
+  private List<UISlave> uiListeners = new LinkedList<UISlave>();
+  private List<MovementListener> moveListeners = new LinkedList<MovementListener>();
 
   private class SteeringWorker implements CameraListener {
 
@@ -125,6 +135,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
 
       Position new_pos = new_pos_camera.flip(xflip, yflip);
 
+      Logger.trace("new_pos_camera: {} xflip: {} yflip: {}", new_pos_camera, xflip, yflip);
+
       // If no target has been set yet, do nothing except record position
       if (!model.isTargetSet()) {
         model.setCameraPosition(new_pos);
@@ -133,7 +145,10 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
       }
 
       Position target_pos = model.getTargetPosition();
+
       boolean target_changed = !(target_pos.getX() == last_target.getX() && target_pos.getY() == last_target.getY());
+
+      Logger.trace("Camera position: {} target position: {} target_changed: {}", camera_pos, target_pos, target_changed);
 
       // update camera position model, notify movement listeners
       if (!new_pos.equals(camera_pos)) {
@@ -188,8 +203,6 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
           ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
           if (ts > 1) {
             ts *= damp_tilt;
-          } else if (ts == 0) {
-            dy = 0;
           }
           ts = (ts == 0) ? 1 : ts;
         } else {
@@ -212,7 +225,8 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
         // apply computed speeds if speeds or target have changed
         if (target_changed || ps != last_ps || ts != last_ts || (moving && (ps == 0) && (ts == 0))) {
 
-          Logger.debug("Steering check: moving=" + moving + " target_changed=" + target_changed + " last_ps=" + last_ps + " last_ts=" + last_ts + " ps=" + ps + " ts=" + ts + " dx=" + dx + " dy=" + dy);
+          Logger.debug("Steering check: moving={} target_changed={} last_ps={} last_ts={} ps={} ts={} dx={} dy={}",
+            moving, target_changed, last_ps, last_ts, ps, ts, dx, dy);
 
           bridge.panSpeed.current = ps;
           bridge.tiltSpeed.current = ts;
@@ -221,6 +235,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
             if (last_cmd != CameraCmd.STOP) {
               camera.stopMove();
               last_cmd = CameraCmd.STOP;
+              Logger.trace("Camera Stop");
             }
           } else {
 
@@ -242,6 +257,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
               camera.moveDownLeft(ps, ts);
             }
             last_cmd = CameraCmd.MOVE;
+            Logger.trace("Camera Move");
 
           }
 
@@ -259,15 +275,21 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     // get service configuration
     setConfiguration();
 
-    // Camera model
-    model = new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
-
     // get camera parameters
     maxspeed_pan = camera.getProfile().getPanMaxSpeed();
     maxspeed_tilt = camera.getProfile().getTiltMaxSpeed();
-    maxspeed_zoom = camera.getProfile().getZoomMaxSpeed();
-    zoom_min = camera.getProfile().getZoomMin();
     zoom_max = camera.getProfile().getZoomMax();
+
+    // Camera model
+    model = new CameraPositionModel(pan_min, pan_max, tilt_min, tilt_max);
+
+    // Now update the model for marker/preset calibration if available
+    if (autoCalibrate()) {
+      Logger.info("Automatic calibration, camera pan/tilt limits: pan {} to {}, tilt {} to {}",
+        pan_min, pan_max, tilt_min, tilt_max);
+    } else {
+      Logger.info("Automatic calibration not possible");
+    }
 
     // initialize worker
     worker = new SteeringWorker();
@@ -298,65 +320,137 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
     Logger.info("Deactivated");
   }
 
+  public boolean autoCalibrate() {
+
+    SceneProfile profile = spm.getActiveProfile();
+    List<Zone> markerZones = profile.getCalibrationZones();
+
+    Logger.debug("Active scene profile '{}' has {} calibration markers", profile.name, markerZones.size());
+
+    if (markerZones.size() < 2) {
+      // Need at least 2 calibration points
+      return false;
+    }
+
+    List<Preset> presets = camera.getPresets();
+
+    Logger.debug("Camera has {} presets", presets.size());
+
+    HashMap<String,Preset> presetMap = new HashMap<>();
+    for (Preset preset : presets) {
+      presetMap.put(preset.getName(), preset);
+    }
+
+    List<NormalizedPosition> sceneMarkers = new ArrayList<>();
+    List<Position> cameraPresets = new ArrayList<>();
+
+    // Convert between overview co-ordinates and normalized co-ordinates
+    CoordinatesNormalization normalizer = new CoordinatesNormalization(profile.width, profile.height);
+
+    for (Zone marker : markerZones) {
+      // Is there a preset for this zone?
+      if (presetMap.containsKey(marker.name)) {
+
+        Position p = (Position) presetMap.get(marker.name);
+        cameraPresets.add(p);
+
+        // marker is a rectangle, so find the centre point
+        Position marker_pos = new Position(marker.x + marker.width/2, marker.y + marker.height/2);
+        NormalizedPosition marker_posN = normalizer.toNormalized(marker_pos);
+        sceneMarkers.add(marker_posN);
+
+        Logger.debug("Using marker '{}' for calibration: overview {} camera {},{}",
+          marker.name, marker_posN, p.getX(), p.getY());
+      }
+    }
+
+    if (!cameraPresets.isEmpty()) {
+      // Let the model decide if it has enough points
+      if (model.update(sceneMarkers, cameraPresets)) {
+        // Update the scene limits
+        pan_min = model.getPanMin();
+        pan_max = model.getPanMax();
+        tilt_min = model.getTiltMin();
+        tilt_max = model.getTiltMax();
+        autoCalibrated = true;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   @Override
   public void configurationChanged() {
     Logger.debug("Refreshing configuration");
     setConfiguration();
-    model.update(pan_min, pan_max, tilt_min, tilt_max);
+
+    if (!autoCalibrated) {
+      // Update the model only if the scene limits are set manually
+      model.update(pan_min, pan_max, tilt_min, tilt_max);
+    }
   }
 
   /*
    ** Set configuration values
    */
   private void setConfiguration() {
+
     alpha_x = config.getInt(Constants.PROPKEY_ALPHAX);
     alpha_y = config.getInt(Constants.PROPKEY_ALPHAY);
     stop_x = config.getInt(Constants.PROPKEY_STOPX);
     stop_y = config.getInt(Constants.PROPKEY_STOPY);
+
     damp_pan = config.getFloat(Constants.PROPKEY_DAMP_PAN);
     if (damp_pan > 1.0 || damp_pan < 0.0) {
-      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      Logger.warn("Illegal value for configuration parameter {}. Must be in range [0..1]. Using default value 1.0.",
+        Constants.PROPKEY_DAMP_PAN);
       damp_pan = 1.0f;
     }
     damp_tilt = config.getFloat(Constants.PROPKEY_DAMP_TILT);
     if (damp_tilt > 1.0 || damp_tilt < 0.0) {
-      Logger.warn("Illegal value for configuration parameter " + Constants.PROPKEY_DAMP_PAN + ". Must be in range [0..1]. Using default value 1.0.");
+      Logger.warn("Illegal value for configuration parameter {}. Must be in range [0..1]. Using default value 1.0.",
+        Constants.PROPKEY_DAMP_TILT);
       damp_tilt = 1.0f;
     }
+
     initial_delay = config.getInt(Constants.PROPKEY_INITIAL_DELAY);
+
     focus_fixed = config.getBoolean(Constants.PROPKEY_FOCUS_FIXED);
 
-    // initialize limits for pan and tilt, if not configured by camera calibration
-    // the limits from the camera profile are taken
-    String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
-    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
-      pan_min = camera.getProfile().getPanMin();
-    } else {
-      pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
-    }
+    // Update the scene limits only if they have not been auto-calibrated
+    if (!autoCalibrated) {
+      // Initialize limits for pan and tilt. If not configured, the limits from the camera profile are used.
+      String val = config.get(Constants.PROPKEY_LIMIT_LEFT);
+      if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
+        pan_min = camera.getProfile().getPanMin();
+      } else {
+        pan_min = config.getInt(Constants.PROPKEY_LIMIT_LEFT);
+      }
 
-    val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
-    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
-      pan_max = camera.getProfile().getPanMax();
-    } else {
-      pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
-    }
+      val = config.get(Constants.PROPKEY_LIMIT_RIGHT);
+      if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
+        pan_max = camera.getProfile().getPanMax();
+      } else {
+        pan_max = config.getInt(Constants.PROPKEY_LIMIT_RIGHT);
+      }
 
-    val = config.get(Constants.PROPKEY_LIMIT_TOP);
-    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
-      tilt_max = camera.getProfile().getTiltMax();
-    } else {
-      tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
-    }
+      val = config.get(Constants.PROPKEY_LIMIT_TOP);
+      if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
+        tilt_max = camera.getProfile().getTiltMax();
+      } else {
+        tilt_max = config.getInt(Constants.PROPKEY_LIMIT_TOP);
+      }
 
-    val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
-    if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
-      tilt_min = camera.getProfile().getTiltMin();
-    } else {
-      tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
-    }
+      val = config.get(Constants.PROPKEY_LIMIT_BOTTOM);
+      if (val.isEmpty() || "none".equalsIgnoreCase(val)) {
+        tilt_min = camera.getProfile().getTiltMin();
+      } else {
+        tilt_min = config.getInt(Constants.PROPKEY_LIMIT_BOTTOM);
+      }
 
-    Logger.debug("Camera pan/tilt limits: pan " + pan_min + " to " + pan_max + ", tilt " + tilt_min + " to " + tilt_max);
+      Logger.debug("Camera pan/tilt limits: pan {} to {}, tilt {} to {}", pan_min, pan_max, tilt_min, tilt_max);
+    }
 
     yflip = config.getBoolean(Constants.PROPKEY_YFLIP);
     xflip = config.getBoolean(Constants.PROPKEY_XFLIP);
@@ -428,7 +522,7 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   @Override
   public void setTargetPosition(NormalizedPosition pos) {
 
-    Logger.debug("Set target normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
+    Logger.debug("Set target normalized position (x,y from -1 to 1): {}", pos);
 
     model.setTargetPositionNorm(pos);
     informUISlaves();
@@ -440,8 +534,18 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   }
 
   @Override
+  public Position getTargetCameraPosition() {
+    return model.getTargetPosition();
+  }
+
+  @Override
   public NormalizedPosition getActualPosition() {
     return model.getCameraPositionNorm();
+  }
+
+  @Override
+  public Position getActualCameraPosition() {
+    return model.getCameraPosition();
   }
 
   @Override
@@ -511,11 +615,6 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   @Override
   public int getTiltMax() {
     return tilt_max;
-  }
-
-  @Override
-  public Position toCameraCoordinates(NormalizedPosition posn) {
-    return model.toCameraCoordinates(posn);
   }
 
   @Override

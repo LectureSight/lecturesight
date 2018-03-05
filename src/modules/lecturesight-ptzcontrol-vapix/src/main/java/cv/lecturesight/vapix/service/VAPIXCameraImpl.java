@@ -6,7 +6,7 @@ import cv.lecturesight.ptz.api.PTZCameraException;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
-import cv.lecturesight.vapix.service.VAPIXCameraImpl.MyAuthenticator;
+import cv.lecturesight.util.geometry.Preset;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -32,6 +33,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * PTZCamera implementation using the Axis VAPIX protocol:
@@ -159,7 +162,7 @@ public class VAPIXCameraImpl implements PTZCamera {
         this.model_name = result.get("root.Brand.ProdFullName");
         this.brand = result.get("root.Brand.Brand");
 
-        this.presets = getPresets();
+        this.presets = getPresetNames();
 
         Logger.info("Vapix: " + this.brand + " " + this.model_name);
 
@@ -364,7 +367,7 @@ public class VAPIXCameraImpl implements PTZCamera {
       String[] list = result.split("~");
 
       for (String line : list) {
-        String[] parts = line.split("=");
+        String[] parts = line.split("=", 2);
 
         if (parts.length > 1) {
           processed.put(parts[0], (parts.length >= 2 ? parts[1] : ""));
@@ -455,21 +458,13 @@ public class VAPIXCameraImpl implements PTZCamera {
 
     Logger.debug("Move preset index " + preset_index);
 
-    if (presets != null) {
-      if (presets.length <= (preset_index + 1) && (preset_index >= 0)) {
-        try {
-          String result = this.doCommand("/axis-cgi/com/ptz.cgi?gotoserverpresetno=" + (preset_index + 1));
-          Logger.trace("Move preset index[" + preset_index + "] (" + result + ")");
-        } catch (IOException e) {
-          Logger.error("movePreset: " + e.getMessage());
-        } finally {
-        }
-      } else {
-        Logger.debug("Preset index not found: " + preset_index);
-      }
-    } else {
-      Logger.debug("No presets configured");
+    try {
+      String result = this.doCommand("/axis-cgi/com/ptz.cgi?gotoserverpresetno=" + (preset_index + 1));
+      Logger.trace("Move preset number {}: {}", preset_index, result);
+    } catch (IOException e) {
+      Logger.error("movePreset: " + e.getMessage());
     }
+
   }
 
   /**
@@ -478,22 +473,24 @@ public class VAPIXCameraImpl implements PTZCamera {
    * @param preset
    *            The name of the preset to move the camera to
    */
-  public void movePreset(String preset) {
+  public boolean movePreset(String preset) {
 
     Logger.debug("Move preset name " + preset);
 
     if (Arrays.asList(presets).contains(preset)) {
-
       try {
         String result = this.doCommand("/axis-cgi/com/ptz.cgi?gotoserverpresetname=" + preset);
         Logger.trace("Move preset [" + preset + "] (" + result + ")");
       } catch (IOException e) {
         Logger.error("moveHome: " + e.getMessage());
-      } finally {
+        return false;
       }
     } else {
       Logger.debug("Preset name not found: " + preset);
+      return false;
     }
+
+    return true;
   }
 
   /**
@@ -507,7 +504,7 @@ public class VAPIXCameraImpl implements PTZCamera {
     try {
       String result = doCommand("/axis-cgi/com/ptzconfig.cgi?setserverpresetname=" + name);
       Logger.trace("setPreset: " + name + "(" + result + ")");
-      this.presets = getPresets(); // refresh the list of presets
+      this.presets = getPresetNames(); // refresh the list of presets
     } catch (IOException e) {
       Logger.error("setPreset: " + e.getMessage());
     } finally {
@@ -525,7 +522,7 @@ public class VAPIXCameraImpl implements PTZCamera {
     try {
       String result = doCommand("/axis-cgi/com/ptzconfig.cgi?removeserverpresetname=" + name);
       Logger.trace("removePreset: " + name + "(" + result + ")");
-      this.presets = getPresets(); // refresh the list of presets
+      this.presets = getPresetNames(); // refresh the list of presets
     } catch (Exception e) {
       Logger.error("removePreset: " + e.getMessage());
     }
@@ -536,10 +533,11 @@ public class VAPIXCameraImpl implements PTZCamera {
    *
    * @return String array of all the presets on the camera
    */
-  private String[] getPresets() {
+  private String[] getPresetNames() {
 
     Hashtable<String, String> list = processCommand("/axis-cgi/com/ptz.cgi?query=presetposall");
     String[] result = new String[list.size() - 1];
+    int preset = 0;
     if (list.get("success").equals("1")) {
 
       for (Entry<String, String> entry : list.entrySet()) {
@@ -547,9 +545,11 @@ public class VAPIXCameraImpl implements PTZCamera {
         String value = entry.getValue();
 
         if (key.indexOf("presetposno") >= 0)
-          result[Integer.parseInt(key.replace("presetposno", "")) - 1] = value;
+          result[preset++] = value;
+          Logger.trace("Camera preset {}: {}", key, value);
       }
     }
+
     return result;
   }
 
@@ -1018,6 +1018,60 @@ public class VAPIXCameraImpl implements PTZCamera {
     }
 
     return new Position();
+  }
+
+  @Override
+  public List<Preset> getPresets() {
+
+    Logger.debug("Fetching camera preset positions");
+
+    ArrayList<Preset> presetList = new ArrayList<>();
+
+    Hashtable<String, String> result = processCommand("/axis-cgi/admin/param.cgi?action=list&group=PTZ.Preset.P0.Position");
+    if (!result.get("success").equals("1")) {
+      Logger.warn("Unable to fetch camera preset positions");
+      return presetList;
+    }
+
+    /*
+     * Results are pairs of .Data and .Name like this:
+     *   root.PTZ.Preset.P0.Position.P1.Data=tilt=24.628906:focus=32766.000000:pan=-1.425781:iris=32766.000000:zoom=154.000000
+     *   root.PTZ.Preset.P0.Position.P1.Name=Home
+     * But if the camera is inverted, then we have to swap the sign of the pan and tilt values.
+     */
+
+    String presetPatternRe = "root\\.PTZ\\.Preset\\.P0\\.Position\\.(P[0-9]+)\\.Name";
+    String dataPatternRe = "tilt=([0-9.-]+):focus=([0-9.]+):pan=([0-9.-]+):iris=([0-9.-]+):zoom=([0-9.-]+)$";
+
+    Pattern presetPattern = Pattern.compile(presetPatternRe);
+    Pattern dataPattern = Pattern.compile(dataPatternRe);
+
+    for (String presetInfo : result.keySet()) {
+      if (presetInfo.endsWith(".Name")) {
+        String presetName = result.get(presetInfo);
+        Matcher matcher = presetPattern.matcher(presetInfo);
+        if (matcher.matches()) {
+          String presetNumber = matcher.group(1);
+          String dataPrefix = "root.PTZ.Preset.P0.Position." + presetNumber+ ".Data";
+          String dataLine = result.get(dataPrefix);
+          Matcher dataMatcher = dataPattern.matcher(dataLine);
+          if (dataMatcher.matches()) {
+            int x = Math.round(this.map(Float.parseFloat(dataMatcher.group(3)), range_pan.min, scale_pan_rev, lim_pan.min)) * (inverted ? -1 : 1);
+            int y = Math.round(this.map(Float.valueOf(dataMatcher.group(1)), range_tilt.min, scale_tilt_rev, lim_tilt.min)) * (inverted ? -1 : 1);
+            int z = Math.round(this.map(Float.valueOf(dataMatcher.group(5)), range_zoom.min, scale_zoom_rev, lim_zoom.min));
+            Preset p = new Preset(presetName, x, y, z);
+            Logger.debug("Camera has preset {}", p);
+            presetList.add(p);
+          } else {
+            Logger.warn("Unexpected format for preset data string: {}", dataLine);
+          }
+        } else {
+          Logger.warn("Unexpected format for preset response key: {}", presetInfo);
+        }
+      }
+    }
+
+    return presetList;
   }
 
   /**

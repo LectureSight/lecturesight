@@ -10,9 +10,12 @@ import cv.lecturesight.ptz.api.PTZCamera;
 import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.geometry.Position;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+
+import cv.lecturesight.util.geometry.Preset;
 import org.pmw.tinylog.Logger;
 
 public class VISCACameraImpl implements PTZCamera {
@@ -545,6 +548,11 @@ public class VISCACameraImpl implements PTZCamera {
   @Override
   public Position getPosition() {
     return new Position(this.state.currentPosition().x(), this.state.currentPosition().y());
+  }
+
+  @Override
+  public List<Preset> getPresets() {
+    return Collections.emptyList();
   }
 
   @Override

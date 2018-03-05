@@ -32,12 +32,12 @@ import org.pmw.tinylog.Logger;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "cs"),
-  @Property(name = "osgi.command.function", value = {"on", "off", "move", "home", "zoom"})
+  @Property(name = "osgi.command.function", value = {"on", "off", "move", "home", "zoom", "calibrate"})
 })
 public class ConsoleCommands implements DummyInterface {
 
   @Reference
-  CameraSteeringWorker steerer;
+  private CameraSteeringWorker steerer;
 
   public void on(String[] args) {
     steerer.setSteering(true);
@@ -92,4 +92,25 @@ public class ConsoleCommands implements DummyInterface {
       }
     }
   }
+
+  public void calibrate(String[] args) {
+
+    boolean steering = steerer.isSteering();
+
+    if (steering)
+      steerer.setSteering(false);
+
+    if (steerer.autoCalibrate()) {
+      console("Automatic calibration, camera pan/tilt limits: pan "
+              + steerer.getPanMin() + " to " + steerer.getPanMax()
+              + ", tilt " + steerer.getTiltMin() + " to " + steerer.getTiltMax());
+    } else {
+      console("Automatic calibration not possible");
+    }
+
+    if (steering)
+      steerer.setSteering(true);
+
+  }
+
 }

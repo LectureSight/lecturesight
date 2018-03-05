@@ -17,30 +17,44 @@
  */
 package cv.lecturesight.util.geometry;
 
+/**
+ * Convert between overview image co-ordinates and normalized co-ordinates.
+ *
+ * For example, for an overview image 640x360 pixels,
+ * overview (0,0) to (639,359) is mapped to normalized (-1, 1) to (1, -1).
+ *
+ * Note that the normalized Y co-ordinates are inverted relative to overview image co-ordinates:
+ * top is positive, bottom is negative. This aligns with camera tilt co-ordinates.
+ */
 public class CoordinatesNormalization {
 
-  private int maxX;
-  private int maxY;
+  // Dimensions of the image in pixels
+  private int width;
+  private int height;
 
-  public CoordinatesNormalization(int maxX, int maxY) {
-    this.maxX = maxX;
-    this.maxY = maxY;
+  public CoordinatesNormalization(int width, int height) {
+    this.width = width;
+    this.height = height;
   }
 
+  // Range -1 ... 1 for co-ordinates from 0 ... width - 1
   public float normalizeX(int x) {
-    return ((float) x / (float) maxX) * 2.0f - 1.0f;
+    return (x / (float) (width - 1)) * 2.0f - 1.0f;
   }
 
+  // Range -1 ... 1 for co-ordinates from 0 ... height - 1
   public float normalizeY(int y) {
-    return ((float) y / (float) maxY) * 2.0f - 1.0f;
+    return (y / (float) (height - 1)) * -2.0f + 1.0f;
   }
 
+  // Range 0 ... width - 1 for co-ordinates from -1 ... 1
   public int denormalizeX(float x) {
-    return (int) (((x + 1) / 2) * maxX);
+    return (int) Math.round((x + 1) / 2f * (width - 1));
   }
 
+  // Range 0 ... height - 1 for co-ordinates from -1 ... 1
   public int denormalizeY(float y) {
-    return (int) (((y + 1) / 2) * maxY);
+    return (int) Math.round((-1 * y + 1) / 2f * (height - 1));
   }
 
   public NormalizedPosition toNormalized(Position pos) {
@@ -55,27 +69,27 @@ public class CoordinatesNormalization {
             denormalizeY(pos.getY()));
   }
 
-  public int getMaxX() {
-    return maxX;
+  public int getWidth() {
+    return width;
   }
 
-  public void setMaxX(int maxX) {
-    if (maxX > 0) {
-      this.maxX = maxX;
+  public void setWidth(int width) {
+    if (width > 0) {
+      this.width = width;
     } else {
-      this.maxX = 1;
+      this.width = 1;
     }
   }
 
-  public int getMaxY() {
-    return maxY;
+  public int getHeight() {
+    return height;
   }
 
-  public void setMaxY(int maxY) {
-    if (maxY > 0) {
-      this.maxY = maxY;
+  public void setHeight(int height) {
+    if (height > 0) {
+      this.height = height;
     } else {
-      this.maxY = 1;
+      this.height = 1;
     }
   }
 }

@@ -35,7 +35,11 @@ public interface CameraSteeringWorker {
 
   NormalizedPosition getTargetPosition();
 
+  Position getTargetCameraPosition();
+
   NormalizedPosition getActualPosition();
+
+  Position getActualCameraPosition();
 
   void setZoom(float zoom);
 
@@ -55,6 +59,8 @@ public interface CameraSteeringWorker {
 
   boolean isMoving();
 
+  boolean autoCalibrate();
+
   int getPanMin();
 
   int getPanMax();
@@ -62,8 +68,6 @@ public interface CameraSteeringWorker {
   int getTiltMin();
 
   int getTiltMax();
-
-  Position toCameraCoordinates(NormalizedPosition posn);
 
   void addUISlave(UISlave slave);
 

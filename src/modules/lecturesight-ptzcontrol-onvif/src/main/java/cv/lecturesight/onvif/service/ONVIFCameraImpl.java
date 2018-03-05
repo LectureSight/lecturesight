@@ -7,11 +7,13 @@ import cv.lecturesight.ptz.api.PTZCameraProfile;
 import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.util.conf.Configuration;
 
+import cv.lecturesight.util.geometry.Preset;
 import de.onvif.soap.OnvifDevice;
 import de.onvif.soap.devices.InitialDevices;
 import de.onvif.soap.devices.PtzDevices;
 
 import java.net.ConnectException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -19,8 +21,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import javax.xml.soap.SOAPException;
+
 import org.onvif.ver10.device.wsdl.GetDeviceInformationResponse;
 import org.onvif.ver10.schema.FloatRange;
 import org.onvif.ver10.schema.PTZPreset;
@@ -152,7 +154,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 					this.profile_token = profiles.get(0).getToken();
 
 					this.ptz_device = onvif_device.getPtz();
-					this.presets = this.getPresets();
+					this.presets = this.getCameraPresets();
 
 					InitialDevices initial_Device = onvif_device.getDevices();
 
@@ -662,7 +664,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 		try {
 			Logger.trace("setPreset: " + name);
 			this.ptz_device.setPreset(name, this.profile_token);
-			this.presets = this.getPresets();
+			this.presets = this.getCameraPresets();
 		} catch (Exception e) {
 			Logger.error("setPreset: " + e.getMessage());
 		}
@@ -679,7 +681,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 		try {
 			Logger.trace("removePreset: " + name);
 			this.ptz_device.removePreset(name, this.profile_token);
-			this.presets = this.getPresets();
+			this.presets = this.getCameraPresets();
 		} catch (Exception e) {
 			Logger.error("removePreset: " + e.getMessage());
 		}
@@ -690,7 +692,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 	 * 
 	 * @return String array of all the presets on the camera
 	 */
-	private List<PTZPreset> getPresets() {
+	private List<PTZPreset> getCameraPresets() {
 
 		try {
 			Logger.trace("getPresets");
@@ -831,6 +833,12 @@ public class ONVIFCameraImpl implements PTZCamera {
 		}
 
 		return null;
+	}
+
+	@Override
+	public List<Preset> getPresets() {
+		// not supported yet
+		return Collections.emptyList();
 	}
 
 	/**

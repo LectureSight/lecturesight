@@ -23,8 +23,10 @@ import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.ptz.steering.api.UISlave;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
+import cv.lecturesight.util.geometry.CameraPositionModel;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -280,6 +282,12 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   }
 
   @Override
+  public boolean autoCalibrate() {
+    // not supported
+    return false;
+  }
+
+  @Override
   public void setInitialPosition(NormalizedPosition pos) {
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
     setTargetPosition(pos);
@@ -300,8 +308,18 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   }
 
   @Override
+  public Position getTargetCameraPosition() {
+    return model.getTargetPosition();
+  }
+
+  @Override
   public NormalizedPosition getActualPosition() {
     return model.getCameraPositionNorm();
+  }
+
+  @Override
+  public Position getActualCameraPosition() {
+    return model.getCameraPosition();
   }
 
   @Override
@@ -365,11 +383,6 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   @Override
   public int getTiltMax() {
     return tilt_max;
-  }
-
-  @Override
-  public Position toCameraCoordinates(NormalizedPosition posn) {
-    return model.toCameraCoordinates(posn);
   }
 
   @Override

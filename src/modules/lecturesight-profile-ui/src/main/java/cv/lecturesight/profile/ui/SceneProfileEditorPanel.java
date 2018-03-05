@@ -971,7 +971,8 @@ public class SceneProfileEditorPanel extends javax.swing.JPanel implements Custo
 
   private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
     if (selection != null) {
-      String new_name = JOptionPane.showInputDialog(this, "Enter name for area: ", "Edit Area", 1);
+      String new_name = (String) JOptionPane.showInputDialog(this, "Enter name for area: ",
+        "Edit Area", 1, null, null, selection.zone.name);
       if (new_name != null) {
         selection.zone.name = new_name;
       }

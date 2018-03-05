@@ -189,6 +189,40 @@
     </profile>
 
     <profile>
+      <id>ptz-dummy-only</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/lecturesight-utils</module>
+        <module>modules/lecturesight-ptzcontrol-api</module>
+        <module>modules/lecturesight-ptzcontrol-dummy</module>
+        <module>modules/lecturesight-steeringworker-api</module>
+        <module>modules/lecturesight-steeringworker-gui</module>
+        <module>modules/lecturesight-steeringworker-relativemove</module>
+        <module>modules/lecturesight-gui-api</module>
+        <module>modules/lecturesight-gui-impl</module>
+        <module>modules/lecturesight-display-api</module>
+        <module>modules/lecturesight-display-impl</module>
+        <module>modules/lecturesight-opencl-api</module>
+        <module>modules/lecturesight-opencl-impl</module>
+        <module>modules/lecturesight-objecttracker-api</module>
+        <module>modules/lecturesight-objecttracker-dummy</module>
+        <module>modules/lecturesight-profile-api</module>
+        <module>modules/lecturesight-profile-manager</module>
+        <module>modules/lecturesight-cameraoperator-api</module>
+        <module>modules/lecturesight-cameraoperator-simple</module>
+        <module>modules/lecturesight-scripting-api</module>
+        <module>modules/lecturesight-scripting-stub</module>
+        <module>modules/lecturesight-script-utils</module>
+        <module>modules/lecturesight-framesource-api</module>
+        <module>modules/lecturesight-framesource-gst</module>
+        <module>modules/lecturesight-framesource-impl</module>
+        <module>modules/lecturesight-heartbeat</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>ptz-visca-only</id>
       <activation>
         <activeByDefault>false</activeByDefault>
@@ -300,6 +334,13 @@
         </executions>
       </plugin>
 
+      <!-- Surefire for unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.20.1</version>
+      </plugin>
+
       <!-- analyse dependencies -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -366,12 +407,12 @@
       <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
-        <version>1.0.2</version>
+        <version>1.3.2</version>
       </dependency>
       <dependency>
         <groupId>org.tinylog</groupId>
         <artifactId>slf4j-binding</artifactId>
-        <version>1.0.2</version>
+        <version>1.3.2</version>
       </dependency>
       
       <!-- SCR Annotations -->
@@ -410,7 +451,7 @@
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.5</version>
+        <version>4.12</version>
         <scope>test</scope>
       </dependency>
 
