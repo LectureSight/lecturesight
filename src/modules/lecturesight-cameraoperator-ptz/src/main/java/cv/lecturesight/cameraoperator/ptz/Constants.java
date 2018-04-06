@@ -27,6 +27,7 @@ public interface Constants {
   String PROPKEY_FRAME_WIDTH = "frame.width";
   String PROPKEY_FRAME_HEIGHT = "frame.height";
   String PROPKEY_IDLE_PRESET = "idle.preset";
+  String PROPKEY_START_PRESET = "start.preset";
   String PROPKEY_TARGET_LIMIT = "target.limit";
   String PROPKEY_TILT_LOCK = "tilt.lock";
   String PROPKEY_TILT_OFFSET = "tilt.offset";

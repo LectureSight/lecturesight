@@ -26,6 +26,7 @@ import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.CameraPositionModel;
 import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
+import cv.lecturesight.util.geometry.Preset;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -288,6 +289,43 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   }
 
   @Override
+  public void setInitialPosition(String presetName) {
+
+    // Get list of presets
+    List<Preset> presets = camera.getPresets();
+
+    NormalizedPosition pos = null;
+
+    for (Preset preset : presets) {
+      if (preset.getName().equalsIgnoreCase(presetName)) {
+        // Found matching preset
+        pos = model.toNormalizedCoordinates((Position) preset);
+        break;
+      }
+    }
+
+    if (pos == null) {
+      Logger.warn("Camera preset '{}' not found: unable to move to initial camera position", presetName);
+      return;
+    }
+
+    Logger.debug("Set initial normalized position from camera preset '{}' (x,y from -1 to 1): {} {}",
+      presetName, pos.getX(), pos.getY());
+
+    boolean s = steering;
+    setSteering(false);
+
+    model.setTargetPositionNorm(pos);
+    Position target_pos = model.getTargetPosition();
+
+    camera.movePreset(presetName);
+
+    setSteering(s);
+
+    informUISlaves();
+  }
+
+  @Override
   public void setInitialPosition(NormalizedPosition pos) {
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
     setTargetPosition(pos);
@@ -356,8 +394,8 @@ public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
   }
 
   @Override
-  public void movePreset(int preset) {
-    camera.movePreset(preset);
+  public boolean movePreset(String presetName) {
+    return camera.movePreset(presetName);
   }
 
   @Override

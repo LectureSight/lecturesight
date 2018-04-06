@@ -24,5 +24,6 @@ _cv.lecturesight.cameraoperator.ptz.tilt.lock = true_
 |cv.lecturesight.cameraoperator.ptz.frame.trigger.height | 0.8 | Sets the proportion of the frame height in which the target object can move without triggering the camera to move (0 to 1)
 |cv.lecturesight.cameraoperator.ptz.target.timeout | 2500 | Sets the time in milliseconds after the last target movement after which a target will no longer be tracked.
 |cv.lecturesight.cameraoperator.ptz.tracking.timeout | 60000 | Sets the time in milliseconds after the last target movement to return to the initial tracking position (0 to disable)
-|cv.lecturesight.cameraoperator.ptz.idle.preset | -1 | The camera preset to move to when idle (-1 to disable)
+|cv.lecturesight.cameraoperator.ptz.idle.preset | | The camera preset to move to when idle, if set
+|cv.lecturesight.cameraoperator.ptz.start.preset | | The camera preset to move to at start of tracking (used instead of pan, tilt and zoom values above)
 

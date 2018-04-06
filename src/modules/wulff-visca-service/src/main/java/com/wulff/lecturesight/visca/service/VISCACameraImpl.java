@@ -230,7 +230,19 @@ public class VISCACameraImpl implements PTZCamera {
   }
 
   @Override
-  public void movePreset(int preset) {
+  public boolean movePreset(String preset) {
+   try {
+     int result = Integer.parseInt(preset);
+     movePreset(result);
+   } catch (NumberFormatException nfe) {
+     Logger.warn("Only preset numbers are supported");
+     return false;
+   }
+
+   return true;
+  }
+
+  private void movePreset(int preset) {
 
     Logger.debug("Move preset " + preset);
 

@@ -13,7 +13,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,7 +57,19 @@ public class SimulatedCamera implements PTZCamera {
   final Object mutex = new Object();
   List<CameraListener> listeners = new LinkedList<CameraListener>();
 
+  List<Preset> presetList;
+
   protected void activate(ComponentContext cc) {
+
+    // Presets
+    presetList = new ArrayList<>();
+
+    Preset start = new Preset("Start", 0, 0, 0);
+    Preset home = new Preset("Home", 0, 0, 0);
+
+    presetList.add(start);
+    presetList.add(home);
+
     delay = config.getInt(PROPKEY_DELAY);
     (new Thread(new Runnable() {
 
@@ -167,8 +179,16 @@ public class SimulatedCamera implements PTZCamera {
   }
 
   @Override
-  public void movePreset(int preset) {
-    moveHome();       // the only preset in this camera is the home position
+  public boolean movePreset(String presetName) {
+
+    for (Preset preset : presetList) {
+      if (preset.getName().equals(presetName)) {
+        moveAbsolute(PAN_MAX_SPEED, TILT_MAX_SPEED, (Position) preset);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Override
@@ -257,7 +277,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveAbsolute(int panSpeed, int tiltSpeed, Position target) {
-    Logger.debug("move absolute (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
+    Logger.debug("move absolute (" + panSpeed + ", " + tiltSpeed + ", " + target + ")");
     synchronized(mutex) {
       clampPosition(target);
       target_pos.setX(target.getX());
@@ -269,7 +289,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void moveRelative(int panSpeed, int tiltSpeed, Position target) {
-    Logger.debug("move relative (" + panSpeed + ", " + tiltSpeed + "," + target + ")");
+    Logger.debug("move relative (" + panSpeed + ", " + tiltSpeed + ", " + target + ")");
     synchronized(mutex) {
       Position new_target = current_pos.clone();
       new_target.setX(current_pos.getX() + target.getX());
@@ -293,17 +313,17 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public void clearLimits() {
-    Logger.warn("method clearLimits() currently not implemented");
+    Logger.debug("method clearLimits() currently not implemented");
   }
 
   @Override
   public void setLimitUpRight(int pan, int tilt) {
-    Logger.warn("method setLimitUpRight() currently not implemented");
+    Logger.debug("method setLimitUpRight() currently not implemented");
   }
 
   @Override
   public void setLimitDownLeft(int pan, int tilt) {
-    Logger.warn("method setLimitDownLeft() currently not implemented");
+    Logger.debug("method setLimitDownLeft() currently not implemented");
   }
 
   @Override
@@ -317,7 +337,7 @@ public class SimulatedCamera implements PTZCamera {
 
   @Override
   public List<Preset> getPresets() {
-    return Collections.emptyList();
+    return presetList;
   }
 
   @Override

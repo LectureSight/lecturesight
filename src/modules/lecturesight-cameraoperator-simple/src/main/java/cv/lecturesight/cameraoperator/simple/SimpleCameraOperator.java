@@ -66,8 +66,10 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   int interval = 200;
   int target_timeout;
   int tracking_timeout;
-  int idle_preset = -1;
   int target_limit = 10;
+
+  String idle_preset = null;
+  String start_preset = null;
 
   CoordinatesNormalization normalizer;
   ScheduledExecutorService executor;
@@ -100,7 +102,8 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
   private void setConfiguration() {
     target_timeout = config.getInt(Constants.PROPKEY_TARGET_TIMEOUT);
     tracking_timeout = config.getInt(Constants.PROPKEY_TRACKING_TIMEOUT);
-    idle_preset = config.getInt(Constants.PROPKEY_IDLE_PRESET);
+    idle_preset = config.get(Constants.PROPKEY_IDLE_PRESET);
+    start_preset = config.get(Constants.PROPKEY_START_PRESET);
     start_pan = config.getFloat(Constants.PROPKEY_PAN);
     start_tilt = config.getFloat(Constants.PROPKEY_TILT);
     start_zoom = config.getFloat(Constants.PROPKEY_ZOOM);
@@ -108,9 +111,10 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
     frame_trigger = limitRange(config.getFloat(Constants.PROPKEY_FRAME_TRIGGER), 0, 1);
     target_limit = config.getInt(Constants.PROPKEY_TARGET_LIMIT);
 
-    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, initial pan: {}, tilt: {}, zoom: {} "
-            + "frame.width: {}, frame.trigger: {}, target.limit: {}", target_timeout, tracking_timeout, idle_preset,
-            start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
+    Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, start.preset: {}, "
+            + "initial pan: {}, tilt: {}, zoom: {}, frame.width: {}, frame.trigger: {}, target.limit: {}",
+        target_timeout, tracking_timeout, idle_preset, start_preset,
+        start_pan, start_tilt, start_zoom, frame_width, frame_trigger, target_limit);
   }
 
   private float limitRange(float value, float min, float max) {
@@ -172,27 +176,40 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    * Move the camera to the initial pan/tilt/zoom position for start of tracking
    */
   private void setInitialTrackingPosition() {
-    Logger.debug("Set initial tracking position");
-    NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
-    steerer.setZoom(start_zoom);
+
+    if (start_preset != null && !start_preset.isEmpty()) {
+      Logger.debug("Set initial tracking position: preset {}", start_preset);
+      steerer.setInitialPosition(start_preset);
+    } else {
+      Logger.debug("Set initial tracking position: {}, {}, {}", start_pan, start_tilt, start_zoom);
+      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
+      steerer.setZoom(start_zoom);
+      steerer.setInitialPosition(neutral);
+    }
+
     steerer.setFrameWidth(frame_width);
-    steerer.setInitialPosition(neutral);
   }
 
   /*
    * Return the camera to the start pan/tilt position
    */
   private void returnInitialTrackingPosition() {
-    Logger.debug("Return to initial tracking position");
-    NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
-    steerer.setTargetPosition(neutral);
+
+    if (start_preset != null && !start_preset.isEmpty() && steerer.movePreset(start_preset)) {
+      Logger.debug("Return to initial tracking position: preset {}", start_preset);
+      steerer.movePreset(start_preset);
+    } else {
+      Logger.debug("Return to initial tracking position: {}, {}", start_pan, start_tilt);
+      NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
+      steerer.setTargetPosition(neutral);
+    }
   }
 
   /*
    * Move the camera to the idle position (not tracking)
    */
   private void setIdlePosition() {
-    if (idle_preset >= 0) {
+    if (idle_preset != null && !idle_preset.isEmpty()) {
       steerer.movePreset(idle_preset);
     } else {
       steerer.moveHome();

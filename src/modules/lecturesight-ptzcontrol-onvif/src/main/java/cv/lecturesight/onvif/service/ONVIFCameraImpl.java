@@ -329,7 +329,7 @@ public class ONVIFCameraImpl implements PTZCamera {
 	 * @param preset_index
 	 *            The number of the preset in the preset list to move camera to
 	 */
-	public void movePreset(int preset_index) {
+	private void movePreset(int preset_index) {
 
 		if (this.presets != null && !this.presets.isEmpty() && (this.presets.size() < preset_index)
 				&& (preset_index >= 0)) {
@@ -353,7 +353,8 @@ public class ONVIFCameraImpl implements PTZCamera {
 	 * @param preset
 	 *            The name of the preset to move the camera to
 	 */
-	public void movePreset(String preset) {
+	@Override
+	public boolean movePreset(String preset) {
 
 		PTZPreset found = null;
 
@@ -372,12 +373,15 @@ public class ONVIFCameraImpl implements PTZCamera {
 			try {
 				Logger.trace("Move preset " + preset);
 				this.ptz_device.absoluteMove(this.profile_token, pan_tilt.getX(), pan_tilt.getY(), zoom.getX());
+				return true;
 			} catch (SOAPException e) {
 				Logger.error("movePreset: " + e.getMessage());
 			}
 		} else {
 			Logger.debug("Preset not found: " + preset);
 		}
+
+		return false;
 	}
 
 	/**

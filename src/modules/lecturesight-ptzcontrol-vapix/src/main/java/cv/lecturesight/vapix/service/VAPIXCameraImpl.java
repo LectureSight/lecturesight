@@ -477,6 +477,8 @@ public class VAPIXCameraImpl implements PTZCamera {
 
     Logger.debug("Move preset name " + preset);
 
+    this.presets = getPresetNames(); // refresh the list of presets
+
     if (Arrays.asList(presets).contains(preset)) {
       try {
         String result = this.doCommand("/axis-cgi/com/ptz.cgi?gotoserverpresetname=" + preset);

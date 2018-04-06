@@ -20,4 +20,5 @@ The Pan-Only Camera Operator is provided by the  `lecturesight-cameraoperator-si
 | cv.lecturesight.cameraoperator.panonly.target.limit | 3 | Do not acquire a new tracking target if the total number of available targets exceeds this threshold. This avoids excessive camera movement during busy scenes.
 | cv.lecturesight.cameraoperator.panonly.target.timeout | 2500 | Sets the time in milliseconds after the last target movement after which a target will no longer be tracked.
 | cv.lecturesight.cameraoperator.panonly.tracking.timeout | 60000 | Time in ms after the last target movement to return to the initial tracking position or the idle preset<br> (0 to disable)
-| cv.lecturesight.cameraoperator.panonly.idle.preset | -1 | The camera preset to move to when idle (-1 to disable)
+| cv.lecturesight.cameraoperator.panonly.idle.preset | | The camera preset to move to when idle, if set
+| cv.lecturesight.cameraoperator.panonly.start.preset | | The camera preset to move to at start of tracking (used instead of pan, tilt and zoom values above)

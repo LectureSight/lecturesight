@@ -40,7 +40,7 @@ public interface PTZCamera {
 
   void moveHome();
 
-  void movePreset(int preset);
+  boolean movePreset(String presetName);
 
   void moveUp(int tiltSpeed);
 

@@ -29,6 +29,8 @@ public interface CameraSteeringWorker {
 
   void setSteering(boolean on);
 
+  void setInitialPosition(String presetName);
+
   void setInitialPosition(NormalizedPosition pos);
 
   void setTargetPosition(NormalizedPosition pos);
@@ -53,7 +55,7 @@ public interface CameraSteeringWorker {
 
   float getFrameHeight();
 
-  void movePreset(int preset);
+  boolean movePreset(String presetName);
 
   void moveHome();
 

@@ -48,7 +48,8 @@ cv.lecturesight.cameraoperator.panonly.tilt=0.4
 cv.lecturesight.cameraoperator.panonly.zoom=0.1
 cv.lecturesight.cameraoperator.panonly.frame.width=0.8
 cv.lecturesight.cameraoperator.panonly.timeout=500
-cv.lecturesight.cameraoperator.panonly.idle.preset=0
+cv.lecturesight.cameraoperator.panonly.idle.preset=Home
+cv.lecturesight.cameraoperator.panonly.start.preset=Start
 cv.lecturesight.cameraoperator.panonly.target.limit=2
 
 # --- Scene Profile

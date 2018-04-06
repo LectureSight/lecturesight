@@ -491,6 +491,52 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   }
 
   @Override
+  public void setInitialPosition(String presetName) {
+
+    // Get list of presets
+    List<Preset> presets = camera.getPresets();
+
+    NormalizedPosition pos = null;
+
+    for (Preset preset : presets) {
+      if (preset.getName().equalsIgnoreCase(presetName)) {
+        // Found matching preset
+        pos = model.toNormalizedCoordinates((Position) preset);
+        break;
+      }
+    }
+
+    if (pos == null) {
+      Logger.warn("Camera preset '{}' not found: unable to move to initial camera position", presetName);
+      return;
+    }
+
+    Logger.debug("Set initial normalized position from camera preset '{}' (x,y from -1 to 1): {} {}",
+      presetName, pos.getX(), pos.getY());
+
+    boolean s = steering;
+    setSteering(false);
+
+    model.setTargetPositionNorm(pos);
+
+    camera.movePreset(presetName);
+
+    // Allow the camera to reach the target absolute position before sending it any other movement commands
+    try {
+      Thread.sleep(initial_delay);
+    } catch (Exception e) {
+      // ignore
+    }
+    setSteering(s);
+
+    if (focus_fixed) {
+      camera.focusMode(PTZCamera.FocusMode.MANUAL);
+    }
+
+    informUISlaves();
+  }
+
+  @Override
   public void setInitialPosition(NormalizedPosition pos) {
 
     Logger.debug("Set initial normalized position (x,y from -1 to 1): " + pos.getX() + " " + pos.getY());
@@ -582,11 +628,14 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
   }
 
   @Override
-  public void movePreset(int preset) {
-    camera.movePreset(preset);
-    if (focus_fixed) {
-      camera.focusMode(PTZCamera.FocusMode.AUTO);
+  public boolean movePreset(String presetName) {
+    if (camera.movePreset(presetName)) {
+      if (focus_fixed) {
+        camera.focusMode(PTZCamera.FocusMode.AUTO);
+      }
+      return true;
     }
+    return false;
   }
 
   @Override
