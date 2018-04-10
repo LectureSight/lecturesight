@@ -26,6 +26,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
   double[] frameTime = new double[FPS_SAMPLES];
   int sample_i = 0;
   double fps = 0.0;
+  long lastFrameNumber = 0;
 
   public TrackerUIPanel() {
     initComponents();
@@ -50,16 +51,21 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
 
     g.setFont(font);
 
-    double thisFrameTime = System.currentTimeMillis();
-    frameTime[sample_i++] = thisFrameTime;
+    // render() may be called if other windows obscure this window, so only update
+    // frame timing if it's actually for a new frame
+    if (lastFrameNumber != parent.fsrc.getFrameNumber()) {
+      double thisFrameTime = System.currentTimeMillis();
+      frameTime[sample_i++] = thisFrameTime;
 
-    if (sample_i == FPS_SAMPLES) {
-      sample_i = 0;
-    }
+      if (sample_i == FPS_SAMPLES) {
+        sample_i = 0;
+      }
 
-    if (sample_i % 5 == 0) {
-      double earliestFrame = frameTime[sample_i];
-      fps = (FPS_SAMPLES - 1) * 1000 / (thisFrameTime - earliestFrame);
+      if (sample_i % 5 == 0) {
+        double earliestFrame = frameTime[sample_i];
+        fps = (FPS_SAMPLES - 1) * 1000 / (thisFrameTime - earliestFrame);
+      }
+      lastFrameNumber = parent.fsrc.getFrameNumber();
     }
 
     g.drawString("  frame : " + Long.toString(parent.fsrc.getFrameNumber()), 3, 12);
