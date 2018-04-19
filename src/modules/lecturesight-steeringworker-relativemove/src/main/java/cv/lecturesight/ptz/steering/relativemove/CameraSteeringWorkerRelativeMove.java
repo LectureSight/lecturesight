@@ -182,43 +182,46 @@ public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, C
         int dy = camera_pos.getY() - target_pos.getY();
         int dx_abs = Math.abs(dx);
         int dy_abs = Math.abs(dy);
-
-        // compute pan speed
         int ps;
-        if (dx_abs < alpha_x) {
-          ps = (int) (((float) dx_abs / (float) alpha_x) * maxspeed_pan);
-          if (ps > 1) {
-            ps *= damp_pan;
-          } else if (ps == 0) {
-            dx = 0;
-          }
-          ps = (ps == 0) ? 1 : ps;
-        } else {
-          ps = (int) (maxspeed_pan * damp_pan);
-        }
-
-        // compute tilt speed
         int ts;
-        if (dy_abs < alpha_y) {
-          ts = (int) (((float) dy_abs / (float) alpha_y) * maxspeed_tilt);
-          if (ts > 1) {
-            ts *= damp_tilt;
-          }
-          ts = (ts == 0) ? 1 : ts;
-        } else {
-          ts = (int) (maxspeed_tilt * damp_tilt);
-        }
 
-        // Stop moving if the camera is close enough
-        if (dx_abs < stop_x) {
+        // 1.5708rads == 90degs
+        double theta = dx_abs==0 ? 1.5708 : Math.atan(dy_abs/(float)dx_abs);
+
+        // If camera not close enough compute pan speed
+        if (dx_abs >= stop_x) {
+          int speed_pan = (int) (maxspeed_pan * Math.cos(theta));
+
+          if (dx_abs < alpha_x) {
+            ps = (int) (((float) dx_abs / (float) alpha_x) * speed_pan);
+            if (ps > 1) {
+              ps *= damp_pan;
+            } else if (ps == 0) {
+              dx = 0;
+            }
+            ps = (ps == 0) ? 1 : ps;
+          } else {
+            ps = (int) (speed_pan * damp_pan);
+          }
+        } else {
           dx = 0;
-          dx_abs = 0;
           ps = 0;
         }
 
-        if (dy_abs < stop_y) {
+        // If camera not close enough compute tilt speed
+        if (dy_abs >= stop_y) {
+          int speed_tilt = (int) (maxspeed_tilt * Math.sin(theta));
+          if (dy_abs < alpha_y) {
+            ts = (int) (((float) dy_abs / (float) alpha_y) * speed_tilt);
+            if (ts > 1) {
+              ts *= damp_tilt;
+            }
+            ts = (ts == 0) ? 1 : ts;
+          } else {
+            ts = (int) (speed_tilt * damp_tilt);
+          }
+        } else {
           dy = 0;
-          dy_abs = 0;
           ts = 0;
         }
 
