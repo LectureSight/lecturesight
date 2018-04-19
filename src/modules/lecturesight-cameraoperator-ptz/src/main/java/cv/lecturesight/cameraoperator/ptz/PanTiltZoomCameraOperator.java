@@ -189,7 +189,7 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
    */
   private void setInitialTrackingPosition() {
 
-    if (start_preset != null && !start_preset.isEmpty() && steerer.movePreset(start_preset)) {
+    if (start_preset != null && !start_preset.isEmpty()) {
       Logger.debug("Set initial tracking position: preset {}", start_preset);
       steerer.setInitialPosition(start_preset);
     } else {
@@ -207,9 +207,9 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
    * Return the camera to the start pan/tilt position
    */
   private void returnInitialTrackingPosition() {
-    if (start_preset != null && !start_preset.isEmpty() && steerer.movePreset(start_preset)) {
+    if (start_preset != null && !start_preset.isEmpty()) {
       Logger.debug("Return to initial tracking position: preset {}", start_preset);
-      steerer.movePreset(start_preset);
+      steerer.setInitialPosition(start_preset);
     } else {
       Logger.debug("Return to initial tracking position: {}, {}", start_pan, start_tilt);
       NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
