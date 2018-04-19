@@ -103,12 +103,12 @@ public class ConfigCommands {
     }
   }
 
-  private Map<String, String> getProperties(Properties props, String prefix) {
-    boolean asterisk = prefix.trim().equals("*");
+  private Map<String, String> getProperties(Properties props, String filter) {
+    boolean asterisk = filter.trim().equals("*");
     HashMap<String, String> out = new HashMap<String, String>();
     for (Iterator<String> keys = props.stringPropertyNames().iterator(); keys.hasNext();) {
       String key = keys.next();
-      if (asterisk || key.startsWith(prefix)) {
+      if (asterisk || key.contains(filter)) {
         out.put(key, props.getProperty(key));
       }
     }
