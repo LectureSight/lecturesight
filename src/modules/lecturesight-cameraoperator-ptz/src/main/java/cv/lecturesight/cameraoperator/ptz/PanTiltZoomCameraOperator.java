@@ -269,18 +269,19 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
         boolean move = true;
         last_tracked_time = now;
 
-        // Target position
-        Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
-        NormalizedPosition target_pos = normalizer.toNormalized(obj_pos);
-
-        if (tilt_lock) {
-          target_pos.setY(start_tilt);
-        } else {
-          target_pos.setY(target_pos.getY() + tilt_offset);
-        }
-
         // Actual position
         NormalizedPosition actual_pos = steerer.getActualPosition();
+
+        // Target position
+        Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
+        NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
+        NormalizedPosition target_pos;
+
+        if (tilt_lock) {
+          target_pos = new NormalizedPosition(obj_posN.getX(), actual_pos.getY());
+        } else {
+          target_pos = new NormalizedPosition(obj_posN.getX(), obj_posN.getY() + tilt_offset);
+        }
 
         Logger.debug("Tracking object " + target + " currently at position " + target_pos);
 
