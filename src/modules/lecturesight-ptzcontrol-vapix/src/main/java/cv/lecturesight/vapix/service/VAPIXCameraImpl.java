@@ -131,17 +131,15 @@ public class VAPIXCameraImpl implements PTZCamera {
     username = config.get(Constants.PROPKEY_VAPIX_USERNAME);
     password = config.get(Constants.PROPKEY_VAPIX_PASSWORD);
 
-    inverted = config.getBoolean(Constants.PROPKEY_INVERTED);
-
     updateInterval = config.getInt(Constants.PROPKEY_UPDATER_INTERVAL);
 
     lim_pan = new Limits(config.getInt(Constants.PROFKEY_PAN_MIN), config.getInt(Constants.PROFKEY_PAN_MAX));
     lim_tilt = new Limits(config.getInt(Constants.PROFKEY_TILT_MIN), config.getInt(Constants.PROFKEY_TILT_MAX));
     lim_zoom = new Limits(config.getInt(Constants.PROFKEY_ZOOM_MIN), config.getInt(Constants.PROFKEY_ZOOM_MAX));
 
-    speed_pan = new Limits(0, config.getInt(Constants.PROFKEY_PAN_MAXSPEED));
-    speed_tilt = new Limits(0, config.getInt(Constants.PROFKEY_TILT_MAXSPEED));
-    speed_zoom = new Limits(0, config.getInt(Constants.PROFKEY_ZOOM_MAXSPEED));
+    speed_pan = new Limits(1, config.getInt(Constants.PROFKEY_PAN_MAXSPEED));
+    speed_tilt = new Limits(1, config.getInt(Constants.PROFKEY_TILT_MAXSPEED));
+    speed_zoom = new Limits(1, config.getInt(Constants.PROFKEY_ZOOM_MAXSPEED));
 
     if (host.length() > 0) {
 
@@ -165,6 +163,13 @@ public class VAPIXCameraImpl implements PTZCamera {
         this.presets = getPresetNames();
 
         Logger.info("Vapix: " + this.brand + " " + this.model_name);
+
+        // Get camera orientation ie inverted or not
+        Hashtable<String, String>  sensor = processCommand("/axis-cgi/param.cgi?action=list&group=ImageSource.I0.Sensor");
+
+        if ("180".equals(sensor.getOrDefault("root.ImageSource.I0.Sensor.VideoRotation", "0"))) {
+          inverted = true;
+        }
 
         Hashtable<String, String> parameters = processCommand("/axis-cgi/param.cgi?action=list&group=PTZ");
 

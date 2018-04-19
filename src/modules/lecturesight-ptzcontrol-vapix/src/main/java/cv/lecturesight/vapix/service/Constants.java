@@ -8,8 +8,6 @@ public final class Constants {
   final static String PROPKEY_VAPIX_USERNAME = "camera.username";
   final static String PROPKEY_VAPIX_PASSWORD = "camera.password";
 
-  final static String PROPKEY_INVERTED = "camera.inverted";
-
   // Panning (-170 to 170 degrees)
   final static String PROFKEY_PAN_MIN = "camera.pan.min";
   final static String PROFKEY_PAN_MAX = "camera.pan.max";
