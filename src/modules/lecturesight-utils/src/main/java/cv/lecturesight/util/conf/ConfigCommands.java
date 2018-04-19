@@ -139,7 +139,6 @@ public class ConfigCommands {
       sb.append(val);
       sb.append("\n");
     }
-    sb.append("\n");
     //CHECKSTYLE:OFF
     System.out.println(sb.toString());  // PrintWriter to System.out wouldn't hurt
     //CHECKSTYLE:ON
