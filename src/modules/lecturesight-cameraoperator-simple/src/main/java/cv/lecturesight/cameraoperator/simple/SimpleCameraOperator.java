@@ -195,9 +195,9 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
    */
   private void returnInitialTrackingPosition() {
 
-    if (start_preset != null && !start_preset.isEmpty() && steerer.movePreset(start_preset)) {
+    if (start_preset != null && !start_preset.isEmpty()) {
       Logger.debug("Return to initial tracking position: preset {}", start_preset);
-      steerer.movePreset(start_preset);
+      steerer.setInitialPosition(start_preset);
     } else {
       Logger.debug("Return to initial tracking position: {}, {}", start_pan, start_tilt);
       NormalizedPosition neutral = new NormalizedPosition(start_pan, start_tilt);
@@ -260,13 +260,13 @@ public class SimpleCameraOperator implements CameraOperator, ConfigurationListen
           boolean move = true;
           last_tracked_time = now;
 
+          // Actual position
+          NormalizedPosition actual_pos = steerer.getActualPosition();
+
           // Target position
           Position obj_pos = (Position) target.getProperty(ObjectTracker.OBJ_PROPKEY_CENTROID);
           NormalizedPosition obj_posN = normalizer.toNormalized(obj_pos);
-          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), config.getFloat(Constants.PROPKEY_TILT));
-
-          // Actual position
-          NormalizedPosition actual_pos = steerer.getActualPosition();
+          NormalizedPosition target_pos = new NormalizedPosition(obj_posN.getX(), actual_pos.getY());
 
           Logger.debug("Tracking object " + target + " currently at position " + target_pos);
 
