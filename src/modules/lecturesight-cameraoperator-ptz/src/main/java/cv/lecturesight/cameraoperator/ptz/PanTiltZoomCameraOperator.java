@@ -124,6 +124,9 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
     frame_trigger_height = limitRange(config.getFloat(PROPKEY_FRAME_TRIGGER_HEIGHT), 0, 1);
     target_limit = config.getInt(PROPKEY_TARGET_LIMIT);
 
+    steerer.setFrameWidth(frame_width);
+    steerer.setFrameHeight(frame_height);
+
     Logger.debug("Target timeout: {} ms, tracking timeout: {} ms, idle.preset: {}, start.preset: {}, initial pan: {}, tilt: {}, zoom: {} "
             + "frame.width: {}, frame.trigger.width: {}, frame.trigger.height: {}, target.limit: {}, tilt.lock: {}, tilt.offset: {}",
             target_timeout, tracking_timeout, idle_preset, start_preset, start_pan, start_tilt, start_zoom, frame_width, frame_trigger_width,
@@ -199,8 +202,6 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
       steerer.setInitialPosition(neutral);
     }
 
-    steerer.setFrameWidth(frame_width);
-    steerer.setFrameHeight(frame_height);
   }
 
   /*
