@@ -22,8 +22,8 @@ as [propertyName]=[propertyValue]
 | cv.lecturesight.vapix.camera.pan.min  | -17000    | The minimum pan value to use in translating LectureSight values to camera values. VAPIX uses degrees with fractions for the range that the camera can pan.
 | cv.lecturesight.vapix.camera.pan.max  | 17000     | The maximum pan value.
 | cv.lecturesight.vapix.camera.pan.maxspeed | 100 | The maximum speed for changing the pan value.
-| cv.lecturesight.vapix.camera.tilt.min | -2000 | The minimum tilt value, needs to be adjusted if camera is upside down.
-| cv.lecturesight.vapix.camera.tilt.max | 9000 | The maximum tilt value, needs to be adjusted if camera is upside down.
+| cv.lecturesight.vapix.camera.tilt.min | -2000 | The minimum tilt value to use in translating LectureSight values to camera values. VAPIX uses degrees with fractions for the range that the camera can tilt.
+| cv.lecturesight.vapix.camera.tilt.max | 9000 | The maximum tilt value.
 | cv.lecturesight.vapix.camera.tilt.maxspeed | 100 | The maximum speed for changing the tilt value.
 | cv.lecturesight.vapix.camera.zoom.min | 1 | The minimum zoom level value.
 | cv.lecturesight.vapix.camera.zoom.max | 9999 | The maximum zoom level value.

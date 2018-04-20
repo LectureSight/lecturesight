@@ -165,10 +165,11 @@ public class VAPIXCameraImpl implements PTZCamera {
         Logger.info("Vapix: " + this.brand + " " + this.model_name);
 
         // Get camera orientation ie inverted or not
-        Hashtable<String, String>  sensor = processCommand("/axis-cgi/param.cgi?action=list&group=ImageSource.I0.Sensor");
+        Hashtable<String, String>  sensor = processCommand("/axis-cgi/param.cgi?action=list&usergroup=admin&group=ImageSource.I0.Sensor");
 
         if ("180".equals(sensor.getOrDefault("root.ImageSource.I0.Sensor.VideoRotation", "0"))) {
           inverted = true;
+          Logger.debug("camera is inverted");
         }
 
         Hashtable<String, String> parameters = processCommand("/axis-cgi/param.cgi?action=list&group=PTZ");
@@ -207,6 +208,8 @@ public class VAPIXCameraImpl implements PTZCamera {
           if (inverted) {
             range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt"))*-1,
                                     Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt"))*-1);
+            // modify tilt min/max range to match
+            lim_tilt = new Limits(config.getInt(Constants.PROFKEY_TILT_MAX)*-1, config.getInt(Constants.PROFKEY_TILT_MIN)*-1);
           } else {
             range_tilt = new Limits(Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MinTilt")),
                                     Integer.parseInt(parameters.get("root.PTZ.Limit.L1.MaxTilt")));
@@ -822,7 +825,11 @@ public class VAPIXCameraImpl implements PTZCamera {
 
     Logger.trace("Clear camera limits");
     lim_pan = new Limits(config.getInt(Constants.PROFKEY_PAN_MIN), config.getInt(Constants.PROFKEY_PAN_MAX));
-    lim_tilt = new Limits(config.getInt(Constants.PROFKEY_TILT_MIN), config.getInt(Constants.PROFKEY_TILT_MAX));
+    if (inverted) {
+      lim_tilt = new Limits(config.getInt(Constants.PROFKEY_TILT_MAX)*-1, config.getInt(Constants.PROFKEY_TILT_MIN)*-1);
+    } else {
+      lim_tilt = new Limits(config.getInt(Constants.PROFKEY_TILT_MIN), config.getInt(Constants.PROFKEY_TILT_MAX));
+    }
     lim_zoom = new Limits(config.getInt(Constants.PROFKEY_ZOOM_MIN), config.getInt(Constants.PROFKEY_ZOOM_MAX));
 
     speed_pan = new Limits(0, config.getInt(Constants.PROFKEY_PAN_MAXSPEED));
