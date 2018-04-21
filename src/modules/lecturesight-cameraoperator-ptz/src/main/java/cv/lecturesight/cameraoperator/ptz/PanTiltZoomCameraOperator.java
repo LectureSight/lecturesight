@@ -157,6 +157,7 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
   @Override
   public void stop() {
     if (executor != null) {
+      worker.shutdown();
       executor.shutdownNow();
       executor = null;
       Logger.debug("Stopped worker thread");
@@ -254,6 +255,7 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
             targetList.add(target);
             metrics.incCounter("camera.operator.target.new");
             first_tracked_time = now;
+            Logger.debug("Acquired new tracking target ({} available) first_tracked_time={}", objs.size(), first_tracked_time);
           }
         }
 
@@ -308,9 +310,18 @@ public class PanTiltZoomCameraOperator implements Constants, CameraOperator, Con
 
       } else {
         // Target has timed out
+        Logger.debug("Target has timed out: first_tracked_time={} lastSeen={} age={} track_duration={}",
+          first_tracked_time, target.lastSeen(), now-target.lastSeen(), now - first_tracked_time);
         target = null;
         targetList = Collections.emptyList();
         metrics.timedEvent("camera.operator.target.tracked", now - first_tracked_time);
+      }
+    }
+
+    public void shutdown() {
+      // Write out the final metrics entry
+      if (target != null) {
+          metrics.timedEvent("camera.operator.target.tracked", System.currentTimeMillis() - first_tracked_time);
       }
     }
 
