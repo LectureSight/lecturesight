@@ -8,7 +8,7 @@ LectureSight uses 3 co-ordinate systems:
 
 * [Video Analysis](../modules/videoanalysis) uses the dimensions of the overview camera image (for example 640x360). Pixel counts and movement thresholds defined for object tracking therefore refer to these dimensions.
 
-* The [Camera Operator](../modules/cameraoperator-simple) uses a normalized co-ordinate system from -1 to 1 on both the horizontal and vertical axes, where the top-left is (-1, -1), centre is (0,0) and bottom-right is (1,1). Zoom is mapped  from 0 (wide) to 1 (close).
+* The [Camera Operator](../modules/cameraoperator-ptz) uses a normalized co-ordinate system from -1 to 1 on both the horizontal and vertical axes, where the top-left is (-1, -1), centre is (0,0) and bottom-right is (1,1). Zoom is mapped  from 0 (wide) to 1 (close).
 
 * The [Steering Worker](../modules/steeringworker-relativemove) uses the co-ordinate system of the PTZ camera.
 
@@ -111,22 +111,22 @@ so they are distributed across the field of view, both horizontally and vertical
 
 ## Initial position
 
-Set the initial position of the [PTZ camera](../modules/cameraoperator-simple)
+Set the initial position of the [PTZ camera](../modules/cameraoperator-ptz)
 
 ```
-cv.lecturesight.cameraoperator.panonly.pan=0.0
-cv.lecturesight.cameraoperator.panonly.tilt=0.0
-cv.lecturesight.cameraoperator.panonly.zoom=0.0
+cv.lecturesight.cameraoperator.ptz.pan=0.0
+cv.lecturesight.cameraoperator.ptz.tilt=0.0
+cv.lecturesight.cameraoperator.ptz.zoom=0.0
 ```
 
 ## Frame width
 
-Set the frame width of the [PTZ camera](../modules/cameraoperator-simple) at the configured zoom position, relative to the width of the overview image, which is 2 in normalized co-ordinates (-1 to 1).
+Set the frame width of the [PTZ camera](../modules/cameraoperator-ptz) at the configured zoom position, relative to the width of the overview image, which is 2 in normalized co-ordinates (-1 to 1).
 
 For example a frame.width of 0.5 means that the PTZ Camera's image is 25% of the width of the overview image (0.5 / 2).
 
 ```
-cv.lecturesight.cameraoperator.panonly.frame.width=0.5
+cv.lecturesight.cameraoperator.ptz.frame.width=0.5
 ```
 
 You can verify visually that the frame width is correct by looking at the frame boundary guides on the [PTZ Camera Control](../ui/cameracontrol) window.

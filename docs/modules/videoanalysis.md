@@ -4,7 +4,7 @@ The `lecturesight-videoanalysis-templ` bundle performs template-based video anal
 
 The tracker will follow a maximum of 6 targets, using template-matching between frames to maintain persistence. New targets are identified when cells in the overview image exceed defined change thresholds. Targets are dropped when they are inactive for a defined period.
 
-The tracker provides the list of active targets to the [Camera Operator](cameraoperator-simple) which is responsible for selecting one or more targets to follow. The [Object Tracker display](../ui/objecttracker) shows the targets being tracked.
+The tracker provides the list of active targets to the [Camera Operator](cameraoperator-ptz) which is responsible for selecting one or more targets to follow. The [Object Tracker display](../ui/objecttracker) shows the targets being tracked.
 
 ## Configuration
 

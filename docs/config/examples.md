@@ -43,14 +43,14 @@ cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.top=-600
 cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.bottom=-5000
 
 # --- Pan-only Camera Operator
-cv.lecturesight.cameraoperator.panonly.pan=0.0
-cv.lecturesight.cameraoperator.panonly.tilt=0.4
-cv.lecturesight.cameraoperator.panonly.zoom=0.1
-cv.lecturesight.cameraoperator.panonly.frame.width=0.8
-cv.lecturesight.cameraoperator.panonly.timeout=500
-cv.lecturesight.cameraoperator.panonly.idle.preset=Home
-cv.lecturesight.cameraoperator.panonly.start.preset=Start
-cv.lecturesight.cameraoperator.panonly.target.limit=2
+cv.lecturesight.cameraoperator.ptz.pan=0.0
+cv.lecturesight.cameraoperator.ptz.tilt=0.4
+cv.lecturesight.cameraoperator.ptz.zoom=0.1
+cv.lecturesight.cameraoperator.ptz.frame.width=0.8
+cv.lecturesight.cameraoperator.ptz.timeout=500
+cv.lecturesight.cameraoperator.ptz.idle.preset=Home
+cv.lecturesight.cameraoperator.ptz.start.preset=Start
+cv.lecturesight.cameraoperator.ptz.target.limit=2
 
 # --- Scene Profile
 cv.lecturesight.profile.manager.active.profile=overview
@@ -105,13 +105,13 @@ cv.lecturesight.ptz.steering.worker.relativemove.scene.limit.bottom=-5000
 cv.lecturesight.ptz.steering.worker.relativemove.focus.fixed=true
 cv.lecturesight.ptz.steering.worker.relativemove.move.initial.delay=5000
 
-# --- Pan-only Camera Operator
-cv.lecturesight.cameraoperator.panonly.pan=0.3
-cv.lecturesight.cameraoperator.panonly.tilt=-0.40
-cv.lecturesight.cameraoperator.panonly.zoom=0.55
-cv.lecturesight.cameraoperator.panonly.timeout=500
-cv.lecturesight.cameraoperator.panonly.idle.preset=0
-cv.lecturesight.cameraoperator.panonly.target.limit=2
+# --- PTZ Camera Operator
+cv.lecturesight.cameraoperator.ptz.pan=0.3
+cv.lecturesight.cameraoperator.ptz.tilt=-0.40
+cv.lecturesight.cameraoperator.ptz.zoom=0.55
+cv.lecturesight.cameraoperator.ptz.timeout=500
+cv.lecturesight.cameraoperator.ptz.idle.preset=0
+cv.lecturesight.cameraoperator.ptz.target.limit=2
 
 # -- Scene Profile
 cv.lecturesight.profile.manager.active.profile=overview
