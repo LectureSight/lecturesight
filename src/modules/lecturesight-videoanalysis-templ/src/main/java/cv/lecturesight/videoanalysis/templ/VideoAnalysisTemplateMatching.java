@@ -171,6 +171,10 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     @Override
     public void launch(CLQueue queue) {
 
+      // Ignore when shutting down
+      if (ocl == null)
+        return;
+
       abs_diff_thresh_K.setArgs(input_rgb, input_rgb_last, change, change_threshold);
       abs_diff_thresh_K.enqueueNDRange(queue, imageWorkDim);
       ocl.utils().copyImage(0, 0, imageWorkDim[0], imageWorkDim[1], input_rgb, 0, 0, input_rgb_last);
@@ -184,6 +188,10 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     @Override
     public void land() {
+      // Ignore when shutting down
+      if (ocl == null)
+        return;
+
       ocl.castSignal(sig_IMAGEPROC);
     }
   }
@@ -206,6 +214,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     @Override
     public void launch(CLQueue queue) {
+
+      // Ignore when shutting down
+      if (ocl == null)
+        return;
+
       // reset buffers
       ocl.utils().setValues(0, MAX_REGIONS, weights_gpu, 0);
       ocl.utils().setValues(0, MAX_REGIONS * 2, centroids_gpu, 0);
@@ -226,6 +239,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     @Override
     public void land() {
+
+      // Ignore when shutting down
+      if ((ocl == null) || (cclabel == null))
+        return;
+
       numRegions = cclabel.getNumBlobs();
 
       if (numRegions > 0) {
@@ -331,6 +349,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
 
     @Override
     public void land() {
+
+      // Ignore when shutting down
+      if (ocl == null)
+        return;
+
       // update targets that were matched
       if (numTemplMatches > 0) {
         int [] results = new int[numTemplMatches * 4];

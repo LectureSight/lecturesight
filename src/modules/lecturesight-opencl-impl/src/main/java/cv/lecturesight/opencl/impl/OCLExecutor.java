@@ -65,6 +65,7 @@ public class OCLExecutor extends Thread {
         }
       }
     } catch (InterruptedException e) {
+      Logger.debug("Interrupted");
       callbackExecutor.shutdownNow();   // TODO is it right to terminate execution this way?
     }
   }
@@ -79,7 +80,7 @@ public class OCLExecutor extends Thread {
       if (msg != null) {
         warn += ": " + msg;
       }
-      Logger.warn(warn);
+      Logger.error(e, warn);
       return false;
     }
   }
@@ -121,7 +122,7 @@ public class OCLExecutor extends Thread {
         if (msg != null) {
           warn += ": " + msg;
         }
-        Logger.warn(warn);
+        Logger.error(e, warn);
       }
       try {
         if (landing) {
@@ -133,7 +134,7 @@ public class OCLExecutor extends Thread {
         if (msg != null) {
           warn += ": " + msg;
         }
-        Logger.error(warn, e);
+        Logger.error(e, warn);
       }
     }
   }
