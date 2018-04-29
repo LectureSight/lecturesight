@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/lecturesight/badge/?version=latest)](http://lecturesight.readthedocs.io/en/latest/?badge=latest)
+
 LectureSight
 ============
 
