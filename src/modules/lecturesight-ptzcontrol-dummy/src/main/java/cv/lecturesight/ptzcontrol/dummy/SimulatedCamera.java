@@ -307,8 +307,8 @@ public class SimulatedCamera implements PTZCamera {
     if (x < PAN_MIN) in.setX(PAN_MIN);
     if (x > PAN_MAX) in.setX(PAN_MAX);
     int y = in.getY();
-    if (y < TILT_MIN) in.setX(TILT_MIN);
-    if (x < TILT_MAX) in.setX(TILT_MAX);
+    if (y < TILT_MIN) in.setY(TILT_MIN);
+    if (y > TILT_MAX) in.setY(TILT_MAX);
   }
 
   @Override
