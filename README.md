@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/LectureSight/lecturesight.svg?branch=develop)](https://travis-ci.org/LectureSight/lecturesight)
 [![Documentation Status](https://readthedocs.org/projects/lecturesight/badge/?version=latest)](http://lecturesight.readthedocs.io/en/latest/?badge=latest)
 
 LectureSight
