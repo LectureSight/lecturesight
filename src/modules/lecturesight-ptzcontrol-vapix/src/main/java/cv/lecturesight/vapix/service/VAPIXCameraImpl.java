@@ -152,7 +152,7 @@ public class VAPIXCameraImpl implements PTZCamera {
                                           0, 0, 0, // zoom min, max, speed
                                           new Position(0, 0));
 
-      Hashtable<String, String> result = processCommand("/axis-cgi/param.cgi?action=list&group=Brand");
+      Hashtable<String, String> result = processCommand("/axis-cgi/param.cgi?usergroup=admin&action=list&group=Brand");
       Logger.info("Vapix connecting to " + host + " [ " + username + " : " + password + " ] ("
                   + result.get("success") + ")");
 
@@ -254,13 +254,13 @@ public class VAPIXCameraImpl implements PTZCamera {
           updaterHandle = executor.scheduleWithFixedDelay(new CameraStateUpdater(), updateInterval,
                                                           updateInterval, TimeUnit.MILLISECONDS);
         } else {
-          String msg = "Camera not responding to HTTPRequest - group=PTZ.";
-          Logger.debug(msg);
+          String msg = "Camera not responding correctly to HTTPRequest - group=PTZ.";
+          Logger.error(msg);
           throw new PTZCameraException(msg);
         }
       } else {
-        String msg = "Camera not responding to HTTPRequest - group=Brand.";
-        Logger.debug(msg);
+        String msg = "Camera not responding correctly to HTTPRequest - group=Brand.";
+        Logger.error(msg);
         throw new PTZCameraException(msg);
       }
 
