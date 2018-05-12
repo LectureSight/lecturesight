@@ -20,6 +20,7 @@ import org.pmw.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -145,9 +146,16 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
             // Is this event in progress?
             if (now.after(startDate) && now.before(stopDate)) {
-              Logger.info("Immediate start for event in progress: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
-              fireEvent(startTracker);
-              fireEvent(startOperator);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(stopDate);
+                cal.add(Calendar.SECOND, -10);
+              if (now.before(cal.getTime())) {
+                Logger.info("Immediate start for event in progress: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
+                fireEvent(startTracker);
+                fireEvent(startOperator);
+              } else {
+                Logger.info("Ingoring event in progress which finishes within 10s: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
+              }
             } else {
               Logger.info("Created recording event: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
               newEvents.add(startTracker);
