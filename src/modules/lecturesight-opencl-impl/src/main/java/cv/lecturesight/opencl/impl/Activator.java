@@ -25,6 +25,7 @@ import cv.lecturesight.opencl.impl.profiling.ProfilingServer;
 import com.nativelibs4java.opencl.CLBuildException;
 import com.nativelibs4java.opencl.CLContext;
 import com.nativelibs4java.opencl.CLDevice;
+import com.nativelibs4java.opencl.CLException;
 import com.nativelibs4java.opencl.CLImageFormat;
 import com.nativelibs4java.opencl.CLMem.Flags;
 import com.nativelibs4java.opencl.CLMem.ObjectType;
@@ -171,7 +172,11 @@ public final class Activator implements BundleActivator, ServiceFactory {
 
         // find all available devices of configured type
         for (CLPlatform platform : platforms) {
-          devices.addAll(Arrays.asList(platform.listDevices(type, true)));
+          try {
+            devices.addAll(Arrays.asList(platform.listDevices(type, true)));
+          } catch (CLException cle) {
+            Logger.trace("No devices available of type {} available on platform: {}", type.name(), platform);
+          }
         }
 
         // find best device
