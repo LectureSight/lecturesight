@@ -122,4 +122,9 @@ public interface OpenCLService {
   void unregisterTriggerable(OCLSignal trigger, Triggerable handler);
 
   OCLSignalBarrier createSignalBarrier(OCLSignal[] triggers);
+
+ /**
+  * True if the OpenCL service is running
+  */
+  boolean isAlive();
 }

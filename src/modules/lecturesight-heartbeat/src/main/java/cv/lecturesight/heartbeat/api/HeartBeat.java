@@ -21,6 +21,7 @@ public interface HeartBeat {
 
   boolean isReady();
   boolean isRunning();
+  boolean isAlive();
   void init();
   void deinit();
   void step(int i);
