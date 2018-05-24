@@ -136,4 +136,8 @@ public class OpenCLServiceImpl implements OpenCLService {
     return out;
   }
 
+  @Override
+  public boolean isAlive() {
+    return (executor != null) && executor.isAlive();
+  }
 }

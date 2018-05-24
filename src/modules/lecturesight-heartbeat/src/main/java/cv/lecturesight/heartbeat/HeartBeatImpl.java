@@ -189,4 +189,9 @@ public class HeartBeatImpl implements HeartBeat {
   public boolean isRunning() {
     return !(iterationsToRun == 0);
   }
+
+  @Override
+  public boolean isAlive() {
+    return ocl.isAlive();
+  }
 }

@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -60,7 +61,11 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   private String scheduleFileName;
   private String scheduleFileAbsolutePath;
 
+  private BundleContext bundleContext;
+
   protected void activate(ComponentContext cc) {
+
+    bundleContext = cc.getBundleContext();
 
     // look for schedule file and load events if existing
     scheduleFileName = config.get(PROPKEY_FILENAME);
@@ -265,6 +270,17 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
     @Override
     public void run() {
+
+      // still alive?
+      if (!heart.isAlive()) {
+        Logger.error("Heartbeat is dead: shutting down");
+        stop();
+        try {
+          bundleContext.getBundle(0).stop();
+        } catch (Exception e) {
+          // Ignore
+        }
+      }
 
       synchronized (events) {
         long now = System.currentTimeMillis();   // get current time

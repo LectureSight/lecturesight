@@ -62,6 +62,9 @@ public class OCLExecutor extends Thread {
         if (launch(run)) {
           CLEvent marker = oclQueue.enqueueMarker();
           callbackExecutor.execute(new CallbackExecution(marker, run));
+        } else {
+          callbackExecutor.shutdownNow();
+          shutdown();
         }
       }
     } catch (InterruptedException e) {
@@ -123,6 +126,7 @@ public class OCLExecutor extends Thread {
           warn += ": " + msg;
         }
         Logger.error(e, warn);
+        shutdown();
       }
       try {
         if (landing) {
@@ -135,6 +139,7 @@ public class OCLExecutor extends Thread {
           warn += ": " + msg;
         }
         Logger.error(e, warn);
+        shutdown();
       }
     }
   }

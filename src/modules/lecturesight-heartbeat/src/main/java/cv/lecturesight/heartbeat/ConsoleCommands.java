@@ -35,7 +35,7 @@ import org.pmw.tinylog.Logger;
 @Service()
 @Properties({
   @Property(name = "osgi.command.scope", value = "ls"),
-  @Property(name = "osgi.command.function", value = {"run", "stop", "pause", "restart", "step"})
+  @Property(name = "osgi.command.function", value = {"run", "stop", "pause", "restart", "step", "health"})
 })
 public class ConsoleCommands implements DummyInterface {
 
@@ -44,6 +44,12 @@ public class ConsoleCommands implements DummyInterface {
 
   protected void activate(ComponentContext context) {
     Logger.info("Commands activated");
+  }
+
+  public void health(String[] param) {
+    // CHECKSTYLE:OFF
+    System.out.println(main.isAlive() ? "alive" : "dead");
+    // CHECKSTYLE:ON
   }
 
   public void run(String[] param) {
