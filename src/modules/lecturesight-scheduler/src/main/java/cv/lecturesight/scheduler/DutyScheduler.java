@@ -337,19 +337,23 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
         long now = System.currentTimeMillis();   // get current time
         Event current = events.getNextAfter(0);   // get earliest event
 
-        // Step when inactive so that overview images are snapshotted (if configured). This means that
-        // overview images will continue to be processed and displayed at 1fps (execution interval),
-        // without any analysis or camera movement taking place.
-        if (!heart.isRunning()) {
-          heart.step(1);
-        }
+        boolean eventActivity = false;
 
-        // Fire pending events
+        // Fire pending events if there are any
         while ((current != null)  && (current.getTime() <= now)) {
+          eventActivity = true;
           fireEvent(current);
           events.remove(current);
           now = System.currentTimeMillis();
           current = events.getNextAfter(0);
+        }
+
+        // Step when inactive so that overview images are snapshotted (if configured). This means that
+        // overview images will continue to be processed and displayed at 1fps (execution interval),
+        // without any analysis or camera movement taking place.
+        if (!eventActivity && !heart.isRunning()) {
+          // TODO This appears to cause issues with NVIDIA cards
+          // heart.step(1);
         }
       }
     }
