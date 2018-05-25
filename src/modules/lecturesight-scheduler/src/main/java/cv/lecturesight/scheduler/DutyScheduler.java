@@ -20,6 +20,7 @@ import org.pmw.tinylog.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -119,6 +120,8 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   private void loadEvents(File file) {
     Logger.info("Loading schedule from " + file.getName());
 
+    Date now = new Date();
+
     long timeZoneOffset = config.getLong(PROPKEY_TZOFFSET);  // get time zone offset
     timeZoneOffset *= 1000 * 60 * 60;                        // make time zone offset hours
     String agentName = config.get(PROPKEY_AGENTNAME);        // get agent name
@@ -134,15 +137,32 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
           String location = vevent.getLocation();
           if (agentName.isEmpty() || (location != null && location.equals(agentName))) {
 
-            // create start events, apply configured time zone offset to UTC dates from iCal
             Date startDate = new Date(vevent.getStart().getTime() + timeZoneOffset);
+            Date stopDate = new Date(vevent.getEnd().getTime() + timeZoneOffset);
+
+            // create start events, apply configured time zone offset to UTC dates from iCal
             Event startTracker = new Event(startDate.getTime(), Event.Action.START_TRACKING, vevent.getUID());
-            newEvents.add(startTracker);
             Event startOperator = new Event(startDate.getTime() + trackerLeadTime, Event.Action.START_OPERATOR, vevent.getUID());
-            newEvents.add(startOperator);
+
+            // Is this event in progress?
+            if (now.after(startDate) && now.before(stopDate)) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(stopDate);
+                cal.add(Calendar.SECOND, -10);
+              if (now.before(cal.getTime())) {
+                Logger.info("Immediate start for event in progress: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
+                fireEvent(startTracker);
+                fireEvent(startOperator);
+              } else {
+                Logger.info("Ingoring event in progress which finishes within 10s: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
+              }
+            } else {
+              Logger.info("Created recording event: Start: {} End: {}  UID: {}", startDate, stopDate, vevent.getUID());
+              newEvents.add(startTracker);
+              newEvents.add(startOperator);
+            }
 
             // create stop events, apply configured time zone offset to UTC dates from iCal
-            Date stopDate = new Date(vevent.getEnd().getTime() + timeZoneOffset);
             Event stopTracker = new Event(stopDate.getTime(), Event.Action.STOP_TRACKING, vevent.getUID());
             newEvents.add(stopTracker);
             Event stopOperator = new Event(stopDate.getTime() - 1, Event.Action.STOP_OPERATOR, vevent.getUID());
@@ -256,6 +276,37 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   }
 
   /**
+   * Ensure that action associated with current event was set in motion.
+   */
+  void fireEvent(Event event) {
+    Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
+    switch (event.getAction()) {
+
+      case START_TRACKING:
+        metrics.reset();
+        startTracking();
+        break;
+
+      case STOP_TRACKING:
+        stopTracking();
+        metrics.pause();
+        metrics.save(event.getUID());
+        break;
+
+      case START_OPERATOR:
+        startOperator();
+        break;
+
+      case STOP_OPERATOR:
+        stopOperator();
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  /**
    * Periodically called
    * <code>Runnable</code> that is responsible for starting and stopping the
    * tracking and camera operator.
@@ -286,51 +337,24 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
         long now = System.currentTimeMillis();   // get current time
         Event current = events.getNextAfter(0);   // get earliest event
 
-        // Step when inactive so that overview images are snapshotted (if configured). This means that
-        // overview images will continue to be processed and displayed at 1fps (execution interval),
-        // without any analysis or camera movement taking place.
-        if (!heart.isRunning()) {
-          heart.step(1);
-        }
+        boolean eventActivity = false;
 
-        // Fire pending events
+        // Fire pending events if there are any
         while ((current != null)  && (current.getTime() <= now)) {
+          eventActivity = true;
           fireEvent(current);
           events.remove(current);
           now = System.currentTimeMillis();
           current = events.getNextAfter(0);
         }
-      }
-    }
 
-    /**
-     * Ensure that action associated with current event was set in motion.
-     */
-    void fireEvent(Event event) {
-      Logger.debug("Firing action " + event.getAction().name() + " for time " + event.getTime());
-      switch (event.getAction()) {
-
-        case START_TRACKING:
-          metrics.reset();
-          startTracking();
-          break;
-
-        case STOP_TRACKING:
-          stopTracking();
-          metrics.pause();
-          metrics.save(event.getUID());
-          break;
-
-        case START_OPERATOR:
-          startOperator();
-          break;
-
-        case STOP_OPERATOR:
-          stopOperator();
-          break;
-
-        default:
-          break;
+        // Step when inactive so that overview images are snapshotted (if configured). This means that
+        // overview images will continue to be processed and displayed at 1fps (execution interval),
+        // without any analysis or camera movement taking place.
+        if (!eventActivity && !heart.isRunning()) {
+          // TODO This appears to cause issues with NVIDIA cards
+          // heart.step(1);
+        }
       }
     }
   }
