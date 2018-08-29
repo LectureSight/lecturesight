@@ -3,16 +3,16 @@
 import sys,os
 
 pardir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(pardir)
+#print(pardir)
 sys.path.append(pardir)
 
-from sphinx_materialdesign_theme  import __version__
+#from sphinx_materialdesign_theme  import __version__
 
 source_suffix = '.rst'
 master_doc = 'index'
 
-version = __version__
-release = __version__
+version = "0.9.0"
+release = "0.9.0"
 
 
 project = 'LectureSight'
