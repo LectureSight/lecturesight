@@ -22,7 +22,7 @@ author = 'The LectureSight Project'
 language = 'en'
 
 html_favicon = '_static/favicon.png'
-html_logo = '_static/logo.png'
+html_logo = '_static/logo_wide.png'
 
 html_theme = 'theme'
 html_theme_path = ['../']
@@ -59,16 +59,16 @@ html_theme_options = {
     # For details see link.
     # https://getmdl.io/components/index.html#layout-section
     'fixed_drawer': True,
-    'fixed_header': True,
+    'fixed_header': False,
     'header_waterfall': False,
     'header_scroll': False,
 
     # Render title in header.
     # Values: True, False (Default: False)
-    'show_header_title': True,
+    'show_header_title': False,
     # Render title in drawer.
     # Values: True, False (Default: True)
-    'show_drawer_title': True,
+    'show_drawer_title': False,
     # Render footer.
     # Values: True, False (Default: True)
     'show_footer': True
