@@ -60,12 +60,12 @@ html_theme_options = {
     # https://getmdl.io/components/index.html#layout-section
     'fixed_drawer': True,
     'fixed_header': False,
-    'header_waterfall': False,
+    'header_waterfall': True,
     'header_scroll': False,
 
     # Render title in header.
     # Values: True, False (Default: False)
-    'show_header_title': False,
+    'show_header_title': True,
     # Render title in drawer.
     # Values: True, False (Default: True)
     'show_drawer_title': False,
@@ -74,7 +74,7 @@ html_theme_options = {
     'show_footer': True
 }
 
-html_show_sourcelink = True
+html_show_sourcelink = False
 
 rst_prolog= u"""
     .. |project| replace:: Sphinx Material Design Theme
