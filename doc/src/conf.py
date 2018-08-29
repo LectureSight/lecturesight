@@ -65,10 +65,10 @@ html_theme_options = {
 
     # Render title in header.
     # Values: True, False (Default: False)
-    'show_header_title': True,
+    'show_header_title': False,
     # Render title in drawer.
     # Values: True, False (Default: True)
-    'show_drawer_title': False,
+    'show_drawer_title': True,
     # Render footer.
     # Values: True, False (Default: True)
     'show_footer': True
