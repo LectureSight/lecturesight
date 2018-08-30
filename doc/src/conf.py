@@ -51,9 +51,9 @@ html_theme_options = {
     #
     # Values: amber, blue, brown, cyan deep_orange, deep_purple, green, grey, indigo, light_blue,
     #         light_green, lime, orange, pink, purple, red, teal, yellow(Default: indigo)
-    'primary_color': 'blue',
+    'primary_color': 'lecturesight',
     # Values: Same as primary_color. (Default: pink)
-    'accent_color': 'indigo',
+    'accent_color': 'blue',
 
     # Customize layout.
     # For details see link.
