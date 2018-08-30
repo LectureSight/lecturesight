@@ -1,6 +1,6 @@
-=======
-Modules
-=======
+===
+UIs
+===
 
 .. toctree::
    :caption: Table of Contents
