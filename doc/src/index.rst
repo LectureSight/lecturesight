@@ -1,9 +1,12 @@
 Welcome to LectureSight
 =======================
 
-LectureSight is an open source OSGI application that uses OpenCL to
-analyze a video stream in real-time and track the presenter by
-controlling a PTZ camera.
+LectureSight is an Open Source live camera tracking solution mainly
+intended for use in lecture recordings. The system uses unobtrusive
+tracking, analyzing the video stream from an overview camera. The
+lecturer does not need to wear any form of indicator. The system
+is highly customizable and ships with tools for adopting instances
+to particular venues.
 
 Quick Start
 -----------
@@ -58,10 +61,10 @@ Contents
    :glob:
    :maxdepth: 1
 
-   config/index
-   core/index
-   develop/index
    hardware/index
    install/index
-   modules/index
+   config/index
    ui/index
+   core/index
+   modules/index
+   develop/index
