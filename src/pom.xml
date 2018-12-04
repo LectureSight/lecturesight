@@ -111,7 +111,7 @@
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-utils</module>
-        <module>modules/lecturesight-videoanalysis-templ</module>
+        <module>modules/lecturesight-videoanalysis-rerdmann</module>
       </modules>
     </profile>
 

@@ -14,7 +14,7 @@ __kernel void test_processing
 
 	if (pos.x % 8 == 0 && pos.y % 8 == 0)
 	{
-		out_pxl = WHITE
+		out_pxl = WHITE;
 	}
 
 	barrier( CLK_GLOBAL_MEM_FENCE );
