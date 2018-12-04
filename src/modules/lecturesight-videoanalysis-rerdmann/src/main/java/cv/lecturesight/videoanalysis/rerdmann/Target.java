@@ -1,5 +1,7 @@
 package cv.lecturesight.videoanalysis.rerdmann;
 
+import cv.lecturesight.objecttracker.TrackerObject;
+
 class Target {
 
   int id = -1;
