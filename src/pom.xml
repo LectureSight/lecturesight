@@ -11,7 +11,7 @@
   <prerequisites>
     <maven>3.1.0</maven>
   </prerequisites>
-  
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -19,9 +19,9 @@
     <owasp.skip>true</owasp.skip>
   </properties>
 
-  <!--___________________________ Build Profiles ____________________________--> 
+  <!--___________________________ Build Profiles ____________________________-->
   <profiles>
-    
+
     <profile>
       <id>full</id>
       <activation>
@@ -66,11 +66,11 @@
         <module>modules/lecturesight-steeringworker-gui</module>
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-utils</module>
-        <module>modules/lecturesight-videoanalysis-templ</module>
+        <module>modules/lecturesight-videoanalysis-rerdmann</module>
         <module>modules/wulff-visca-api</module>
         <module>modules/wulff-visca-over-ip-service</module>
         <module>modules/wulff-visca-service</module>
-      </modules>      
+      </modules>
     </profile>
 
     <profile>
@@ -152,7 +152,7 @@
         <module>modules/lecturesight-utils</module>
       </modules>
     </profile>
-    
+
     <profile>
       <id>ptz-onvif-only</id>
       <activation>
@@ -167,9 +167,9 @@
         <module>modules/lecturesight-steeringworker-relativemove</module>
         <module>modules/lecturesight-gui-api</module>
         <module>modules/lecturesight-gui-impl</module>
-      </modules>            
+      </modules>
     </profile>
-    
+
     <profile>
       <id>ptz-vapix-only</id>
       <activation>
@@ -259,14 +259,14 @@
         <module>modules/lecturesight-visualization</module>
       </modules>
     </profile>
-    
+
   </profiles>
 
   <!--________________________________ Build ________________________________-->
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
-      
+
       <!-- Require Java 8 or higher for building -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -278,7 +278,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-      
+
       <!-- Deploy OSGi bundles to a container -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -402,7 +402,7 @@
         <artifactId>org.apache.felix.fileinstall</artifactId>
         <version>3.2.8</version>
       </dependency>
-      
+
       <!-- Logging -->
       <dependency>
         <groupId>org.tinylog</groupId>
@@ -414,7 +414,7 @@
         <artifactId>slf4j-binding</artifactId>
         <version>1.3.2</version>
       </dependency>
-      
+
       <!-- SCR Annotations -->
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -433,7 +433,7 @@
         <artifactId>javacl-jna</artifactId>
         <version>1.0.0-RC3</version>
       </dependency>
-      
+
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
@@ -446,7 +446,7 @@
         <artifactId>gst1-java-core</artifactId>
         <version>0.9.1</version>
       </dependency>
-     
+
       <!-- testing -->
       <dependency>
         <groupId>junit</groupId>
@@ -457,7 +457,7 @@
 
     </dependencies>
   </dependencyManagement>
-  
+
   <!--____________________________ Repositories _____________________________-->
   <repositories>
     <repository>
@@ -465,7 +465,7 @@
       <name>Sonatype OSS Snapshots Repository</name>
       <url>https://oss.sonatype.org/content/groups/public</url>
     </repository>
-    
+
     <!-- for JavaCL -->
     <repository>
       <id>nativelibs4java-repo</id>
@@ -475,7 +475,7 @@
         <updatePolicy>daily</updatePolicy>
       </releases>
     </repository>
-    
+
     <!-- Opencast Community repo -->
     <repository>
       <id>opencast</id>
@@ -488,7 +488,7 @@
         <enabled>true</enabled>
       </releases>
     </repository>
-    
+
     <!-- v4l4j -->
     <repository>
       <id>lecturesight-3rd-party</id>
@@ -501,7 +501,7 @@
         <enabled>true</enabled>
       </releases>
     </repository>
-    
+
   </repositories>
 
   <!--_____________________________ Developers ______________________________-->
