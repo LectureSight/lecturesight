@@ -46,7 +46,7 @@ import java.util.Map;
   @Property(name = "osgi.command.scope", value = "va"),
   @Property(name = "osgi.command.function", value = {"reset"})
 })
-public class VideoAnalysisTemplateMatching implements ObjectTracker, ConfigurationListener {
+public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListener {
 
   final int MAX_REGIONS = 36; // maximum number of foreground regions analysed by this Tracker
   final int MAX_TARGETS = 6;  // maximum number of targets this Tracker can track
