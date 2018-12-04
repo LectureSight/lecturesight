@@ -4,7 +4,7 @@ import cv.lecturesight.objecttracker.TrackerObject;
 
 class Target {
 
-  static targetSeq = 1
+  static targetSeq = 1;
 
   int id = -1;
   int seq = -1;
