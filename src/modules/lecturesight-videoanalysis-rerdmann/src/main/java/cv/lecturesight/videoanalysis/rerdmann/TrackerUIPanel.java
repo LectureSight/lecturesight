@@ -36,7 +36,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
     initComponents();
     this.inputDisplay = parent.dsps.getDisplayBySID("cam.overview.input");
     this.parent = parent;
-    display = parent.dsps.getDisplayBySID("visual");
+    display = parent.dsps.getDisplayBySID("test_output");
     displayPanel = display.getDisplayPanel();
     displayPanel.setCustomRenderer(this);
     this.setBackground(Color.black);
