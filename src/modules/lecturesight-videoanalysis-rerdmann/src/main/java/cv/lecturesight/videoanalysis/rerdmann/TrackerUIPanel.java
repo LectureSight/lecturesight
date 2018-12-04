@@ -3,7 +3,7 @@ package cv.lecturesight.videoanalysis.rerdmann;
 import cv.lecturesight.display.CustomRenderer;
 import cv.lecturesight.display.Display;
 import cv.lecturesight.display.DisplayPanel;
-import cv.lecturesight.videoanalysis.templ.VideoAnalysisTemplateMatching.Target;
+import cv.lecturesight.videoanalysis.rerdmann.Target;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,7 +15,7 @@ import java.util.Locale;
 
 public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer {
 
-  VideoAnalysisTemplateMatching parent;
+  VideoAnalysisRErdmann parent;
   Display display;
   Display inputDisplay;
   DisplayPanel displayPanel;
@@ -32,7 +32,7 @@ public class TrackerUIPanel extends javax.swing.JPanel implements CustomRenderer
     initComponents();
   }
 
-  public TrackerUIPanel(VideoAnalysisTemplateMatching parent) {
+  public TrackerUIPanel(VideoAnalysisRErdmann parent) {
     initComponents();
     this.inputDisplay = parent.dsps.getDisplayBySID("cam.overview.input");
     this.parent = parent;

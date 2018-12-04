@@ -6,10 +6,10 @@ import javax.swing.JPanel;
 
 public class TrackerUI implements UserInterface {
 
-  VideoAnalysisTemplateMatching parent;
+  VideoAnalysisRErdmann parent;
   JPanel panel;
 
-  public TrackerUI(VideoAnalysisTemplateMatching parent) {
+  public TrackerUI(VideoAnalysisRErdmann parent) {
     this.parent = parent;
     panel = new TrackerUIPanel(parent);
   }
