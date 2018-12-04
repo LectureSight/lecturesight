@@ -4,6 +4,8 @@ import cv.lecturesight.objecttracker.TrackerObject;
 
 class Target {
 
+  static targetSeq = 1
+
   int id = -1;
   int seq = -1;
 
@@ -41,7 +43,7 @@ class Target {
     this.y = y;
     this.first_x = x;
     this.first_y = y;
-    int ht = TARGET_SIZE / 2;
+    int ht = 32 / 2;
     this.searchbox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
     this.updatebox = new Box(x-ht-5, y-ht-5, x+ht+5, y+ht+5);
     first_seen = System.currentTimeMillis();

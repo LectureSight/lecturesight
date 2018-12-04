@@ -252,7 +252,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
   public void discardObject(TrackerObject object) {
     for (Target t : targets) {
       if (t != null && t.id == object.getId()) {
-        discardTarget(t);
+        //discardTarget(t);
       }
     }
   }
@@ -270,8 +270,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
 
   @Override
   public List<TrackerObject> getCurrentlyTracked() {
-    // return trackable objects which are older than object_min_active milliseconds
-    long seen_before = System.currentTimeMillis() - object_min_active;
+    long seen_before = System.currentTimeMillis();
     List l = new LinkedList<TrackerObject>();
     for (Target t : targets) {
       if ((t != null) && (t.first_seen < seen_before)) {
