@@ -1,4 +1,4 @@
-package cv.lecturesight.videoanalysis.templ;
+package cv.lecturesight.videoanalysis.rerdmann;
 
 import cv.lecturesight.videoanalysis.rerdmann.Target;
 import cv.lecturesight.videoanalysis.rerdmann.Box;

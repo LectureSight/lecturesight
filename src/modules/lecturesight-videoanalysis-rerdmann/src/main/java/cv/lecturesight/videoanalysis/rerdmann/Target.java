@@ -1,3 +1,5 @@
+package cv.lecturesight.videoanalysis.rerdmann;
+
 class Target {
 
   int id = -1;

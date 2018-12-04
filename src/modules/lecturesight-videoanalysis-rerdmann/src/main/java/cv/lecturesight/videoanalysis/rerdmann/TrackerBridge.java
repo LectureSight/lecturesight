@@ -1,4 +1,4 @@
-package cv.lecturesight.videoanalysis.templ;
+package cv.lecturesight.videoanalysis.rerdmann;
 
 import cv.lecturesight.objecttracker.ObjectTracker;
 import cv.lecturesight.script.util.geometry.TrackerTarget;
