@@ -100,6 +100,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   CLKernel update_templates_K;
   CLKernel match_templates_K;
 
+  // Richard: hier Kernel deklarieren
+
   // -- GPU Buffers --
   CLImage2D input_rgb;
   CLImage2D input_rgb_last;
@@ -116,6 +118,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   CLBuffer<Integer> bboxes_gpu;
   CLBuffer<Integer> head_data_gpu;
   CLBuffer<Integer> head_pos_gpu;
+
+  CLBuffer<Integer> person_score_gpu;   // Richard: Ergebnis SVM
 
   int numRegions;
   int[] region_weights;
@@ -203,6 +207,8 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     IntBuffer headpos_host;
     IntBuffer bboxes_host;
 
+    IntBuffer person_score_host;  // Richard
+
     final int[] regionsDim = {MAX_REGIONS};
 
     {
@@ -289,9 +295,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
               }
             }
           } else if (updated.isEmpty()) {
+            // Richard: Plausicheck
             if (changeBox.width() > TARGET_SIZE / 2 && changeBox.height() > TARGET_SIZE / 2) {
               Target new_t = new Target(changeBox.x + changeBox.width() / 2, changeBox.y + TARGET_SIZE / 2);
               int idx = addTarget(new_t);
+              // Richard: addCandidate() --> PersonCheckRun
             }
           }
         }
@@ -301,6 +309,12 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     }
 
   }
+
+
+  // Richard: ComputationRun fuer Personencheck
+  // Achtung: Wenn nix zu tun, trotzdem SIGNAL fuer TrackingUpdateRun casten
+
+
 
   class TrackingUpdateRun implements ComputationRun {
 
@@ -481,8 +495,11 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
     ocl_trackingPrep = new TrackingPreparationRun();
     ocl.registerLaunch(cclabel.getSignal(ConnectedComponentLabeler.Signal.DONE), ocl_trackingPrep);
 
+    /// Richard: ComputationRun PersonenCheck started auf SIG_TRACKPREP
+
     ocl_trackingUpdate = new TrackingUpdateRun();
     ocl.registerLaunch(sig_TRACKPREP, ocl_trackingUpdate);
+    // Richard: ocl.registerLaunch(sig_PERSONCHECK, ocl_trackingUpdate);
 
     ocl_main = new DetectionRun();
     ocl.registerLaunch(sig_START, ocl_main);
