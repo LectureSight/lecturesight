@@ -1,0 +1,7 @@
+git checkout -b <branchName>y
+
+/NetBeansProjects/lecturesight/src/modules/lecturesight-videoanalysis-rerdmann
+git push origin rerdmann
+
+mvn clean install -DdeployTo=//home/rerdmann/NetBeansProjects/lecturesight/runtime/bundles/application
+

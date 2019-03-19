@@ -33,13 +33,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import java.nio.FloatBuffer;
-
 import static ImportFromFile.ImportCNN.*;
-import com.nativelibs4java.opencl.CLImage3D;
-import com.nativelibs4java.opencl.CLImageFormat;
-import com.nativelibs4java.util.NIOUtils;
-import java.util.Arrays;
+
+import com.nativelibs4java.opencl.*;
+import java.awt.Image;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+import org.jocl.*;
+import javax.imageio.ImageReader;
 
 //OSGI Definitionen
 @Component(name = "lecturesight.videoanalysis", immediate = true)
@@ -71,6 +75,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     
     //Format for 3d images
     CLImageFormat format = new CLImageFormat(CLImageFormat.ChannelOrder.RGBA, CLImageFormat.ChannelDataType.Float);
+    CLImageFormat file_input_format = new CLImageFormat(CLImageFormat.ChannelOrder.BGRA, CLImageFormat.ChannelDataType.UNormInt8);
     // configuration properties for this service (resources/conf/default.properties)--
     private final static String PROPKEY_TESTPARAM = "param1"; //siehe Other Sources conf
 
@@ -86,6 +91,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     //OCL Signale=Kommunikation Graka CPU
     OCLSignal sig_START;        // signal triggering processing of new frame
     OCLSignal sig_VA_DONE;      // signal indicating that VideoAnalysis is done
+    //OCLSignal sig_MYSTART;
 
     @Reference
     DisplayService dsps;        // display service
@@ -98,7 +104,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     ComputationRun ocl_test_run;    // example of a ComputationRun
 
     // -- OpenCL Kernels --
-    //CLKernel test_kernel;           // example of kernel used in ocl_test_run
+    CLKernel image_import_kernel;           // example of kernel used in ocl_test_run
     CLKernel sobel_kernel;
     CLKernel grayscale_kernel;
     CLKernel hog_kernel_gradient;
@@ -110,14 +116,18 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     
     
     CLKernel input_layer_kernel;
-    CLKernel conv_layer_kernel;
     CLKernel pooling_layer_kernel;
     CLKernel dense_layer_kernel;
     CLKernel print_3d_kernel;
     CLKernel max_pooling_kernel;
+    CLKernel conv_layer_kernel;
+    CLKernel flatten_kernel;
+    CLKernel dense_kernel;
 
     // -- GPU Buffers -- (siehe openCL-Klasse)
     CLImage2D input_rgb;            // input image GPU buffer
+    CLImage2D file_input_rgb;
+    CLImage2D file_input_rgb_temp;
     CLImage2D test_result_image;    // GPU buffer for result of ocl_test_run
     CLImage2D io_grayscale_image;
     CLImage2D hog_gradient_image;
@@ -136,6 +146,7 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     CLBuffer<Float> features_gpu;
     CLBuffer<Float> features_empty_gpu;
     CLBuffer<Float> descriptor_gpu;
+    CLBuffer<Float> tester_gpu;
     CLBuffer<Float> norm_gpu;
     CLBuffer<Float> norm_factor_gpu;
     CLBuffer<Float> svm_y_gpu;
@@ -155,10 +166,14 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     CLBuffer<Float> conv2d_3_weights_gpu;
     CLBuffer<Float> conv2d_3_bias_gpu;
     CLImage3D pool_3_gpu;
-    CLImage2D dense_1_gpu;
-    CLImage2D dense_2_gpu;
+    CLBuffer<Float> dense_1_gpu;
+    CLBuffer<Float> dense_1_weights_gpu;
+    CLBuffer<Float> dense_1_bias_gpu;
+    CLBuffer<Float> dense_2_gpu;
+    CLBuffer<Float> dense_2_weights_gpu;
+    CLBuffer<Float> dense_2_bias_gpu;
     CLBuffer<Float> test_gpu;
-   
+    CLBuffer<Float> flatten_1_gpu;
     // Host arrays for object data (Klone der GPU Buffer zum speichern der Ergebnisse)
     int[] region_centroids;               // recieves values from centroids_gpu
     int[] region_bboxes;                  // recieves values from bboxes_gpu
@@ -170,22 +185,30 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
 
     // dimensions of input images
     int[] imageWorkDim;         // work group size of per-pixel kernels
-    int[] workingDim = new int[]{image_height, image_width};
+    int[] workingDim = new int[]{64, 64};
     int[] cropDim = new int[]{480, 480};
+    int[] fileDim = new int[]{64,64};
+    
     // GPU max workgroup size
     long gpu_maxworkgroupsize;
 
     //Buffer to reset feature_Buffer (features_gpu)
     ByteBuffer buf = ByteBuffer.allocate(1000);
     // initially loads configuration property values (hold die defaultProperties in den Code z.B. macimale Anz an Ziele)
-
+    BufferedImage img;
+    Image image;
+    int imageSizeX;
+    int imageSizeY;    
+    private cl_context context;
+    
+    boolean first_run = true; //indicates first run for status messages
     private void mapParameters() {
         param1 = config.getInt(PROPKEY_TESTPARAM);
     }
 
     // get OpenCL kernels
     private void getKernels() {
-        //test_kernel = ocl.programs().getKernel("test", "test_processing"); //Kerneldatei, Kernelname
+        image_import_kernel = ocl.programs().getKernel("imageImport", "image_import_processing"); //Kerneldatei, Kernelname
         sobel_kernel = ocl.programs().getKernel("sobel", "SobelDetector"); //Kerneldatei, Kernelname
         grayscale_kernel = ocl.programs().getKernel("grayscale", "grayscale_processing"); //Kerneldatei, Kernelname
         hog_kernel_gradient = ocl.programs().getKernel("hog", "compute_hog_gradient"); //Kerneldatei, Kernelname    
@@ -196,16 +219,18 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
         crop_kernel = ocl.programs().getKernel("cropKernel", "crop"); //Kerneldatei, Kernelname
         
         input_layer_kernel = ocl.programs().getKernel("input_layer", "compute_input_layer"); //Kerneldatei, Kernelname
-        conv_layer_kernel = ocl.programs().getKernel("ConvLayer", "compute_conv_layer"); //Kerneldatei, Kernelname
         print_3d_kernel = ocl.programs().getKernel("print3DImage", "compute_print_3d_image"); //Kerneldatei, Kernelname
         max_pooling_kernel = ocl.programs().getKernel("PoolingLayer", "compute_max_pooling"); //Kerneldatei, Kernelname
+        conv_layer_kernel = ocl.programs().getKernel("conv_layer", "compute_conv_layer"); //Kerneldatei, Kernelname
+        flatten_kernel = ocl.programs().getKernel("FlatteningLayer","compute_flatten");
+        dense_kernel = ocl.programs().getKernel("DenseLayer","compute_dense");
     }
 
     // allocates an OpenCL Image buffer (Allokiert Speicherplatz für Bilder hier für das Resultatbild) Sinnvoll für z.B. nn
     private CLImage2D allocImage2D(Format format, int[] dim) {
         return ocl.context().createImage2D(CLMem.Usage.InputOutput, format.getCLImageFormat(), dim[0], dim[1]);
     }
-
+    
     // initialize GPU buffers (e.g. setting image buffers to black)
     private void initBuffers() {
         ocl.utils().setValues(0, 0, imageWorkDim[0], imageWorkDim[1], test_result_image, 0, 0, 0, 255);
@@ -214,6 +239,9 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
 
     // registers displays that show up in the UI
     private void registerDisplays() {
+        dsps.registerDisplay("File Input", file_input_rgb, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
+        dsps.registerDisplay("File Input Imported", file_input_rgb_temp, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
+        dsps.registerDisplay("input_rgb", input_rgb, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
         dsps.registerDisplay("test_output", test_result_image, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
         dsps.registerDisplay("hog_gradient_output", hog_gradient_image, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
         dsps.registerDisplay("grayscale_output", io_grayscale_image, sig_VA_DONE); //Titel, GPU-Buffer, der dargestellt werden soll, Signal dass Ausgabe trigert)
@@ -228,10 +256,11 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
     private void allocateBuffers() throws IllegalStateException {
         // obtain input image buffer from FrameSource
         input_rgb = fsrc.getImage();
-
+        
         // allocate working buffers
         test_result_image = allocImage2D(Format.RGBA_UINT8, imageWorkDim);
-        io_grayscale_image = allocImage2D(Format.RGBA_UINT8, workingDim);
+        //io_grayscale_image = allocImage2D(Format.RGBA_UINT8, imageWorkDim);
+        io_grayscale_image = allocImage2D(Format.RGBA_UINT8, fileDim);
         hog_gradient_image = allocImage2D(Format.RGBA_UINT8, workingDim);
         
         cropped_image = allocImage2D(Format.RGBA_UINT8, cropDim);
@@ -249,16 +278,21 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
         features_empty_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, features_size);
         descriptor_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, descriptor_size);
 
+        tester_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 20);
         //allocate buffers and arrays for CNN
-        conv2d_1_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,64 ,64 ,32 ); // Siehe Heterogenous computing opencl P.80 //old: new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float)
+        conv2d_1_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,64 ,64 ,64 ); // Siehe Heterogenous computing opencl P.80 //old: new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float)
         pool_1_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,13 ,13 ,64 );
-         
-        /*conv2d_2_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float),conv2d_2_i ,conv2d_2_i ,conv2d_2_c ); // Siehe Heterogenous computing opencl P.80
-        conv2d_3_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float),conv2d_3_i ,conv2d_3_i ,conv2d_3_c ); // Siehe Heterogenous computing opencl P.80
-        dense_1_gpu = ocl.context().createImage2D(CLMem.Usage.InputOutput, new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float),dense_1_c ,dense_1_f); // Siehe Heterogenous computing opencl P.80
-        dense_2_gpu = ocl.context().createImage2D(CLMem.Usage.InputOutput, new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float),dense_1_c ,dense_1_f); // Siehe Heterogenous computing opencl P.80
-        cnn_out_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 2);*/
-        test_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 169);
+        conv2d_2_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,13 ,13 ,32 ); // Siehe Heterogenous computing opencl P.80 //old: new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float)
+        pool_2_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,3 ,3 ,32 );
+        conv2d_3_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,3 ,3 ,32 ); // Siehe Heterogenous computing opencl P.80 //old: new CLImageFormat(CLImageFormat.ChannelOrder.R, CLImageFormat.ChannelDataType.Float)
+        pool_3_gpu = ocl.context().createImage3D(CLMem.Usage.InputOutput, format,1 ,1 ,32 );
+        flatten_1_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 32);
+        dense_1_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 512);
+        dense_2_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 2);
+        
+        test_gpu = ocl.context().createFloatBuffer(CLMem.Usage.InputOutput, 4096);
+            
+        
         // init host arrays for object data
         region_centroids = new int[MAX_REGIONS * 2];
         region_bboxes = new int[MAX_REGIONS * 4];
@@ -269,16 +303,19 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
 
     }
     
-    protected void activate(ComponentContext cc) {
+    protected void activate(ComponentContext cc) throws IOException {
  
         fsrc = fsp.getFrameSource();              // obtain frame source
 
         sig_START = fsrc.getSignal();             // obtain start signal
         sig_VA_DONE = ocl.getSignal("VA_DONE");   // create finish signal
-
+        //sig_MYSTART = ocl.getSignal("RERDMANN_START");  // Richard: Custom start signal
+        
         // determine input image dimensions (=work group size for image processing kernel)
         imageWorkDim = new int[]{fsrc.getWidth(), fsrc.getHeight()};
-
+        
+        importFile();
+        
         // do the usual init steps
         mapParameters();      // get computation parameters from configuration
         getKernels();         // get kernels
@@ -302,25 +339,51 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
         float[] conv2d_1_bias = extractBias(conv2d_1);
         conv2d_1_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(conv2d_1_weights)); 
         conv2d_1_bias_gpu = makeFloatBuffer(ocl, conv2d_1_bias);
-        System.out.println("Imported Weights of Convolutional Layer as: Conv2d_1");
+        System.out.println("### Imported Weights of Convolutional Layer as: Conv2d_1");
 
         float[][][] conv2d_2 = readWeights("/home/rerdmann/Desktop/MasterThesis/INRIAPerson/weights/Conv2d_2.txt", 64, 32, 9);
         float[][][] conv2d_2_weights = extractWeights(conv2d_2);
         float[] conv2d_2_bias = extractBias(conv2d_2);
-        conv2d_1_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(conv2d_2_weights)); 
-        conv2d_1_bias_gpu = makeFloatBuffer(ocl, conv2d_2_bias);
-        System.out.println("Imported Weights of Convolutional Layer as: Conv2d_2");
+        conv2d_2_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(conv2d_2_weights)); 
+        conv2d_2_bias_gpu = makeFloatBuffer(ocl, conv2d_2_bias);
+        System.out.println("### Imported Weights of Convolutional Layer as: Conv2d_2");
 
         float[][][] conv2d_3 = readWeights("/home/rerdmann/Desktop/MasterThesis/INRIAPerson/weights/Conv2d_3.txt", 32, 32, 9);
         float[][][] conv2d_3_weights = extractWeights(conv2d_3);
         float[] conv2d_3_bias = extractBias(conv2d_3);
-        conv2d_1_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(conv2d_3_weights)); 
-        conv2d_1_bias_gpu = makeFloatBuffer(ocl, conv2d_3_bias);
-        System.out.println("Imported Weights of Convolutional Layer as: Conv2d_3");
-    }
+        conv2d_3_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(conv2d_3_weights)); 
+        conv2d_3_bias_gpu = makeFloatBuffer(ocl, conv2d_3_bias);
+        System.out.println("### Imported Weights of Convolutional Layer as: Conv2d_3");
+        
+        float [][][] dense_1 = readWeights("/home/rerdmann/Desktop/MasterThesis/INRIAPerson/weights/Dense_1.txt",32,512,1);
+        float [][][] dense_1_weights = extractWeights(dense_1);
+        float [] dense_1_bias = extractBias(dense_1);    
+        dense_1_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(dense_1_weights)); 
+        dense_1_bias_gpu = makeFloatBuffer(ocl, dense_1_bias);
+        System.out.println("### Imported Weights of Dense Layer as: Dense_1");
+        
+        float [][][] dense_2 = readWeights("/home/rerdmann/Desktop/MasterThesis/INRIAPerson/weights/Dense_2.txt",512,2,1);
+        float [][][] dense_2_weights = extractWeights(dense_2);
+        float [] dense_2_bias = extractBias(dense_2);
+        dense_2_weights_gpu = makeFloatBuffer(ocl, getFlatWeights(dense_2_weights)); 
+        dense_2_bias_gpu = makeFloatBuffer(ocl, dense_2_bias);
+        System.out.println("### Imported Weights of Dense Layer as: Dense_2");
+      }
 
     protected void deactivate(ComponentContext cc) throws Exception {
         Logger.info("Deactivated.");
+    }
+
+    private void importFile() {
+        String fileName = "/home/rerdmann/Desktop/MasterThesis/INRIAPerson/OneFile/crop001001a.png";
+        
+        img = createBufferedImage(fileName); 
+        image = (Image)img;     
+        fileDim = new int[]{(int)img.getWidth(),(int)img.getHeight()};
+        cropDim = new int[]{(int)img.getWidth(),(int)img.getWidth()};
+        file_input_rgb = ocl.context().createImage2D(CLMem.Usage.Input, image, true);
+        file_input_rgb_temp = ocl.context().createImage2D(CLMem.Usage.InputOutput, format, img.getWidth(), img.getHeight());
+        System.out.println(file_input_rgb.getFormat());
     }
 
     class ExampleComputationRun implements ComputationRun {
@@ -330,27 +393,63 @@ public class VideoAnalysisRErdmann implements ObjectTracker, ConfigurationListen
             // Ignore when shutting down
             if (ocl == null) {
                 return;
-            }
+            } 
 
+            //Preparing image
             features_empty_gpu.copyTo(queue, features_gpu);
-            //WICHTIG!!! mal schauen ob der sobel auf rgb und dann grayscale besser ist als sobel mit grayscale
-            crop_kernel.setArgs(input_rgb, cropped_image);
+            //WICHTIG!!! mal schauen ob der sobel auf rgb und dann grayscale besser ist als sobel mit grayscale             
+            
+            image_import_kernel.setArgs(file_input_rgb, file_input_rgb_temp);
+            image_import_kernel.enqueueNDRange(queue, fileDim);
+            if(first_run)System.out.println("### Executing: Test_Kernel");
+            
+            crop_kernel.setArgs(file_input_rgb_temp, cropped_image);
             crop_kernel.enqueueNDRange(queue, cropDim);
+            if(first_run)System.out.println("### Executing: Image_Crop");
             nn_kernel.setArgs(cropped_image, nn_image);
             nn_kernel.enqueueNDRange(queue, workingDim);
+            if(first_run)System.out.println("### Executing: NearestNeighbor Scaling");
             bi_kernel.setArgs(cropped_image, bi_image);
             bi_kernel.enqueueNDRange(queue, workingDim);
-
-            input_layer_kernel.setArgs(bi_image, conv2d_1_weights_gpu, conv2d_1_bias_gpu, conv2d_1_gpu,input_layer_image);
-            input_layer_kernel.enqueueNDRange(queue, new int[]{64, 64, 32});
+            if(first_run)System.out.println("### Executing: Bilinear Scaling");
+            //Execuing ConvNet
+            input_layer_kernel.setArgs(bi_image, conv2d_1_weights_gpu, conv2d_1_bias_gpu, conv2d_1_gpu,input_layer_image);   
+            input_layer_kernel.enqueueNDRange(queue, new int[]{64, 64, 64});   
+            if(first_run)System.out.println("### Executing ConvNet layer: conv2d_1");
             max_pooling_kernel.setArgs(conv2d_1_gpu, pool_1_gpu, 5, 5);
-            max_pooling_kernel.enqueueNDRange(queue, new int[]{13, 13, 64});
+            max_pooling_kernel.enqueueNDRange(queue, new int[]{13, 13, 64});   
+            if(first_run)System.out.println("### Executing ConvNet layer: pool_1");
+            conv_layer_kernel.setArgs(pool_1_gpu, conv2d_2_weights_gpu, conv2d_2_bias_gpu, conv2d_2_gpu,64);
+            conv_layer_kernel.enqueueNDRange(queue, new int[]{13, 13, 32});   
+            if(first_run)System.out.println("### Executing ConvNet layer: conv2d_2");            
+            max_pooling_kernel.setArgs(conv2d_2_gpu, pool_2_gpu, 5, 5);
+            max_pooling_kernel.enqueueNDRange(queue, new int[]{3, 3, 32});   
+            if(first_run)System.out.println("### Executing ConvNet layer: pool_2");       
+            conv_layer_kernel.setArgs(pool_2_gpu, conv2d_3_weights_gpu, conv2d_3_bias_gpu, conv2d_3_gpu,32);
+            conv_layer_kernel.enqueueNDRange(queue, new int[]{3, 3, 32});   
+            if(first_run)System.out.println("### Executing ConvNet layer: conv2d_3");
+            max_pooling_kernel.setArgs(conv2d_3_gpu, pool_3_gpu, 5, 5);
+            max_pooling_kernel.enqueueNDRange(queue, new int[]{1, 1, 32});   
+            if(first_run)System.out.println("### Executing ConvNet layer: pool_3");
+            flatten_kernel.setArgs(pool_3_gpu, flatten_1_gpu);
+            flatten_kernel.enqueueNDRange(queue, new int[]{1, 1, 32});   
+            if(first_run)System.out.println("### Executing ConvNet layer: flatten_1");
+            dense_kernel.setArgs(flatten_1_gpu, dense_1_weights_gpu, dense_1_bias_gpu, dense_1_gpu,32);
+            dense_kernel.enqueueNDRange(queue, new int[]{512});   
+            if(first_run)System.out.println("### Executing ConvNet layer: flatten_2");
+            dense_kernel.setArgs(dense_1_gpu, dense_2_weights_gpu, dense_2_bias_gpu, dense_2_gpu,512);
+            dense_kernel.enqueueNDRange(queue, new int[]{2});   
+            if(first_run)System.out.println("### Executing ConvNet layer: flatten_2");
+            
+            //print_CLBuffer_Float(queue, dense_2_gpu);
+            //count_CLBuffer_Float(queue, dense_1_bias_gpu);
             
             //Testkernel to check if 3d image is written   
-            print_3d_kernel.setArgs(pool_1_gpu,test_gpu);
-            print_3d_kernel.enqueueNDRange(queue, new int[]{13, 13}); 
-            print_CLBuffer_Float(queue, test_gpu);
+            //print_3d_kernel.setArgs(flatten_1_gpu,test_gpu);
+            //print_3d_kernel.enqueueNDRange(queue, new int[]{64, 64}); 
+            //print_CLBuffer_Float(queue, test_gpu);
             
+            first_run=false;
             
             //grayscale_kernel.setArgs(nn_image, io_grayscale_image);
             //grayscale_kernel.enqueueNDRange(queue, workingDim);    

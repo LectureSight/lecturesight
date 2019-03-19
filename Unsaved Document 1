@@ -1,0 +1,34 @@
+ if( x >= 1 && x < (width-1) && y >= 1 && y < height - 1)
+    {
+        out_pxl = read_imageui(input, sampler, (int2)(x-1, y-1));
+        float4 i00 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x, y-1));
+        float4 i10 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x+1, y-1));
+        float4 i20 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x-1, y));
+        float4 i01 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x, y));
+        float4 i11 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x+1, y));
+        float4 i21 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x-1, y+1));
+        float4 i02 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x, y+1));
+        float4 i12 = convert_float4(out_pxl);
+        out_pxl = read_imageui(input, sampler, (int2)(x+1, y+1));
+        float4 i22 = convert_float4(out_pxl);
+
+        //              ⎡−1 0 1 ⎤
+        //G_x = G x A = ⎢−2 0 2 ⎥ x A 
+        //              ⎣−1 0 1 ⎦
+        //    
+        //              ⎡−1 −2 −1⎤
+        //G_y = G x A = ⎢ 0  0  0⎥ x A
+        //              ⎣ 1  2  1⎦
+                
+                
+        Gx = i00 + (float4)(2) * i10 + i20 - i02 - (float4)(2) * i12 -i22;
+        Gy = i00 - i20 + (float4)(2)*i01 - (float4)(2)*i21 + i02 - i22;
+        uint4 out_pxl = convert_uint4(hypot(Gx, Gy)/(float4)(2));
+    }

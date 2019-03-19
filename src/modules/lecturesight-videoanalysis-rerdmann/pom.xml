@@ -86,6 +86,11 @@
         <groupId>org.tinylog</groupId>
         <artifactId>tinylog</artifactId>
     </dependency>
+    <dependency>
+        <groupId>org.jocl</groupId>
+        <artifactId>jocl</artifactId>
+        <version>2.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>
