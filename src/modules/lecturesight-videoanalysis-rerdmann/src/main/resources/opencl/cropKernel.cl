@@ -16,7 +16,8 @@ __kernel void crop(
     
     
     //Crop horizontal middle of image
-    float inX = ((input_width-output_width)/2)+outX;
+    float inX = outX;
+    //float inX = ((input_width-output_width)/2)+outX;
     float inY = outY;
     //float inY = ((input_height-output_height)/2)+outY;
     

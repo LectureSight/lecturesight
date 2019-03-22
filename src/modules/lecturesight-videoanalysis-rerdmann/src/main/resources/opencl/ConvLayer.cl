@@ -1,4 +1,4 @@
-const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP_TO_EDGE;
+const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_FILTER_NEAREST | CLK_ADDRESS_CLAMP;
 
 #ifdef TANH
     #define ACTIVATION_FUNCTION(output) (tanh(output))
@@ -19,7 +19,9 @@ __kernel void compute_conv_layer(
     __global float *weights,   
     __global float *bias,    
     __write_only image3d_t output,
-    int channel)
+    int channel,
+    __write_only image2d_t test_image,  
+    __global float *outputBuffer)
 {    
     //Kernel for every Pixel of Input-Image
     //3 Channel (RGB)
@@ -36,75 +38,28 @@ __kernel void compute_conv_layer(
     int filter = get_global_id(2); //Filter
     float fi[9];
     float result = 0;
-    //read weights
-    
     /*
     0|1|2
     3|4|5
     6|7|8
     */   
+    //sampler: CLK_ADDRESS_CLAMP = returns 0 for coordinates out of image size
     float in = 0;
     for(int c=0; c < channel; c++)
-    {
+    {        
+        fi[0]=read_imagef(input, sampler, (float4)(inX-1,inY-1,filter,0)).x; 
+        fi[1]=read_imagef(input, sampler, (float4)(inX,inY-1,filter,0)).x; 
+        fi[2]=read_imagef(input, sampler, (float4)(inX+1,inY-1,filter,0)).x;          
+        fi[3]=read_imagef(input, sampler, (float4)(inX-1,inY,filter,0)).x;
         fi[4]=read_imagef(input, sampler, (float4)(inX,inY,filter,0)).x;
-        //padding same (fill corners with zeros
-        //left corner
-        if(inX == 0)
-        {
-            fi[0] = 0;
-            fi[3] = 0;
-            fi[6] = 0;
-        }
-        else
-        {
-            fi[0]=read_imagef(input, sampler, (float4)(inX-1,inY-1,filter,0)).x;            
-            fi[3]=read_imagef(input, sampler, (float4)(inX-1,inY,filter,0)).x;
-            fi[6]=read_imagef(input, sampler, (float4)(inX-1,inY+1,filter,0)).x;
-        }
-        //right corner
-        if(inX == inWidth)
-        {
-            fi[2] = 0;
-            fi[5] = 0;
-            fi[8] = 0;
-        }
-        else
-        {
-            fi[2]=read_imagef(input, sampler, (float4)(inX+1,inY-1,filter,0)).x;
-            fi[5]=read_imagef(input, sampler, (float4)(inX+1,inY,filter,0)).x;
-            fi[8]=read_imagef(input, sampler, (float4)(inX+1,inY+1,filter,0)).x; 
-        }
-        //top corner
-        if(inY == 0)
-        {
-            fi[0] = 0;
-            fi[1] = 0;
-            fi[2] = 0;
-        }
-        else
-        {
-            fi[0]=read_imagef(input, sampler, (float4)(inX-1,inY-1,filter,0)).x;
-            fi[1]=read_imagef(input, sampler, (float4)(inX,inY-1,filter,0)).x;
-            fi[2]=read_imagef(input, sampler, (float4)(inX+1,inY-1,filter,0)).x;
-        }
-        //bottom corner
-        if(inY == inHeight)
-        {
-            fi[6] = 0;
-            fi[7] = 0;
-            fi[8] = 0;
-        } 
-        else
-        {            
-            fi[6]=read_imagef(input, sampler, (float4)(inX-1,inY+1,filter,0)).x;
-            fi[7]=read_imagef(input, sampler, (float4)(inX,inY+1,filter,0)).x;
-            fi[8]=read_imagef(input, sampler, (float4)(inX+1,inY+1,filter,0)).x; 
-        }  
+        fi[5]=read_imagef(input, sampler, (float4)(inX+1,inY,filter,0)).x;
+        fi[6]=read_imagef(input, sampler, (float4)(inX-1,inY+1,filter,0)).x;
+        fi[7]=read_imagef(input, sampler, (float4)(inX,inY+1,filter,0)).x;
+        fi[8]=read_imagef(input, sampler, (float4)(inX+1,inY+1,filter,0)).x; 
+        
         for(int i=0; i < kernel_size; i++) {
-            //(f*channel*kernel_size)   : (current Filter * input channels * weights per kernel) => filters before
-            //(c*kernel_size)           : (current channel * weights per kernel) => channel before
-            //i                         : current weight
-            result = result + (fi[i]*weights[1]);
+            result = result + (fi[i]*weights[(f*kernel_size*channel)+(f*kernel_size)+i]);
+            //outputBuffer[c*kernel_size + i] = (f*kernel_size*channel)+(f*kernel_size)+i;
         }
     }    
     result = bias[f] + result;  
@@ -112,4 +67,16 @@ __kernel void compute_conv_layer(
     
     barrier( CLK_GLOBAL_MEM_FENCE );//synchro der Threads im Grid => wichtig wegen des ifs. Hier werden alle Threads gleichzeitig ausgeführt
     write_imagef(output,out_pos,(float4)(result,0,0,0));
+    if(f == 0)
+    {
+        write_imagef(test_image, (int2)(inX, inY), (float4)(result, result, result, 255));
+        if(inX == inY && inX == 1)
+        {
+            outputBuffer[28] = read_imagef(input, sampler, (float4)(inX,inY,0,0)).x;                   
+            outputBuffer[29] = read_imagef(input, sampler, (float4)(inX,inY,1,0)).x;           
+            outputBuffer[30] = read_imagef(input, sampler, (float4)(inX,inY,2,0)).x;
+
+            outputBuffer[31] = result;
+        }
+    }
 }
