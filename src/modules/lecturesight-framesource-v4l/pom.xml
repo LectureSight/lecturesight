@@ -53,7 +53,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-scr-plugin</artifactId>
-        <version>1.21.0</version>
         <executions>
           <execution>
             <id>generate-scr-scrdescriptor</id>
@@ -62,23 +61,21 @@
             </goals>
           </execution>
         </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>3.0.4</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.0.1</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Import-Package>
+              cv.lecturesight.framesource,
+              cv.lecturesight.util.conf,
+              org.osgi.service.component,
+              org.pmw.tinylog,
+            </Import-Package>
             <Bundle-SymbolicName>cv.lecturesight.framesource.v4l</Bundle-SymbolicName>
             <Private-Package>
               au.edu.jcu.v4l4j,

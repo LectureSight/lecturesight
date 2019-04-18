@@ -20,6 +20,7 @@ package cv.lecturesight.framesource.videofile;
 import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 
+import org.freedesktop.gstreamer.Bin;
 import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Caps;
@@ -28,7 +29,7 @@ import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.GstObject;
 import org.freedesktop.gstreamer.Pad;
 import org.freedesktop.gstreamer.PadDirection;
-import org.freedesktop.gstreamer.PadLinkReturn;
+import org.freedesktop.gstreamer.PadLinkException;
 import org.freedesktop.gstreamer.Pipeline;
 import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
@@ -90,7 +91,7 @@ public class VideoFilePipeline implements FrameGrabber {
     // Write pipeline .dot file. Requires gstreamer configured with "--gst-enable-gst-debug"
     //  and the environment variable GST_DEBUG_DUMP_DOT_DIR set to a basepath (e.g. /tmp)
     if (Logger.getLevel(VideoFilePipeline.class) == Level.DEBUG) {
-      pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, "ls-framesource", false);
+      pipeline.debugToDotFile(Bin.DebugGraphDetails.SHOW_ALL, "ls-framesource");
     }
 
     if (!playing) {
@@ -101,7 +102,7 @@ public class VideoFilePipeline implements FrameGrabber {
 
     try {
       Structure structure = appsink.getSinkPads().get(0)
-      .getNegotiatedCaps().getStructure(0);
+      .getCurrentCaps().getStructure(0);
       width = structure.getInteger("width");
       height = structure.getInteger("height");
     } catch (Exception e) {
@@ -145,11 +146,11 @@ public class VideoFilePipeline implements FrameGrabber {
       public void padAdded(Element element, Pad pad) {
         Pad peerPad = videoconvert.getStaticPad("sink");
         if (pad.getDirection() == PadDirection.SRC) {
-          PadLinkReturn result = pad.link(peerPad);
-          if ((result != PadLinkReturn.OK) && (result != PadLinkReturn.WAS_LINKED)) {
-            Logger.error("Can't link decodebin to videoconvert");
-          } else {
+          try {
+            pad.link(peerPad);
             elementsLinked = true;
+          } catch (PadLinkException e) {
+            Logger.error("Can't link decodebin to videoconvert");
           }
         }
       }
