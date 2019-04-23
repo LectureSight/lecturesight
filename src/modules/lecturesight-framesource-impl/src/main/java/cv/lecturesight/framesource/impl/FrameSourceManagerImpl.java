@@ -34,6 +34,7 @@ import cv.lecturesight.util.conf.Configuration;
 import com.nativelibs4java.opencl.CLImage2D;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.ServiceReference;
@@ -46,9 +47,7 @@ import org.pmw.tinylog.Logger;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -57,6 +56,7 @@ import java.util.Map;
  */
 @Component(name = "lecturesight.framesource.manager", immediate = true)
 @Service
+@Property(name= EventConstants.EVENT_TOPIC, value={FrameSourceManagerImpl.OSGI_EVENT_REGISTERED, FrameSourceManagerImpl.OSGI_EVENT_UNREGISTERED})
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
@@ -124,12 +124,6 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     } catch (Exception e) {
       Logger.error("Error during scanning for plugins", e);
     }
-
-    // listen to bundle un-/register events
-    String[] topics = new String[]{OSGI_EVENT_REGISTERED, OSGI_EVENT_UNREGISTERED};
-    Dictionary<String, Object> props = new Hashtable<String, Object>();
-    props.put(EventConstants.EVENT_TOPIC, topics);
-    cc.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
     try {
       providerMRL = new FrameSourceDescriptor(config.get(PROPKEY_MRL));
