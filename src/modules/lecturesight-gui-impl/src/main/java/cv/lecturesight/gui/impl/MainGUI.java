@@ -21,9 +21,7 @@ import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.conf.ConfigurationService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -32,11 +30,9 @@ import org.pmw.tinylog.Logger;
 
 import java.awt.HeadlessException;
 
-@Component(name="lecturesight.gui", immediate=true)
-@Service
 public class MainGUI implements DummyInterface {
 
-  @Reference
+  @Setter
   private ConfigurationService configService;
 
   UserInterfaceTracker uiTracker;

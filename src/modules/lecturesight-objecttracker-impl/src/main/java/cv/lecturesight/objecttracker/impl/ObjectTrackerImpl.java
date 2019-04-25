@@ -25,29 +25,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Object Tracker Service
  *
  */
-@Component(name = "lecturesight.objecttracker.simpel", immediate = true)
-@Service
 public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
   
-  @Reference
+  @Setter
   private Configuration config;
   
-  @Reference
+  @Setter
   OpenCLService ocl;
   
-  @Reference
+  @Setter
   private RegionTracker rTracker;
   
-  @Reference
+  @Setter
   private DecoratorManager dManager;
   
   OCLSignal sig_DONE;
@@ -65,9 +61,9 @@ public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
   final static String OBJ_PROPKEY_INSCENE = "obj.in_scene";
   final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
 
-  @Reference
+  @Setter
   ForegroundService fgs;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
 
   protected void activate(ComponentContext cc) throws Exception {

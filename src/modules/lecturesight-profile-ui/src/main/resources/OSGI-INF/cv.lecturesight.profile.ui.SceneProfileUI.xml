@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.profile.editor">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.gui.api.UserInterface"/>
+        <provide interface="cv.lecturesight.profile.api.SceneProfileListener"/>
+    </service>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <reference name="spm" interface="cv.lecturesight.profile.api.SceneProfileManager" cardinality="1..1" policy="static" bind="setSpm"/>
+    <implementation class="cv.lecturesight.profile.ui.SceneProfileUI"/>
+</scr:component>

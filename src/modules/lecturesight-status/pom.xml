@@ -55,12 +55,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
         <groupId>org.tinylog</groupId>
@@ -75,21 +71,6 @@
 
   <build>
     <plugins>
-
-     <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -103,6 +84,9 @@
             </Import-Package>
             <Embed-Transitive>true</Embed-Transitive>
             <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=http*|fluent-hc|commons-logging</Embed-Dependency>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.status.StatusServiceImpl.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

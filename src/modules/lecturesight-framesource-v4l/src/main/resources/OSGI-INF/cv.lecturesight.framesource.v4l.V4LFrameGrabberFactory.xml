@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.framesource.v4l">
+    <property name="cv.lecturesight.framesource.name" value="Video4Linux"/>
+    <property name="cv.lecturesight.framesource.type" value="v4l, v4l2"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.framesource.FrameGrabberFactory"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <implementation class="cv.lecturesight.framesource.v4l.V4LFrameGrabberFactory"/>
+</scr:component>

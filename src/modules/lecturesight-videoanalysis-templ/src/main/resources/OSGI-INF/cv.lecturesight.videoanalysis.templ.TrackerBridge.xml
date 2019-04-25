@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.script.bridge.tracker">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.scripting.api.ScriptBridge"/>
+    </service>
+    <reference name="tracker" interface="cv.lecturesight.objecttracker.ObjectTracker" cardinality="1..1" policy="static" bind="setTracker"/>
+    <reference name="engine" interface="cv.lecturesight.scripting.api.ScriptingService" cardinality="1..1" policy="static" bind="setEngine"/>
+    <implementation class="cv.lecturesight.videoanalysis.templ.TrackerBridge"/>
+</scr:component>

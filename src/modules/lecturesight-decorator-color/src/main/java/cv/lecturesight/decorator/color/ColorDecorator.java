@@ -27,32 +27,21 @@ import cv.lecturesight.util.geometry.BoundingBox;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
  */
-@Component(name = "lecturesight.decorator.color", immediate = true)
-@Service
-@Properties({
-  @Property(name = "lecturesight.decorator.name", value = "Color Decorator"),
-  @Property(name = "lecturesight.decorator.callon", value = "EACHFRAME"),
-  @Property(name = "lecturesight.decorator.produces", value = {"color.histogram"})
-})
 public class ColorDecorator implements ObjectDecorator {
 
   final static String OBJ_PROPKEY_COLOR_HISTOGRAM = "color.histogram";
-  @Reference
+  @Setter
   Configuration config;
-  @Reference
+  @Setter
   ForegroundService fgs;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private int width_min, width_max, height_min, height_max, channel_number;
 

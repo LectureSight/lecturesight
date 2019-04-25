@@ -36,8 +36,8 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
         <groupId>org.tinylog</groupId>
@@ -49,22 +49,6 @@
 
   <build>
     <plugins>
-
-      <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
@@ -75,6 +59,9 @@
             <Export-Package>
               cv.lecturesight.profile.manager;version=${project.version}
             </Export-Package>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.profile.manager.SceneProfileManagerImpl.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

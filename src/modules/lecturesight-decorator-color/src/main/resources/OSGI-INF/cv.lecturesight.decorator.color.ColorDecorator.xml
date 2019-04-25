@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.decorator.color">
+    <property name="lecturesight.decorator.name" value="Color Decorator"/>
+    <property name="lecturesight.decorator.callon" value="EACHFRAME"/>
+    <property name="lecturesight.decorator.produces" value="color.histogram"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.decorator.api.ObjectDecorator"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="fgs" interface="cv.lecturesight.videoanalysis.foreground.ForegroundService" cardinality="1..1" policy="static" bind="setFgs"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <implementation class="cv.lecturesight.decorator.color.ColorDecorator"/>
+</scr:component>

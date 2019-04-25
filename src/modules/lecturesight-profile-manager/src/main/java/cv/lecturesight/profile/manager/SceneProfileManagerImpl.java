@@ -27,10 +27,8 @@ import cv.lecturesight.profile.api.Zone;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationService;
 
+import lombok.Setter;
 import org.apache.felix.fileinstall.ArtifactInstaller;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -43,15 +41,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-@Component(name="lecturesight.profile.manager", immediate=true)
-@Service()
 public class SceneProfileManagerImpl implements SceneProfileManager, ArtifactInstaller {
 
   static final String PROPKEY_PROFILE = "active.profile";
   static final String FILEEXT_PROFILE = ".scn";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private ConfigurationService configService;
   private ProfileStore profiles = new ProfileStore();
   private SceneProfile defaultProfile;

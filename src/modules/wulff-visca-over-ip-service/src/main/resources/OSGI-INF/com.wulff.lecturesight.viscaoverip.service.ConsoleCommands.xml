@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="cv.lecturesight.ptz.steering.commands">
+    <property name="osgi.command.scope" value="cam"/>
+    <property name="osgi.command.function">
+        home
+        move
+    </property>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.util.DummyInterface"/>
+    </service>
+    <reference name="parent" interface="com.wulff.lecturesight.visca.api.VISCAService" cardinality="1..1" policy="static" bind="setParent"/>
+    <implementation class="com.wulff.lecturesight.viscaoverip.service.ConsoleCommands"/>
+</scr:component>

@@ -27,9 +27,7 @@ import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 import cv.lecturesight.util.metrics.MetricsService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -47,27 +45,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Component(name = "lecturesight.status", immediate = true)
-@Service
-
 public class StatusServiceImpl implements StatusService, ConfigurationListener {
 
-  @Reference
+  @Setter
   private Configuration config;
 
-  @Reference
+  @Setter
   private HeartBeat heart;
 
-  @Reference
+  @Setter
   private CameraOperator operator;
 
-  @Reference
+  @Setter
   private MetricsService metrics;
 
-  @Reference
+  @Setter
   private SceneProfileManager sceneProfileManager;
 
-  @Reference
+  @Setter
   private FrameSourceManager frameSourceManager;
 
   // The active profile

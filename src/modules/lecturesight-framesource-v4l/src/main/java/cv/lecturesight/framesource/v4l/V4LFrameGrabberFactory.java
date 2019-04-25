@@ -31,11 +31,7 @@ import au.edu.jcu.v4l4j.VideoDevice;
 import au.edu.jcu.v4l4j.exceptions.ControlException;
 import au.edu.jcu.v4l4j.exceptions.V4L4JException;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -45,15 +41,9 @@ import java.util.Vector;
 /** Implementation of Service API
  *
  */
-@Component(name="lecturesight.framesource.v4l", immediate=true)
-@Service()
-@Properties({
-@Property(name="cv.lecturesight.framesource.name", value="Video4Linux"),
-@Property(name="cv.lecturesight.framesource.type", value="v4l, v4l2")
-})
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
-  @Reference
+  @Setter
   private Configuration config;
 
   protected void activate(ComponentContext cc) {

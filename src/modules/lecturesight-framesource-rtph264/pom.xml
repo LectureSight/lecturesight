@@ -31,8 +31,8 @@
       <artifactId>gst1-java-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
         <groupId>org.tinylog</groupId>
@@ -42,21 +42,6 @@
 
   <build>
     <plugins>
-
-      <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -75,6 +60,9 @@
             <Private-Package>
               com.sun.jna.*,
             </Private-Package>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.framesource.rtph264.RTPH264FrameSourceFactory.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

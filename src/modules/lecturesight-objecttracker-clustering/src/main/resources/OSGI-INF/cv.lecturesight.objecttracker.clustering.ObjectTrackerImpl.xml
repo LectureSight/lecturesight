@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.objecttracker.simpel">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.objecttracker.ObjectTracker"/>
+        <provide interface="cv.lecturesight.util.conf.ConfigurationListener"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <reference name="rTracker" interface="cv.lecturesight.regiontracker.RegionTracker" cardinality="1..1" policy="static" bind="setRTracker"/>
+    <reference name="dManager" interface="cv.lecturesight.decorator.api.DecoratorManager" cardinality="1..1" policy="static" bind="setDManager"/>
+    <reference name="fgs" interface="cv.lecturesight.videoanalysis.foreground.ForegroundService" cardinality="1..1" policy="static" bind="setFgs"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <implementation class="cv.lecturesight.objecttracker.clustering.ObjectTrackerImpl"/>
+</scr:component>

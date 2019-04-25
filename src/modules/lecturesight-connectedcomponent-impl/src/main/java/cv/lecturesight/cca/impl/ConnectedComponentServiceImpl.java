@@ -26,25 +26,21 @@ import cv.lecturesight.util.conf.Configuration;
 
 import com.nativelibs4java.opencl.CLImage2D;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
  */
-@Component(name="lecturesight.caa",immediate=true)
-@Service
 public class ConnectedComponentServiceImpl implements ConnectedComponentService {
 
   final static String PROPKEY_MAX_BLOBS = "blobs.max";
   final static String PROPKEY_BLOBSIZE_MIN = "blobsize.min";
   final static String PROPKEY_BLOBSIZE_MAX = "blobsize.max";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
 
   protected void activate(ComponentContext cc) {

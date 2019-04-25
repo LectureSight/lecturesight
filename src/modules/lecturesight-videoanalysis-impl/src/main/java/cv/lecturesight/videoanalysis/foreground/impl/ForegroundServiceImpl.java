@@ -42,11 +42,7 @@ import cv.lecturesight.util.conf.Configuration;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.EnumMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.pmw.tinylog.Logger;
 
 /** Foreground Service Implementation
@@ -61,38 +57,32 @@ import org.pmw.tinylog.Logger;
  * disappear after a certain period of time.
  *
  */
-@Component(name="lecturesight.foreground", immediate=true)
-@Service()
-@Properties({
-@Property(name="osgi.command.scope", value="fg"),
-@Property(name="osgi.command.function", value={"reset"})
-})
 public class ForegroundServiceImpl implements ForegroundService {
 
   // collection of this services signals
   private EnumMap<ForegroundService.Signal, OCLSignal> signals =
           new EnumMap<ForegroundService.Signal, OCLSignal>(ForegroundService.Signal.class);
 
-  @Reference
+  @Setter
   private Configuration config;             // this services configuration
 
-  @Reference
+  @Setter
   private OpenCLService ocl;                // OpenCL service
 
-  @Reference
+  @Setter
   private DisplayService dsps;              // display service
 
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
 
-  @Reference
+  @Setter
   private BackgroundModel bgmodel;          // background model service
 
-  @Reference
+  @Setter
   private ChangeDetector changedetect;      // change detection service
 
-  @Reference
+  @Setter
   private ConnectedComponentService ccs;    // connected component analysis service
 
   private CLImage2D change;                 // output of change detection

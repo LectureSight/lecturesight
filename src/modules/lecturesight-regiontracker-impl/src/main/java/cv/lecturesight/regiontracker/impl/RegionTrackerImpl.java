@@ -48,32 +48,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 
 /** Implementation of Service API
  *
  */
-@Component(name = "lecturesight.regiontracker", immediate = true)
-@Service
 public class RegionTrackerImpl implements RegionTracker {
 
   // collection of this services signals
   private EnumMap<RegionTracker.Signal, OCLSignal> signals =
           new EnumMap<RegionTracker.Signal, OCLSignal>(RegionTracker.Signal.class);
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private DisplayService dsps;
-  @Reference
+  @Setter
   private ConnectedComponentService ccs;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
-  @Reference
+  @Setter
   private ForegroundService fgs;
   boolean debugEnabled = false;
   int[] workDim;

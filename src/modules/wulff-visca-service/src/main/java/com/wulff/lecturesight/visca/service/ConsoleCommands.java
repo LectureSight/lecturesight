@@ -4,21 +4,11 @@ import com.wulff.lecturesight.visca.api.VISCAService;
 import com.wulff.lecturesight.visca.protocol.Message;
 import com.wulff.lecturesight.visca.protocol.VISCA;
 import cv.lecturesight.util.DummyInterface;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 
-@Component(name = "cv.lecturesight.ptz.steering.commands", immediate = true)
-@Service()
-@Properties({
-  @Property(name = "osgi.command.scope", value = "cam"),
-  @Property(name = "osgi.command.function", value = {"home","move"})
-})
 public class ConsoleCommands implements DummyInterface {
 
-  @Reference
+  @Setter
   VISCAService parent;
 
   public void home(String[] args) {

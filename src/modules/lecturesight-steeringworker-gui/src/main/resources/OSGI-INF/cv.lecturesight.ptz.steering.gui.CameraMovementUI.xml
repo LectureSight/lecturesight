@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.ptz.steering.ui">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.gui.api.UserInterface"/>
+    </service>
+    <reference name="operator" interface="cv.lecturesight.operator.CameraOperator" cardinality="1..1" policy="static" bind="setOperator"/>
+    <reference name="worker" interface="cv.lecturesight.ptz.steering.api.CameraSteeringWorker" cardinality="1..1" policy="static" bind="setWorker"/>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <implementation class="cv.lecturesight.ptz.steering.gui.CameraMovementUI"/>
+</scr:component>

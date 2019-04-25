@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.foreground">
+    <property name="osgi.command.scope" value="fg"/>
+    <property name="osgi.command.function" value="reset"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.videoanalysis.foreground.ForegroundService"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <reference name="bgmodel" interface="cv.lecturesight.videoanalysis.backgroundmodel.BackgroundModel" cardinality="1..1" policy="static" bind="setBgmodel"/>
+    <reference name="changedetect" interface="cv.lecturesight.videoanalysis.change.ChangeDetector" cardinality="1..1" policy="static" bind="setChangedetect"/>
+    <reference name="ccs" interface="cv.lecturesight.cca.ConnectedComponentService" cardinality="1..1" policy="static" bind="setCcs"/>
+    <implementation class="cv.lecturesight.videoanalysis.foreground.impl.ForegroundServiceImpl"/>
+</scr:component>

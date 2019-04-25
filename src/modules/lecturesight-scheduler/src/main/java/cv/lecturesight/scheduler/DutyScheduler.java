@@ -8,12 +8,8 @@ import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.metrics.MetricsService;
 
+import lombok.Setter;
 import org.apache.felix.fileinstall.ArtifactInstaller;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
@@ -32,13 +28,6 @@ import java.util.concurrent.TimeUnit;
  * A service that loads a schedule from a iCal file and starts/stops object
  * tracking and camera operator accordingly.
  */
-@Component(name = "lecturesight.dutyscheduler", immediate = true)
-@Service
-@Properties({
-@Property(name = "osgi.command.scope", value = "scheduler"),
-@Property(name = "osgi.command.function", value = {"start", "stop", "status"})
-})
-
 public class DutyScheduler implements ArtifactInstaller, DummyInterface {
 
   final static String PROPKEY_LEADTIME = "tracker.leadtime";
@@ -46,13 +35,13 @@ public class DutyScheduler implements ArtifactInstaller, DummyInterface {
   final static String PROPKEY_TZOFFSET = "timezone.offset";
   final static String PROPKEY_AGENTNAME = "agent.name";
   final static String PROPKEY_ENABLE = "enable";
-  @Reference
+  @Setter
   Configuration config;
-  @Reference
+  @Setter
   HeartBeat heart;
-  @Reference
+  @Setter
   CameraOperator operator;
-  @Reference
+  @Setter
   MetricsService metrics;
 
   boolean enable = true;

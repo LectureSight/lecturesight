@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.heartbeat">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.heartbeat.api.HeartBeat"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <implementation class="cv.lecturesight.heartbeat.HeartBeatImpl"/>
+</scr:component>

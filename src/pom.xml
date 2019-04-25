@@ -391,12 +391,6 @@
             </dependency>
           </dependencies>
         </plugin>
-
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-scr-plugin</artifactId>
-          <version>1.26.0</version>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -438,18 +432,6 @@
         <version>1.3.2</version>
       </dependency>
       
-      <!-- SCR Annotations -->
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <version>1.26.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.scr.annotations</artifactId>
-        <version>1.12.0</version>
-      </dependency>
-
       <!-- OpenCL -->
       <dependency>
         <groupId>com.nativelibs4java</groupId>
@@ -468,6 +450,13 @@
         <groupId>org.freedesktop.gstreamer</groupId>
         <artifactId>gst1-java-core</artifactId>
         <version>1.0.0</version>
+      </dependency>
+
+      <!-- lombok -->
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.6</version>
       </dependency>
 
       <!-- testing -->

@@ -37,8 +37,8 @@
       <version>0.9.1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
         <groupId>org.tinylog</groupId>
@@ -48,21 +48,6 @@
 
   <build>
     <plugins>
-
-      <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -92,6 +77,9 @@
               lib/linux-x86/libv4l4j.so;
                 osname=linux;processor=x86
             </Bundle-NativeCode>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.framesource.v4l.V4LFrameGrabberFactory.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

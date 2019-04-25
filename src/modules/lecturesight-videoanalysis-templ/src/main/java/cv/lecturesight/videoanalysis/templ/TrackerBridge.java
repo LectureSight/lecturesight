@@ -5,19 +5,15 @@ import cv.lecturesight.script.util.geometry.TrackerTarget;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name = "lecturesight.script.bridge.tracker", immediate = true)
-@Service()
 public class TrackerBridge implements ScriptBridge {
 
-  @Reference
+  @Setter
   ObjectTracker tracker;
 
-  @Reference
+  @Setter
   ScriptingService engine;
 
   protected void activate(ComponentContext cc) {

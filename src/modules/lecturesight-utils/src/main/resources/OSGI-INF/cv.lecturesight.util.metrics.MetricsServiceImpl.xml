@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.util.metrics">
+    <implementation class="cv.lecturesight.util.metrics.MetricsServiceImpl"/>
+    <property name="osgi.command.scope" value="metrics"/>
+    <property name="osgi.command.function">
+        list
+        save
+        show
+        reset
+        pause
+        resume
+    </property>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.util.metrics.MetricsService"/>
+        <provide interface="cv.lecturesight.util.conf.ConfigurationListener"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+</scr:component>

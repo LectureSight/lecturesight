@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="cv.lecturesight.ptz.steering.commands">
+    <property name="osgi.command.scope" value="cs"/>
+    <property name="osgi.command.function">
+        on
+        off
+        move
+        home
+        zoom
+    </property>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.util.DummyInterface"/>
+    </service>
+    <reference name="steerer" interface="cv.lecturesight.ptz.steering.api.CameraSteeringWorker" cardinality="1..1" policy="static" bind="setSteerer"/>
+    <implementation class="cv.lecturesight.ptz.steering.absolutemove.ConsoleCommands"/>
+</scr:component>

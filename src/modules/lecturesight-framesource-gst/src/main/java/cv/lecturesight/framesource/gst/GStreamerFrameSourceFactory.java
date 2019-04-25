@@ -21,10 +21,6 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.freedesktop.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
@@ -35,12 +31,6 @@ import java.util.Map;
  * GStreamer FrameSourceFactory
  *
  */
-@Component(name = "lecturesight.framesource.gst", immediate = true)
-@Service
-@Properties({
-@Property(name = "cv.lecturesight.framesource.name", value = "GStreamer"),
-@Property(name = "cv.lecturesight.framesource.type", value = "gst")
-})
 public class GStreamerFrameSourceFactory implements FrameGrabberFactory {
 
   protected void activate(ComponentContext cc) {

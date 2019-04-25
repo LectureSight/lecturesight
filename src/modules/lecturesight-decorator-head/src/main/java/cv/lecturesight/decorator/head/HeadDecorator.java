@@ -27,25 +27,13 @@ import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.Random;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
  */
-@Component(name = "lecturesight.decorator.head", immediate = true)
-@Service
-@Properties({
-  @Property(name = "lecturesight.decorator.name", value = "Head Finder"),
-  @Property(name = "lecturesight.decorator.callon", value = "EACHFRAME"),
-  @Property(name = "lecturesight.decorator.produces", value = {"head.center",
-    "head.boundingbox", "head.radius"})
-})
 public class HeadDecorator implements ObjectDecorator {
 
   final static String PROPKEY_K = "k";
@@ -56,9 +44,9 @@ public class HeadDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_CLUSTERS = "head.clusters";
   final static String OBJ_PROPKEY_BW_PIXELS = "obj.bw_pixels";
   
-  @Reference
+  @Setter
   Configuration config;
-  @Reference
+  @Setter
   ForegroundService fgs;
   private int PARAM_K = 7;
   private int MAX_ITER = 100;

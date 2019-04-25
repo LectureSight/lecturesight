@@ -25,22 +25,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "com.bwulff.lecturesight.visca", immediate = true)
-@Service
 public class VISCAServiceImpl implements VISCAService, SerialPortEventListener {
   
   ComponentContext cc;
 
   boolean camera_alive = false;
 
-  @Reference
+  @Setter
   Configuration config;   // service configuration
 
   // Camera profiles

@@ -36,28 +36,24 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 
-@Component(name = "lecturesight.cameraoperator.panonly", immediate = true)
-@Service
 public class SimpleCameraOperator implements CameraOperator, ConfigurationListener {
 
-  @Reference
+  @Setter
   Configuration config;
 
-  @Reference
+  @Setter
   MetricsService metrics;
 
-  @Reference
+  @Setter
   ObjectTracker tracker;
 
-  @Reference
+  @Setter
   CameraSteeringWorker steerer;
 
-  @Reference
+  @Setter
   FrameSourceProvider fsp;
   FrameSource fsrc;
 

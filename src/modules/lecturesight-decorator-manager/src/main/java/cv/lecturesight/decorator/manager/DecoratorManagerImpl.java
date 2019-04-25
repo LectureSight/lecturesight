@@ -27,8 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -36,8 +34,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.decorator.manager", immediate = true)
-@Service
 public class DecoratorManagerImpl implements DecoratorManager,EventHandler {
 
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";

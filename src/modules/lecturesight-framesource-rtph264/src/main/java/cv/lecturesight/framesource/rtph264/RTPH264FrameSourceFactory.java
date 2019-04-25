@@ -21,10 +21,6 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameGrabberFactory;
 import cv.lecturesight.framesource.FrameSourceException;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.freedesktop.gstreamer.Gst;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
@@ -38,12 +34,6 @@ import java.util.Map;
  * RTP h.264 Streaming FrameSourceFactory
  *
  */
-@Component(name = "lecturesight.framesource.rtph264", immediate = true)
-@Service
-@Properties({
-  @Property(name = "cv.lecturesight.framesource.name", value = "RTP h.264 Streaming"),
-  @Property(name = "cv.lecturesight.framesource.type", value = "rtph264")
-})
 public class RTPH264FrameSourceFactory implements FrameGrabberFactory {
 
   final static int DEFAULT_PORT = 8554;

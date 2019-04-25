@@ -61,12 +61,8 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
         <groupId>org.tinylog</groupId>
@@ -78,21 +74,6 @@
 
   <build>
     <plugins>
-
-      <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -101,6 +82,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>cv.lecturesight.ptz.steering.gui</Bundle-SymbolicName>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.ptz.steering.gui.CameraMovementUI.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

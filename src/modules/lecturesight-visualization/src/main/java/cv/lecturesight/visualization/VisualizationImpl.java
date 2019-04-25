@@ -17,9 +17,7 @@ import cv.lecturesight.regiontracker.RegionTracker;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.videoanalysis.foreground.ForegroundService;
 import javax.swing.JPanel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -27,27 +25,25 @@ import org.pmw.tinylog.Logger;
  * Visualization Service
  *
  */
-@Component(name = "lecturesight.visualization", immediate = true)
-@Service
 public class VisualizationImpl implements Visualization, UserInterface {
 
   static final String OBJ_PROPKEY_COLOR = "obj.color";
   final static String WINDOWNAME_VISUAL = "visual";
   final static String SIGNAME_DONE_VISUAL = "visual.DONE";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private FrameSource fsource;
-  @Reference
+  @Setter
   ForegroundService fgs;
-  @Reference
+  @Setter
   private RegionTracker rTracker;
-  @Reference
+  @Setter
   private ObjectTracker oTracker;
-  @Reference
+  @Setter
   private DisplayService dsps;
   CLImage2D visual;
   OCLSignal sig_DONE;

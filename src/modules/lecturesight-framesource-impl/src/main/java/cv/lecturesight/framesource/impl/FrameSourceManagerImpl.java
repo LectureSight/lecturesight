@@ -33,14 +33,10 @@ import cv.lecturesight.util.conf.Configuration;
 
 import com.nativelibs4java.opencl.CLImage2D;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.pmw.tinylog.Logger;
 
@@ -54,9 +50,6 @@ import java.util.Map;
  * Implementation of Service API
  *
  */
-@Component(name = "lecturesight.framesource.manager", immediate = true)
-@Service
-@Property(name= EventConstants.EVENT_TOPIC, value={FrameSourceManagerImpl.OSGI_EVENT_REGISTERED, FrameSourceManagerImpl.OSGI_EVENT_UNREGISTERED})
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
@@ -71,13 +64,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private DisplayService dsps;
-  @Reference
+  @Setter
   private SceneProfileManager spm;
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();

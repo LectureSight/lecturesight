@@ -32,9 +32,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -42,17 +40,15 @@ import org.pmw.tinylog.Logger;
  * Camera Steering SteeringWorker Implementation
  *
  */
-@Component(name = "lecturesight.ptz.steering.worker.absolutemove", immediate = true)
-@Service
 public class CameraSteeringWorkerAbsoluteMove implements CameraSteeringWorker {
 
-  @Reference
+  @Setter
   Configuration config;        // service configuration
 
-  @Reference
+  @Setter
   PTZCamera camera;            // PTZCamera implementation
 
-  @Reference
+  @Setter
   private ScriptingService engine;
 
   CameraPositionModel model;   // model mapping normalized coords <--> camera coords

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.caa">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.cca.ConnectedComponentService"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <implementation class="cv.lecturesight.cca.impl.ConnectedComponentServiceImpl"/>
+</scr:component>
