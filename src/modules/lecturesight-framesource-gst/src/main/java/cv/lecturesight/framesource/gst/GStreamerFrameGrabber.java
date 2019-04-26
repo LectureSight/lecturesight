@@ -21,10 +21,12 @@ import cv.lecturesight.framesource.FrameGrabber;
 import cv.lecturesight.framesource.FrameSourceException;
 
 import org.freedesktop.gstreamer.Buffer;
+import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.Gst;
+import org.freedesktop.gstreamer.GstObject;
 import org.freedesktop.gstreamer.Pipeline;
 import org.freedesktop.gstreamer.Sample;
 import org.freedesktop.gstreamer.State;
@@ -90,6 +92,23 @@ public class GStreamerFrameGrabber implements FrameGrabber {
     addToPipeline(pipe, appsink);
     linkElements(capsfilter, appsink);
 
+    // Log errors from the pipeline
+    Bus bus = pipe.getBus();
+
+    bus.connect(new Bus.ERROR() {
+            @Override
+            public void errorMessage(GstObject source, int code, String message) {
+                Logger.error("Pipeline: source {} code {} message {}", source, code, message);
+            }
+        });
+
+    bus.connect(new Bus.WARNING() {
+            @Override
+            public void warningMessage(GstObject source, int code, String message) {
+                Logger.warn("Pipeline: source {} code {} message {}", source, code, message);
+            }
+        });
+
     return pipe;
   }
 
@@ -114,6 +133,7 @@ public class GStreamerFrameGrabber implements FrameGrabber {
   }
 
   void start() {
+    Logger.debug("start()");
     pipeline.play();
   }
 
