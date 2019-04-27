@@ -16,9 +16,9 @@
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
-        <properties>
-                <checkstyle.skip>true</checkstyle.skip>
-        </properties>
+		<properties>
+			<checkstyle.skip>true</checkstyle.skip>
+		</properties>
 
 	<dependencies>
 		<dependency>
@@ -54,28 +54,28 @@
 	</dependencies>
 
 	<build>
-    <plugins>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
+				<extensions>true</extensions>
 				<configuration>
 				<instructions>
-				<Bundle-SymbolicName>cv.lecturesight.onvif</Bundle-SymbolicName>
-				<Private-Package>
-							org.apache.commons.*, org.me.javawsdiscovery.*, de.onvif.*,
-							org.oasis_open.*, org.onvif.*, org.xmlsoap.*, org.w3.*
-				</Private-Package>
-			    <Export-Package>
-					  cv.lecturesight.ptz.api,cv.lecturesight.onvif.service
-			    </Export-Package>
-			    <Service-Component>
-					OSGI-INF/cv.lecturesight.onvif.service.ONVIFCameraImpl.xml,
-				</Service-Component>
-          </instructions>
-			</configuration>
-		      </plugin>
-    </plugins>
-  </build>
+					<Bundle-SymbolicName>cv.lecturesight.onvif</Bundle-SymbolicName>
+					<Private-Package>
+						org.apache.commons.*, org.me.javawsdiscovery.*, de.onvif.*,
+						org.oasis_open.*, org.onvif.*, org.xmlsoap.*, org.w3.*
+					</Private-Package>
+					<Export-Package>
+						cv.lecturesight.ptz.api,cv.lecturesight.onvif.service
+					</Export-Package>
+					<Service-Component>
+						OSGI-INF/cv.lecturesight.onvif.service.ONVIFCameraImpl.xml,
+					</Service-Component>
+				</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
