@@ -58,7 +58,7 @@
               gst1-java-core;inline=true,
             </Embed-Dependency>
             <Private-Package>
-              com.sun.jna.*,
+              com.sun.jna.*;-split-package:=merge-last
             </Private-Package>
             <Service-Component>
               OSGI-INF/cv.lecturesight.framesource.gst.GStreamerFrameSourceFactory.xml,
