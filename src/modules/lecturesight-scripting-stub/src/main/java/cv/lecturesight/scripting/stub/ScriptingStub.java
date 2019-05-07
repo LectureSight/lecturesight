@@ -3,13 +3,9 @@ package cv.lecturesight.scripting.stub;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.scripting.stub", immediate = true)
-@Service
 public class ScriptingStub implements ScriptingService {
 
   protected void activate(ComponentContext cc) throws Exception {

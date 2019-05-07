@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.backgroundmodel">
+    <property name="osgi.command.scope" value="bgmodel"/>
+    <property name="osgi.command.function" value="reset"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.videoanalysis.backgroundmodel.BackgroundModel"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <implementation class="cv.lecturesight.videoanalysis.backgroundmodel.impl.BackgroundModelImpl"/>
+</scr:component>

@@ -33,30 +33,23 @@ import cv.lecturesight.util.conf.Configuration;
 
 import com.nativelibs4java.opencl.CLImage2D;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.pmw.tinylog.Logger;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 /**
  * Implementation of Service API
  *
  */
-@Component(name = "lecturesight.framesource.manager", immediate = true)
-@Service
 public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler {
 
   final static String PROPKEY_MRL = "input.mrl";
@@ -71,13 +64,13 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
 
   static final String OSGI_EVENT_REGISTERED = "org/osgi/framework/ServiceEvent/REGISTERED";
   static final String OSGI_EVENT_UNREGISTERED = "org/osgi/framework/ServiceEvent/UNREGISTERING";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private DisplayService dsps;
-  @Reference
+  @Setter
   private SceneProfileManager spm;
   private ComponentContext componentContext;
   private Map<String, FrameGrabberFactory> sourceTypes = new HashMap<String, FrameGrabberFactory>();
@@ -124,12 +117,6 @@ public class FrameSourceManagerImpl implements FrameSourceManager, EventHandler 
     } catch (Exception e) {
       Logger.error("Error during scanning for plugins", e);
     }
-
-    // listen to bundle un-/register events
-    String[] topics = new String[]{OSGI_EVENT_REGISTERED, OSGI_EVENT_UNREGISTERED};
-    Dictionary<String, Object> props = new Hashtable<String, Object>();
-    props.put(EventConstants.EVENT_TOPIC, topics);
-    cc.getBundleContext().registerService(EventHandler.class.getName(), this, props);
 
     try {
       providerMRL = new FrameSourceDescriptor(config.get(PROPKEY_MRL));

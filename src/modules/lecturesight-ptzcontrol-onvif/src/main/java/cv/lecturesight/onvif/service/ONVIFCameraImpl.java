@@ -30,9 +30,7 @@ import org.onvif.ver10.schema.PTZVector;
 import org.onvif.ver10.schema.Vector1D;
 import org.onvif.ver10.schema.Vector2D;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -64,11 +62,9 @@ import org.pmw.tinylog.Logger;
  * 
  * @author Corne Oosthuizen (CILT - UCT) [2015-12]
  */
-@Component(name = "cv.lecturesight.onvif", immediate = true)
-@Service
 public class ONVIFCameraImpl implements PTZCamera {
 
-	@Reference
+	@Setter
 	Configuration config; // service configuration
 
 	String model_name;

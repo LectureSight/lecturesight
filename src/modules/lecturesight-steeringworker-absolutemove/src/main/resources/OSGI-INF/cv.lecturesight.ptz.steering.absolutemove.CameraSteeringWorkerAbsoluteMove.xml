@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.ptz.steering.worker.absolutemove">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.ptz.steering.api.CameraSteeringWorker"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="camera" interface="cv.lecturesight.ptz.api.PTZCamera" cardinality="1..1" policy="static" bind="setCamera"/>
+    <reference name="engine" interface="cv.lecturesight.scripting.api.ScriptingService" cardinality="1..1" policy="static" bind="setEngine"/>
+    <implementation class="cv.lecturesight.ptz.steering.absolutemove.CameraSteeringWorkerAbsoluteMove"/>
+</scr:component>

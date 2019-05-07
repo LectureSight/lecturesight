@@ -20,26 +20,16 @@ package cv.lecturesight.heartbeat;
 import cv.lecturesight.heartbeat.api.HeartBeat;
 import cv.lecturesight.util.DummyInterface;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
  */
-@Component(name = "lecturesight.main.commands", immediate = true)
-@Service()
-@Properties({
-  @Property(name = "osgi.command.scope", value = "ls"),
-  @Property(name = "osgi.command.function", value = {"run", "stop", "pause", "restart", "step", "health"})
-})
 public class ConsoleCommands implements DummyInterface {
 
-  @Reference
+  @Setter
   private HeartBeat main;
 
   protected void activate(ComponentContext context) {

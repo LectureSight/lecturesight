@@ -41,12 +41,8 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>maven-scr-plugin</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -63,34 +59,10 @@
 
   <build>
     <plugins>
-
-      <!-- Generate Declarative Service Descriptor -->
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-scr-plugin</artifactId>
-        <version>1.21.0</version>
-        <executions>
-          <execution>
-            <id>generate-scr-scrdescriptor</id>
-            <goals>
-              <goal>scr</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>3.0.4</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
       <!-- Generate OSGi Bundle -->
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.0.1</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -103,6 +75,9 @@
               sun.*;resolution:=optional,
               *
             </Import-Package>
+            <Service-Component>
+              OSGI-INF/cv.lecturesight.cameraoperator.scripted.ScriptedCameraOperator.xml,
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

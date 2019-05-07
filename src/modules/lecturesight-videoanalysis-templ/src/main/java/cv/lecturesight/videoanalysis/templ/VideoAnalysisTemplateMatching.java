@@ -24,11 +24,8 @@ import com.nativelibs4java.opencl.CLKernel;
 import com.nativelibs4java.opencl.CLMem;
 import com.nativelibs4java.opencl.CLQueue;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -38,12 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@Component(name = "lecturesight.videoanalysis", immediate = true)
-@Service
-@Properties({
-  @Property(name = "osgi.command.scope", value = "va"),
-  @Property(name = "osgi.command.function", value = {"reset"})
-})
 public class VideoAnalysisTemplateMatching implements ObjectTracker, ConfigurationListener {
 
   // -- configuration properties --
@@ -64,24 +55,24 @@ public class VideoAnalysisTemplateMatching implements ObjectTracker, Configurati
   // pixels for 640x360 overview size.
   private final int ORIGIN_MOVE_RATIO = 40;
 
-  @Reference
+  @Setter
   Configuration config;       // configuration parameters
 
-  @Reference
+  @Setter
   OpenCLService ocl;          // OpenCL service
   OCLSignal sig_START;        // signal triggering processing of new frame
   OCLSignal sig_IMAGEPROC;
   OCLSignal sig_TRACKPREP;
   OCLSignal sig_VA_DONE;
 
-  @Reference
+  @Setter
   ConnectedComponentService ccs;
   ConnectedComponentLabeler cclabel;
 
-  @Reference
+  @Setter
   DisplayService dsps;        // display service
 
-  @Reference
+  @Setter
   FrameSourceProvider fsp;    // service providing the input FrameSource
   FrameSource fsrc;           // input FrameSource
 

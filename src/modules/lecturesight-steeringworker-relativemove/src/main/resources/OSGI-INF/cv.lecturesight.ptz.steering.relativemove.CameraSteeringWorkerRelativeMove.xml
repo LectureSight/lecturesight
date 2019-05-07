@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.ptz.steering.worker.relativemove">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.ptz.steering.api.CameraSteeringWorker"/>
+        <provide interface="cv.lecturesight.util.conf.ConfigurationListener"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="metrics" interface="cv.lecturesight.util.metrics.MetricsService" cardinality="1..1" policy="static" bind="setMetrics"/>
+    <reference name="camera" interface="cv.lecturesight.ptz.api.PTZCamera" cardinality="1..1" policy="static" bind="setCamera"/>
+    <reference name="spm" interface="cv.lecturesight.profile.api.SceneProfileManager" cardinality="1..1" policy="static" bind="setSpm"/>
+    <reference name="engine" interface="cv.lecturesight.scripting.api.ScriptingService" cardinality="1..1" policy="static" bind="setEngine"/>
+    <implementation class="cv.lecturesight.ptz.steering.relativemove.CameraSteeringWorkerRelativeMove"/>
+</scr:component>

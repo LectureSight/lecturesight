@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.script.bridge.time">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.scripting.api.ScriptBridge"/>
+    </service>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <reference name="engine" interface="cv.lecturesight.scripting.api.ScriptingService" cardinality="1..1" policy="static" bind="setEngine"/>
+    <implementation class="cv.lecturesight.script.util.TimeBridge"/>
+</scr:component>

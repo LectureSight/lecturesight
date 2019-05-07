@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.videoanalysis">
+    <property name="osgi.command.scope" value="va"/>
+    <property name="osgi.command.function" value="reset"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.objecttracker.ObjectTracker"/>
+        <provide interface="cv.lecturesight.util.conf.ConfigurationListener"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <reference name="ccs" interface="cv.lecturesight.cca.ConnectedComponentService" cardinality="1..1" policy="static" bind="setCcs"/>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <reference name="fsp" interface="cv.lecturesight.framesource.FrameSourceProvider" cardinality="1..1" policy="static" bind="setFsp"/>
+    <implementation class="cv.lecturesight.videoanalysis.templ.VideoAnalysisTemplateMatching"/>
+</scr:component>

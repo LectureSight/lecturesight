@@ -16,32 +16,28 @@ import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationService;
 import java.util.Properties;
 import javax.swing.JPanel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.cameracalibration", immediate = true)
-@Service
 public class CameraCalibrationUI implements UserInterface {
 
-  @Reference
+  @Setter
   ConfigurationService configService;
-  @Reference
+  @Setter
   Configuration config;
-  @Reference
+  @Setter
   CameraSteeringWorker steeringWorker;
-  @Reference
+  @Setter
   PTZCamera camera;
-  @Reference
+  @Setter
   FrameSourceManager fsm;
   FrameSource productionCamera;
-  @Reference
+  @Setter
   DisplayService dsps;
   DisplayRegistration cameraDisplayRegistration;
   Display cameraDisplay;
-  @Reference
+  @Setter
   OpenCLService ocl;
   CameraCalibrationPanel panel = new CameraCalibrationPanel(this);
   boolean wasSteeringBefore = false;

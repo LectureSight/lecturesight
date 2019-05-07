@@ -5,21 +5,17 @@ import cv.lecturesight.framesource.FrameSourceProvider;
 import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "lecturesight.script.bridge.time", immediate = true)
-@Service()
 public class TimeBridge implements ScriptBridge {
 
-  @Reference
+  @Setter
   FrameSourceProvider fsp;
   FrameSource fsrc;
 
-  @Reference
+  @Setter
   ScriptingService engine;
 
   protected void activate(ComponentContext cc) {

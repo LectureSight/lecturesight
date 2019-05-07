@@ -24,9 +24,7 @@ import cv.lecturesight.profile.api.SceneProfile;
 import cv.lecturesight.profile.api.SceneProfileListener;
 import cv.lecturesight.profile.api.SceneProfileManager;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 
 import javax.swing.JPanel;
@@ -37,17 +35,15 @@ import javax.swing.JPanel;
  * being added or removed.
  *
  */
-@Component(name = "lecturesight.profile.editor", immediate = true)
-@Service
 public class SceneProfileUI implements UserInterface, SceneProfileListener {
 
   final static String UI_TITLE = "Scene Profile Editor";  // window name
-  @Reference
+  @Setter
   DisplayService dsps;                        // we need the display service
-  @Reference
+  @Setter
   FrameSourceProvider fsp;                    // reference the FrameSourceProvider so
   // this gets only activated if there is video input
-  @Reference
+  @Setter
   SceneProfileManager spm;                    // ..and the scene profile manager
   private SceneProfileEditorPanel editor;     // our editor UI panel
 

@@ -20,21 +20,17 @@ package cv.lecturesight.gui.impl;
 import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.util.conf.ConfigurationService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 import javax.swing.JPanel;
 
-@Component(name="lecturesight.gui.configeditor", immediate=true)
-@Service
 public class ConfigEditorUI implements UserInterface {
 
   ConfigEditorPanel editorPanel;
 
-  @Reference
+  @Setter
   ConfigurationService configService;
 
   protected void activate(ComponentContext cc) {

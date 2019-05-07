@@ -32,32 +32,22 @@ import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
  */
-@Component(name="lecturesight.backgroundmodel", immediate=true)
-@Service()
-@Properties({
-@Property(name="osgi.command.scope", value="bgmodel"),
-@Property(name="osgi.command.function", value={"reset"})
-})
 public class BackgroundModelImpl implements BackgroundModel {
 
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private DisplayService dsps;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
   private int[] workDim;

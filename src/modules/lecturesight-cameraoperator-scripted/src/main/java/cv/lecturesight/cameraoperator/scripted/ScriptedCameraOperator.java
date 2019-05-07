@@ -7,9 +7,7 @@ import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -20,11 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-@Component(name = "lecturesight.cameraoperator.scripted", immediate = true)
-@Service
 public class ScriptedCameraOperator implements CameraOperator, ScriptingService, ArtifactInstaller {
 
-  @Reference
+  @Setter
   Configuration config;               // service configuration
 
   File scriptFile = null;             // script file when loaded

@@ -8,9 +8,7 @@ import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.util.geometry.Preset;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -53,11 +51,9 @@ import java.util.regex.Pattern;
  * @author Corne Oosthuizen (CILT - UCT) [2015-12]
 
  */
-@Component(name = "cv.lecturesight.vapix", immediate = true)
-@Service
 public class VAPIXCameraImpl implements PTZCamera {
 
-  @Reference
+  @Setter
   Configuration config; // service configuration
 
   String model_name;

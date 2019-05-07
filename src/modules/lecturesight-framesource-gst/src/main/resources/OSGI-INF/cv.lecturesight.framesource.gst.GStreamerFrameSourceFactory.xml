@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.framesource.gst">
+    <property name="cv.lecturesight.framesource.name" value="GStreamer"/>
+    <property name="cv.lecturesight.framesource.type" value="gst"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.framesource.FrameGrabberFactory"/>
+    </service>
+    <implementation class="cv.lecturesight.framesource.gst.GStreamerFrameSourceFactory"/>
+</scr:component>

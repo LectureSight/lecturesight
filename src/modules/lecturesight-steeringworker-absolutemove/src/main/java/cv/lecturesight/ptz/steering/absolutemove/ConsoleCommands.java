@@ -20,22 +20,12 @@ package cv.lecturesight.ptz.steering.absolutemove;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 import cv.lecturesight.util.DummyInterface;
 import cv.lecturesight.util.geometry.NormalizedPosition;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.pmw.tinylog.Logger;
 
-@Component(name = "cv.lecturesight.ptz.steering.commands", immediate = true)
-@Service()
-@Properties({
-  @Property(name = "osgi.command.scope", value = "cs"),
-  @Property(name = "osgi.command.function", value = {"on", "off", "move", "home", "zoom"})
-})
 public class ConsoleCommands implements DummyInterface {
 
-  @Reference
+  @Setter
   CameraSteeringWorker steerer;
 
   public void on(String[] args) {

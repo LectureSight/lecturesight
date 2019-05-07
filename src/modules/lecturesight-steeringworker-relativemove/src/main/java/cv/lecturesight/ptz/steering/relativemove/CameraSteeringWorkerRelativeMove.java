@@ -34,9 +34,7 @@ import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.util.geometry.Preset;
 import cv.lecturesight.util.metrics.MetricsService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -51,23 +49,21 @@ import java.util.List;
  * Camera Steering SteeringWorker Implementation
  *
  */
-@Component(name = "lecturesight.ptz.steering.worker.relativemove", immediate = true)
-@Service
 public class CameraSteeringWorkerRelativeMove implements CameraSteeringWorker, ConfigurationListener {
 
-  @Reference
+  @Setter
   private Configuration config;        // service configuration
 
-  @Reference
+  @Setter
   private MetricsService metrics;      // metrics
 
-  @Reference
+  @Setter
   private PTZCamera camera;            // PTZCamera implementation
 
-  @Reference
+  @Setter
   private SceneProfileManager spm;     // Scene profile manager
 
-  @Reference
+  @Setter
   private ScriptingService engine;
 
   private CameraPositionModel model;   // model mapping normalized coords <--> camera coords

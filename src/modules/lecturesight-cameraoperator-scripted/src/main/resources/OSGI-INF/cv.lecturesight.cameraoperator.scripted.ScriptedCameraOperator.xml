@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.cameraoperator.scripted">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.operator.CameraOperator"/>
+        <provide interface="cv.lecturesight.scripting.api.ScriptingService"/>
+        <provide interface="org.apache.felix.fileinstall.ArtifactInstaller"/>
+        <provide interface="org.apache.felix.fileinstall.ArtifactListener"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <implementation class="cv.lecturesight.cameraoperator.scripted.ScriptedCameraOperator"/>
+</scr:component>

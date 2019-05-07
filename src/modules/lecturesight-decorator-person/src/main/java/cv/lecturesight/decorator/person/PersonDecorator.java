@@ -4,24 +4,13 @@ import cv.lecturesight.decorator.api.ObjectDecorator;
 import cv.lecturesight.objecttracker.TrackerObject;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** ObjectDecorator Service: Head finder
  *
  */
-@Component(name = "lecturesight.decorator.person", immediate = true)
-@Service
-@Properties({
-  @Property(name = "lecturesight.decorator.name", value = "Person Finder"),
-  @Property(name = "lecturesight.decorator.callon", value = "EACHFRAME"),
-  @Property(name = "lecturesight.decorator.produces", value = {"person.probability"})
-})
 public class PersonDecorator implements ObjectDecorator {
 
   //final static String PROPKEY_PERSON = "person.probability";
@@ -30,7 +19,7 @@ public class PersonDecorator implements ObjectDecorator {
   final static String OBJ_PROPKEY_HEAD_RADIUS = "head.radius";
   final static String PROPKEY_PROB = "person.probability";
 
-  @Reference
+  @Setter
   Configuration config;
 
   protected void activate(ComponentContext cc) throws Exception {

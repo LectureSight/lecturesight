@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.cameracalibration">
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.gui.api.UserInterface"/>
+    </service>
+    <reference name="configService" interface="cv.lecturesight.util.conf.ConfigurationService" cardinality="1..1" policy="static" bind="setConfigService"/>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="steeringWorker" interface="cv.lecturesight.ptz.steering.api.CameraSteeringWorker" cardinality="1..1" policy="static" bind="setSteeringWorker"/>
+    <reference name="camera" interface="cv.lecturesight.ptz.api.PTZCamera" cardinality="1..1" policy="static" bind="setCamera"/>
+    <reference name="fsm" interface="cv.lecturesight.framesource.FrameSourceManager" cardinality="1..1" policy="static" bind="setFsm"/>
+    <reference name="dsps" interface="cv.lecturesight.display.DisplayService" cardinality="1..1" policy="static" bind="setDsps"/>
+    <reference name="ocl" interface="cv.lecturesight.opencl.OpenCLService" cardinality="1..1" policy="static" bind="setOcl"/>
+    <implementation class="cv.lecturesight.setup.CameraCalibrationUI"/>
+</scr:component>

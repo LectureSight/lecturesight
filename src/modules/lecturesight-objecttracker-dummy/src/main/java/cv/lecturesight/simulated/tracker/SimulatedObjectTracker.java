@@ -6,11 +6,7 @@ import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.conf.ConfigurationListener;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -19,16 +15,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-@Component(name = "lecturesight.simulated.tracker", immediate = true)
-@Service
-@Properties({
-  @Property(name = "osgi.command.scope", value = "va"),
-  @Property(name = "osgi.command.function", value = {"reset"})
-})
-
 public class SimulatedObjectTracker implements ObjectTracker, ConfigurationListener {
 
-  @Reference
+  @Setter
   Configuration config;       // configuration parameters
 
   private OCLSignal sig_VA_DONE = null;

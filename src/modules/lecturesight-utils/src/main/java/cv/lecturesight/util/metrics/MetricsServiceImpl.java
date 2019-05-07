@@ -34,11 +34,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +44,8 @@ import java.util.Locale;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
-@Component(name="lecturesight.util.metrics", immediate=true)
-@Service
-@Properties({
-@Property(name = "osgi.command.scope", value = "metrics"),
-@Property(name = "osgi.command.function", value = {"list", "save", "show", "reset", "pause", "resume"})
-})
-
 public class MetricsServiceImpl implements MetricsService, ConfigurationListener {
 
-  @Reference
   private Configuration config;
 
   public static final String PROPKEY_ENABLE = "metrics.enable";
@@ -443,5 +430,10 @@ public class MetricsServiceImpl implements MetricsService, ConfigurationListener
     System.out.println(enable ? json() : "disabled");
   }
   //CHECKSTYLE:ON
+
+  public void setConfig(Configuration config) {
+    // lombok causes trouble in this module. So we define a setter here.
+    this.config = config;
+  }
 
 }

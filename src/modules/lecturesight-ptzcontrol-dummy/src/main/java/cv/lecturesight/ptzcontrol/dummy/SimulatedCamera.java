@@ -7,9 +7,7 @@ import cv.lecturesight.util.conf.Configuration;
 import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.util.geometry.Preset;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -17,8 +15,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-@Component(name = "cv.lecturesight.ptzcontrol.dummy", immediate = true)
-@Service
 public class SimulatedCamera implements PTZCamera {
 
   static final String PROPKEY_DELAY ="delay";
@@ -33,7 +29,7 @@ public class SimulatedCamera implements PTZCamera {
   static final int ZOOM_MAX = 1000;
   final Position HOME_POS = new Position(0, 0);
 
-  @Reference
+  @Setter
   Configuration config;
 
   PTZCameraProfile myProfile = new PTZCameraProfile(

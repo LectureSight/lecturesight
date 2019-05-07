@@ -36,9 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -46,21 +44,19 @@ import org.pmw.tinylog.Logger;
  * Object Tracker Service
  *
  */
-@Component(name = "lecturesight.objecttracker.simpel", immediate = true)
-@Service
 public class ObjectTrackerImpl implements ObjectTracker, ConfigurationListener {
 
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   OpenCLService ocl;
-  @Reference
+  @Setter
   private RegionTracker rTracker;
-  @Reference
+  @Setter
   private DecoratorManager dManager;
-  @Reference
+  @Setter
   private ForegroundService fgs;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private OCLSignal sig_DONE;
   private TrackerUpdate trackerUpdate;

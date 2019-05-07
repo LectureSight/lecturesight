@@ -31,26 +31,22 @@ import cv.lecturesight.opencl.api.ComputationRun;
 import cv.lecturesight.opencl.api.OCLSignal;
 import cv.lecturesight.util.conf.Configuration;
 import java.util.EnumMap;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
  */
-@Component(name="lecturesight.changedetector",immediate=true)
-@Service
 public class ChangeDetectorImpl implements ChangeDetector {
 
-  @Reference
+  @Setter
   Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private DisplayService dsps;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
   CLImage2D input, last, twoback;

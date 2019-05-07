@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.framesource.rtph264">
+    <property name="cv.lecturesight.framesource.name" value="RTP h.264 Streaming"/>
+    <property name="cv.lecturesight.framesource.type" value="rtph264"/>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.framesource.FrameGrabberFactory"/>
+    </service>
+    <implementation class="cv.lecturesight.framesource.rtph264.RTPH264FrameSourceFactory"/>
+</scr:component>

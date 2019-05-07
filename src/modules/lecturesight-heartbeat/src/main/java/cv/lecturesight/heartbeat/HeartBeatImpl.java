@@ -27,26 +27,22 @@ import cv.lecturesight.opencl.api.OCLSignalBarrier;
 import cv.lecturesight.opencl.api.Triggerable;
 import cv.lecturesight.util.conf.Configuration;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
 /** Implementation of Service API
  *
  */
-@Component(name = "lecturesight.heartbeat", immediate = true)
-@Service
 public class HeartBeatImpl implements HeartBeat {
 
   static final String PROPKEY_LISTENTO = "listens.to";
   static final String PROPKEY_AUTOSTART = "autostart";
-  @Reference
+  @Setter
   private Configuration config;
-  @Reference
+  @Setter
   private OpenCLService ocl;
-  @Reference
+  @Setter
   private FrameSourceProvider fsp;
   private FrameSource fsrc;
   private OCLSignal[] listenTo;

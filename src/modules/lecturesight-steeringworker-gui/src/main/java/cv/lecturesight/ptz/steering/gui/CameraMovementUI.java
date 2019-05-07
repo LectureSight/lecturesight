@@ -22,24 +22,20 @@ import cv.lecturesight.gui.api.UserInterface;
 import cv.lecturesight.operator.CameraOperator;
 import cv.lecturesight.ptz.steering.api.CameraSteeringWorker;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 
 import javax.swing.JPanel;
 
-@Component(name = "lecturesight.ptz.steering.ui", immediate = true)
-@Service
 public class CameraMovementUI implements UserInterface {
 
-  @Reference
+  @Setter
   CameraOperator operator;
 
-  @Reference
+  @Setter
   CameraSteeringWorker worker;
 
-  @Reference
+  @Setter
   DisplayService dsps;
 
   private CameraControlPanel controlPanel;

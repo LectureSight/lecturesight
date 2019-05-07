@@ -30,9 +30,7 @@ import cv.lecturesight.util.geometry.NormalizedPosition;
 import cv.lecturesight.util.geometry.Position;
 import cv.lecturesight.util.metrics.MetricsService;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import lombok.Setter;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
@@ -43,23 +41,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Component(name = "lecturesight.cameraoperator.ptz", immediate = true)
-@Service
 public class PanTiltZoomCameraOperator implements Constants, CameraOperator, ConfigurationListener {
 
-  @Reference
+  @Setter
   Configuration config;
 
-  @Reference
+  @Setter
   MetricsService metrics;
 
-  @Reference
+  @Setter
   ObjectTracker tracker;
 
-  @Reference
+  @Setter
   CameraSteeringWorker steerer;
 
-  @Reference
+  @Setter
   FrameSourceProvider fsp;
   FrameSource fsrc;
 

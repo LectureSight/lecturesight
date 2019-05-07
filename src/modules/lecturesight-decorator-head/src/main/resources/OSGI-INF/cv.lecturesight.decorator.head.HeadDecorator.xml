@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0" immediate="true" name="lecturesight.decorator.head">
+    <property name="lecturesight.decorator.name" value="Head Finder"/>
+    <property name="lecturesight.decorator.callon" value="EACHFRAME"/>
+    <property name="lecturesight.decorator.produces">
+        head.center
+        head.boundingbox
+        head.radius
+    </property>
+    <service servicefactory="false">
+        <provide interface="cv.lecturesight.decorator.api.ObjectDecorator"/>
+    </service>
+    <reference name="config" interface="cv.lecturesight.util.conf.Configuration" cardinality="1..1" policy="static" bind="setConfig"/>
+    <reference name="fgs" interface="cv.lecturesight.videoanalysis.foreground.ForegroundService" cardinality="1..1" policy="static" bind="setFgs"/>
+    <implementation class="cv.lecturesight.decorator.head.HeadDecorator"/>
+</scr:component>
