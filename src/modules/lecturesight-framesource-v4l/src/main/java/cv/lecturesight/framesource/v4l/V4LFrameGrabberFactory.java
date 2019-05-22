@@ -283,6 +283,7 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
       }
       return device;
     } catch (V4L4JException ex) {
+      Logger.error(ex, "Unable to open capture device {}", name);
       throw new FrameSourceException("Could not open capture device " + name + ": " + ex.getMessage());
     }
   }
