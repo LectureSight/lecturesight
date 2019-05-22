@@ -6,8 +6,8 @@ import cv.lecturesight.scripting.api.ScriptBridge;
 import cv.lecturesight.scripting.api.ScriptingService;
 import cv.lecturesight.util.conf.Configuration;
 
-import org.apache.felix.fileinstall.ArtifactInstaller;
 import lombok.Setter;
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.osgi.service.component.ComponentContext;
 import org.pmw.tinylog.Logger;
 
