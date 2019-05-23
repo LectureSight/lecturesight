@@ -43,6 +43,12 @@ import java.util.Vector;
  */
 public class V4LFrameGrabberFactory implements FrameGrabberFactory {
 
+  // Max attempts to open the v4l device
+  private static int maxOpenAttempts = 10;
+
+  // Delay between open attempts
+  private static int retrySleep = 1500;
+
   @Setter
   private Configuration config;
 
@@ -274,17 +280,31 @@ public class V4LFrameGrabberFactory implements FrameGrabberFactory {
   }
 
   private VideoDevice initVideoDevice(String name) throws FrameSourceException {
-    try {
-      Logger.info("Opening capture device " + name);
-      VideoDevice device = new VideoDevice(name);
-      Logger.info("Device name: " + device.getDeviceInfo().getName());
-      if (device == null) {
-        throw new FrameSourceException("Could not open capture device: " + name);
+
+    int tries = 0;
+
+    while (true) {
+      try {
+        Logger.info("Opening capture device " + name);
+        VideoDevice device = new VideoDevice(name);
+        Logger.info("Device name: " + device.getDeviceInfo().getName());
+        if (device == null) {
+          throw new FrameSourceException("Could not open capture device: " + name);
+        }
+        return device;
+      } catch (V4L4JException ex) {
+        Logger.warn("Unable to open capture device {}", name);
+        if (tries < maxOpenAttempts) {
+          try {
+            Thread.sleep(retrySleep);
+          } catch (InterruptedException e) {
+            // ignore
+          }
+          tries++;
+        } else {
+          throw new FrameSourceException("Could not open capture device " + name + ": " + ex.getMessage());
+        }
       }
-      return device;
-    } catch (V4L4JException ex) {
-      Logger.error(ex, "Unable to open capture device {}", name);
-      throw new FrameSourceException("Could not open capture device " + name + ": " + ex.getMessage());
     }
   }
 
